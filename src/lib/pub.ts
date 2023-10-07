@@ -11,8 +11,8 @@ const send = async (
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
   await publisher.connect();
-  for (var iter=count;iter > 0;iter--) {
-    publisher.publish(options.topic, options.message);
+  for (var iter=count, n=1;iter > 0;iter--, n++) {
+    publisher.publish(options.topic, (options.message as string).concat(` [${n}]`));
     if (delay) await delay(interval)
   }
 
