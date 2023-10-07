@@ -1,5 +1,5 @@
 import concat from 'concat-stream'
-import { checkPubTopicExists, checkConnectionParamsExists } from '../utils/parse'
+import { checkPubTopicExists, checkConnectionParamsExists, defaultMessage } from '../utils/parse'
 import { saveConfig, loadConfig } from '../utils/config'
 import { SolaceClient } from '../common/solace-client'
 import { basicLog } from '../utils/signale'
@@ -11,8 +11,13 @@ const send = async (
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
   await publisher.connect();
+  let message = options.message as string;
   for (var iter=count, n=1;iter > 0;iter--, n++) {
-    publisher.publish(options.topic, (options.message as string).concat(` [${n}]`));
+    if (message === defaultMessage)
+      publisher.publish(options.topic, message.concat(` [${n}]`));
+    else
+      publisher.publish(options.topic, message);
+
     if (delay) await delay(interval)
   }
 
@@ -54,7 +59,7 @@ const pub = (options: ClientOptions) => {
     basicLog.ctrlDToPublish();
     process.stdin.pipe(
       concat((data) => {
-        options.message = data
+        options.message = data.toString().slice(0, -1)
         send(options)
       }),
     )

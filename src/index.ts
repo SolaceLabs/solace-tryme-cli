@@ -11,7 +11,7 @@ import {
   parsePubTopic,
   parseSubTopic,
   parseLogLevel,
-  parseDumpLevel,
+  defaultMessage,
 } from './utils/parse'
 import { pub } from './lib/pub'
 import { sub } from './lib/sub'
@@ -50,7 +50,7 @@ export class Commander {
 
       // message options
       .option('-t, --topic <TOPIC>', 'the message topic', parsePubTopic, "stm/topic")
-      .option('-m, --message <BODY>', 'the message body', 'Hello From Solace Try-Me CLI')
+      .option('-m, --message <BODY>', 'the message body', defaultMessage)
       .option('-s, --stdin', 'read the message body from stdin')
       .option('-c, --count <COUNT>', 'the number of events to publish', parseNumber, 1)
       .option('-i, --interval <MILLISECONDS>', 'the time to wait between publish', parseNumber, 0)
@@ -198,7 +198,22 @@ export class Commander {
       .option('-u, --username <USER>', 'the username', 'default')
       .option('-p, --password <PASS>', 'the password', 'default')
       // message options
+      // subscribe to topic
+      // .addOption(new Option('-t, --topic <TOPIC...>', 
+      //   'the message topic')
+      //   .argParser(parseSubTopic)
+      //   .default(["stm/topic"]))
+      //   // .conflicts('queue'))
       .option('-t, --topic <TOPIC...>', 'the message topic', ["stm/topic"])
+
+      // receive from queue
+      .addOption(new Option('-q, --queue <QUEUE>', 
+        'the message queue') 
+        .conflicts('topic'))
+      .addOption(new Option('--create-if-missing', 
+        'create message queue if missing')
+        .conflicts('topic'))
+
       // output options
       .option(
         '--output-mode <default/pretty>',
@@ -206,10 +221,6 @@ export class Commander {
         parseOutputMode,
         'default',
       )
-      .addOption(new Option('--dump-level <DETAIL>', 
-        'message dump details, one of values: PROPS, PAYLOAD, ALL')
-        .argParser(parseDumpLevel)
-        .default('PAYLOAD'))
       // configuration options
       .option(
         '--save [PATH]',

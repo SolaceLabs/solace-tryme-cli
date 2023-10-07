@@ -8,6 +8,8 @@ declare global {
 
   type PublisherAcknowledgeMode = solace.MessagePublisherAcknowledgeMode.PER_MESSAGE | solace.MessagePublisherAcknowledgeMode.WINDOWED
 
+  type MessageConsumerAcknowledgeMode = solace.MessageConsumerAcknowledgeMode.AUTO | solace.MessageConsumerAcknowledgeMode.CLIENT
+
   type OutputMode = 'pretty' | 'default'
 
   type DumpMode = 'PROPS' | 'PAYLOAD | ALL'
@@ -49,8 +51,7 @@ declare global {
     reapplySubscriptions?: boolean
     
     acknowledgeTimeout?: number
-    acknowledgeMode?: PublisherAcknowledgeMode
-
+    acknowledgeMode?: PublisherAcknowledgeMode | MessageConsumerAcknowledgeMode
 
     logLevel?: string
   }
@@ -61,6 +62,8 @@ declare global {
 
     // topic info
     topic: any
+    queue: any
+    createIfMissing: boolean
 
     // publish options
     message: string | Buffer

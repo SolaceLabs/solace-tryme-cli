@@ -259,7 +259,16 @@ export class SolaceClient {
    * @param topicName Topic string for the subscription
    * @param callback Callback for the function
    */
-  subscribe(topicNames: any, callback:any) {
+  subscribe(options: any, callback:any) {
+    const { topic, queue } = options;
+
+    if (topic)
+      this.receiveOnTopic(topic, callback);
+    else 
+      this.receiveFromQueue(queue, callback)
+  }
+
+  receiveOnTopic(topicNames: any, callback:any) {
     //Check if the session has been established
     if (!this.session) {
       signale.warn("Cannot subscribe because not connected to Solace message router!");
@@ -296,6 +305,18 @@ export class SolaceClient {
     }
   }
 
+  receiveFromQueue(queueName: any, callback:any) {
+    //Check if the session has been established
+    if (!this.session) {
+      signale.warn("Cannot subscribe because not connected to Solace message router!");
+      return;
+    }
+
+    this.callback = callback;
+    signale.fatal('Not Implemented.... check again later')
+    process.exit(1);
+  }
+
   /**
    * Publish a message on a topic
    * @param topicName Topic to publish on
@@ -307,8 +328,6 @@ export class SolaceClient {
       return;
     }
     try {
-      signale.info(`Publishing message '${payload}' to topic ${topicName}...`);
-
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       message.setBinaryAttachment(payload);
@@ -326,8 +345,10 @@ export class SolaceClient {
         });
         message.setUserPropertyMap(propertyMap);    
       } 
-      basicLog.publishing()
-      this.options.dumpMessage && signale.log(message.dump());
+      
+      !this.options.dumpMessage && signale.info(`Publishing message '${payload}' to topic ${topicName}...`);
+      this.options.dumpMessage && basicLog.messagePubDump(message.dump(0), message.getBinaryAttachment());
+
       this.session.send(message);
       basicLog.published()
     } catch (error:any) {

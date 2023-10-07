@@ -1,6 +1,8 @@
 import * as fs from 'fs'
 import signale from '../utils/signale'
 
+const defaultMessage:string = 'Hello From Solace Try-Me CLI';
+
 const parseNumber = (value: string) => {
   const parsedValue = Number(value)
   if (isNaN(parsedValue)) {
@@ -89,13 +91,13 @@ const parsePubTopic = (value: string) => {
   return value
 }
 
-const parseSubTopic = (value: object | "stm/topic") => {
+const parseSubTopic = (value: object | string) => {
   if (!value) {
     console.log("error: required option '-t, --topic <TOPIC...>' not specified")
     process.exit(1)
   }
 
-  if (typeof value !== 'object') {
+  if (typeof value !== 'string' && typeof value !== 'object') {
     console.log("error: invalid topic specified, one or more topic name is expected")
     process.exit(1)
   }
@@ -234,13 +236,13 @@ const checkPubTopicExists = (topic: string | "stm/topic") => {
   }
 }
 
-const checkSubTopicExists = (topic: string[] | ["stm/topic"]) => {
-  if (!topic) {
+const checkSubTopicExists = (topic: string[] | ["stm/topic"], queue: string) => {
+  if (!topic && !queue) {
     console.log("error: required option '-t, --topic <TOPIC...>' not specified")
     process.exit(1)
   }
 
-  if (typeof topic !== 'object') {
+  if (!queue && typeof topic !== 'object') {
     console.log("error: invalid topic specified, one or more topic name is expected")
     process.exit(1)
   }
@@ -270,6 +272,7 @@ const checkConnectionParamsExists = (url: string | undefined, vpn :string | unde
 }
 
 export {
+  defaultMessage,
   parseNumber,
   parseProtocol,
   parseLogLevel,
