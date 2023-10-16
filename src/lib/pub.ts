@@ -2,8 +2,9 @@ import concat from 'concat-stream'
 import { checkPubTopicExists, checkConnectionParamsExists, defaultMessage } from '../utils/parse'
 import { saveConfig, loadConfig } from '../utils/config'
 import { SolaceClient } from '../common/solace-client'
-import { basicLog } from '../utils/signale'
-import delay from '../utils/delay'
+import { stmLog } from '../utils/logger'
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const send = async (
   options: ClientOptions
@@ -29,24 +30,24 @@ const pub = (options: ClientOptions) => {
 
   if (typeof view === 'string') {
     options = loadConfig('pub', view);
-    basicLog.printConfig('pub', options);
+    stmLog.printConfig('pub', options);
     process.exit(0);
   } else if (typeof view === 'boolean') {
     options = loadConfig('pub', 'stm-cli-config.json');
-    basicLog.printConfig('pub', options);
+    stmLog.printConfig('pub', options);
     process.exit(0);
 
   }
 
   if (save && options) {
-    basicLog.printConfig('pub', options);
+    stmLog.printConfig('pub', options);
     saveConfig('pub', options);
     process.exit(0);
   }
 
   if (config) {
     options = loadConfig('pub', config);
-    basicLog.printConfig('pub', options);
+    stmLog.printConfig('pub', options);
   }
 
   // check connection params found
@@ -56,7 +57,7 @@ const pub = (options: ClientOptions) => {
   checkPubTopicExists(options.topic);
 
   if (options.stdin) {
-    basicLog.ctrlDToPublish();
+    stmLog.ctrlDToPublish();
     process.stdin.pipe(
       concat((data) => {
         options.message = data.toString().slice(0, -1)

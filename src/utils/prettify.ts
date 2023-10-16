@@ -1,5 +1,6 @@
 'use strict';
 
+import { prettyPrint } from '@base2/pretty-print-object';
 var _os = require('os');
 
 var stringTimesN = function stringTimesN(n:number, char:string) {
@@ -46,7 +47,31 @@ function prettifyXml(xmlInput:string, options: any) {
   return formatted.trim();
 }
 
+function prettyXML(str: string, indent: number) {
+  if (str.startsWith('<')) {
+    var result = prettifyXml(str, {indent: indent, newline: '\n'});
+    return result;
+  } else
+    return str;
+}
+
+function prettyJSON(str: string) {
+  try {
+      var obj = JSON.parse(str);
+      return prettyPrint(obj, {
+        indent: '  ',
+        singleQuotes: false
+      });
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+
+
 // For non-es2015 usage
 export {
+  prettyXML,
+  prettyJSON,
   prettifyXml
 }

@@ -7,7 +7,9 @@
     "tryme",
     "try-me",
     "pub/sub",
+    "pub/recv",
     "publish/subscribe",
+    "publish/receive",
     "publish",
     "subscribe"
   ],

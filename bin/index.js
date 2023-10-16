@@ -1,9 +1,5 @@
 #!/usr/bin/env node
-const solace = require('solclientjs').debug; // logging supported
 const { Commander } = require('..')
-const { splitSpacesExcludeQuotes } = require('quoted-string-space-split')
-const cmd = 'XX XX pub -h localhost -p 1883 -t "hello/world" -m "Hello World from COMMANDER"'
-const cmdArgv = splitSpacesExcludeQuotes(cmd);
 
 try {
   const help = process.argv.includes('-h') || process.argv.includes('--help')

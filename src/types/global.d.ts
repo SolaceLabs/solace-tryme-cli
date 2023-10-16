@@ -2,7 +2,7 @@ import { Faker } from '@faker-js/faker'
 import solace = require('solclientjs')
 
 declare global {
-  type CommandType = 'pub' | 'sub'
+  type CommandType = 'pub' | 'recv'
 
   // type DeliveryMode = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.PERSISTENT | solace.MessageDeliveryModeType.NON_PERSISTENT
 
@@ -11,8 +11,6 @@ declare global {
   type MessageConsumerAcknowledgeMode = solace.MessageConsumerAcknowledgeMode.AUTO | solace.MessageConsumerAcknowledgeMode.CLIENT
 
   type OutputMode = 'pretty' | 'default'
-
-  type DumpMode = 'PROPS' | 'PAYLOAD | ALL'
 
   // type LogLevel = solace.LogLevel.DEBUG | solace.LogLevel.ERROR | solace.LogLevel.WARN | solace.LogLevel.INFO | solace.LogLevel.DEBUG | solace.LogLevel.TRACE
 
@@ -64,6 +62,7 @@ declare global {
     topic: any
     queue: any
     createIfMissing: boolean
+    addSubscription: boolean
 
     // publish options
     message: string | Buffer
@@ -79,8 +78,7 @@ declare global {
     userProperties?: Record<string, string | string[]>
 
     // subscriber options
-    outputMode?: OutputMode
-    dumpLevel?: DumpMode
+    pretty?: boolean
     dumpMessage?: boolean
     
     // config options

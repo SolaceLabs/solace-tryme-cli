@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import signale from '../utils/signale'
+import signale from './logger'
 
 const defaultMessage:string = 'Hello From Solace Try-Me CLI';
 
@@ -30,16 +30,6 @@ const parseLogLevel = (value: string) => {
   return value;
 }
 
-const parseDumpLevel = (value: string) => {
-  if (!['PROPS', 'PAYLOAD', 'ALL'].includes(value)) {
-    signale.error('Only PROPS, PAYLOAD and ALL are supported.')
-    process.exit(1)
-  }
-  
-  return value;
-}
-
-
 const parseDeliveryMode = (value: string) => {
   if (!['DIRECT', 'PERSISTENT', 'NON_PERSISTENT'].includes(value)) {
     signale.error('Only DIRECT, PERSISTENT, and NON_PERSISTENT are supported.')
@@ -48,7 +38,6 @@ const parseDeliveryMode = (value: string) => {
   
   return value;
 }
-
 
 const parseUserProperties = (value: string, previous?: Record<string, string | string[]>) => {
   const [key, val] = value.split(': ')
@@ -64,18 +53,8 @@ const parseUserProperties = (value: string, previous?: Record<string, string | s
       }
     }
   } else {
-    signale.error('Not a valid user properties.')
+    signale.error('Not a valid user property.')
     process.exit(1)
-  }
-}
-
-const parseVariadicOfBooleanType = (value: string, previous: boolean[] | undefined) => {
-  if (!['true', 'false'].includes(value)) {
-    signale.error(`${value} is not a boolean.`)
-    process.exit(1)
-  } else {
-    const booleanValue = value === 'true'
-    return previous ? [...previous, booleanValue] : [booleanValue]
   }
 }
 
@@ -93,180 +72,68 @@ const parsePubTopic = (value: string) => {
 
 const parseSubTopic = (value: object | string) => {
   if (!value) {
-    console.log("error: required option '-t, --topic <TOPIC...>' not specified")
+    signale.error("error: required option '-t, --topic <TOPIC...>' not specified")
     process.exit(1)
   }
 
   if (typeof value !== 'string' && typeof value !== 'object') {
-    console.log("error: invalid topic specified, one or more topic name is expected")
+    signale.error("error: invalid topic specified, one or more topic name is expected")
     process.exit(1)
   }
-}
 
-const parseFormat = (value: string) => {
-  if (!['base64', 'json', 'hex'].includes(value)) {
-    signale.error('Not a valid format type.')
-    process.exit(1)
-  }
-  return value
-}
-
-const parseOutputMode = (value: string) => {
-  if (!['pretty', 'default'].includes(value)) {
-    signale.error('Not a valid output mode.')
-    process.exit(1)
-  }
-  return value
-}
-
-const parseClientOptions = (
-  options: ClientOptions,
-  commandType?: CommandType,
-) => {
-  // let pubOptions = parsePublishOptions(options);
-  // let subOptions = parseSubscribeOptions(options);
-
-  const {
-    url,
-    vpn,
-    username,
-    password,
-    clientName,
-    description,
-
-    connectionTimeout,
-    connectionRetries,
-
-    reconnectRetries,
-    reconnectRetryWait,
-
-    keepAlive,
-    keepAliveIntervalLimit,
-
-    sendTimestamps,
-    includeSenderId,
-    generateSequenceNumber,
-    sendBufferMaxSize,
-    guaranteedPublisher,
-    windowSize,
-
-    receiveTimestamps,
-    reapplySubscriptions,
-    
-    acknowledgeTimeout,
-    acknowledgeMode,
-
-    logLevel,
-
-    // publish options
-    topic,
-    message,
-    stdin,
-    timeToLive,
-    dmqEligible,
-    messageId,
-    messageType,
-    correlationId,
-    correlationKey,
-    deliveryMode,
-    replyToTopic,
-    userProperties,
-  } = options
-
-  const clientOptions = {
-    op: commandType,
-    url,
-    vpn,
-    username,
-    password,
-    clientName,
-    description,
-
-    connectionTimeout,
-    connectionRetries,
-
-    reconnectRetries,
-    reconnectRetryWait,
-
-    keepAlive,
-    keepAliveIntervalLimit,
-
-    sendTimestamps,
-    includeSenderId,
-    generateSequenceNumber,
-    sendBufferMaxSize,
-    guaranteedPublisher,
-    windowSize,
-
-    receiveTimestamps,
-    reapplySubscriptions,
-    
-    acknowledgeTimeout,
-    acknowledgeMode,
-
-    logLevel,
-
-    // publish options
-    topic,
-    message,
-    stdin,
-    timeToLive,
-    dmqEligible,
-    messageId,
-    messageType,
-    correlationId,
-    correlationKey,
-    deliveryMode,
-    replyToTopic,
-    userProperties,
-  }
-
-  return clientOptions
+  return (typeof value === 'string') ? [ value ] : value;
 }
 
 const checkPubTopicExists = (topic: string | "stm/topic") => {
   if (!topic) {
-    console.log("error: required option '-t, --topic <TOPIC>' not specified")
+    signale.error("error: required option '-t, --topic <TOPIC>' not specified")
     process.exit(1)
   }
 
   if (typeof topic !== 'string') {
-    console.log("error: invalid topic specified, a single topic name is expected")
+    signale.error("error: invalid topic specified, a single topic name is expected")
     process.exit(1)
   }
 }
 
-const checkSubTopicExists = (topic: string[] | ["stm/topic"], queue: string) => {
-  if (!topic && !queue) {
-    console.log("error: required option '-t, --topic <TOPIC...>' not specified")
+const checkSubTopicExists = (options: ClientOptions) => {
+  if (!options.topic && !options.queue) {
+    signale.error("error: required option '-t, --topic <TOPIC...>' not specified")
     process.exit(1)
   }
 
-  if (!queue && typeof topic !== 'object') {
-    console.log("error: invalid topic specified, one or more topic name is expected")
+  if (!options.queue && typeof options.topic !== 'object') {
+    signale.error("error: invalid topic specified, one or more topic name is expected")
     process.exit(1)
   }
+
+  if (!options.queue && options.createIfMissing) {
+    signale.error("error: Create queue missing option is applicable only when you connect to a queue")
+    process.exit(1)
+  }
+
+  options.addSubscription = options.queue && options.topic ? true : false;
 }
 
 const checkConnectionParamsExists = (url: string | undefined, vpn :string | undefined, 
                                       username: string | undefined, password: string | undefined) => {
   if (!url) {
-    console.log("error: required option '-U, --url <URL>' not specified")
+    signale.error("error: required option '-U, --url <URL>' not specified")
     process.exit(1)
   }
 
   if (!vpn) {
-    console.log("error: required option '-v, --vpn <VPN>' not specified")
+    signale.error("error: required option '-v, --vpn <VPN>' not specified")
     process.exit(1)
   }
 
   if (!username) {
-    console.log("error: required option '-u, --username <USER>' not specified")
+    signale.error("error: required option '-u, --username <USER>' not specified")
     process.exit(1)
   }
 
   if (!password) {
-    console.log("error: required option '-p, --password <PASS>' not specified")
+    signale.error("error: required option '-p, --password <PASS>' not specified")
     process.exit(1)
   }
 }
@@ -276,15 +143,10 @@ export {
   parseNumber,
   parseProtocol,
   parseLogLevel,
-  parseDumpLevel,
   parseUserProperties,
-  parseVariadicOfBooleanType,
   parsePubTopic,
   parseSubTopic,
   parseDeliveryMode,
-  parseFormat,
-  parseOutputMode,
-  parseClientOptions,
   // connection validation
   checkConnectionParamsExists,
   // publisher validation

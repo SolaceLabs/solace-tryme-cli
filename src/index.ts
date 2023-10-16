@@ -1,11 +1,8 @@
 import 'core-js'
 import { Command, Option } from 'commander'
-import { getClientName } from './utils/generator'
 import {
   parseNumber,
   parseUserProperties,
-  parseVariadicOfBooleanType,
-  parseOutputMode,
   parseDeliveryMode,
   parseProtocol,
   parsePubTopic,
@@ -14,8 +11,10 @@ import {
   defaultMessage,
 } from './utils/parse'
 import { pub } from './lib/pub'
-import { sub } from './lib/sub'
+import { recv } from './lib/recv'
 import { version } from '../package.json'
+
+const getClientName = () => `stm_${Math.random().toString(16).substring(2, 10)}`
 
 export class Commander {
   program: Command
@@ -34,6 +33,7 @@ export class Commander {
       .description('A Solace Try-Me client for the command line')
       .enablePositionalOptions()
       .allowUnknownOption(false)
+      .version(`${version}`, '--version')
 
     this.program
       .command('pub')
@@ -58,6 +58,7 @@ export class Commander {
         'the time to live is the number of milliseconds the message may be stored before it is discarded or moved to a DMQ', 
         parseNumber)
       .option('-dmq, --dmq-eligible', 'the DMQ eligible flag')
+
       // configuration options
       .option(
         '--save [PATH]',
@@ -69,8 +70,9 @@ export class Commander {
       )
       .option(
         '--config [PATH]',
-        'load stored settings from the local configuration file and lanuch a publisher, if filepath not specified, a default path of ./stm-pub-config.json is used',
+        'load stored settings from the local configuration file and launch a publisher, if filepath not specified, a default path of ./stm-pub-config.json is used',
       )
+
       // advanced connect options
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
@@ -105,9 +107,6 @@ export class Commander {
         .hideHelp(!this.advanced))
       .addOption(new Option('--generate-sequence-number', 
         '[advanced] a sequence number is automatically included in the Solace-defined fields for each message sent')
-        .hideHelp(!this.advanced))
-      .addOption(new Option('--reapply-subscriptions', 
-        '[advanced] have the API remember subscriptions and reapply them upon calling connecting to a disconnected session')
         .hideHelp(!this.advanced))
       .addOption(new Option('--log-level <LEVEL>', 
         '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
@@ -144,6 +143,7 @@ export class Commander {
       .addOption(new Option('--acknowledge-mode <MODE>', 
         '[advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED')
         .hideHelp(!this.advanced))
+
       // advanced message options
       .addOption(new Option('--message-id <ID>', 
         '[advanced] the application-provided message ID')
@@ -190,37 +190,31 @@ export class Commander {
       .action(pub)
 
     this.program
-      .command('sub')
-      .description('Subscribe to a topic.')
+      .command('recv')
+      .description('Receive messages from a queue or directly by subscribing to one or more topics.')
+
       // connect options
       .option('-U, --url <URL>', 'the broker service url', parseProtocol, 'ws://localhost:8008')
       .option('-v, --vpn <VPN>', 'the message VPN name', 'default')
       .option('-u, --username <USER>', 'the username', 'default')
       .option('-p, --password <PASS>', 'the password', 'default')
-      // message options
-      // subscribe to topic
-      // .addOption(new Option('-t, --topic <TOPIC...>', 
-      //   'the message topic')
-      //   .argParser(parseSubTopic)
-      //   .default(["stm/topic"]))
-      //   // .conflicts('queue'))
-      .option('-t, --topic <TOPIC...>', 'the message topic', ["stm/topic"])
+      .addOption(new Option('-t, --topic <TOPIC...>', 
+        'the message topic(s)')
+        .argParser(parseSubTopic)
+        .default(["stm/topic"]))
 
       // receive from queue
       .addOption(new Option('-q, --queue <QUEUE>', 
-        'the message queue') 
-        .conflicts('topic'))
-      .addOption(new Option('--create-if-missing', 
-        'create message queue if missing')
-        .conflicts('topic'))
+        'the message queue'))
+        .addOption(new Option('--create-if-missing', 
+        'create message queue if missing'))
 
       // output options
       .option(
-        '--output-mode <default/pretty>',
-        'choose between the default and pretty print mode',
-        parseOutputMode,
-        'default',
+        '--pretty',
+        'pretty print message',
       )
+
       // configuration options
       .option(
         '--save [PATH]',
@@ -234,6 +228,7 @@ export class Commander {
         '--config [PATH]',
         'load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json',
       )
+
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
         '[advanced] the client name')
@@ -285,23 +280,19 @@ export class Commander {
         .option('-ah, --advanced-help', 'display advanced help with all parameters')
         .addHelpText('after', `
   Example:
-    // subscribe with default settings (broker, vpn, username and password and topic).      
-    stm sub
+  // direct receiver with topic(s) subscription
+    stm recv
+    stm recv -t stm/topic
+    stm recv -U ws://localhost:8008 -v default -u default -p default -t stm/topic/inventory stm/topic/logistics
+    stm recv -U ws://localhost:8008 -v default -u default -p default -t "stm/topic/inventory/*" "stm/topic/logistics/>"
 
-    // subscribe to topic 'stm/topic' with default settings (broker, vpn, username and password).    
-    stm sub -t stm/topic
-
-    // subscribe to multiple topics 'stm/topic/inventory' and 'stm/topic/logistics' 
-    // to broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
-    stm sub -U ws://localhost:8008 -v default -u default -p default -t stm/topic/inventory stm/topic/logistics
-
-    // subscribe to wildcard topic 'stm/topic/inventory/*' and 'stm/topic/logistics/>' 
-    // on broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
-    stm sub -U ws://localhost:8008 -v default -u default -p default -t "stm/topic/inventory/*" "stm/topic/logistics/>"
+  // guaranteed receiver from a queue
+    stm recv -q my_queue
+    stm recv -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/topic/inventory stm/topic/logistics
     `
         )  
       .allowUnknownOption(false)
-      .action(sub)
+      .action(recv)
   }
 }
 

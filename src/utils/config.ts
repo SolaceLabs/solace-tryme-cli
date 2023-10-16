@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import path from 'path'
-import { signale, basicLog } from '../utils/signale'
+import { signale, stmLog } from './logger'
 
 const defaultPath = `${process.cwd()}/stm-cli-config.json`
 
@@ -80,7 +80,7 @@ const saveConfig = (
 }
 
 function loadConfig(commandType: 'pub', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'sub', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'recv', loadPath: boolean | string): ClientOptions
 function loadConfig(commandType: CommandType, loadPath: boolean | string) {
   try {
     const filePath = processPath(loadPath)

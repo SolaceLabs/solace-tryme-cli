@@ -24,3 +24,6 @@ yarn-error.log*
 package
 release
 dist
+
+# config json fils
+*.json
