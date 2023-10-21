@@ -8,10 +8,29 @@ import {
   parsePubTopic,
   parseSubTopic,
   parseLogLevel,
-  defaultMessage,
+  parseReplyTopic,
 } from './utils/parse'
-import { pub } from './lib/pub'
-import { recv } from './lib/recv'
+import {
+  defaultUrl,
+  defaultBroker,
+  defaultUserName,
+  defaultPassword,
+  defaultMessage,
+  defaultRequestMessage,
+  defaultPublisherDescription,
+  defaultReceiverDescription,
+  defaultReplierDescription,
+  defaultPublishTopic,
+  defaultSubscribeTopic,
+  defaultRequestTopic,
+  defaultCount,
+  defaultInterval,
+  defaultLogLevel,
+} from './utils/defaults';
+import { publisher } from './lib/publisher'
+import { receiver} from './lib/receiver'
+import { requestor } from './lib/requestor'
+import { replier } from './lib/replier'
 import { version } from '../package.json'
 
 const getClientName = () => `stm_${Math.random().toString(16).substring(2, 10)}`
@@ -34,49 +53,83 @@ export class Commander {
       .enablePositionalOptions()
       .allowUnknownOption(false)
       .version(`${version}`, '--version')
-
+      .addOption(new Option('-hm, --help-more', 'display more help for command, all other options not shown in basic help'))
+      .addOption(new Option('-he, --help-examples', 'show cli examples help'))
+// publisher 
+{
     this.program
-      .command('pub')
-      .description('Publish a message to a topic.')
+      .command('publish')
+      .description('publish message(s) to a topic.')
 
       // connect options
-      .option('-U, --url <URL>', 'the broker service url', parseProtocol, 'ws://localhost:8008')
-      .option('-v, --vpn <VPN>', 'the message VPN name', 'default')
-      .option('-u, --username <USER>', 'the username', 'default')
-      .option('-p, --password <PASS>', 'the password', 'default')
-      .addOption(new Option('-cn, --client-name <NAME>', 
-          'the client name')
-        .default(getClientName(), 'an auto-generated client name'))
+      .addOption(new Option('-U, --url <URL>', 
+        'the broker url')
+        .argParser(parseProtocol)
+        .default(defaultUrl)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-v, --vpn <VPN>', 
+        'the message VPN (broker) name')
+        .default(defaultBroker)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-u, --username <USER>', 
+        'the username')
+        .default(defaultUserName)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-p, --password <PASS>', 
+        'the password')
+        .default(defaultPassword)
+        .hideHelp(this.advanced))
 
       // message options
-      .option('-t, --topic <TOPIC>', 'the message topic', parsePubTopic, "stm/topic")
-      .option('-m, --message <BODY>', 'the message body', defaultMessage)
-      .option('-s, --stdin', 'read the message body from stdin')
-      .option('-c, --count <COUNT>', 'the number of events to publish', parseNumber, 1)
-      .option('-i, --interval <MILLISECONDS>', 'the time to wait between publish', parseNumber, 0)
-      .option('-ttl, --time-to-live <NUMBER>', 
-        'the time to live is the number of milliseconds the message may be stored before it is discarded or moved to a DMQ', 
-        parseNumber)
-      .option('-dmq, --dmq-eligible', 'the DMQ eligible flag')
+      .addOption(new Option('-t, --topic <TOPIC>', 
+        'the message topic')
+        .argParser(parsePubTopic)
+        .default(defaultPublishTopic)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-m, --message <BODY>', 
+        'the message body')
+        .default(defaultMessage)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-s, --stdin', 
+        'read the message body from stdin')
+        .hideHelp(this.advanced))
+      .addOption(new Option('-c, --count <COUNT>', 
+        'the number of events to publish')
+        .argParser(parseNumber)
+        .default(defaultCount)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-i, --interval <MILLISECONDS>', 
+        'the time to wait between publish')
+        .argParser(parseNumber)
+        .default(defaultInterval)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-ttl, --time-to-live <NUMBER>', 
+        'the time to live is the number of milliseconds the message may be stored before it is discarded or moved to a DMQ')
+        .argParser(parseNumber)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-dmq, --dmq-eligible', 
+        'the DMQ eligible flag')
+        .hideHelp(this.advanced))
 
       // configuration options
-      .option(
-        '--save [PATH]',
-        'save the settings to a local configuration file in json format, if filepath not specified, a default path of ./stm-pub-config.json is used',
-      )
-      .option(
-        '--view [PATH]',
-        'view the stored settings from the local configuration file, if filepath not specified, a default path of ./stm-pub-config.json is used',
-      )
-      .option(
-        '--config [PATH]',
-        'load stored settings from the local configuration file and launch a publisher, if filepath not specified, a default path of ./stm-pub-config.json is used',
-      )
+      .addOption(new Option('--save [PATH]',
+        'save the settings to a local configuration file in json format, if filepath not specified, a default path of ./stm-pub-config.json is used')
+        .hideHelp(this.advanced))
+      .addOption(new Option('--view [PATH]',
+        'view the stored settings from the local configuration file, if filepath not specified, a default path of ./stm-pub-config.json is used')
+        .hideHelp(this.advanced))
+      .addOption(new Option('--config [PATH]',
+        'load stored settings from the local configuration file and launch a publisher, if filepath not specified, a default path of ./stm-pub-config.json is used')
+        .hideHelp(this.advanced))
 
       // advanced connect options
+      .addOption(new Option('--client-name <NAME>', 
+          '[advanced] the client name')
+        .default(getClientName(), 'an auto-generated client name')
+        .hideHelp(this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
-        .default("")
+        .default(defaultPublisherDescription)
         .hideHelp(!this.advanced))
       .addOption(new Option('--connection-timeout <NUMBER>', 
         '[advanced] the timeout period (in milliseconds) for a connect operation') 
@@ -111,7 +164,7 @@ export class Commander {
       .addOption(new Option('--log-level <LEVEL>', 
         '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
         .argParser(parseLogLevel)
-        .default('ERROR')
+        .default(defaultLogLevel)
         .hideHelp(!this.advanced))
 
       // publish options
@@ -165,78 +218,84 @@ export class Commander {
         '[advanced] string which is used as the topic name for a response message')
         .argParser(parsePubTopic)
         .hideHelp(!this.advanced))
-        .addOption(new Option('--user-properties <PROPS...>', 
-        '[advanced] the user properties (e.g., "name1:value1" "name2:value2")')
+      .addOption(new Option('--user-properties <PROPS...>', 
+        '[advanced] the user properties (e.g., "name1: value1" "name2: value2")')
         .argParser(parseUserProperties)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--dump-message', 
-        '[advanced] print published message')
-        .hideHelp(!this.advanced))
-      .option('-ah, --advanced-help', 'display advanced help with all parameters')
-        .addHelpText('after', `
-  Example:
-    // publish a message with default settings (broker, vpn, username and password and topic).      
-    stm pub
-
-    // publish on topic 'stm/topic' with default settings (broker, vpn, username and password).    
-    stm pub -t stm/topic
-
-    // publish 5 messages with 1 sec interval between publish on topic 'stm/topic' 
-    // to broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
-    stm pub -U ws://localhost:8008 -v default -u default -p default -t stm/topic -c 5 -i 1000
-    `
-        )
+        .addOption(new Option('-hm, --help-more', 
+        'show more help, display all other options not shown in basic help'))
+      .addOption(new Option('-he, --help-examples', 
+        'show cli examples help'))
       .allowUnknownOption(false)
-      .action(pub)
+      .action(publisher)
+}
 
+// receiver
+{
     this.program
-      .command('recv')
-      .description('Receive messages from a queue or directly by subscribing to one or more topics.')
+      .command('receive')
+      .description('receive messages from a queue or subscribing to topic(s).')
 
       // connect options
-      .option('-U, --url <URL>', 'the broker service url', parseProtocol, 'ws://localhost:8008')
-      .option('-v, --vpn <VPN>', 'the message VPN name', 'default')
-      .option('-u, --username <USER>', 'the username', 'default')
-      .option('-p, --password <PASS>', 'the password', 'default')
+      .addOption(new Option('-U, --url <URL>', 
+        'the broker service url')
+        .argParser(parseProtocol)
+        .default(defaultUrl)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-v, --vpn <VPN>', 
+        'the message VPN name')
+        .default(defaultBroker)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-u, --username <USER>', 
+        'the username')
+        .default(defaultUserName)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-p, --password <PASS>', 
+        'the password')
+        .default(defaultPassword)
+        .hideHelp(this.advanced))
       .addOption(new Option('-t, --topic <TOPIC...>', 
         'the message topic(s)')
         .argParser(parseSubTopic)
-        .default(["stm/topic"]))
+        .default([ defaultSubscribeTopic ])
+        .hideHelp(this.advanced))
 
       // receive from queue
       .addOption(new Option('-q, --queue <QUEUE>', 
-        'the message queue'))
-        .addOption(new Option('--create-if-missing', 
-        'create message queue if missing'))
+        'the message queue')
+        .hideHelp(this.advanced))
+      .addOption(new Option('--create-if-missing', 
+        'create message queue if missing')
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--add-subscriptions', 
+        'add subscription(s) to the queue')
+        .hideHelp(!this.advanced))
 
       // output options
-      .option(
-        '--pretty',
-        'pretty print message',
-      )
+      .addOption(new Option('--pretty',
+        'pretty print message')
+        .hideHelp(this.advanced))
 
       // configuration options
-      .option(
-        '--save [PATH]',
-        'save the parameters to the local configuration file in json format, default path is ./stm-pub-config.json',
-      )
-      .option(
-        '--view [PATH]',
-        'list the parameters from the local configuration file in json format, default path is ./stm-pub-config.json',
-      )
-      .option(
+      .addOption(new Option('--save [PATH]',
+        'save the parameters to the local configuration file in json format, default path is ./stm-pub-config.json')
+        .hideHelp(this.advanced))
+      .addOption(new Option('--view [PATH]',
+        'list the parameters from the local configuration file in json format, default path is ./stm-pub-config.json')
+        .hideHelp(this.advanced))
+      .addOption(new Option(
         '--config [PATH]',
-        'load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json',
-      )
+        'load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json')
+        .hideHelp(this.advanced))
 
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
         '[advanced] the client name')
-        .default(getClientName())
+        .default(getClientName(), 'an auto-generated client name')
         .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
-        .default("")
+        .default(defaultReceiverDescription)
         .hideHelp(!this.advanced))
       .addOption(new Option('--connection-timeout <NUMBER>', 
         '[advanced] the timeout period (in milliseconds) for a connect operation') 
@@ -277,22 +336,272 @@ export class Commander {
         .argParser(parseLogLevel)
         .default('ERROR')
         .hideHelp(!this.advanced))
-        .option('-ah, --advanced-help', 'display advanced help with all parameters')
-        .addHelpText('after', `
-  Example:
-  // direct receiver with topic(s) subscription
-    stm recv
-    stm recv -t stm/topic
-    stm recv -U ws://localhost:8008 -v default -u default -p default -t stm/topic/inventory stm/topic/logistics
-    stm recv -U ws://localhost:8008 -v default -u default -p default -t "stm/topic/inventory/*" "stm/topic/logistics/>"
-
-  // guaranteed receiver from a queue
-    stm recv -q my_queue
-    stm recv -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/topic/inventory stm/topic/logistics
-    `
-        )  
+      .addOption(new Option('-hm, --help-more', 
+        'show more help, display all other options not shown in basic help'))
+      .addOption(new Option('-he, --help-examples', 
+        'show cli examples help'))
       .allowUnknownOption(false)
-      .action(recv)
+      .action(receiver)
+}
+
+// requestor
+{
+    this.program
+      .command('request')
+      .description('publish request and receive reply.')
+
+      // connect options
+      .addOption(new Option('-U, --url <URL>', 
+        'the broker service url')
+        .argParser(parseProtocol)
+        .default(defaultUrl)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-v, --vpn <VPN>', 
+        'the message VPN name')
+        .default(defaultBroker)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-u, --username <USER>', 
+        'the username')
+        .default(defaultUserName)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-p, --password <PASS>', 
+        'the password')
+        .default(defaultPassword)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-t, --topic <TOPIC>', 
+        'the request message topic')
+        .argParser(parsePubTopic)
+        .default(defaultRequestTopic)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-m, --message <BODY>', 
+        'the request message body')
+        .default(defaultRequestMessage)
+        .hideHelp(this.advanced))
+      .addOption(new Option('-gr, --guaranteed-requestor', 
+        'a guaranteed requestor is automatically created')
+        .hideHelp(this.advanced))
+
+      // output options
+      .addOption(new Option('--pretty',
+        'pretty print message')
+        .hideHelp(this.advanced))
+
+      // configuration options
+      .addOption(new Option('--save [PATH]',
+        'save the parameters to the local configuration file in json format, default path is ./stm-reqreply-config.json')
+        .hideHelp(this.advanced))
+      .addOption(new Option('--view [PATH]',
+        'list the parameters from the local configuration file in json format, default path is ./stm-reqreply-config.json')
+        .hideHelp(this.advanced))
+      .addOption(new Option(
+        '--config [PATH]',
+        'load the parameters from the local configuration file in json format, default path is ./stm-reqreply-config.json')
+        .hideHelp(this.advanced))
+
+      // advanced connect options
+      .addOption(new Option('--client-name <NAME>', 
+        '[advanced] the client name')
+        .default(getClientName(), 'an auto-generated client name')
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--description <DESCRIPTION>', 
+        '[advanced] the application description')
+        .default(defaultReplierDescription)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--connection-timeout <NUMBER>', 
+        '[advanced] the timeout period (in milliseconds) for a connect operation') 
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--connection-retries <NUMBER>', 
+        '[advanced] the number of times to retry connecting during initial connection setup')
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--reconnect-retries <NUMBER>', 
+        '[advanced] the number of times to retry connecting after a connected session goes down')
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', 
+        '[advanced] the amount of time (in milliseconds) between each attempt to connect to a host')
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--keepalive <MILLISECONDS>', 
+        '[advanced] the amount of time (in milliseconds) to wait between sending out keep-alive messages to the VPN')
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--keepalive-interval-limit <NUMBER>', 
+        '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')
+        .argParser(parseNumber)
+        .hideHelp(!this.advanced))
+      .addOption(new Option('--log-level <LEVEL>', 
+        '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
+        .argParser(parseLogLevel)
+        .default('ERROR')
+        .hideHelp(!this.advanced))
+      .addOption(new Option('-hm, --help-more', 
+        'show more help, display all other options not shown in basic help'))
+      .addOption(new Option('-he, --help-examples', 
+        'show cli examples help'))
+      .allowUnknownOption(false)
+      .action(requestor)
+}
+
+// replier
+{
+  this.program
+    .command('reply')
+    .description('reply to request messages.')
+
+    // connect options
+    .addOption(new Option('-U, --url <URL>', 
+      'the broker service url')
+      .argParser(parseProtocol)
+      .default(defaultUrl)
+      .hideHelp(this.advanced))
+    .addOption(new Option('-v, --vpn <VPN>', 
+      'the message VPN name')
+      .default(defaultBroker)
+      .hideHelp(this.advanced))
+    .addOption(new Option('-u, --username <USER>', 
+      'the username')
+      .default(defaultUserName)
+      .hideHelp(this.advanced))
+    .addOption(new Option('-p, --password <PASS>', 
+      'the password')
+      .default(defaultPassword)
+      .hideHelp(this.advanced))
+    .addOption(new Option('-t, --topic <TOPIC>', 
+      'the message topic(s)')
+      .argParser(parseReplyTopic)
+      .default( defaultRequestTopic )
+      .hideHelp(this.advanced))
+
+    // output options
+    .addOption(new Option('--pretty',
+      'pretty print message')
+      .hideHelp(this.advanced))
+
+    // configuration options
+    .addOption(new Option('--save [PATH]',
+      'save the parameters to the local configuration file in json format, default path is ./stm-pub-config.json')
+      .hideHelp(this.advanced))
+    .addOption(new Option('--view [PATH]',
+      'list the parameters from the local configuration file in json format, default path is ./stm-pub-config.json')
+      .hideHelp(this.advanced))
+    .addOption(new Option(
+      '--config [PATH]',
+      'load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json')
+      .hideHelp(this.advanced))
+
+    // advanced connect options
+    .addOption(new Option('--client-name <NAME>', 
+      '[advanced] the client name')
+      .default(getClientName(), 'an auto-generated client name')
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--description <DESCRIPTION>', 
+      '[advanced] the application description')
+      .default(defaultReceiverDescription)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--connection-timeout <NUMBER>', 
+      '[advanced] the timeout period (in milliseconds) for a connect operation') 
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--connection-retries <NUMBER>', 
+      '[advanced] the number of times to retry connecting during initial connection setup')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', 
+      '[advanced] the number of times to retry connecting after a connected session goes down')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', 
+      '[advanced] the amount of time (in milliseconds) between each attempt to connect to a host')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', 
+      '[advanced] the amount of time (in milliseconds) to wait between sending out keep-alive messages to the VPN')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--keepalive-interval-limit <NUMBER>', 
+      '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--receive-timestamps',
+      '[advanced] a receive timestamp is recorded for each message and passed to the session\'s message callback receive handler')
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--reapply-subscriptions', 
+      '[advanced] to have the API remember subscriptions and reapply them upon calling on a disconnected session')
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--send-max-buffer-size <NUMBER>', 
+      '[advanced] the maximum buffer size for the transport session, must be bigger than the largest message an application intends to send on the session')
+      .argParser(parseNumber)
+      .hideHelp(!this.advanced))
+    .addOption(new Option('--log-level <LEVEL>', 
+      '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
+      .argParser(parseLogLevel)
+      .default('ERROR')
+      .hideHelp(!this.advanced))
+    .addOption(new Option('-hm, --help-more', 
+      'show more help, display all other options not shown in basic help'))
+    .addOption(new Option('-he, --help-examples', 
+        'show cli examples help'))
+    .allowUnknownOption(false)
+    .action(replier)
+}
+
+//     this.program
+//       .command('examples <command>')
+//       .description('show cli examples help for a command.')
+//       .action(function(option) {
+//         if (option === 'publish') {
+//           console.log(`
+// Example:
+// // publish a message with default settings (broker, vpn, username and password and topic).      
+// stm publish
+
+// // publish on topic ${defaultPublishTopic} with default settings (broker, vpn, username and password).    
+// stm publish -t ${defaultPublishTopic}
+
+// // publish 5 messages with 1 sec interval between publish on topic '${defaultPublishTopic}' 
+// // to broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
+// stm publish -U ws://localhost:8008 -v default -u default -p default -t ${defaultPublishTopic} -c 5 -i 1000
+//           `);
+//         } else if (option === 'receive') {
+//           console.log(`
+// Example:
+// // direct receiver with topic(s) subscription
+// stm receive
+// stm receive -t ${defaultPublishTopic}
+// stm receive -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
+// stm receive -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
+
+// // guaranteed receiver from a queue
+// stm receive -q my_queue
+// stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/inventory stm/logistics
+//           `);
+//         } else if (option === 'request') {
+//           console.log(`
+// Example:
+// // send request messages and and receive reply(s)
+// stm request
+// stm request -t ${defaultRequestTopic}
+// stm request -U ws://localhost:8008 -v default -u default -p default -t stm/inventory
+//           `);
+//         } else if (option === 'reply') {
+//           console.log(`
+// Example:
+// // direct replier to request messages
+// stm reply
+// stm reply -t ${defaultRequestTopic}
+// stm reply -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
+// stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
+
+// // guaranteed replier to request messages from a queue
+// stm reply -q my_queue
+// stm reply -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/inventory stm/logistics
+//           `);
+//         } else {
+//           console.log(`error: unknown command '${option}'`);
+//         }
+//       })
   }
 }
 

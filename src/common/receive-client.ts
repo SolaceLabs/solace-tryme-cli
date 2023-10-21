@@ -1,5 +1,5 @@
 import solace from "solclientjs";
-import { signale, stmLog } from '../utils/logger'
+import { Logger, Signal } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -17,13 +17,14 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
   ['NON_PERSISTENT', MessageDeliveryModeType.NON_PERSISTENT],
 ]);
 
-
 export class SolaceClient {
   //Solace session object
   options:any = null;
   session:any = null;
-  callback:any = null;
+  active:boolean = false;
+  correlationId:any = null;
   receiver:any = {};
+  replier:any = {};
 
   constructor(options:any) {
     // record the options
@@ -46,7 +47,7 @@ export class SolaceClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        signale.warn("Already connected and ready to subscribe.");
+        Signal.warn("Already connected and ready to subscribe.");
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
@@ -84,19 +85,19 @@ export class SolaceClient {
 
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          stmLog.connected()
+          Signal.success('Connected')
           resolve();
         });
 
         //The CONNECT_FAILED_ERROR implies a connection failure
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          signale.error("Connection failed to the message router: " + sessionEvent.infoStr + " - check correct parameter values and connectivity!"),
+          Signal.error("Connection failed to the message router: " + sessionEvent.infoStr + " - check correct parameter values and connectivity!"),
           reject();
         });
 
         //DISCONNECTED implies the client was disconnected
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
-          stmLog.disconnected()
+          Signal.success('Disconnected')
           if (this.session !== null) {
             this.session.dispose();
             this.session = null;
@@ -105,26 +106,25 @@ export class SolaceClient {
 
         //ACKNOWLEDGED MESSAGE implies that the broker has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
-          signale.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+          Signal.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
         });
 
         //REJECTED_MESSAGE implies that the broker has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
-          signale.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+          Signal.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
         });
 
         //SUBSCRIPTION ERROR implies that there was an error in subscribing on a topic
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) => {
-          signale.error("Cannot subscribe to topic: " + sessionEvent.correlationKey);
+          Signal.error("Cannot subscribe to topic: " + sessionEvent.correlationKey);
         });
 
         //SUBSCRIPTION_OK implies that a subscription was successfully applied/removed from the broker
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) => {
-          signale.info(`Session subscription activity for correlation-key: ${sessionEvent.correlationKey}`);
           //Check if the topic exists in the map
           let key:string = sessionEvent.correlationKey ? sessionEvent.correlationKey.toString() : '';
           if (!key) {
-            signale.error(`Session subscription activity missing correlation-key`);
+            Signal.error(`Session subscription activity missing correlation-key`);
             return;
           }
 
@@ -132,20 +132,18 @@ export class SolaceClient {
           if (subscription) {
             // subscription exists, remove the topic from the map
             this.receiver.topics.delete(key);
-            signale.success(`Successfully unsubscribed from topic: ${key}`);
+            Signal.success(`Successfully unsubscribed from topic: ${key}`);
           } else {
             // Otherwise, add subscription
             this.receiver.topics.add(key);
-            signale.success(`Successfully subscribed to topic: ${key}`);
-            stmLog.waitingForEvents();
-
-            // wait to be told to exit
-            signale.warn('Press Ctrl-C to exit');  
+            Signal.success(`Successfully subscribed to topic: ${key}`);
           }
         });
 
         //Message callback function
         this.session.on(solace.SessionEventCode.MESSAGE, (message:any) => {
+          Signal.success(`Message Received - ${message.getDestination()}`)
+
           //Get the topic name from the message's destination
           let topicName: string = message.getDestination().getName();
           if (!this.receiver.topics.has(topicName)) {
@@ -162,41 +160,24 @@ export class SolaceClient {
               if (matched) break;
             }
             if (!matched) {
-              signale.error('💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
+              Signal.error('💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
               return;
             }
           } 
-
-          this.callback(message, this.options.pretty);
+          Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.pretty);
         });
       } catch (error: any) {
-        signale.error(error);
+        Signal.error(error);
       }
 
       // connect the session
       try {
-        stmLog.connecting(this.options.url, this.options.vpn, this.options.username, this.options.clientName);
+        Signal.await(`Connecting to broker [${this.options.url}, broker: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
         this.session.connect();
       } catch (error:any) {
-        signale.error(error);
+        Signal.error(error);
       }
     });
-  }
-
-  /**
-   * A function to disconnect session
-   */
-  disconnect() {
-    stmLog.disconnecting();
-    if (this.session !== null) {
-      try {
-        this.session.disconnect();
-      } catch (error:any) {
-        signale.error(error);
-      }
-    } else {
-      signale.error("Not connected to Solace PubSub+ Event Broker.");
-    }
   }
 
   /**
@@ -205,21 +186,21 @@ export class SolaceClient {
    */
   unsubscribe(topicName: string) {
     if (!this.session) {
-      signale.warn("Cannot subscribe because not connected to Solace message router!");
+      Signal.warn("Cannot subscribe because not connected to Solace message router!");
       return;
     }
 
     if (!this.receiver.topics.has(topicName)) {
-      signale.warn(`Subscription ${topicName} does not exist - Cannot unsubscribe`);
+      Signal.warn(`Subscription ${topicName} does not exist - Cannot unsubscribe`);
       return;
     }
 
     try {
-      signale.info(`Unsubscribing from ${topicName}...`);
+      Signal.info(`Unsubscribing from ${topicName}...`);
       this.session.unsubscribe(solace.SolclientFactory.createTopicDestination(topicName), true, topicName);
       this.receiver.receiver.delete(topicName);
     } catch (error: any) {
-      signale.error(error);
+      Signal.error(error);
     }
   }
 
@@ -229,18 +210,18 @@ export class SolaceClient {
    */
   unsubscribeAll() {
     if (!this.session) {
-      signale.warn("Cannot subscribe because not connected to Solace message router!");
+      Signal.warn("Cannot subscribe because not connected to Solace message router!");
       return;
     }
 
     if (!this.receiver.topics.size) {
-      signale.warn(`No existing subscriptions found`);
+      Signal.warn(`No existing subscriptions found`);
       return;
     }
 
     try {
       this.receiver.topics.forEach((topicName: string) => {
-        signale.info(`Unsubscribing ${topicName}`);
+        Signal.info(`Unsubscribing ${topicName}`);
         this.receiver.topics.delete(topicName)
 
         //Session Un-subscribe
@@ -251,32 +232,31 @@ export class SolaceClient {
           this.receiver.topics.delete(topicName);  
       });
     } catch (error: any) {
-      signale.error(error);
+      Signal.error(error);
     }
   }
 
   /**
    * Function that subscribes to the topic
-   * @param topicName Topic string for the subscription
-   * @param callback Callback for the function
    */
-  subscribe(options: any, callback:any) {
+  subscribe(options: any) {
     const { topic, queue } = options;
 
     if (queue)
-      this.receiveFromQueue(queue, callback, options)
+      this.receiveFromQueue(queue, options)
     else 
-      this.receiveOnTopic(topic, callback);
+      this.receiveOnTopic(topic);
   }
 
-  receiveOnTopic(topicNames: any, callback:any) {
+  /**
+   * A function to consume messages on topic
+   */
+  receiveOnTopic(topicNames: any) {
     //Check if the session has been established
     if (!this.session) {
-      signale.warn("Cannot subscribe because not connected to Solace message router!");
+      Signal.warn("Cannot subscribe because not connected to Solace message router!");
       return;
     }
-
-    this.callback = callback;
 
     let topicList:string[] = [];
     if (typeof topicNames === 'string')
@@ -284,13 +264,13 @@ export class SolaceClient {
     else if (typeof topicNames === 'object')
       topicNames.forEach((name: string) => { topicList.push(name) });
     else {
-      signale.fatal("Unknown topic type!");
+      Signal.fatal("Unknown topic type!");
       process.exit(1)
     }
 
     try {
       topicList.forEach(topicName => {
-        signale.info(`Subscribing to ${topicName}`);
+        Signal.info(`Subscribing to ${topicName}`);
         this.receiver.topics.add(topicName)
 
         //Session subscription
@@ -302,22 +282,20 @@ export class SolaceClient {
         );                
       });
     } catch (error: any) {
-      signale.error(error);
+      Signal.error(error);
     }
   }
 
   /**
    * A function to consume messages from queue
    */
-  receiveFromQueue(queueName: any, callback:any, options: any) {
+  receiveFromQueue(queueName: any, options: any) {
     if (this.session !== null) {
       if (this.receiver.consuming) {
-        signale.warn('Already started receiver for queue "' + queueName + '" and ready to receive messages.');
+        Signal.warn('Already started receiver for queue "' + queueName + '" and ready to receive messages.');
       } else {
-        stmLog.startingConsumer(queueName);
+        Signal.success(`Starting receiver for queue ${queueName}`)
         try {
-          // record the callback
-          this.callback = callback;
           this.options = options;
 
           // Create a message receiver
@@ -338,53 +316,53 @@ export class SolaceClient {
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.UP, () => {
             this.options.topic.forEach((topicName: string) => {              
               try {
-                signale.success('Subscribing to topic: ' + topicName);
+                Signal.success('Subscribing to topic: ' + topicName);
                 this.receiver.messageReceiver.addSubscription(
                   solace.SolclientFactory.createTopicDestination(topicName),
                   topicName, // correlation key as topic name
                   this.options.readTimeout
                 );
               } catch (error) {
-                signale.error(error);
+                Signal.error(error);
                 throw error;
               }
             });
 
             this.receiver.consuming = true;
-            signale.success('Ready to receive messages.');
-            stmLog.waitingForEvents();
+            Signal.success('Ready to receive messages.');
+            Signal.await(`Waiting for events...`);
 
             // wait to be told to exit
-            signale.warn('Press Ctrl-C to exit');  
+            Signal.info('Press Ctrl-C to exit');  
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.CONNECT_FAILED_ERROR, () => {
             this.receiver.consuming = false;
-            signale.error('Error: the message receiver could not bind to queue "' + this.receiver.queue +
+            Signal.error('Error: the message receiver could not bind to queue "' + this.receiver.queue +
                   '"\n   Ensure this queue exists on the message router vpn');
             process.exit();
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN, () => {
             this.receiver.consuming = false;
-            signale.error('The message receiver is now down');
+            Signal.error('The message receiver is now down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN_ERROR, () => {
             this.receiver.consuming = false;
-              signale.log('An error happened, the message receiver is down');
+            Signal.error('An error happened, the message receiver is down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) =>  {
-            signale.log('Cannot subscribe to topic ' + sessionEvent);
+            Signal.error('Cannot subscribe to topic ' + sessionEvent);
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) =>  {
             if (sessionEvent.infoStr === 'Subscription Already Exists') {
-              signale.success('Subscription already exists for topic: ' + sessionEvent.correlationKey);
+              Signal.warn('Subscription already exists for topic: ' + sessionEvent.correlationKey);
             } else {
-              signale.success('Successfully subscribed to topic: ' + sessionEvent.correlationKey);
+              Signal.success('Successfully subscribed to topic: ' + sessionEvent.correlationKey);
             }
-            signale.success('Ready to receive messages.');
           });
           // Define message received event listener
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.MESSAGE, (message: any) => {
-            this.callback(message, this.options.pretty);
+            Signal.success(`Message Received - ${message.getDestination()}`)
+            Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.pretty);
 
             // Need to explicitly ack otherwise it will not be deleted from the message router
             message.acknowledge();
@@ -392,58 +370,29 @@ export class SolaceClient {
 
           this.receiver.messageReceiver.connect();
         } catch (error) {
-          signale.error(error)
+          Signal.error(error)
           throw error;
         }
       }
     } else {
-      signale.error('Solace PubSub+ Event Broker.');
+      Signal.error('Solace PubSub+ Event Broker.');
     }
   }
   
-  /**
-   * Publish a message on a topic
-   * @param topicName Topic to publish on
-   * @param payload Payload on the topic
-   */
-  publish(topicName: string, payload: string | Buffer) {
-    if (!this.session) {
-      signale.warn("Cannot publish because not connected to Solace message router!");
-      return;
+  // Gracefully disconnects from Solace PubSub+ Event Broker
+  disconnect = () => {
+    Signal.success('Disconnecting from Solace PubSub+ Event Broker...');
+    if (this.session !== null) {
+      try {
+        this.session.disconnect();
+      } catch (error:any) {
+        Signal.error(error)
+      }
+    } else {
+      Signal.error('Not connected to Solace PubSub+ Event Broker.');
     }
-    try {
-      let message = solace.SolclientFactory.createMessage();
-      message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
-      message.setBinaryAttachment(payload);
-      message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : topicName);
-      this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode) as MessageDeliveryModeType);
-      this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
-      this.options.dmqEligible && message.setDMQEligible(true);
-      this.options.messageId && message.setApplicationMessageId(this.options.messageId);
-      this.options.messageType && message.setApplicationMessageType(this.options.messageType);
-      this.options.replyToTopic && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
-      if (this.options.userProperties) {
-        let propertyMap = new solace.SDTMapContainer();
-        let props:Record<string, string | string[]> = this.options.userProperties;
-        Object.entries(props).forEach((entry) => {
-          propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
-        });
-        message.setUserPropertyMap(propertyMap);    
-      } 
-      
-      !this.options.dumpMessage && signale.info(`Publishing message '${payload}' to topic ${topicName}...`);
-      this.options.dumpMessage && stmLog.messagePubDump(message.dump(0), message.getBinaryAttachment());
-
-      this.session.send(message);
-      stmLog.published()
-    } catch (error:any) {
-      signale.error(error);
-    }
-  }
-
-  /**
-   * Publish a message on a topic
-   */
+  };
+    
   exit() {
     if (!this.options.queue) this.unsubscribeAll();
     this.disconnect();

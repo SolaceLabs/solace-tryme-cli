@@ -1,8 +1,8 @@
-import { Faker } from '@faker-js/faker'
 import solace = require('solclientjs')
 
 declare global {
-  type CommandType = 'pub' | 'recv'
+
+  type CommandType = 'publisher' | 'receiver' | 'requestor' | 'replier' | 'connection'
 
   // type DeliveryMode = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.PERSISTENT | solace.MessageDeliveryModeType.NON_PERSISTENT
 
@@ -16,16 +16,12 @@ declare global {
 
   type FormatType = 'base64' | 'json' | 'hex'
 
-  interface ConnectOptions {
+  interface ConnectionOptions {
     // connect options
     url: string
     vpn: string
     username: string
     password: string
-    count: number
-    interval: number
-    clientName?: string
-    description?: string
 
     connectionTimeout?: number
     connectionRetries?: number
@@ -43,6 +39,8 @@ declare global {
     generateSequenceNumber?: boolean
     sendBufferMaxSize?: number
     guaranteedPublisher?: boolean
+    guaranteedRequestor?: boolean
+
     windowSize?: number
 
     receiveTimestamps?: boolean
@@ -54,18 +52,26 @@ declare global {
     logLevel?: string
   }
    
-  interface ClientOptions extends ConnectOptions {
+  type ConnectKeys = Pick<ClientOptions, keyof ConnectionOptions>; 
+
+  interface OperationOptions {
     // operation
     mode: CommandType
 
+    // misc.
+    count?: number
+    interval?: number
+    clientName?: string
+    description?: string
+
     // topic info
-    topic: any
+    topic: string | string[] | any
     queue: any
     createIfMissing: boolean
     addSubscription: boolean
 
     // publish options
-    message: string | Buffer
+    message?: string | Buffer
     stdin?: boolean
     timeToLive?: number
     dmqEligible?: boolean
@@ -77,18 +83,22 @@ declare global {
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
 
-    // subscriber options
+    // Receiver options
+    replyMessage?: string | Buffer
     pretty?: boolean
-    dumpMessage?: boolean
-    
+    dumpMessage?: boolean    
+
+    // Help Examples
+    helpExamples?: boolean
+  }
+
+  interface ConfigOptions {
     // config options
     save?: boolean | string
     view?: boolean | string
     config?: boolean | string
   }
-
-  interface Subscription {
-    topic: string,
+  interface ClientOptions extends ConnectionOptions, OperationOptions, ConfigOptions {
   }
 
   type Config = {
