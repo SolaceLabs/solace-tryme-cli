@@ -31,40 +31,42 @@ const publisher = (options: ClientOptions) => {
 
   if (helpExamples) {
         console.log(`
-Example:
-// publish a message with default settings (broker, vpn, username and password and topic).      
+Examples:
+// publish a message to broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'
 stm publish
 
-// publish on topic ${defaultPublishTopic} with default settings (broker, vpn, username and password).    
+// publish on topic ${defaultPublishTopic} to broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'
 stm publish -t ${defaultPublishTopic}
 
-// publish 5 messages with 1 sec interval between publish on topic '${defaultPublishTopic}' 
-// to broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
-stm publish -U ws://localhost:8008 -v default -u default -p default -t ${defaultPublishTopic} -c 5 -i 1000
+// publish 5 messages with 3 sec interval between publish on topic '${defaultPublishTopic}' 
+// to broker 'default' at broker URL 'ws://localhost:8008' with username 'default' and password 'default'.
+stm publish -U ws://localhost:8008 -v default -u default -p default -t ${defaultPublishTopic} -c 5 -i 3000
         `);
     process.exit(0);
   }
 
   if (typeof view === 'string') {
-    options = loadConfig('publisher', view);
-    Logger.printConfig('publisher', options);
+    options = loadConfig('publish', view);
+    Logger.printConfig('publish', options);
     process.exit(0);
   } else if (typeof view === 'boolean') {
-    options = loadConfig('publisher', 'stm-cli-config.json');
-    Logger.printConfig('publisher', options);
+    options = loadConfig('publish', 'stm-cli-config.json');
+    Logger.printConfig('publish', options);
     process.exit(0);
 
   }
 
   if (save && options) {
-    Logger.printConfig('publisher', options);
-    saveConfig('publisher', options);
+    Logger.printConfig('publish', options);
+    saveConfig('publish', options);
     process.exit(0);
   }
 
   if (config) {
-    options = loadConfig('publisher', config);
-    Logger.printConfig('publisher', options);
+    options = loadConfig('publish', config);
+    Logger.printConfig('publish', options);
   }
 
   // check connection params found

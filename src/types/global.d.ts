@@ -2,7 +2,7 @@ import solace = require('solclientjs')
 
 declare global {
 
-  type CommandType = 'publisher' | 'receiver' | 'requestor' | 'replier' | 'connection'
+  type CommandType = 'publish' | 'receive' | 'request' | 'reply' | 'connection'
 
   // type DeliveryMode = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.PERSISTENT | solace.MessageDeliveryModeType.NON_PERSISTENT
 
@@ -39,7 +39,6 @@ declare global {
     generateSequenceNumber?: boolean
     sendBufferMaxSize?: number
     guaranteedPublisher?: boolean
-    guaranteedRequestor?: boolean
 
     windowSize?: number
 
@@ -77,7 +76,6 @@ declare global {
     dmqEligible?: boolean
     messageId?: string
     messageType?: string
-    correlationId?: string
     correlationKey?: string
     deliveryMode?: string
     replyToTopic?: string

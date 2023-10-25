@@ -21,9 +21,18 @@ const replier = (options: ClientOptions) => {
 
   if (helpExamples) {
     console.log(`
-Example:
+Examples:
+// receive request on default topic ${defaultRequestTopic} from broker 'default' 
+// at broker URL 'ws://localhost:8008' with username 'default' and password 'default' 
+// and send reply
 stm reply
+
+// receive request on default topic ${defaultRequestTopic} from broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default' // and send reply
 stm reply -t ${defaultRequestTopic}
+
+// receive request on specified topics from broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default' and send reply
 stm reply -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
 stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
     `);
@@ -31,25 +40,25 @@ stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/invent
   }
 
   if (typeof view === 'string') {
-    options = loadConfig('replier', view);
-    Logger.printConfig('replier', options);
+    options = loadConfig('reply', view);
+    Logger.printConfig('reply', options);
     process.exit(0);
   } else if (typeof view === 'boolean') {
-    options = loadConfig('replier', 'stm-cli-config.json');
-    Logger.printConfig('replier', options);
+    options = loadConfig('reply', 'stm-cli-config.json');
+    Logger.printConfig('reply', options);
     process.exit(0);
 
   }
 
   if (save && options) {
-    Logger.printConfig('replier', options);
-    saveConfig('replier', options);
+    Logger.printConfig('reply', options);
+    saveConfig('reply', options);
     process.exit(0);
   }
 
   if (config) {
-    options = loadConfig('replier', config);
-    Logger.printConfig('replier', options);
+    options = loadConfig('reply', config);
+    Logger.printConfig('reply', options);
   }
 
   // check connection params found

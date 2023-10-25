@@ -110,7 +110,6 @@ const parseClientOptions = (
     dmqEligible,
     messageId,
     messageType,
-    correlationId,
     correlationKey,
     deliveryMode,
     replyToTopic,
@@ -160,7 +159,6 @@ const parseClientOptions = (
         dmqEligible,
         messageId,
         messageType,
-        correlationId,
         correlationKey,
         deliveryMode,
         replyToTopic,
@@ -232,13 +230,13 @@ const enrichConfiguration = (
   if (!opts.vpn) opts.vpn = defaultBroker
   if (!opts.username) opts.username = defaultUserName
   if (!opts.password) opts.password = defaultPassword
-  if (!opts.topic) opts.topic = (commandType === 'publisher') ? defaultPublishTopic : 
-                                  (commandType === 'requestor' ? defaultRequestTopic : 
+  if (!opts.topic) opts.topic = (commandType === 'publish') ? defaultPublishTopic : 
+                                  (commandType === 'request' ? defaultRequestTopic : 
                                     [ defaultSubscribeTopic ])
   if (!opts.message) opts.message = defaultMessage
-  if (!opts.description && commandType === 'publisher') opts.description = defaultPublisherDescription
-  if (!opts.description && commandType === 'receiver') opts.description = defaultReceiverDescription
-  if (!opts.description && commandType === 'requestor') opts.description = defaultReplierDescription
+  if (!opts.description && commandType === 'publish') opts.description = defaultPublisherDescription
+  if (!opts.description && commandType === 'receive') opts.description = defaultReceiverDescription
+  if (!opts.description && commandType === 'request') opts.description = defaultReplierDescription
   if (!opts.count) opts.count = defaultCount
   if (!opts.interval) opts.interval = defaultInterval
   if (!opts.logLevel) opts.logLevel = defaultLogLevel
@@ -275,10 +273,10 @@ const saveConfig = (
   }
 }
 
-function loadConfig(commandType: 'publisher', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'receiver', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'requestor', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'replier', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'publish', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'receive', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'request', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'reply', loadPath: boolean | string): ClientOptions
 function loadConfig(commandType: CommandType, loadPath: boolean | string) {
   try {
     const filePath = processPath(loadPath)

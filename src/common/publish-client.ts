@@ -23,7 +23,6 @@ export class SolaceClient {
   session:any = null;
   callback:any = null;
   active:boolean = false;
-  correlationId:any = null;
   receiver:any = {};
   replier:any = {};
 

@@ -126,7 +126,7 @@ export class Commander {
       .addOption(new Option('--client-name <NAME>', 
           '[advanced] the client name')
         .default(getClientName(), 'an auto-generated client name')
-        .hideHelp(this.advanced))
+        .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
         .default(defaultPublisherDescription)
@@ -204,9 +204,6 @@ export class Commander {
       .addOption(new Option('--message-type <TYPE>', 
         '[advanced] the application-provided message type')
         .hideHelp(!this.advanced))
-      .addOption(new Option('--correlation-id <CID>', 
-        '[advanced] the application-provided message correlation ID')
-        .hideHelp(!this.advanced))
       .addOption(new Option('--correlation-key <CKEY>', 
         '[advanced] the application-provided message correlation key for acknowledgement management')
         .hideHelp(!this.advanced))
@@ -234,7 +231,7 @@ export class Commander {
 {
     this.program
       .command('receive')
-      .description('receive messages from a queue or subscribing to topic(s).')
+      .description('receive messages from a queue or on topic(s).')
 
       // connect options
       .addOption(new Option('-U, --url <URL>', 
@@ -265,10 +262,10 @@ export class Commander {
         'the message queue')
         .hideHelp(this.advanced))
       .addOption(new Option('--create-if-missing', 
-        'create message queue if missing')
+        '[advanced] create message queue if missing')
         .hideHelp(!this.advanced))
       .addOption(new Option('--add-subscriptions', 
-        'add subscription(s) to the queue')
+        '[advanced] add subscription(s) to the queue')
         .hideHelp(!this.advanced))
 
       // output options
@@ -327,10 +324,6 @@ export class Commander {
       .addOption(new Option('--reapply-subscriptions', 
         '[advanced] to have the API remember subscriptions and reapply them upon calling on a disconnected session')
         .hideHelp(!this.advanced))
-      .addOption(new Option('--send-max-buffer-size <NUMBER>', 
-        '[advanced] the maximum buffer size for the transport session, must be bigger than the largest message an application intends to send on the session')
-        .argParser(parseNumber)
-        .hideHelp(!this.advanced))
       .addOption(new Option('--log-level <LEVEL>', 
         '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
         .argParser(parseLogLevel)
@@ -376,9 +369,6 @@ export class Commander {
       .addOption(new Option('-m, --message <BODY>', 
         'the request message body')
         .default(defaultRequestMessage)
-        .hideHelp(this.advanced))
-      .addOption(new Option('-gr, --guaranteed-requestor', 
-        'a guaranteed requestor is automatically created')
         .hideHelp(this.advanced))
 
       // output options
@@ -547,61 +537,6 @@ export class Commander {
     .action(replier)
 }
 
-//     this.program
-//       .command('examples <command>')
-//       .description('show cli examples help for a command.')
-//       .action(function(option) {
-//         if (option === 'publish') {
-//           console.log(`
-// Example:
-// // publish a message with default settings (broker, vpn, username and password and topic).      
-// stm publish
-
-// // publish on topic ${defaultPublishTopic} with default settings (broker, vpn, username and password).    
-// stm publish -t ${defaultPublishTopic}
-
-// // publish 5 messages with 1 sec interval between publish on topic '${defaultPublishTopic}' 
-// // to broker 'default' on endpoint 'ws://localhost:8008' with username 'default' and password 'default'.
-// stm publish -U ws://localhost:8008 -v default -u default -p default -t ${defaultPublishTopic} -c 5 -i 1000
-//           `);
-//         } else if (option === 'receive') {
-//           console.log(`
-// Example:
-// // direct receiver with topic(s) subscription
-// stm receive
-// stm receive -t ${defaultPublishTopic}
-// stm receive -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
-// stm receive -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
-
-// // guaranteed receiver from a queue
-// stm receive -q my_queue
-// stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/inventory stm/logistics
-//           `);
-//         } else if (option === 'request') {
-//           console.log(`
-// Example:
-// // send request messages and and receive reply(s)
-// stm request
-// stm request -t ${defaultRequestTopic}
-// stm request -U ws://localhost:8008 -v default -u default -p default -t stm/inventory
-//           `);
-//         } else if (option === 'reply') {
-//           console.log(`
-// Example:
-// // direct replier to request messages
-// stm reply
-// stm reply -t ${defaultRequestTopic}
-// stm reply -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
-// stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
-
-// // guaranteed replier to request messages from a queue
-// stm reply -q my_queue
-// stm reply -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/inventory stm/logistics
-//           `);
-//         } else {
-//           console.log(`error: unknown command '${option}'`);
-//         }
-//       })
   }
 }
 

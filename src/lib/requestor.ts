@@ -23,35 +23,42 @@ const requestor = (options: ClientOptions) => {
 
   if (helpExamples) {
     console.log(`
-Example:
-// send request messages and and receive reply(s)
+Examples:
+// send request on default topic ${defaultRequestTopic} to broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default' and receive reply 
 stm request
+
+// send request on default topic ${defaultRequestTopic} to broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'.
 stm request -t ${defaultRequestTopic}
+
+// send request on the specified topic to broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'.
 stm request -U ws://localhost:8008 -v default -u default -p default -t stm/inventory
     `);
     process.exit(0);
   }
 
   if (typeof view === 'string') {
-    options = loadConfig('requestor', view);
-    Logger.printConfig('requestor', options);
+    options = loadConfig('request', view);
+    Logger.printConfig('request', options);
     process.exit(0);
   } else if (typeof view === 'boolean') {
-    options = loadConfig('requestor', 'stm-cli-config.json');
-    Logger.printConfig('requestor', options);
+    options = loadConfig('request', 'stm-cli-config.json');
+    Logger.printConfig('request', options);
     process.exit(0);
 
   }
 
   if (save && options) {
-    Logger.printConfig('requestor', options);
-    saveConfig('requestor', options);
+    Logger.printConfig('request', options);
+    saveConfig('request', options);
     process.exit(0);
   }
 
   if (config) {
-    options = loadConfig('requestor', config);
-    Logger.printConfig('requestor', options);
+    options = loadConfig('request', config);
+    Logger.printConfig('request', options);
   }
 
   // check connection params found

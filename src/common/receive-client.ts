@@ -22,7 +22,6 @@ export class SolaceClient {
   options:any = null;
   session:any = null;
   active:boolean = false;
-  correlationId:any = null;
   receiver:any = {};
   replier:any = {};
 

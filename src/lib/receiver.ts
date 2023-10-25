@@ -23,40 +23,47 @@ const receiver = (options: ClientOptions) => {
 
   if (helpExamples) {
     console.log(`
-Example:
-// direct receiver with topic(s) subscription
+Examples:
+// subscribe and receive message on ${defaultPublishTopic} on broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'
 stm receive
-stm receive -t ${defaultPublishTopic}
+
+// subscribe and receive message on specified topics on broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'
 stm receive -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
 stm receive -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
 
-// guaranteed receiver from a queue
+// receive message from the specified queue on the broker 'default' at broker URL 'ws://localhost:8008' 
+// with username 'default' and password 'default'
 stm receive -q my_queue
+
+// receive message from the specified queue, optionally create the queue if found missing + add topic subscription on the broker 'default' 
+// at broker URL 'ws://localhost:8008' with username 'default' and password 'default'
 stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue --create-if-missing -t stm/inventory stm/logistics
   `);
     process.exit(0);
   }
 
   if (typeof view === 'string') {
-    options = loadConfig('receiver', view);
-    Logger.printConfig('receiver', options);
+    options = loadConfig('receive', view);
+    Logger.printConfig('receive', options);
     process.exit(0);
   } else if (typeof view === 'boolean') {
-    options = loadConfig('receiver', 'stm-cli-config.json');
-    Logger.printConfig('receiver', options);
+    options = loadConfig('receive', 'stm-cli-config.json');
+    Logger.printConfig('receive', options);
     process.exit(0);
 
   }
 
   if (save && options) {
-    Logger.printConfig('receiver', options);
-    saveConfig('receiver', options);
+    Logger.printConfig('receive', options);
+    saveConfig('receive', options);
     process.exit(0);
   }
 
   if (config) {
-    options = loadConfig('receiver', config);
-    Logger.printConfig('receiver', options);
+    options = loadConfig('receive', config);
+    Logger.printConfig('receive', options);
   }
 
   // check connection params found
