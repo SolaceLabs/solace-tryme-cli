@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 const { Commander } = require('..')
 
+// suppress ExperimentalWarning emitted by fetch()
+// https://github.com/nodejs/node/issues/30810#issuecomment-1433950987
+const { emit: originalEmit } = process;
+process.emit = (event, error) => event === 'warning' && error.name === 'ExperimentalWarning' ? false : originalEmit.apply(process, arguments);
+
 try {
   const help = process.argv.includes('-h') || process.argv.includes('--help')
   const moreHelp = process.argv.includes('-hm') || process.argv.includes('--help-more')

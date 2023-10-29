@@ -1,22 +1,7 @@
 import * as fs from 'fs'
 import path from 'path'
-import { Signal } from './logger'
-import { 
-  defaultUrl,
-  defaultBroker,
-  defaultUserName,
-  defaultPassword,
-  defaultPublishTopic,
-  defaultSubscribeTopic,
-  defaultRequestTopic,
-  defaultMessage,
-  defaultPublisherDescription,
-  defaultReceiverDescription,
-  defaultReplierDescription,
-  defaultCount,
-  defaultInterval,
-  defaultLogLevel
-} from './defaults'
+import { Logger } from './logger'
+import defaults from './defaults'
 
 const defaultPath = `${process.cwd()}/stm-cli-config.json`
 
@@ -26,8 +11,10 @@ const writeFile = (filePath: string, data: Config) => {
   try {
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
-  } catch (error) {
-    Signal.error(error)
+  } catch (error: any) {
+    Logger.logDetailedError('error: file write failed - ', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 }
@@ -36,8 +23,10 @@ const readFile = (path: string) => {
   try {
     const config = fs.readFileSync(path, 'utf-8')
     return JSON.parse(config) as Config
-  } catch (error) {
-    Signal.error(error)
+  } catch (error: any) {
+    Logger.logDetailedError('error: read write failed - ', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 }
@@ -58,20 +47,10 @@ const processPath = (savePath: boolean | string) => {
   return filePath
 }
 
-const removeUselessOptions = (
-  opts:ClientOptions    
-) => {
-  const { save, view, config, ...rest } = opts
-
-  rest.clientName && rest.clientName.startsWith('stm_') && delete rest.clientName;
-  
-  return rest
-}
-
 const parseClientOptions = (
   opts: ClientOptions
 ) => {
-  const {
+  const { // connection
     url,
     vpn,
     username,
@@ -95,7 +74,7 @@ const parseClientOptions = (
     acknowledgeMode,
     logLevel,
   } = opts;
-  const {
+  const { // operation
     count,
     interval,
     clientName,
@@ -103,7 +82,7 @@ const parseClientOptions = (
     topic,
     queue,
     createIfMissing,
-    addSubscription,
+    createSubscriptions,
     message,
     stdin,
     timeToLive,
@@ -115,7 +94,30 @@ const parseClientOptions = (
     replyToTopic,
     userProperties,
     pretty,
-    dumpMessage,
+  } = opts;
+  const { // sempconnection
+    sempUrl,
+    sempVpn,
+    sempUsername,
+    sempPassword,
+  } = opts;
+  const { // sempoperation
+    operation,
+    queueName,
+    accessType,
+    addSubscriptions,
+    removeSubscriptions,
+    deadMessageQueue,
+    deliveryCountEnabled,
+    egressEnabled,
+    ingressEnabled,
+    respectTtlEnabled,
+    redeliveryEnabled,
+    maxRedeliveryCount,
+    partitionCount,
+    partitionRebalanceDelay,
+    partitionRebalanceMaxHandoffTime,
+    nonOwnerPermission    
   } = opts;
 
   return (
@@ -152,7 +154,7 @@ const parseClientOptions = (
         topic,
         queue,
         createIfMissing,
-        addSubscription,
+        createSubscriptions,
         message,
         stdin,
         timeToLive,
@@ -164,10 +166,43 @@ const parseClientOptions = (
         replyToTopic,
         userProperties,
         pretty,
-        dumpMessage,
+      },
+      "sempconnection": {
+        sempUrl,
+        sempVpn,
+        sempUsername,
+        sempPassword
+      },
+      "sempoperation": {
+        operation,
+        queueName,
+        accessType,
+        addSubscriptions,
+        removeSubscriptions,
+        deadMessageQueue,
+        deliveryCountEnabled,
+        egressEnabled,
+        ingressEnabled,
+        respectTtlEnabled,
+        redeliveryEnabled,
+        maxRedeliveryCount,
+        partitionCount,
+        partitionRebalanceDelay,
+        partitionRebalanceMaxHandoffTime,
+        nonOwnerPermission    
       }
     }
   )
+}
+
+const compareSempConnectionConfiguration = (updated: any, current: any) => {
+  let count:number = 0;
+  if (current.sempUrl && updated.sempUrl && updated.sempUrl !== current.sempUrl) console.log(`[${++count}] URL changed: ${current.sempUrl} => ${updated.sempUrl}`)
+  if (current.sempVpn && updated.sempVpn && updated.sempVpn !== current.sempVpn) console.log(`[${++count}] VPN changed: ${current.sempVpn} => ${updated.sempVpn}`)
+  if (current.sempUsername && updated.sempUsername && updated.sempUsername !== current.sempUsername) console.log(`[${++count}] Username changed: ${current.sempUsername} => ${updated.sempUsername}`)
+  if (current.sempPassword && updated.sempPassword && updated.sempPassword !== current.sempPassword) console.log(`[${++count}] Password changed: ${current.sempPassword} => ${updated.sempPassword}`)
+
+  return count;
 }
 
 const compareConnectionConfiguration = (updated: any, current: any) => {
@@ -198,27 +233,58 @@ const compareConnectionConfiguration = (updated: any, current: any) => {
   return count;
 }
 
-const validateConfig = (commandType: CommandType, filePath: string, config: Config) => {
+const validateSempConfig = (commandType: CommandType, filePath: string, config: Config) => {
   const data = config[commandType]
   if (!config || typeof config !== 'object' || Object.keys(config).length === 0) {
-    Signal.error(`Invalid configuration file ${filePath}`)
+    Logger.logDetailedError(`error: invalid configuration file - `, `${filePath}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 
-  if (!config.connection) {
-    Signal.error(`Missing connection in file ${filePath}`)
+  if (!config.sempconnection) {
+    Logger.logDetailedError(`error: missing connection configuration in file - `, `${filePath}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 
   if (!config[commandType]) {
-    Signal.error(`No configuration for ${commandType} found in ${filePath}`)
+    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 
   if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-    Signal.error(`No configuration for ${commandType} found in ${filePath}`)
+    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
+}
+
+const validateConfig = (commandType: CommandType, filePath: string, config: Config) => {
+  const data = config[commandType]
+  if (!config || typeof config !== 'object' || Object.keys(config).length === 0) {
+    Logger.logDetailedError(`error: invalid configuration file - `, `${filePath}`)
+    Logger.error('Exiting...')
+    process.exit(1)
+  }
+
+  if (!config.hasOwnProperty('connection')) {
+    Logger.logDetailedError(`error: missing connection configuration in file - `, `${filePath}`)
+    Logger.error('Exiting...')
+    process.exit(1)
+  }
+
+  if (!config.hasOwnProperty(commandType)) {
+    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
+    Logger.error('Exiting...')
+    process.exit(1)
+  }
+
+  // if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+  //   Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
+  //   Logger.error('Exiting...')
+  //   process.exit(1)
+  // }
 }
 
 const enrichConfiguration = (
@@ -226,49 +292,160 @@ const enrichConfiguration = (
   commandType: CommandType
 ) => {
   var opts:ClientOptions = { ...config[commandType], ...config.connection } as ClientOptions
-  if (!opts.url) opts.url = defaultUrl
-  if (!opts.vpn) opts.vpn = defaultBroker
-  if (!opts.username) opts.username = defaultUserName
-  if (!opts.password) opts.password = defaultPassword
-  if (!opts.topic) opts.topic = (commandType === 'publish') ? defaultPublishTopic : 
-                                  (commandType === 'request' ? defaultRequestTopic : 
-                                    [ defaultSubscribeTopic ])
-  if (!opts.message) opts.message = defaultMessage
-  if (!opts.description && commandType === 'publish') opts.description = defaultPublisherDescription
-  if (!opts.description && commandType === 'receive') opts.description = defaultReceiverDescription
-  if (!opts.description && commandType === 'request') opts.description = defaultReplierDescription
-  if (!opts.count) opts.count = defaultCount
-  if (!opts.interval) opts.interval = defaultInterval
-  if (!opts.logLevel) opts.logLevel = defaultLogLevel
+  if (!opts.url) opts.url = defaults.url
+  if (!opts.vpn) opts.vpn = defaults.vpn
+  if (!opts.username) opts.username = defaults.username
+  if (!opts.password) opts.password = defaults.password
+  if (!opts.topic) {
+    switch (commandType) {
+      case 'publish': opts.topic = defaults.publishTopic; break;
+      case 'receive': opts.topic = [ defaults.subscribeTopic ]; break;
+      case 'request': opts.topic = defaults.requestTopic; break;
+      case 'reply': opts.topic = [ defaults.requestTopic ]; break;
+    }
+  }
+  if (!opts.message) opts.message = defaults.message
+  if (!opts.description && commandType === 'publish') opts.description = defaults.publisherDescription
+  if (!opts.description && commandType === 'receive') opts.description = defaults.receiverDescription
+  if (!opts.description && commandType === 'request') opts.description = defaults.requestorDescription
+  if (!opts.description && commandType === 'reply') opts.description = defaults.replierDescription
+  if (!opts.count) opts.count = defaults.count
+  if (!opts.interval) opts.interval = defaults.interval
+  if (!opts.logLevel) opts.logLevel = defaults.logLevel
   return opts;
 }
 
+const enrichSempConfiguration = (
+  config: Config,
+  commandType: CommandType
+) => {
+  var opts:ClientOptions = { ...config[commandType], ...config.sempconnection } as ClientOptions
+  return opts;
+}
 
+const removeDefaultOptions = (
+  opts: ClientOptions,
+) => {
+  const defaultKeys = Object.keys(defaults);
+  for (var i=0; i<defaultKeys.length; i++) {
+    if (opts[defaultKeys[i]]) delete opts[defaultKeys[i]];
+  }
+  return opts;
+}
 const saveConfig = (
   commandType: CommandType,
-  opts: ClientOptions
+  opts: ClientOptions,
+  optsSource: any
 ) => {
   try {
+    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
     const filePath = processPath(opts.save!)
     if (!filePath.endsWith('.json')) filePath.concat('.json')
+
+    // rid opts of default settings
+    // Object.keys(optsSource).forEach((key:string) => {
+    //   if (!optsSource[key] || optsSource[key] === 'default') {
+    //     delete opts[key];
+    //   }
+    // })
+
     const parsedData:any = parseClientOptions(opts)
     let data:any = {}
-    data[commandType] = removeUselessOptions(parsedData.operation)
-    data["connection"] = parsedData.connection;
-    if (fileExists(filePath)) {
-      const config = readFile(filePath)
-      if (compareConnectionConfiguration(data.connection, config.connection) > 0) {
-        var prompt = require('prompt-sync')();
-        var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
-        if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
-          process.exit(0);
+    if (sempOp) {
+      data["sempconnection"] = parsedData.sempconnection
+      if (fileExists(filePath)) {
+        const config = readFile(filePath)
+        if (config.sempconnection && compareSempConnectionConfiguration(data.sempconnection, config.sempconnection) > 0) {
+          var prompt = require('prompt-sync')();
+          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
+          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
+            Logger.success('Exiting...')
+            process.exit(0);
+        }
+        data[commandType] = parsedData.sempoperation;
+        data = mergeConfig(config, data)
       }
-      data = mergeConfig(config, data)
+    } else {
+      parsedData.operation.clientName && parsedData.operation.clientName.startsWith('stm_') && delete parsedData.operation.clientName;
+      data["connection"] = parsedData.connection;
+      if (fileExists(filePath)) {
+        const config = readFile(filePath)
+        if (config.connection && compareConnectionConfiguration(data.connection, config.connection) > 0) {
+          var prompt = require('prompt-sync')();
+          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
+          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
+            Logger.success('Exiting...')
+            process.exit(0);
+        }
+        data[commandType] = parsedData.operation;
+        data = mergeConfig(config, data)
+      }
     }
     writeFile(filePath, data)
-    Signal.success(`Configurations saved to ${filePath}`)
-  } catch (error) {
-    Signal.error(error)
+    Logger.logSuccess(`Configurations saved to ${filePath}`)
+  } catch (error: any) {
+    Logger.logDetailedError('error: file write failed - ', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+    Logger.error('Exiting...')
+    process.exit(1)
+  }
+}
+
+const updateConfig = (
+  commandType: CommandType,
+  opts: ClientOptions,
+  optsSource: any
+) => {
+  try {
+    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
+    const filePath = processPath(opts.update!)
+    if (!filePath.endsWith('.json')) filePath.concat('.json')
+
+    // rid opts of default settings
+    // Object.keys(optsSource).forEach((key:string) => {
+    //   if (!optsSource[key] || optsSource[key] === 'default') {
+    //     delete opts[key];
+    //   }
+    // })
+    
+    const parsedData:any = parseClientOptions(opts)
+    parsedData.operation.clientName && parsedData.operation.clientName.startsWith('stm_') && delete parsedData.operation.clientName;
+    let data:any = {}
+    if (sempOp) {
+      data["sempconnection"] = parsedData.sempconnection
+      if (fileExists(filePath)) {
+        const config = readFile(filePath)
+        if (config.sempconnection && compareSempConnectionConfiguration(data.sempconnection, config.sempconnection) > 0) {
+          var prompt = require('prompt-sync')();
+          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
+          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
+            Logger.success('Exiting...')
+            process.exit(0);
+        }
+        data[commandType] = parsedData.sempoperation;
+        data = mergeConfig(config, data)
+      }
+    } else {
+      data["connection"] = parsedData.connection;
+      if (fileExists(filePath)) {
+        const config = readFile(filePath)
+        if (compareConnectionConfiguration(data.connection, config.connection) > 0) {
+          var prompt = require('prompt-sync')();
+          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
+          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
+            Logger.success('Exiting...')
+            process.exit(0);
+        }
+        data[commandType] = parsedData.operation;
+        data = mergeConfig(config, data)
+      }
+    }
+    writeFile(filePath, data)
+    Logger.logSuccess(`Configurations saved to ${filePath}`)
+  } catch (error: any) {
+    Logger.logDetailedError('error: file write failed - ', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 }
@@ -277,23 +454,35 @@ function loadConfig(commandType: 'publish', loadPath: boolean | string): ClientO
 function loadConfig(commandType: 'receive', loadPath: boolean | string): ClientOptions
 function loadConfig(commandType: 'request', loadPath: boolean | string): ClientOptions
 function loadConfig(commandType: 'reply', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'queue', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'client-profile', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'acl-profile', loadPath: boolean | string): ClientOptions
+function loadConfig(commandType: 'client-username', loadPath: boolean | string): ClientOptions
 function loadConfig(commandType: CommandType, loadPath: boolean | string) {
   try {
+    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
     const filePath = processPath(loadPath)
     if (fileExists(filePath)) {
       const config = readFile(filePath)
-      validateConfig(commandType, filePath, config)
-      return enrichConfiguration(config, commandType)      
+      sempOp ?
+        validateSempConfig(commandType, filePath, config) :
+        validateConfig(commandType, filePath, config)
+      return sempOp ? 
+        enrichSempConfiguration(config, commandType) :
+        enrichConfiguration(config, commandType)      
     } else {
-      Signal.error(`Configuration file ${filePath} not found`)
+      Logger.logDetailedError(`error: configuration file not found - `, `${filePath}`)
+      Logger.error('Exiting...')
       process.exit(1)
     }
-  } catch (error) {
-    Signal.error(error)
+  } catch (error: any) {
+    Logger.logDetailedError('error: file write failed - ', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+    Logger.error('Exiting...')
     process.exit(1)
   }
 }
 
-export { saveConfig, loadConfig }
+export { saveConfig, updateConfig, loadConfig, parseClientOptions }
 
 export default saveConfig

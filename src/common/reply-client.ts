@@ -1,7 +1,7 @@
 import solace from "solclientjs";
-import { Signal, Logger } from '../utils/logger'
+import { Logger } from '../utils/logger'
 import { LogLevel } from "solclientjs";
-import { defaultRequestTopic } from "../utils/defaults";
+import defaults from "../utils/defaults";
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -21,21 +21,21 @@ export class ReplyClient {
   constructor(options:any) {
     // record the options
     this.options = options;
-    this.replier.topicName = this.options.topic ? this.options.topic : defaultRequestTopic;;
+    this.replier.topicName = this.options.topic ? this.options.topic : defaults.requestTopic;;
     this.replier.subscribed = false;
 
     //Initializing the solace client library
     let factoryProps = new solace.SolclientFactoryProperties();
     factoryProps.profile = solace.SolclientFactoryProfiles.version10;
     solace.SolclientFactory.init(factoryProps);
-    this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel) as LogLevel);
+    this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
   }
 
   // Establishes connection to Solace PubSub+ Event Broker
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Signal.warn('Already connected and ready to receive requests.');
+        Logger.warn('Already connected and ready to receive requests.');
         return;
       }
 
@@ -60,21 +60,22 @@ export class ReplyClient {
           keepAliveIntervalsLimit: this.options.keepAliveIntervalLimit,
           reapplySubscriptions: this.options.reapplySubscriptions,
           sendBufferMaxSize: this.options.sendBufferMaxSize,
-
         });
 
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Signal.success('=== Successfully connected and ready to subscribe to request topic. ===');
+          Logger.success('=== Successfully connected and ready to subscribe to request topic. ===');
+          // wait to be told to exit
+          Logger.info('Press Ctrl-C to exit');  
           this.subscribe();
           resolve();
         });
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Signal.error("Connection failed to the message router: " + sessionEvent.infoStr + " - check correct parameter values and connectivity!"),
+          Logger.logDetailedError(`error: connection failed to the message router ${sessionEvent.infoStr} - `, `check the connection parameters!`),
           reject();
         });
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
-          Signal.success('Disconnected.');
+          Logger.success('Disconnected.');
           this.replier.subscribed = false;
           if (this.session !== null) {
             this.session.dispose();
@@ -82,16 +83,16 @@ export class ReplyClient {
           }
         });
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Signal.error('Cannot subscribe to topic: ' + sessionEvent.correlationKey);
+          Logger.error('Cannot subscribe to topic: ' + sessionEvent.correlationKey);
         });
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) => {
           if (this.replier.subscribed) {
             this.replier.subscribed = false;
-            Signal.success('Successfully unsubscribed from request topic: ' + sessionEvent.correlationKey);
+            Logger.logSuccess('Successfully unsubscribed from request topic: ' + sessionEvent.correlationKey);
           } else {
             this.replier.subscribed = true;
-            Signal.success('Successfully subscribed to request topic: ' + sessionEvent.correlationKey);
-            Signal.await('=== Ready to receive requests. ===');
+            Logger.logSuccess('Successfully subscribed to request topic: ' + sessionEvent.correlationKey);
+            Logger.await('=== Ready to receive requests. ===');
           }
         });
         // define message event listener
@@ -99,13 +100,22 @@ export class ReplyClient {
           try {
             this.reply(message);
           } catch (error:any) {
-            Signal.error(error)
+            Logger.logDetailedError('error: send reply failed - ', error.toString())
+            if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
           }
         });
-        // connect the session
+      } catch (error:any) {
+        Logger.logDetailedError('error: session creation failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+      }
+
+      // connect the session
+      try {
+        Logger.await(`Connecting to broker [${this.options.url}, broker: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
         this.session.connect();
       } catch (error:any) {
-        Signal.error(error)
+        Logger.logDetailedError('error: failed to connect to broker - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
       }
     });
   }
@@ -114,9 +124,9 @@ export class ReplyClient {
   subscribe = () => {
     if (this.session !== null) {
       if (this.replier.subscribed) {
-        Signal.warn('Already subscribed to "' + this.replier.topicName + '" and ready to receive messages.');
+        Logger.warn('Already subscribed to "' + this.replier.topicName + '" and ready to receive messages.');
       } else {
-        Signal.info('Subscribing to topic: ' + this.replier.topicName);
+        Logger.info('Subscribing to topic: ' + this.replier.topicName);
         try {
           this.session.subscribe(
             solace.SolclientFactory.createTopicDestination(this.replier.topicName),
@@ -124,12 +134,13 @@ export class ReplyClient {
             this.replier.topicName, // use topic name as correlation key
             10000 // 10 seconds timeout for this operation
           );
-        } catch (err) {
-          Signal.error(err);
+        } catch (error: any) {
+          Logger.logDetailedError(`error: failed to subscribe to topic ${this.replier.topicName} - `, error.toString())
+          if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
         }
       }
     } else {
-      Signal.error('Cannot subscribe because not connected to Solace PubSub+ Event Broker.');
+      Logger.error('error: cannot subscribe because not connected to Solace PubSub+ Event Broker.');
     }
   };
 
@@ -137,7 +148,7 @@ export class ReplyClient {
   unsubscribe = () => {
     if (this.session !== null) {
       if (this.replier.subscribed) {
-        Signal.info('Unsubscribing from topic: ' + this.replier.topicName);
+        Logger.info('Unsubscribing from topic: ' + this.replier.topicName);
         try {
           this.session.unsubscribe(
             solace.SolclientFactory.createTopicDestination(this.replier.topicName),
@@ -146,40 +157,42 @@ export class ReplyClient {
             10000 // 10 seconds timeout for this operation
           );
         } catch (error:any) {
-          Signal.error(error)
+          Logger.logDetailedError(`error: failed to unsubscribe to topic ${this.replier.topicName} - `, error.toString())
+          if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
         }
       }
     } else {
-      Signal.error('Cannot unsubscribe because not connected to Solace PubSub+ Event Broker.');
+      Logger.error('error: cannot unsubscribe because not connected to Solace PubSub+ Event Broker.');
     }
   };
 
   reply = (message:any) => {
-    Signal.success('Request received');
+    Logger.success('Request received');
     Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.pretty);
-    Signal.await('Replying...');
+    Logger.await('Replying...');
     if (this.session !== null) {
       var requestText = message.getBinaryAttachment();
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(requestText + " - Sample Reply");
       this.session.sendReply(message, reply);
-      Signal.success('Replied.');
+      Logger.logSuccess('Replied.');
     } else {
-      Signal.error('Cannot reply: not connected to Solace PubSub+ Event Broker.');
+      Logger.error('error: cannot reply because not connected to Solace PubSub+ Event Broker.');
     }
   };
 
   // Gracefully disconnects from Solace PubSub+ Event Broker
   disconnect = () => {
-    Signal.success('Disconnecting from Solace PubSub+ Event Broker...');
+    Logger.success('Disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
       try {
         this.session.disconnect();
       } catch (error:any) {
-        Signal.error(error)
+        Logger.logDetailedError('error: session disconnect failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
       }
     } else {
-      Signal.error('Not connected to Solace PubSub+ Event Broker.');
+      Logger.error('Not connected to Solace PubSub+ Event Broker.');
     }
   };
 
@@ -189,7 +202,8 @@ export class ReplyClient {
       this.disconnect();
     }, 1000); // wait for 1 second to disconnect
     setTimeout(function () {
-      process.exit();
+      Logger.success('Exiting...')
+      process.exit(0);
     }, 2000); // wait for 2 seconds to finish
   };
 }

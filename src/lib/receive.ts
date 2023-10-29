@@ -1,16 +1,20 @@
-import { Signal, Logger } from '../utils/logger'
+import { Logger } from '../utils/logger'
 import { checkSubTopicExists, checkConnectionParamsExists } from '../utils/parse'
-import { saveConfig, loadConfig } from '../utils/config'
-import { prettyXML, prettyJSON } from '../utils/prettify'
+import { saveConfig, updateConfig, loadConfig } from '../utils/config'
 import { SolaceClient } from '../common/receive-client'
-import { defaultPublishTopic } from '../utils/defaults'
+import defaults from '../utils/defaults';
 
 const receive = async (
   options: ClientOptions
 ) => {
   const receiver = new SolaceClient(options);
-  await receiver.connect();
-  receiver.subscribe(options);
+  try {
+    await receiver.connect();
+    receiver.subscribe(options);
+  } catch (error:any) {
+    Logger.error('Exiting...')
+    process.exit(1)
+  }
   process.stdin.resume();
   process.on('SIGINT', function () {
     'use strict';
@@ -18,13 +22,13 @@ const receive = async (
   });
 }
 
-const receiver = (options: ClientOptions) => {
-  const { save, view, config, helpExamples } = options
+const receiver = (options: ClientOptions, optionsSource: any) => {
+  const { save, view, update, exec, helpExamples } = options
 
   if (helpExamples) {
     console.log(`
 Examples:
-// subscribe and receive message on ${defaultPublishTopic} on broker 'default' at broker URL 'ws://localhost:8008' 
+// subscribe and receive message on ${defaults.publishTopic} on broker 'default' at broker URL 'ws://localhost:8008' 
 // with username 'default' and password 'default'
 stm receive
 
@@ -47,22 +51,54 @@ stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue 
   if (typeof view === 'string') {
     options = loadConfig('receive', view);
     Logger.printConfig('receive', options);
+    Logger.success('Exiting...')
     process.exit(0);
   } else if (typeof view === 'boolean') {
     options = loadConfig('receive', 'stm-cli-config.json');
     Logger.printConfig('receive', options);
+    Logger.success('Exiting...')
     process.exit(0);
-
   }
 
   if (save && options) {
     Logger.printConfig('receive', options);
-    saveConfig('receive', options);
+    saveConfig('receive', options, optionsSource);
+    Logger.success('Exiting...')
     process.exit(0);
   }
 
-  if (config) {
-    options = loadConfig('receive', config);
+  if (update && options) {
+    const savedOptions = loadConfig('receive', update);
+    // rid opts of default settings
+    Object.keys(optionsSource).forEach((key:string) => {
+      if (optionsSource[key] === 'default') {
+        delete options[key];
+      }
+    })
+    
+    if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
+    if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
+    options = { ...savedOptions, ...options }
+    updateConfig('receive', options, optionsSource);
+    Logger.printConfig('receive', options);
+    Logger.success('Exiting...')
+    process.exit(0);
+  }
+
+  if (exec) {
+    const savedOptions = loadConfig('receive', exec);
+    // rid opts of default settings
+    Object.keys(optionsSource).forEach((key:string) => {
+      if (optionsSource[key] === 'default') {
+        delete options[key];
+      }
+    })
+    
+    // if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
+    // if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
+    // options = { ...savedOptions, ...options }
+
+    options = { ...savedOptions, ...options }
     Logger.printConfig('receive', options);
   }
 

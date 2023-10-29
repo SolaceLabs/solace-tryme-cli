@@ -2,9 +2,11 @@ import solace = require('solclientjs')
 
 declare global {
 
-  type CommandType = 'publish' | 'receive' | 'request' | 'reply' | 'connection'
+  type CommandType = 'publish' | 'receive' | 'request' | 'reply' | 
+                      'queue' | 'client-profile' | 'acl-profile' | 'client-username' |
+                      'connection' | 'sempconnection'
 
-  // type DeliveryMode = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.PERSISTENT | solace.MessageDeliveryModeType.NON_PERSISTENT
+  type SempOperationType = 'CREATE' | 'UPDATE' | 'DELETE'
 
   type PublisherAcknowledgeMode = solace.MessagePublisherAcknowledgeMode.PER_MESSAGE | solace.MessagePublisherAcknowledgeMode.WINDOWED
 
@@ -12,10 +14,43 @@ declare global {
 
   type OutputMode = 'pretty' | 'default'
 
-  // type LogLevel = solace.LogLevel.DEBUG | solace.LogLevel.ERROR | solace.LogLevel.WARN | solace.LogLevel.INFO | solace.LogLevel.DEBUG | solace.LogLevel.TRACE
+  interface SempConnectionOptions {
+    // connect options
+    sempUrl: string
+    sempVpn: string
+    sempUsername: string
+    sempPassword: string
+    
+  }
 
-  type FormatType = 'base64' | 'json' | 'hex'
+  interface SempOperationOptions {
+    // operation
+    operation: CommandType
 
+    // QUEUE
+    addSub: boolean
+    removeSub: boolean
+
+    queueName?: string
+    accessType?: string
+    addSubscriptions?: string | string[] | any
+    removeSubscriptions?: string | string[] | any
+    deadMessageQueue?: string
+    deliveryCountEnabled?: string
+    egressEnabled?: string
+    ingressEnabled?: string
+    respectTtlEnabled?: string
+    redeliveryEnabled?: string
+    maxRedeliveryCount?: number
+    partitionCount?: number
+    partitionRebalanceDelay?: number
+    partitionRebalanceMaxHandoffTime?: number
+    nonOwnerPermission?: string
+    
+    // Help Examples
+    helpExamples?: boolean
+  }
+  
   interface ConnectionOptions {
     // connect options
     url: string
@@ -51,8 +86,6 @@ declare global {
     logLevel?: string
   }
    
-  type ConnectKeys = Pick<ClientOptions, keyof ConnectionOptions>; 
-
   interface OperationOptions {
     // operation
     mode: CommandType
@@ -67,7 +100,7 @@ declare global {
     topic: string | string[] | any
     queue: any
     createIfMissing: boolean
-    addSubscription: boolean
+    createSubscriptions: boolean
 
     // publish options
     message?: string | Buffer
@@ -84,19 +117,19 @@ declare global {
     // Receiver options
     replyMessage?: string | Buffer
     pretty?: boolean
-    dumpMessage?: boolean    
 
     // Help Examples
     helpExamples?: boolean
   }
-
   interface ConfigOptions {
     // config options
     save?: boolean | string
     view?: boolean | string
-    config?: boolean | string
+    update?: boolean | string
+    exec?: boolean | string
   }
-  interface ClientOptions extends ConnectionOptions, OperationOptions, ConfigOptions {
+  interface ClientOptions extends SempConnectionOptions, SempOperationOptions, ConnectionOptions, OperationOptions, ConfigOptions {
+    [key: string]: any | undefined
   }
 
   type Config = {

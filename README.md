@@ -195,9 +195,9 @@ stm publish --help
 |  -i, --interval <MILLISECONDS>  |the time to wait between publish (default: 1000)|
 |  -ttl, --time-to-live <NUMBER>  |the time to live is the number of milliseconds the message may be stored before it is discarded or moved to a DMQ|
 |  -dmq, --dmq-eligible           |the DMQ eligible flag|
-|  --save [PATH]                  |save the settings to a local configuration file in json format, if filepath not specified, a default path of ./stm-pub-config.json is used|
-|  --view [PATH]                  |view the stored settings from the local configuration file, if filepath not specified, a default path of ./stm-pub-config.json is used|
-|  --config [PATH]                |load stored settings from the local configuration file and launch a publisher, if filepath not specified, a default path of ./stm-pub-config.json is used|
+|  --save [PATH]                  |save the settings to a local configuration file in json format, if filepath not specified, a default path of ./stm-cli-config.json is used|
+|  --view [PATH]                  |view the stored settings from the local configuration file, if filepath not specified, a default path of ./stm-cli-config.json is used|
+|  --exec [PATH]                |load stored settings from the local configuration file and launch a publisher, if filepath not specified, a default path of ./stm-cli-config.json is used|
 
 In addition to the standard parameters, the following advanced parameters can be specified.
 
@@ -250,9 +250,9 @@ stm receive --help
 |  -t, --topic <TOPIC...>  |the message topic(s) (default: ["stm/cli/topic"])|
 |  -q, --queue <QUEUE>     |the message queue|
 |  --pretty                |pretty print message|
-|  --save [PATH]           |save the parameters to the local configuration file in json format, default path is ./stm-pub-config.json|
-|  --view [PATH]           |list the parameters from the local configuration file in json format, default path is ./stm-pub-config.json|
-|  --config [PATH]         |load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json|
+|  --save [PATH]           |save the parameters to the local configuration file in json format, default path is ./stm-cli-config.json|
+|  --view [PATH]           |list the parameters from the local configuration file in json format, default path is ./stm-cli-config.json|
+|  --exec [PATH]         |load the parameters from the local configuration file in json format, default path is ./stm-cli-config.json|
 
 
 In addition to the standard parameters, the following advanced parameters can be specified.
@@ -264,7 +264,7 @@ stm receive --help-more
 | Options | Description | 
 | ------- | ------------ | 
 |  --create-if-missing                    |[advanced] create message queue if missing|
-|  --add-subscriptions                    |[advanced] add subscription(s) to the queue|
+|  --create-subscriptions                 |[advanced] create subscription(s) on the queue|
 |  --client-name <NAME>                   |[advanced] the client name (default: an auto-generated client name)|
 |  --description <DESCRIPTION>            |[advanced] the application description (default: "Receiver created via Solace Try-Me CLI")|
 |  --connection-timeout <NUMBER>          |[advanced] the timeout period (in milliseconds) for a connect operation|
@@ -297,7 +297,7 @@ stm request --help
 |  --pretty                     |pretty print message|
 |  --save [PATH]                |save the parameters to the local configuration file in json format, default path is ./stm-reqreply-config.json|
 |  --view [PATH]                |list the parameters from the local configuration file in json format, default path is ./stm-reqreply-config.json|
-|  --config [PATH]              |load the parameters from the local configuration file in json format, default path is ./stm-reqreply-config.json|
+|  --exec [PATH]              |load the parameters from the local configuration file in json format, default path is ./stm-reqreply-config.json|
 |  -hm, --help-more             |show more help, display all other options not shown in basic help|
 In addition to the standard parameters, the following advanced parameters can be specified.
 
@@ -333,9 +333,9 @@ stm reply --help
 |  -p, --password <PASS>  |the password (default: "default")|
 |  -t, --topic <TOPIC>    |the message topic(s) (default: "stm/cli/request")|
 |  --pretty               |pretty print message|
-|  --save [PATH]          |save the parameters to the local configuration file in json format, default path is ./stm-pub-config.json|
-|  --view [PATH]          |list the parameters from the local configuration file in json format, default path is ./stm-pub-config.json|
-|  --config [PATH]        |load the parameters from the local configuration file in json format, default path is ./stm-pub-config.json|
+|  --save [PATH]          |save the parameters to the local configuration file in json format, default path is ./stm-cli-config.json|
+|  --view [PATH]          |list the parameters from the local configuration file in json format, default path is ./stm-cli-config.json|
+|  --exec [PATH]        |load the parameters from the local configuration file in json format, default path is ./stm-cli-config.json|
 
 In addition to the standard parameters, the following advanced parameters can be specified.
 
