@@ -1,5 +1,5 @@
 import 'core-js'
-import { program, Command, Option } from 'commander'
+import { Command, Option } from 'commander'
 import {
   parseNumber,
   parseUserProperties,
@@ -16,15 +16,13 @@ import {
   parseSempOperation,
   parseSempQueueTopics,
 } from './utils/parse'
-import defaults, { getDefaultTopic } from './utils/defaults';
+import defaults, { getDefaultClientName, getDefaultTopic } from './utils/defaults';
 import { publisher } from './lib/publish'
 import { receiver} from './lib/receive'
 import { requestor } from './lib/request'
 import { replier } from './lib/reply'
 import { queue } from './lib/queue';
 import { version } from '../package.json'
-
-const getClientName = () => `stm_${Math.random().toString(16).substring(2, 10)}`
 
 export class Commander {
   program: Command
@@ -56,12 +54,12 @@ export class Commander {
 
       // connect options
       .addOption(new Option('-U, --url <URL>', 
-        'the broker service url')
+        'the broker url')
         .argParser(parseProtocol)
         .default(defaults.url)
         .hideHelp(this.advanced))
       .addOption(new Option('-v, --vpn <VPN>', 
-        'the message VPN (broker) name')
+        'the message VPN name')
         .default(defaults.vpn)
         .hideHelp(this.advanced))
       .addOption(new Option('-u, --username <USER>', 
@@ -100,8 +98,10 @@ export class Commander {
         'the time to live is the number of milliseconds the message may be stored before it is discarded or moved to a DMQ')
         .argParser(parseNumber)
         .hideHelp(this.advanced))
-      .addOption(new Option('--dmq-eligible', 
-        'the DMQ eligible flag')
+      .addOption(new Option('--dmq-eligible [FLAG]', 
+        'the DMQ eligible flag - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.dmqEligible)
         .hideHelp(this.advanced))
 
       // configuration options
@@ -120,8 +120,8 @@ export class Commander {
 
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
-          '[advanced] the client name')
-        .default(getClientName(), 'an auto-generated client name')
+        '[advanced] the client name')
+        .default(getDefaultClientName(), 'an auto-generated client name')
         .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
@@ -151,11 +151,15 @@ export class Commander {
         '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')
         .argParser(parseNumber)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--include-sender-id', 
-        '[advanced] a sender ID be automatically included in the Solace-defined fields for each message sent')
+      .addOption(new Option('--include-sender-id [FLAG]', 
+        '[advanced] include a sender ID on sent messages - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.includeSenderId)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--generate-sequence-number', 
-        '[advanced] a sequence number is automatically included in the Solace-defined fields for each message sent')
+      .addOption(new Option('--generate-sequence-number [FLAG]', 
+        '[advanced] include sequence number on messages sent - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.generateSequenceNumber)
         .hideHelp(!this.advanced))
       .addOption(new Option('--log-level <LEVEL>', 
         '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
@@ -164,11 +168,15 @@ export class Commander {
         .hideHelp(!this.advanced))
 
       // publish options
-      .addOption(new Option('--send-timestamps', 
-        '[advanced] a send timestamp to be automatically included in the Solace-defined fields foreach message sent')
+      .addOption(new Option('--send-timestamps [FLAG]', 
+        '[advanced] include a send timestamp on sent messages - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.sendTimestamps)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--include-sender-id', 
-        '[advanced] a sender ID to be automatically included in the Solace-defined fields foreach message sent')
+      .addOption(new Option('--include-sender-id [FLAG]', 
+        '[advanced] include a sender ID on sent messages - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.includeSenderId)
         .hideHelp(!this.advanced))
       .addOption(new Option('--send-buffer-max-size <NUMBER>', 
         '[advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session')
@@ -178,8 +186,10 @@ export class Commander {
         '[advanced] the maximum payload size (in bytes) when sending data using the Web transport protocol')
         .argParser(parseNumber)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--guaranteed-publisher', 
-        '[advanced] a Guaranteed Messaging Publisher is automatically created when a session is connected')
+      .addOption(new Option('--guaranteed-publisher [FLAG]', 
+        '[advanced] create a guaranteed messaging publisher - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.guaranteedPublisher)
         .hideHelp(!this.advanced))
       .addOption(new Option('--window-size <NUMBER>', 
         '[advanced] the maximum number of messages that can be published without acknowledgment')
@@ -240,7 +250,7 @@ export class Commander {
 
       // connect options
       .addOption(new Option('-U, --url <URL>', 
-        'the broker service url')
+        'the broker url')
         .argParser(parseProtocol)
         .default(defaults.url)
         .hideHelp(this.advanced))
@@ -266,11 +276,10 @@ export class Commander {
       .addOption(new Option('-q, --queue <QUEUE>', 
         'the message queue')
         .hideHelp(this.advanced))
-      .addOption(new Option('--create-if-missing', 
-        '[advanced] create message queue if missing')
-        .hideHelp(!this.advanced))
-      .addOption(new Option('--create-subscriptions', 
-        '[advanced] create subscription(s) on the queue')
+      .addOption(new Option('--create-if-missing [FLAG]', 
+        '[advanced] create message queue if missing - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.createIfMissing)
         .hideHelp(!this.advanced))
 
       // output options
@@ -295,7 +304,7 @@ export class Commander {
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
         '[advanced] the client name')
-        .default(getClientName(), 'an auto-generated client name')
+        .default(getDefaultClientName(), 'an auto-generated client name')
         .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
@@ -325,11 +334,15 @@ export class Commander {
         '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')
         .argParser(parseNumber)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--receive-timestamps',
-        '[advanced] a receive timestamp is recorded for each message and passed to the session\'s message callback receive handler')
+      .addOption(new Option('--receive-timestamps [FLAG]',
+        '[advanced] include a receive timestamp on received messages - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.receiveTimestamps)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--reapply-subscriptions', 
-        '[advanced] to have the API remember subscriptions and reapply them upon calling on a disconnected session')
+      .addOption(new Option('--reapply-subscriptions [FLAG]', 
+        '[advanced] reapply subscriptions upon calling on a disconnected session - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.reapplySubscriptions)
         .hideHelp(!this.advanced))
       .addOption(new Option('--log-level <LEVEL>', 
         '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')
@@ -361,7 +374,7 @@ export class Commander {
 
       // connect options
       .addOption(new Option('-U, --url <URL>', 
-        'the broker service url')
+        'the broker url')
         .argParser(parseProtocol)
         .default(defaults.url)
         .hideHelp(this.advanced))
@@ -409,7 +422,7 @@ export class Commander {
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
         '[advanced] the client name')
-        .default(getClientName(), 'an auto-generated client name')
+        .default(getDefaultClientName(), 'an auto-generated client name')
         .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
@@ -473,7 +486,7 @@ export class Commander {
 
       // connect options
       .addOption(new Option('-U, --url <URL>', 
-        'the broker service url')
+        'the broker url')
         .argParser(parseProtocol)
         .default(defaults.url)
         .hideHelp(this.advanced))
@@ -492,7 +505,7 @@ export class Commander {
       .addOption(new Option('--topic <TOPIC>', 
         'the message topic(s)')
         .argParser(parseReplyTopic)
-        .default( getDefaultTopic('reply') )
+        .default(getDefaultTopic('reply') )
         .hideHelp(this.advanced))
 
       // output options
@@ -517,7 +530,7 @@ export class Commander {
       // advanced connect options
       .addOption(new Option('--client-name <NAME>', 
         '[advanced] the client name')
-        .default(getClientName(), 'an auto-generated client name')
+        .default(getDefaultClientName(), 'an auto-generated client name')
         .hideHelp(!this.advanced))
       .addOption(new Option('--description <DESCRIPTION>', 
         '[advanced] the application description')
@@ -547,11 +560,15 @@ export class Commander {
         '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')
         .argParser(parseNumber)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--receive-timestamps',
-        '[advanced] a receive timestamp is recorded for each message and passed to the session\'s message callback receive handler')
+      .addOption(new Option('--receive-timestamps [FLAG]',
+        '[advanced] include a receive timestamp on received messages - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.receiveTimestamps)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--reapply-subscriptions', 
-        '[advanced] to have the API remember subscriptions and reapply them upon calling on a disconnected session')
+      .addOption(new Option('--reapply-subscriptions [FLAG]', 
+        '[advanced] reapply subscriptions upon calling on a disconnected session - true or false')
+        .argParser(parseBoolean)
+        .default(defaults.reapplySubscriptions)
         .hideHelp(!this.advanced))
       .addOption(new Option('--send-max-buffer-size <NUMBER>', 
         '[advanced] the maximum buffer size for the transport session, must be bigger than the largest message an application intends to send on the session')
@@ -632,28 +649,28 @@ export class Commander {
         '[advanced] name of the Dead Message queue (DMQ) used by the queue')
         .default(defaults.deadMessageQueue)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--delivery-count-enabled <FLAG>', 
-        '[advanced] message delivery count of messages received from the queue: true or false')
+      .addOption(new Option('--delivery-count-enabled [FLAG]', 
+        '[advanced] enable message delivery count on received messages - true or false')
         .default(defaults.deliveryCountEnabled)
         .argParser(parseBoolean)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--egress-enabled <FLAG>', 
-        '[advanced] transmission of messages from the queue: true or false')
+      .addOption(new Option('--egress-enabled [FLAG]', 
+        '[advanced] enable transmission of messages from the queue - true or false')
         .default(defaults.egressEnabled)
         .argParser(parseBoolean)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--ingress-enabled <FLAG>', 
-        '[advanced] reception of messages to the queue: true or false')
+      .addOption(new Option('--ingress-enabled [FLAG]', 
+        '[advanced] enable reception of messages to the queue - true or false')
         .argParser(parseBoolean)
         .default(defaults.ingressEnabled)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--respect-ttl-enabled <FLAG>', 
-        '[advanced] Enable or disable the respecting of the TTL for messages in the queue.')
+      .addOption(new Option('--respect-ttl-enabled [FLAG]', 
+        '[advanced] enable respecting of the TTL for messages in the queue - true or false.')
         .argParser(parseBoolean)
         .default(defaults.respectTtlEnabled)
         .hideHelp(!this.advanced))
-      .addOption(new Option('--redelivery-enabled <FLAG>', 
-        '[advanced] enable or disable message redelivery')
+      .addOption(new Option('--redelivery-enabled [FLAG]', 
+        '[advanced] enable message redelivery - true or false')
         .default(defaults.redeliveryEnabled)
         .argParser(parseBoolean)
         .hideHelp(!this.advanced))

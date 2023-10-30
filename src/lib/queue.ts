@@ -1,6 +1,6 @@
 import { saveConfig, updateConfig, loadConfig } from '../utils/config'
 import { Logger } from '../utils/logger'
-import { checkSempConnectionParamsExists, checkSempQueueParamsExists, 
+import { checkSempConnectionParamsExists, checkSempQueueParamsExists, checkPersistenceParams,
         checkSempQueueSubscriptionTopicExists, checkSempQueuePartitionSettings } from '../utils/parse'
 import { SempClient } from '../common/queue-client'
 
@@ -11,6 +11,8 @@ const invoke = async (
   try {
     await client.manageQueue();
   } catch (error:any) {
+    Logger.logDetailedError(`error: queue creation failed with error - `, `${error.toString()}`)
+    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
     Logger.error('Exiting...')
     process.exit(1)
   }
@@ -22,6 +24,12 @@ const invoke = async (
 const queue = (options: ClientOptions, optionsSource: any) => {
   const { save, view, update, exec, helpExamples } = options
 
+  if (checkPersistenceParams(options) > 1) {
+    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
+    Logger.error('Exiting')
+    process.exit(0)
+  }
+  
   if (helpExamples) {
         console.log(`
 Examples:
@@ -73,8 +81,14 @@ stm queue --operation delete --queue-name TestQ3
   if (update && options) {
     const savedOptions = loadConfig('queue', update);
     // remove subscription info
-    if (options.addSubscriptions && options.addSubscriptions.length) delete savedOptions.addSubscriptions
-    if (options.removeSubscriptions && options.removeSubscriptions.length) delete savedOptions.removeSubscriptions
+    if (typeof options.addSubscriptions === 'string' && options.addSubscriptions === "") {
+      delete options.addSubscriptions;
+      delete savedOptions.addSubscriptions;
+    } else if (typeof options.removeSubscriptions === 'string' && options.removeSubscriptions === "") {
+      delete options.removeSubscriptions
+      delete savedOptions.removeSubscriptions;
+    }
+
     options = { ...savedOptions, ...options }
     updateConfig('queue', options, optionsSource);
     Logger.printConfig('queue', options);
@@ -91,10 +105,9 @@ stm queue --operation delete --queue-name TestQ3
       }
     })
     
-    // // remove subscription info
-    // if (options.addSubscriptions && options.addSubscriptions.length) delete savedOptions.addSubscriptions
-    // if (options.removeSubscriptions && options.removeSubscriptions.length) delete savedOptions.removeSubscriptions
-    // options = { ...options, ...savedOptions }
+    // remove subscription info
+    if (options.addSubscriptions && !options.addSubscriptions.length) delete options.addSubscriptions
+    if (options.removeSubscriptions && !options.removeSubscriptions.length) delete options.removeSubscriptions
     options = { ...savedOptions, ...options }
     Logger.printConfig('queue', options);
   }

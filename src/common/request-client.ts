@@ -92,7 +92,7 @@ export class RequestClient {
 
       // connect the session
       try {
-        Logger.await(`Connecting to broker [${this.options.url}, broker: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
+        Logger.await(`Connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
         this.session.connect();
       } catch (error:any) {
         Logger.logDetailedError('error: failed to connect to broker - ', error.toString())
@@ -164,7 +164,7 @@ export class RequestClient {
         if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
       }
     } else {
-      Logger.error('Not connected to Solace PubSub+ Event Broker.');
+      Logger.error('error: not connected to Solace PubSub+ Event Broker.');
     }
   };
 

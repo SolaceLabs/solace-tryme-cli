@@ -99,17 +99,23 @@ export class SolaceClient {
 
         //ACKNOWLEDGED MESSAGE implies that the broker has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
-          Logger.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+          if (sessionEvent.correlationKey) 
+            Logger.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+          else
+            Logger.success("Delivery of message confirmed.");
         });
 
         //REJECTED_MESSAGE implies that the broker has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+          if (sessionEvent.correlationKey) 
+            Logger.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+          else
+            Logger.warn("Delivery of message rejected: " + sessionEvent.infoStr);
         });
 
         //SUBSCRIPTION ERROR implies that there was an error in subscribing on a topic
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.error("Cannot subscribe to topic: " + sessionEvent.correlationKey);
+          Logger.logDetailedError(`error: cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
         });
 
         //SUBSCRIPTION_OK implies that a subscription was successfully applied/removed from the broker
@@ -117,7 +123,7 @@ export class SolaceClient {
           //Check if the topic exists in the map
           let key:string = sessionEvent.correlationKey ? sessionEvent.correlationKey.toString() : '';
           if (!key) {
-            Logger.error(`Session subscription activity missing correlation-key`);
+            Logger.error(`error: session subscription activity missing correlation-key`);
             return;
           }
 
@@ -153,7 +159,7 @@ export class SolaceClient {
               if (matched) break;
             }
             if (!matched) {
-              Logger.error('💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
+              Logger.error('error: 💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
               return;
             }
           } 
@@ -166,7 +172,7 @@ export class SolaceClient {
 
       // connect the session
       try {
-        Logger.await(`Connecting to broker [${this.options.url}, broker: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
+        Logger.await(`Connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
         this.session.connect();
       } catch (error:any) {
         Logger.logDetailedError('error: failed to connect to broker - ', error.toString())
@@ -308,7 +314,7 @@ export class SolaceClient {
             createIfMissing: this.options.createIfMissing // Create queue if not exists
           });
 
-          if (this.options.createSubscriptions && this.options.topic) {
+          if (this.options.topic) {
             this.options.topic.forEach((topicName: string) => {  
               this.receiver.topics.add(topicName);            
             })
@@ -318,7 +324,7 @@ export class SolaceClient {
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.UP, () => {
             this.options.topic.forEach((topicName: string) => {              
               try {
-                Logger.success('Adding subscribing to topic: ' + topicName);
+                Logger.success('Adding subscription to topic: ' + topicName);
                 this.receiver.messageReceiver.addSubscription(
                   solace.SolclientFactory.createTopicDestination(topicName),
                   topicName, // correlation key as topic name
@@ -340,21 +346,21 @@ export class SolaceClient {
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.CONNECT_FAILED_ERROR, () => {
             this.receiver.consuming = false;
-            Logger.error('Error: the message receiver could not bind to queue "' + this.receiver.queue +
-                  '"\n   Ensure this queue exists on the message router vpn');
+            Logger.logDetailedError('error: the message receiver could not bind to queue "' + this.receiver.queue,
+                  'check if the queue exists on the message router vpn');
             Logger.error('Exiting...')
             process.exit(1);
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN, () => {
             this.receiver.consuming = false;
-            Logger.error('The message receiver is now down');
+            Logger.error('error: the message receiver is now down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN_ERROR, () => {
             this.receiver.consuming = false;
-            Logger.error('An error happened, the message receiver is down');
+            Logger.error('error: the message receiver is down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) =>  {
-            Logger.error('Cannot subscribe to topic ' + sessionEvent);
+            Logger.logDetailedError(`error: cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) =>  {
             if (sessionEvent.infoStr === 'Subscription Already Exists') {

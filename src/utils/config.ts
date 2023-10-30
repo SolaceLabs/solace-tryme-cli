@@ -82,7 +82,6 @@ const parseClientOptions = (
     topic,
     queue,
     createIfMissing,
-    createSubscriptions,
     message,
     stdin,
     timeToLive,
@@ -154,7 +153,6 @@ const parseClientOptions = (
         topic,
         queue,
         createIfMissing,
-        createSubscriptions,
         message,
         stdin,
         timeToLive,
@@ -353,6 +351,7 @@ const saveConfig = (
     let data:any = {}
     if (sempOp) {
       data["sempconnection"] = parsedData.sempconnection
+      data[commandType] = parsedData.sempoperation;
       if (fileExists(filePath)) {
         const config = readFile(filePath)
         if (config.sempconnection && compareSempConnectionConfiguration(data.sempconnection, config.sempconnection) > 0) {
@@ -362,12 +361,12 @@ const saveConfig = (
             Logger.success('Exiting...')
             process.exit(0);
         }
-        data[commandType] = parsedData.sempoperation;
         data = mergeConfig(config, data)
       }
     } else {
       parsedData.operation.clientName && parsedData.operation.clientName.startsWith('stm_') && delete parsedData.operation.clientName;
       data["connection"] = parsedData.connection;
+      data[commandType] = parsedData.operation;
       if (fileExists(filePath)) {
         const config = readFile(filePath)
         if (config.connection && compareConnectionConfiguration(data.connection, config.connection) > 0) {
@@ -377,7 +376,6 @@ const saveConfig = (
             Logger.success('Exiting...')
             process.exit(0);
         }
-        data[commandType] = parsedData.operation;
         data = mergeConfig(config, data)
       }
     }

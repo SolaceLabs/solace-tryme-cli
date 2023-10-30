@@ -100,14 +100,20 @@ export class SolaceClient {
           }
         });
 
-        //ACKNOWLEDGED MESSAGE implies that the broker has confirmed message receipt
+        //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
-          Logger.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+          if (sessionEvent.correlationKey) 
+            Logger.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+          else
+            Logger.success("Delivery of message confirmed.");
         });
 
-        //REJECTED_MESSAGE implies that the broker has rejected the message
+        //REJECTED_MESSAGE implies that the vpn has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+          if (sessionEvent.correlationKey) 
+            Logger.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+          else
+            Logger.warn("Delivery of message rejected: " + sessionEvent.infoStr);
         });
       } catch (error: any) {
         Logger.logDetailedError('error: session creation failed - ', error.toString())
@@ -116,7 +122,7 @@ export class SolaceClient {
 
       // connect the session
       try {
-        Logger.await(`Connecting to broker [${this.options.url}, broker: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
+        Logger.await(`Connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
         this.session.connect();
       } catch (error:any) {
         Logger.logDetailedError('error: failed to connect to broker - ', error.toString())

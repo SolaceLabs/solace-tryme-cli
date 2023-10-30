@@ -100,7 +100,6 @@ declare global {
     topic: string | string[] | any
     queue: any
     createIfMissing: boolean
-    createSubscriptions: boolean
 
     // publish options
     message?: string | Buffer

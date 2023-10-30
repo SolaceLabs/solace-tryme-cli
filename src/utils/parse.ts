@@ -134,14 +134,12 @@ const parsePubTopic = (value: string) => {
   return value
 }
 
-// const parseUserProperties = (value: string, previous?: Record<string, string | string[]>) => {
-
 const parseSubTopic = (value: string, previous: string[] | undefined) => {
-  if (!value) {
-    Logger.error("error: required option '-t, --topic <TOPIC...>' not specified")
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
+  // if (!value) {
+  //   Logger.error("error: required option '--topic <TOPIC...>' not specified")
+  //   Logger.error('Exiting...')
+  //   process.exit(1)
+  // }
 
   if (typeof value !== 'string' && typeof value !== 'object') {
     Logger.error("error: invalid topic specified, one or more topic name is expected")
@@ -170,7 +168,7 @@ const parseSempQueueTopics = (value: string, previous: string[] | undefined) => 
 
 const checkPubTopicExists = (topic: string) => {
   if (!topic) {
-    Logger.error("error: required option '-t, --topic <TOPIC>' not specified")
+    Logger.error("error: required option '--topic <TOPIC>' not specified")
     Logger.error('Exiting...')
     process.exit(1)
   }
@@ -184,7 +182,7 @@ const checkPubTopicExists = (topic: string) => {
 
 const checkSubTopicExists = (options: ClientOptions) => {
   if (!options.topic && !options.queue) {
-    Logger.error("error: required option '-t, --topic <TOPIC...>' not specified")
+    Logger.error("error: required option '--topic <TOPIC...>' not specified")
     Logger.error('Exiting...')
     process.exit(1)
   }
@@ -200,8 +198,6 @@ const checkSubTopicExists = (options: ClientOptions) => {
     Logger.error('Exiting...')
     process.exit(1)
   }
-
-  options.createSubscriptions = options.queue && options.topic ? true : false;
 }
 
 const checkSempQueueSubscriptionTopicExists = (options: ClientOptions) => {
@@ -299,7 +295,7 @@ const checkSempConnectionParamsExists = (url: string | undefined, vpn :string | 
 
 const checkSempQueueParamsExists = (options: ClientOptions) => {
   if (!options.operation) {
-    Logger.error("error: missing queue operation, CREATE, UPDATE or DELETE is expected")
+    Logger.error("error: missing parameter, --operation CREATE, UPDATE or DELETE is expected")
     Logger.error('Exiting...')
     process.exit(1)
   }
@@ -309,6 +305,16 @@ const checkSempQueueParamsExists = (options: ClientOptions) => {
     Logger.error('Exiting...')
     process.exit(1)
   }
+}
+
+const checkPersistenceParams = (options: ClientOptions) => {
+  const { save, view, update, exec } = options
+  var count = 0;
+  count += save ? 1 : 0;
+  count += view ? 1 : 0;
+  count += update ? 1 : 0;
+  count += exec ? 1 : 0;
+  return count;
 }
 
 export {
@@ -331,6 +337,9 @@ export {
   // connection validation
   checkConnectionParamsExists,
   checkSempConnectionParamsExists,
+
+  // persistence command validation
+  checkPersistenceParams,
 
   // semp operation validation
   checkSempQueueParamsExists,

@@ -1,5 +1,5 @@
 import { Logger } from '../utils/logger'
-import { checkSubTopicExists, checkConnectionParamsExists } from '../utils/parse'
+import { checkSubTopicExists, checkConnectionParamsExists, checkPersistenceParams } from '../utils/parse'
 import { saveConfig, updateConfig, loadConfig } from '../utils/config'
 import { SolaceClient } from '../common/receive-client'
 import defaults from '../utils/defaults';
@@ -25,6 +25,12 @@ const receive = async (
 const receiver = (options: ClientOptions, optionsSource: any) => {
   const { save, view, update, exec, helpExamples } = options
 
+  if (checkPersistenceParams(options) > 1) {
+    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
+    Logger.error('Exiting')
+    process.exit(0)
+  }
+  
   if (helpExamples) {
     console.log(`
 Examples:
@@ -76,8 +82,21 @@ stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue 
       }
     })
     
-    if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
-    if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
+    // if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
+    // if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
+
+    // remove subscription info
+    if ((typeof options.topic === 'string' && options.topic === "") ||
+        (typeof options.topic === 'object' && options.topic.length === 1 && options.topic[0] === "")) {
+      delete options.topic;
+      delete savedOptions.topic;
+    } 
+    
+    if (typeof options.userProperties === 'string' && options.userProperties === "") {
+      delete options.userProperties;
+      delete savedOptions.userProperties;
+    }
+    
     options = { ...savedOptions, ...options }
     updateConfig('receive', options, optionsSource);
     Logger.printConfig('receive', options);
@@ -94,9 +113,8 @@ stm receive -U ws://localhost:8008 -v default -u default -p default -q my_queue 
       }
     })
     
-    // if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
-    // if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
-    // options = { ...savedOptions, ...options }
+    if (optionsSource.topic === 'cli' && options.topic && options.topic.length) delete savedOptions.topic
+    if (optionsSource.userProperties === 'cli' && options.userProperties && options.userProperties.length) delete savedOptions.userProperties    
 
     options = { ...savedOptions, ...options }
     Logger.printConfig('receive', options);

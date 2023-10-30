@@ -1,5 +1,5 @@
 import concat from 'concat-stream'
-import { checkPubTopicExists, checkConnectionParamsExists } from '../utils/parse'
+import { checkPersistenceParams, checkConnectionParamsExists } from '../utils/parse'
 import { saveConfig, updateConfig, loadConfig } from '../utils/config'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
@@ -34,6 +34,12 @@ const send = async (
 
 const publisher = (options: ClientOptions, optionsSource: any) => {
   const { save, view, update, exec, helpExamples } = options
+  
+  if (checkPersistenceParams(options) > 1) {
+    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
+    Logger.error('Exiting')
+    process.exit(0)
+  }
 
   if (helpExamples) {
         console.log(`

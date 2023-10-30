@@ -185,10 +185,10 @@ stm publish --help
 | Options | Description | 
 | ------- | ------------ | 
 |  -U, --url <URL>                |the broker url (default: "ws://localhost:8008")|
-|  -v, --vpn <VPN>                |the message VPN (broker) name (default: "default")|
+|  -v, --vpn <VPN>                |the message VPN name (default: "default")|
 |  -u, --username <USER>          |the username (default: "default")|
 |  -p, --password <PASS>          |the password (default: "default")|
-|  -t, --topic <TOPIC>            |the message topic (default: "stm/cli/topic")|
+|  --topic <TOPIC>            |the message topic (default: "stm/cli/topic")|
 |  -m, --message <BODY>           |the message body (default: "Hello from Solace Try-Me CLI Publisher")|
 |  -s, --stdin                    |read the message body from stdin|
 |  -c, --count <COUNT>            |the number of events to publish (default: 1)|
@@ -243,11 +243,11 @@ stm receive --help
 
 | Options | Description | 
 | ------- | ------------ | 
-|  -U, --url <URL>         |the broker service url (default: "ws://localhost:8008")|
+|  -U, --url <URL>         |the broker url (default: "ws://localhost:8008")|
 |  -v, --vpn <VPN>         |the message VPN name (default: "default")|
 |  -u, --username <USER>   |the username (default: "default")|
 |  -p, --password <PASS>   |the password (default: "default")|
-|  -t, --topic <TOPIC...>  |the message topic(s) (default: ["stm/cli/topic"])|
+|  --topic <TOPIC...>  |the message topic(s) (default: ["stm/cli/topic"])|
 |  -q, --queue <QUEUE>     |the message queue|
 |  --pretty                |pretty print message|
 |  --save [PATH]           |save the parameters to the local configuration file in json format, default path is ./stm-cli-config.json|
@@ -288,11 +288,11 @@ stm request --help
 
 | Options | Description | 
 | ------- | ------------ | 
-|  -U, --url <URL>              |the broker service url (default: "ws://localhost:8008")|
+|  -U, --url <URL>              |the broker url (default: "ws://localhost:8008")|
 |  -v, --vpn <VPN>              |the message VPN name (default: "default")|
 |  -u, --username <USER>        |the username (default: "default")|
 |  -p, --password <PASS>        |the password (default: "default")|
-|  -t, --topic <TOPIC>          |the request message topic (default: "stm/cli/request")|
+|  --topic <TOPIC>          |the request message topic (default: "stm/cli/request")|
 |  -m, --message <BODY>         |the request message body (default: "Hello request from Solace Try-Me CLI Requestor")|
 |  --pretty                     |pretty print message|
 |  --save [PATH]                |save the parameters to the local configuration file in json format, default path is ./stm-reqreply-config.json|
@@ -327,11 +327,11 @@ stm reply --help
 
 | Options | Description | 
 | ------- | ------------ | 
-|  -U, --url <URL>        |the broker service url (default: "ws://localhost:8008")|
+|  -U, --url <URL>        |the broker url (default: "ws://localhost:8008")|
 |  -v, --vpn <VPN>        |the message VPN name (default: "default")|
 |  -u, --username <USER>  |the username (default: "default")|
 |  -p, --password <PASS>  |the password (default: "default")|
-|  -t, --topic <TOPIC>    |the message topic(s) (default: "stm/cli/request")|
+|  --topic <TOPIC>    |the message topic(s) (default: "stm/cli/request")|
 |  --pretty               |pretty print message|
 |  --save [PATH]          |save the parameters to the local configuration file in json format, default path is ./stm-cli-config.json|
 |  --view [PATH]          |list the parameters from the local configuration file in json format, default path is ./stm-cli-config.json|

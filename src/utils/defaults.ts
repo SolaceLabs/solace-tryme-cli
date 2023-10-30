@@ -1,5 +1,13 @@
 const defaults = {
   count: 1,
+  dmqEligible: false,
+  sendTimestamps: false,
+  includeSenderId: false,
+  generateSequenceNumber: false,
+  guaranteedPublisher: false,
+  receiveTimestamps: false,
+  reapplySubscriptions: false,
+  createIfMissing: false,
   deadMessageQueue: '#DEAD_MSG_QUEUE',
   deliveryCountEnabled: false,
   egressEnabled: true,
@@ -44,6 +52,10 @@ export const getDefaultTopic = (commandType: CommandType) => {
     case 'request': return defaults.requestTopic; break;
     case 'reply': return defaults.requestTopic; break;
   }
+}
+
+export const getDefaultClientName = () => {
+  return `stm_${Math.random().toString(16).substring(2, 10)}`
 }
 
 export default defaults;
