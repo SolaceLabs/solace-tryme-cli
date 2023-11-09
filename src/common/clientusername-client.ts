@@ -20,20 +20,21 @@ export class SempClient {
   /**
    * Asynchronous function that connects to the Solace Broker using SEMP, and returns a promise.
    */
-  async manageAclProfile() {
+  async manageClientUsername() {
     let sempUrl = this.options.sempUrl;
     switch (this.options.operation.toUpperCase()) {
-      case 'CREATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/aclProfiles`; break;
-      case 'UPDATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/aclProfiles/${this.options.aclProfile}`; break;
-      case 'DELETE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/aclProfiles/${this.options.aclProfile}`; break;
+      case 'CREATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/clientUsernames`; break;
+      case 'UPDATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/clientUsernames/${this.options.clientUsername}`; break;
+      case 'DELETE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/clientUsernames/${this.options.clientUsername}`; break;
     }
 
     this.sempBody = {            
       msgVpnName: this.options?.sempVpn,
+      clientUsername: this.options?.clientUsername,
       aclProfileName: this.options?.aclProfile,
-      clientConnectDefaultAction: this.options?.clientConnectDefaultAction,
-      publishTopicDefaultAction: this.options?.publishTopicDefaultAction,
-      subscribeTopicDefaultAction: this.options?.subscribeTopicDefaultAction,
+      clientProfileName: this.options?.clientProfile,
+      enabled: this.options?.enabled,
+      password: this.options?.clientPassword,
     }
   
     if (this.options.operation.toUpperCase() === 'CREATE') {
@@ -52,15 +53,15 @@ export class SempClient {
       .then(async (response) => {
         const data = await response.json();
         if (data.meta.error) {
-          Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' creation failed with error`, `${data.meta.error.description.split('Problem with POST: ').pop()}`)
+          Logger.logDetailedError(`client-username '${this.options?.clientUsername}' creation failed with error`, `${data.meta.error.description.split('Problem with POST: ').pop()}`)
           Logger.error('exiting...')
           process.exit(1)
         } else {
-          Logger.logSuccess(`acl-profile '${this.options?.aclProfile}' created successfully`)
+          Logger.logSuccess(`client-username '${this.options?.clientUsername}' created successfully`)
         }
       })
       .catch((error) => {
-        Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' creation failed with error`, `${error.toString()}`)
+        Logger.logDetailedError(`client-username '${this.options?.clientUsername}' creation failed with error`, `${error.toString()}`)
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
         throw error;
       });
@@ -81,15 +82,15 @@ export class SempClient {
       .then(async (response) => {
         const data = await response.json();
         if (data.meta.error) {
-          Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' update failed with error`, `${data.meta.error.description}`)
+          Logger.logDetailedError(`client-username '${this.options?.clientUsername}' update failed with error`, `${data.meta.error.description}`)
           Logger.error('exiting...')
           process.exit(1)
         } else {
-          Logger.logSuccess(`acl-profile '${this.options?.aclProfile}' updated successfully`)
+          Logger.logSuccess(`client-username '${this.options?.clientUsername}' updated successfully`)
         }
       })
       .catch((error) => {
-        Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' update failed with error`, `${error.toString()}`)
+        Logger.logDetailedError(`client-username '${this.options?.clientUsername}' update failed with error`, `${error.toString()}`)
         if (error.cause?.message) Logger.error(`${error.cause?.message}`)
         throw error;
       });
@@ -109,15 +110,15 @@ export class SempClient {
       .then(async (response) => {
         const data = await response.json();
         if (data.meta.error) {
-          Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' delete failed with error`, `${data.meta.error.description}`)
+          Logger.logDetailedError(`client-username '${this.options?.clientUsername}' delete failed with error`, `${data.meta.error.description}`)
           Logger.error('exiting...')
           process.exit(1)
         } else {
-          Logger.logSuccess(`acl-profile '${this.options?.aclProfile}' deleted successfully`)
+          Logger.logSuccess(`client-username '${this.options?.clientUsername}' deleted successfully`)
         }
       })
       .catch((error) => {
-        Logger.logDetailedError(`acl-profile '${this.options?.aclProfile}' delete failed with error`, `${error.toString()}`)
+        Logger.logDetailedError(`client-username '${this.options?.clientUsername}' delete failed with error`, `${error.toString()}`)
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
         throw error;
       });

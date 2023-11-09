@@ -1,39 +1,24 @@
 import * as fs from 'fs'
 import path from 'path'
 import { Logger } from './logger'
-import defaults from './defaults'
+import chalk from 'chalk'
+import { defaultConfigFile, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
+import { buildMessageConfig } from './init'
 
-const defaultPath = `${process.cwd()}/stm-cli-config.json`
+const defaultPath = `${process.cwd()}/`
 
-const fileExists = (filePath: string) => fs.existsSync(filePath)
+export const fileExists = (filePath: string) => fs.existsSync(filePath)
 
-const writeFile = (filePath: string, data: Config) => {
-  try {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true })
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
-  } catch (error: any) {
-    Logger.logDetailedError('error: file write failed - ', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
+export const decoratePath = (filePath: boolean | string) => {
+  let result = ''
+  if (filePath === true)
+    result = defaultPath
+  else if (typeof filePath === 'string')
+    result = filePath.concat(filePath.endsWith('.json') ? '' : '.json');
+  return result;
 }
 
-const readFile = (path: string) => {
-  try {
-    const config = fs.readFileSync(path, 'utf-8')
-    return JSON.parse(config) as Config
-  } catch (error: any) {
-    Logger.logDetailedError('error: read write failed - ', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-}
-
-const mergeConfig = (oldConfig: Config, newConfig: Config) => Object.assign({}, oldConfig, newConfig)
-
-const processPath = (savePath: boolean | string) => {
+export const processPath = (savePath: boolean | string) => {
   let filePath = ''
   if (savePath === true) {
     filePath = defaultPath
@@ -47,440 +32,350 @@ const processPath = (savePath: boolean | string) => {
   return filePath
 }
 
-const parseClientOptions = (
-  opts: ClientOptions
-) => {
-  const { // connection
-    url,
-    vpn,
-    username,
-    password,
-    connectionTimeout,
-    connectionRetries,
-    reconnectRetries,
-    reconnectRetryWait,
-    keepAlive,
-    keepAliveIntervalLimit,
-    readTimeout,
-    sendTimestamps,
-    includeSenderId,
-    generateSequenceNumber,
-    sendBufferMaxSize,
-    guaranteedPublisher,
-    windowSize,
-    receiveTimestamps,
-    reapplySubscriptions,
-    acknowledgeTimeout,
-    acknowledgeMode,
-    logLevel,
-  } = opts;
-  const { // operation
-    count,
-    interval,
-    clientName,
-    description,
-    topic,
-    queue,
-    createIfMissing,
-    message,
-    stdin,
-    timeToLive,
-    dmqEligible,
-    messageId,
-    messageType,
-    correlationKey,
-    deliveryMode,
-    replyToTopic,
-    userProperties,
-    pretty,
-  } = opts;
-  const { // sempconnection
-    sempUrl,
-    sempVpn,
-    sempUsername,
-    sempPassword,
-  } = opts;
-  const { // sempoperation
-    operation,
-    queueName,
-    accessType,
-    addSubscriptions,
-    removeSubscriptions,
-    deadMessageQueue,
-    deliveryCountEnabled,
-    egressEnabled,
-    ingressEnabled,
-    respectTtlEnabled,
-    redeliveryEnabled,
-    maxRedeliveryCount,
-    partitionCount,
-    partitionRebalanceDelay,
-    partitionRebalanceMaxHandoffTime,
-    nonOwnerPermission    
-  } = opts;
-
-  return (
-    {
-      "connection": {
-        url,
-        vpn,
-        username,
-        password,
-        connectionTimeout,
-        connectionRetries,
-        reconnectRetries,
-        reconnectRetryWait,
-        keepAlive,
-        keepAliveIntervalLimit,
-        readTimeout,
-        sendTimestamps,
-        includeSenderId,
-        generateSequenceNumber,
-        sendBufferMaxSize,
-        guaranteedPublisher,
-        windowSize,
-        receiveTimestamps,
-        reapplySubscriptions,
-        acknowledgeTimeout,
-        acknowledgeMode,
-        logLevel,
-      },
-      "operation": {
-        count,
-        interval,
-        clientName,
-        description,
-        topic,
-        queue,
-        createIfMissing,
-        message,
-        stdin,
-        timeToLive,
-        dmqEligible,
-        messageId,
-        messageType,
-        correlationKey,
-        deliveryMode,
-        replyToTopic,
-        userProperties,
-        pretty,
-      },
-      "sempconnection": {
-        sempUrl,
-        sempVpn,
-        sempUsername,
-        sempPassword
-      },
-      "sempoperation": {
-        operation,
-        queueName,
-        accessType,
-        addSubscriptions,
-        removeSubscriptions,
-        deadMessageQueue,
-        deliveryCountEnabled,
-        egressEnabled,
-        ingressEnabled,
-        respectTtlEnabled,
-        redeliveryEnabled,
-        maxRedeliveryCount,
-        partitionCount,
-        partitionRebalanceDelay,
-        partitionRebalanceMaxHandoffTime,
-        nonOwnerPermission    
-      }
-    }
-  )
-}
-
-const compareSempConnectionConfiguration = (updated: any, current: any) => {
-  let count:number = 0;
-  if (current.sempUrl && updated.sempUrl && updated.sempUrl !== current.sempUrl) console.log(`[${++count}] URL changed: ${current.sempUrl} => ${updated.sempUrl}`)
-  if (current.sempVpn && updated.sempVpn && updated.sempVpn !== current.sempVpn) console.log(`[${++count}] VPN changed: ${current.sempVpn} => ${updated.sempVpn}`)
-  if (current.sempUsername && updated.sempUsername && updated.sempUsername !== current.sempUsername) console.log(`[${++count}] Username changed: ${current.sempUsername} => ${updated.sempUsername}`)
-  if (current.sempPassword && updated.sempPassword && updated.sempPassword !== current.sempPassword) console.log(`[${++count}] Password changed: ${current.sempPassword} => ${updated.sempPassword}`)
-
-  return count;
-}
-
-const compareConnectionConfiguration = (updated: any, current: any) => {
-  let count:number = 0;
-  if (current.url && updated.url && updated.url !== current.url) console.log(`[${++count}] URL changed: ${current.url} => ${updated.url}`)
-  if (current.vpn && updated.vpn && updated.vpn !== current.vpn) console.log(`[${++count}] VPN changed: ${current.vpn} => ${updated.vpn}`)
-  if (current.username && updated.username && updated.username !== current.username) console.log(`[${++count}] Username changed: ${current.username} => ${updated.username}`)
-  if (current.password && updated.password && updated.password !== current.password) console.log(`[${++count}] Password changed: ${current.password} => ${updated.password}`)
-  if (current.connectionTimeout && updated.connectionTimeout && updated.connectionTimeout !== current.connectionTimeout) console.log(`[${++count}] Connection Timeout changed: ${current.connectionTimeout} => ${updated.connectionTimeout}`)
-  if (current.connectionRetries && updated.connectionRetries && updated.connectionRetries !== current.connectionRetries) console.log(`[${++count}] Connection Retries changed: ${current.connectionRetries} => ${updated.connectionRetries}`)
-  if (current.reconnectRetries && updated.reconnectRetries && updated.reconnectRetries !== current.reconnectRetries) console.log(`[${++count}] Reconnect Retries changed: ${current.reconnectRetries} => ${updated.reconnectRetries}`)
-  if (current.reconnectRetryWait && updated.reconnectRetryWait && updated.reconnectRetryWait !== current.reconnectRetryWait) console.log(`[${++count}] Reconnect Retry Wait changed: ${current.reconnectRetryWait} => ${updated.reconnectRetryWait}`)
-  if (current.keepAlive && updated.keepAlive && updated.keepAlive !== current.keepAlive) console.log(`[${++count}] KeepAlive changed: ${current.keepAlive} => ${updated.keepAlive}`)
-  if (current.keepAliveIntervalLimit && updated.keepAliveIntervalLimit && updated.keepAliveIntervalLimit !== current.keepAliveIntervalLimit) console.log(`[${++count}] KeepAlive Interval Limit changed: ${current.keepAliveIntervalLimit} => ${updated.keepAliveIntervalLimit}`)
-  if (current.readTimeout && updated.readTimeout && updated.readTimeout !== current.readTimeout) console.log(`[${++count}] Read Timeout changed: ${current.readTimeout} => ${updated.readTimeout}`)
-  if (current.sendTimestamps && updated.sendTimestamps && updated.sendTimestamps !== current.sendTimestamps) console.log(`[${++count}] Send Timestamps changed: ${current.sendTimestamps} => ${updated.sendTimestamps}`)
-  if (current.includeSenderId && updated.includeSenderId && updated.includeSenderId !== current.includeSenderId) console.log(`[${++count}] Include SenderID changed: ${current.includeSenderId} => ${updated.includeSenderId}`)
-  if (current.generateSequenceNumber && updated.generateSequenceNumber && updated.generateSequenceNumber !== current.generateSequenceNumber) console.log(`[${++count}] Generate Sequence Number changed: ${current.generateSequenceNumber} => ${updated.generateSequenceNumber}`)
-  if (current.sendBufferMaxSize && updated.sendBufferMaxSize && updated.sendBufferMaxSize !== current.sendBufferMaxSize) console.log(`[${++count}] Send Buffer Max Size changed: ${current.sendBufferMaxSize} => ${updated.sendBufferMaxSize}`)
-  if (current.guaranteedPublisher && updated.guaranteedPublisher && updated.guaranteedPublisher !== current.guaranteedPublisher) console.log(`[${++count}] Guaranteed Publisher changed: ${current.guaranteedPublisher} => ${updated.guaranteedPublisher}`)
-  if (current.windowSize && updated.windowSize && updated.windowSize !== current.windowSize) console.log(`[${++count}] Window Size changed: ${current.windowSize} => ${updated.windowSize}`)
-  if (current.receiveTimestamps && updated.receiveTimestamps && updated.receiveTimestamps !== current.receiveTimestamps) console.log(`[${++count}] Receive Timestamps changed: ${current.receiveTimestamps} => ${updated.receiveTimestamps}`)
-  if (current.reapplySubscriptions && updated.reapplySubscriptions && updated.reapplySubscriptions !== current.reapplySubscriptions) console.log(`[${++count}] Reapply Subscriptions changed: ${current.reapplySubscriptions} => ${updated.reapplySubscriptions}`)
-  if (current.acknowledgeTimeout && updated.acknowledgeTimeout && updated.acknowledgeTimeout !== current.acknowledgeTimeout) console.log(`[${++count}] Acknowledge Timeout changed: ${current.acknowledgeTimeout} => ${updated.acknowledgeTimeout}`)
-  if (current.acknowledgeMode && updated.acknowledgeMode && updated.acknowledgeMode !== current.acknowledgeMode) console.log(`[${++count}] Acknowledge Mode changed: ${current.acknowledgeMode} => ${updated.acknowledgeMode}`)
-  if (current.logLevel && updated.logLevel && updated.logLevel !== current.logLevel) console.log(`[${++count}] Log Level changed: ${current.logLevel} => ${updated.logLevel}`)
-
-  return count;
-}
-
-const validateSempConfig = (commandType: CommandType, filePath: string, config: Config) => {
-  const data = config[commandType]
-  if (!config || typeof config !== 'object' || Object.keys(config).length === 0) {
-    Logger.logDetailedError(`error: invalid configuration file - `, `${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  if (!config.sempconnection) {
-    Logger.logDetailedError(`error: missing connection configuration in file - `, `${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  if (!config[commandType]) {
-    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-}
-
-const validateConfig = (commandType: CommandType, filePath: string, config: Config) => {
-  const data = config[commandType]
-  if (!config || typeof config !== 'object' || Object.keys(config).length === 0) {
-    Logger.logDetailedError(`error: invalid configuration file - `, `${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  if (!config.hasOwnProperty('connection')) {
-    Logger.logDetailedError(`error: missing connection configuration in file - `, `${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  if (!config.hasOwnProperty(commandType)) {
-    Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-
-  // if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-  //   Logger.logDetailedError(`error: missing configuration for - `, `${commandType} in ${filePath}`)
-  //   Logger.error('Exiting...')
-  //   process.exit(1)
-  // }
-}
-
-const enrichConfiguration = (
-  config: Config,
-  commandType: CommandType
-) => {
-  var opts:ClientOptions = { ...config[commandType], ...config.connection } as ClientOptions
-  if (!opts.url) opts.url = defaults.url
-  if (!opts.vpn) opts.vpn = defaults.vpn
-  if (!opts.username) opts.username = defaults.username
-  if (!opts.password) opts.password = defaults.password
-  if (!opts.topic) {
-    switch (commandType) {
-      case 'publish': opts.topic = defaults.publishTopic; break;
-      case 'receive': opts.topic = [ defaults.subscribeTopic ]; break;
-      case 'request': opts.topic = defaults.requestTopic; break;
-      case 'reply': opts.topic = [ defaults.requestTopic ]; break;
-    }
-  }
-  if (!opts.message) opts.message = defaults.message
-  if (!opts.description && commandType === 'publish') opts.description = defaults.publisherDescription
-  if (!opts.description && commandType === 'receive') opts.description = defaults.receiverDescription
-  if (!opts.description && commandType === 'request') opts.description = defaults.requestorDescription
-  if (!opts.description && commandType === 'reply') opts.description = defaults.replierDescription
-  if (!opts.count) opts.count = defaults.count
-  if (!opts.interval) opts.interval = defaults.interval
-  if (!opts.logLevel) opts.logLevel = defaults.logLevel
-  return opts;
-}
-
-const enrichSempConfiguration = (
-  config: Config,
-  commandType: CommandType
-) => {
-  var opts:ClientOptions = { ...config[commandType], ...config.sempconnection } as ClientOptions
-  return opts;
-}
-
-const removeDefaultOptions = (
-  opts: ClientOptions,
-) => {
-  const defaultKeys = Object.keys(defaults);
-  for (var i=0; i<defaultKeys.length; i++) {
-    if (opts[defaultKeys[i]]) delete opts[defaultKeys[i]];
-  }
-  return opts;
-}
-const saveConfig = (
-  commandType: CommandType,
-  opts: ClientOptions,
-  optsSource: any
-) => {
+export const writeFile = (filePath: string, data: MessageClientOptions) => {
   try {
-    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
-    const filePath = processPath(opts.save!)
-    if (!filePath.endsWith('.json')) filePath.concat('.json')
-
-    // rid opts of default settings
-    // Object.keys(optsSource).forEach((key:string) => {
-    //   if (!optsSource[key] || optsSource[key] === 'default') {
-    //     delete opts[key];
-    //   }
-    // })
-
-    const parsedData:any = parseClientOptions(opts)
-    let data:any = {}
-    if (sempOp) {
-      data["sempconnection"] = parsedData.sempconnection
-      data[commandType] = parsedData.sempoperation;
-      if (fileExists(filePath)) {
-        const config = readFile(filePath)
-        if (config.sempconnection && compareSempConnectionConfiguration(data.sempconnection, config.sempconnection) > 0) {
-          var prompt = require('prompt-sync')();
-          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
-          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
-            Logger.success('Exiting...')
-            process.exit(0);
-        }
-        data = mergeConfig(config, data)
-      }
-    } else {
-      parsedData.operation.clientName && parsedData.operation.clientName.startsWith('stm_') && delete parsedData.operation.clientName;
-      data["connection"] = parsedData.connection;
-      data[commandType] = parsedData.operation;
-      if (fileExists(filePath)) {
-        const config = readFile(filePath)
-        if (config.connection && compareConnectionConfiguration(data.connection, config.connection) > 0) {
-          var prompt = require('prompt-sync')();
-          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
-          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
-            Logger.success('Exiting...')
-            process.exit(0);
-        }
-        data = mergeConfig(config, data)
-      }
-    }
-    writeFile(filePath, data)
-    Logger.logSuccess(`Configurations saved to ${filePath}`)
-  } catch (error: any) {
-    Logger.logDetailedError('error: file write failed - ', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
-    process.exit(1)
-  }
-}
-
-const updateConfig = (
-  commandType: CommandType,
-  opts: ClientOptions,
-  optsSource: any
-) => {
-  try {
-    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
-    const filePath = processPath(opts.update!)
-    if (!filePath.endsWith('.json')) filePath.concat('.json')
-
-    // rid opts of default settings
-    // Object.keys(optsSource).forEach((key:string) => {
-    //   if (!optsSource[key] || optsSource[key] === 'default') {
-    //     delete opts[key];
-    //   }
-    // })
+    Object.keys(data).forEach(key => {
+      Object.keys(data[key]).forEach(subKey => {
+        Object.keys(data[key][subKey]).forEach(subSubKey => {
+          if (defaultMetaKeys.includes(subSubKey)) 
+            delete data[key][subKey][subSubKey]
+        })
+        if (defaultMetaKeys.includes(subKey)) 
+          delete data[key][subKey]
+      })
+    })
     
-    const parsedData:any = parseClientOptions(opts)
-    parsedData.operation.clientName && parsedData.operation.clientName.startsWith('stm_') && delete parsedData.operation.clientName;
-    let data:any = {}
-    if (sempOp) {
-      data["sempconnection"] = parsedData.sempconnection
-      if (fileExists(filePath)) {
-        const config = readFile(filePath)
-        if (config.sempconnection && compareSempConnectionConfiguration(data.sempconnection, config.sempconnection) > 0) {
-          var prompt = require('prompt-sync')();
-          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
-          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
-            Logger.success('Exiting...')
-            process.exit(0);
-        }
-        data[commandType] = parsedData.sempoperation;
-        data = mergeConfig(config, data)
-      }
-    } else {
-      data["connection"] = parsedData.connection;
-      if (fileExists(filePath)) {
-        const config = readFile(filePath)
-        if (compareConnectionConfiguration(data.connection, config.connection) > 0) {
-          var prompt = require('prompt-sync')();
-          var confirmation = prompt('Changes detected in the connection settings, do you want to overwrite (y/n):');
-          if (!['Y', 'YES'].includes(confirmation.toUpperCase()))
-            Logger.success('Exiting...')
-            process.exit(0);
-        }
-        data[commandType] = parsedData.operation;
-        data = mergeConfig(config, data)
-      }
-    }
-    writeFile(filePath, data)
-    Logger.logSuccess(`Configurations saved to ${filePath}`)
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
   } catch (error: any) {
-    Logger.logDetailedError('error: file write failed - ', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
+    Logger.logDetailedError('file write failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
     process.exit(1)
   }
 }
 
-function loadConfig(commandType: 'publish', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'receive', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'request', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'reply', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'queue', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'client-profile', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'acl-profile', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: 'client-username', loadPath: boolean | string): ClientOptions
-function loadConfig(commandType: CommandType, loadPath: boolean | string) {
+export const readFile = (path: string) => {
   try {
-    const sempOp = ['queue', 'client-profile', 'acl-profile', 'client-username'].includes(commandType);
+    const config = fs.readFileSync(path, 'utf-8')
+    return JSON.parse(config)
+  } catch (error: any) {
+    Logger.logDetailedError('read write failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const compareConfiguration = (updated: any, current: any, commands: any) => {
+  let count:number = 0;
+  // check messaging settings
+  let keys = Object.keys(updated.message);
+  keys.forEach((key) => {
+    if (!commands.length || commands.includes(key)) {
+      Logger.logInfo(`checking settings for operation - ${chalk.greenBright(key)}`)
+      let subKeys = Object.keys(updated.message[key]);
+      subKeys.forEach((subKey) => {
+        if (!defaultMetaKeys.includes(subKey)) {
+          if (current.message[key].hasOwnProperty(subKey) && updated.message[key].hasOwnProperty(subKey) && 
+              JSON.stringify(updated.message[key][subKey]) !== JSON.stringify(current.message[key][subKey]))
+            Logger.logInfo(`[${++count}] ${chalk.redBright(subKey)} of ${chalk.greenBright(key)} changed: ${current.message[key][subKey]} => ${updated.message[key][subKey]}`)
+        }
+      });
+    }
+  })
+
+  // check management settings
+  keys = Object.keys(updated.manage);
+  keys.forEach((key) => {
+    if (!commands.length || commands.includes(key)) {
+      Logger.logInfo(`checking settings for operation - ${chalk.greenBright(key)}`)
+      let subKeys = Object.keys(updated.manage[key]);
+      subKeys.forEach((subKey) => {
+        if (!defaultMetaKeys.includes(subKey)) {
+          if (current.manage[key].hasOwnProperty(subKey) && updated.manage[key].hasOwnProperty(subKey) && 
+              JSON.stringify(updated.manage[key][subKey]) !== JSON.stringify(current.manage[key][subKey]))
+            Logger.logInfo(`[${++count}] ${chalk.redBright(subKey)} of ${chalk.greenBright(key)} changed: ${current.manage[key][subKey]} => ${updated.manage[key][subKey]}`)
+        }
+      });
+    }
+  })
+
+  return count;
+}
+
+export const writeConfig = (data: any) => {
+  try {
+    const configFile = data.config;
+    delete data.config;
+
+    const filePath = processPath(`${process.cwd()}/${configFile}`)
+    if (!filePath.endsWith('.json')) filePath.concat('.json')
+    writeFile(filePath, data)
+    if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
+    else Logger.logSuccess(`updated configuration on '${decoratePath(configFile)}' successfully`)
+  } catch (error: any) {
+    Logger.logDetailedError('file write failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const saveConfig = (data: any) => {
+  try {
+    const configFile = data.config;
+    delete data.config;
+
+    var updated = false;
+    const filePath = processPath(`${process.cwd()}/${configFile}`)
+    if (!filePath.endsWith('.json')) filePath.concat('.json')
+    if (fileExists(filePath)) {
+      const config:any = readFile(filePath)
+      if (data.message.connection && compareConfiguration(data, config, []) > 0) {
+        var prompt = require('prompt-sync')();
+        var confirmation = prompt(`${chalk.whiteBright('Changes detected in the settings, do you want to overwrite (') + 
+                                    chalk.greenBright('y') + chalk.whiteBright('/') + 
+                                    chalk.redBright('n') + chalk.whiteBright('): ')}`);
+        if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+          Logger.logSuccess('exiting...')
+          process.exit(0);
+        }
+        updated = true;
+      }
+    }
+    writeFile(filePath, data)
+    if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
+    else Logger.logSuccess(`${updated ? 'updated configuration' : 'initialized configuration with default command settings'} on '${decoratePath(configFile)}' successfully`)
+  } catch (error: any) {
+    Logger.logDetailedError('file write failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const loadConfig = (loadPath: string) => {
+  try {
     const filePath = processPath(loadPath)
     if (fileExists(filePath)) {
+      Logger.info(`loading configuration '${loadPath}'`)
       const config = readFile(filePath)
-      sempOp ?
-        validateSempConfig(commandType, filePath, config) :
-        validateConfig(commandType, filePath, config)
-      return sempOp ? 
-        enrichSempConfiguration(config, commandType) :
-        enrichConfiguration(config, commandType)      
+      // TODO: validateConfig(config)
+      return config;   
     } else {
-      Logger.logDetailedError(`error: configuration file not found - `, `${filePath}`)
-      Logger.error('Exiting...')
+      Logger.logDetailedError(`configuration not found`, `${decoratePath(loadPath)}`)
+      Logger.logError('exiting...')
       process.exit(1)
     }
   } catch (error: any) {
-    Logger.logDetailedError('error: file write failed - ', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
+    Logger.logDetailedError('file read failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
     process.exit(1)
-  }
+  }  
 }
 
-export { saveConfig, updateConfig, loadConfig, parseClientOptions }
+export const createDefaultConfig = () => {
 
-export default saveConfig
+  // set the config to default config filename
+  var options:any = {}
+  options.config = defaultConfigFile
+
+  var optionsSource:any = {};
+  const defaultMessageKeys = Object.keys(defaultMessageConnectionConfig);
+  for (var i=0; i<defaultMessageKeys.length; i++) {
+    optionsSource[defaultMessageKeys[i]] = 'default'
+  }
+
+  const defaultManageKeys = Object.keys(defaultManageConnectionConfig);
+  for (var i=0; i<defaultManageKeys.length; i++) {
+    optionsSource[defaultManageKeys[i]] = 'default'
+  }
+
+  // save default configuration
+  saveConfig(buildMessageConfig(options, optionsSource, []))     
+}
+
+export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions) => {
+  try {
+    var group = getCommandGroup(cmd)
+    if (!options.config) {
+      Logger.aid(`Hoho! No default configuration found, creating one for you...`)
+      createDefaultConfig()
+
+      // load configuration
+      Logger.info(`loading configuration '${defaultConfigFile}'`)
+      return readFile(defaultConfigFile)
+    }
+
+    var commandName = options.name ? options.name : cmd
+    const filePath = processPath(options.config as string)
+    if (fileExists(filePath)) {
+      const config = readFile(filePath)
+      Logger.info(`loading '${commandName}' command from configuration '${options.config}'`)
+      if (!config[group][commandName]) {
+        Logger.logError(`could not find '${commandName}' command`)
+        // commandName = cmd
+        Logger.logError('exiting...')
+        process.exit(1)
+      }
+      if (config[group][commandName].command !== cmd) {
+        Logger.logDetailedError(`expected '${commandName}' command, but found '${config[group][commandName].command}'`, `specify a valid command name`)
+        Logger.logError('exiting...')
+        process.exit(1)
+      }
+      // TODO: validateConfig(config)
+
+      const configOptions:any = {}
+      const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
+      for (var i=0; i<connectionKeys.length; i++) {
+        configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
+      }
+      const defaultConfig = getDefaultConfig(cmd);
+      const clientKeys = Object.keys(defaultConfig);
+      for (var i=0; i<clientKeys.length; i++) {
+        configOptions[clientKeys[i]] = config[group][commandName][clientKeys[i]];
+      }
+
+      return configOptions
+    } else {
+      if (options.config === defaultConfigFile) {
+        Logger.aid(`Hoho! No default configuration found, creating one for you...`)
+        createDefaultConfig()
+  
+        // load configuration
+        Logger.info(`loading configuration '${defaultConfigFile}'`)
+        const config = readFile(defaultConfigFile)
+        const configOptions:any = {}
+        const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
+        for (var i=0; i<connectionKeys.length; i++) {
+          configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
+        }
+        const defaultConfig = getDefaultConfig(cmd);
+        const clientKeys = Object.keys(defaultConfig);
+        for (var i=0; i<clientKeys.length; i++) {
+          configOptions[clientKeys[i]] = config[group][commandName][clientKeys[i]];
+        }
+        return configOptions
+      }
+  
+      Logger.logDetailedError(`configuration not found`, `${decoratePath(filePath)}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+  } catch (error: any) {
+    Logger.logDetailedError('file read failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }  
+}
+
+export const saveOrUpdateCommandSettings = (options: MessageClientOptions | ManageClientOptions, optionsSource: any) => {
+  function cleanseMetaFields(opts: MessageClientOptions | ManageClientOptions) {
+    if (opts.message.connection) {
+      delete opts.message.connection.config;
+      delete opts.message.connection.name;
+      delete opts.message.connection.from;
+      delete opts.message.connection.to;
+    }
+    if (opts.manage.sempconnection) {
+      delete opts.manage.sempconnection.config;
+      delete opts.manage.sempconnection.name;
+      delete opts.manage.sempconnection.from;
+      delete opts.manage.sempconnection.to;
+    }
+  }
+
+  try {
+    var newConfigCreated = false;
+    var group = getCommandGroup(options.command)
+    if (!group) {
+      Logger.logDetailedError(`unknown '${options.command}' command`, `specify a valid command name`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    var commandName = options.name ? options.name : options.command
+    if (!commandName) {
+      Logger.logDetailedError(`unknown '${commandName}' command name`, `missing or invalid valid command name`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    
+    if (!options.config) options.config = defaultConfigFile
+    const filePath = processPath(options.config)
+    if (!fileExists(filePath)) {
+      newConfigCreated = true;
+      Logger.aid(`Hoho! No default configuration found, creating one for you...`)
+      createDefaultConfig()
+    }
+
+    // load current configuration
+    var current:any = loadConfig(options.config)
+
+    // build configuration from the command line parameters
+    var updated = buildMessageConfig(options, optionsSource, [ group === 'manage' ? 'sempconnection' : 'connection', options.command]);
+    
+    // absorb unchanged params from the current -> updated
+    Object.keys(optionsSource).forEach(key => {
+      if (optionsSource[key] !== 'cli')
+        updated[group][commandName][key] = current[group][commandName] ? current[group][commandName][key] : current[group][options.command][key]
+    })
+    
+    // clear meta fields
+    cleanseMetaFields(updated)
+    
+    if (options.saveTo) {
+      if (group === 'message') {
+        current.message.connection = updated.message.connection;
+        current.message[options.saveTo] = updated.message[commandName]
+      } else if (group === 'manage') {
+        current.manage.sempconnection = updated.manage.sempconnection;
+        current.manage[options.saveTo] = updated.manage[commandName]
+      }
+    } else {
+      // if update to existing command settings, do a compare
+      if (!newConfigCreated && current[group][commandName]) {
+        if (current[group][commandName].command !== updated[group][commandName].command) {
+          Logger.logDetailedError(`expected '${updated.command}' command, but found '${current[group][updated.name].command}'`, `specify a valid command name`)
+          Logger.logError('exiting...')
+          process.exit(1)
+        }
+
+        cleanseMetaFields(updated)
+        // TODO: validateConfig(config)
+      
+        // compare and save
+        var count = compareConfiguration(updated, current, [ group === 'manage' ? 'sempconnection' : 'connection', commandName ]);
+        if (count > 0) {
+          var prompt = require('prompt-sync')();
+          var confirmation = prompt(`${chalk.whiteBright('Changes detected in the settings, do you want to overwrite (') + 
+                                      chalk.greenBright('y') + chalk.whiteBright('/') + 
+                                      chalk.redBright('n') + chalk.whiteBright('): ')}`);
+          if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+            Logger.logSuccess('exiting...')
+            process.exit(0);
+          }
+        }
+      }
+
+      if (group === 'message') {
+        current.message.connection = updated.message.connection;
+        current.message[commandName] = updated.message[commandName]
+      } else if (group === 'manage') {
+        current.manage.sempconnection = updated.manage.sempconnection;
+        current.manage[commandName] = updated.manage[commandName]
+      }
+    }
+    current.config = options.config
+    writeConfig(current)
+  } catch (error: any) {
+    Logger.logDetailedError('file read failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }  
+}

@@ -1,102 +1,35 @@
 import { Logger } from '../utils/logger'
-import { checkConnectionParamsExists, checkPersistenceParams } from '../utils/parse'
-import { saveConfig, updateConfig, loadConfig } from '../utils/config'
+import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
+import { saveOrUpdateCommandSettings } from '../utils/config'
 import { ReplyClient } from '../common/reply-client'
-import defaults from '../utils/defaults';
+import { displayHelpExamplesForReply } from '../utils/examples'
 
 const reply = async (
-  options: ClientOptions
+  options: MessageClientOptions
 ) => {
   const replier = new ReplyClient(options);
   try {
     await replier.connect();
+    replier.subscribe(options.topic);
   } catch (error:any) {
-    Logger.error('Exiting...')
+    Logger.logError('exiting...')
     process.exit(1)
   }
+
+  Logger.logInfo('press Ctrl-C to exit');  
   process.stdin.resume();
   process.on('SIGINT', function () {
-    console.log('GRI')
     'use strict';
     replier.exit();
   });
 }
 
-const replier = (options: ClientOptions, optionsSource: any) => {
-  const { save, view, update, exec, helpExamples } = options
-
-  if (checkPersistenceParams(options) > 1) {
-    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
-    Logger.error('Exiting')
-    process.exit(0)
-  }
+const replier = (options: MessageClientOptions, optionsSource: any) => {
+  const { helpExamples, save, saveTo } = options
   
   if (helpExamples) {
-    console.log(`
-Examples:
-// receive request on default topic ${defaults.requestTopic} from broker 'default' 
-// at broker URL 'ws://localhost:8008' with username 'default' and password 'default' 
-// and send reply
-stm reply
-
-// receive request on default topic ${defaults.requestTopic} from broker 'default' at broker URL 'ws://localhost:8008' 
-// with username 'default' and password 'default' // and send reply
-stm reply -t ${defaults.requestTopic}
-
-// receive request on specified topics from broker 'default' at broker URL 'ws://localhost:8008' 
-// with username 'default' and password 'default' and send reply
-stm reply -U ws://localhost:8008 -v default -u default -p default -t stm/inventory stm/logistics
-stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/inventory/*" "stm/logistics/>"
-    `);
+    displayHelpExamplesForReply()
     process.exit(0);
-  }
-
-  if (typeof view === 'string') {
-    options = loadConfig('reply', view);
-    Logger.printConfig('reply', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  } else if (typeof view === 'boolean') {
-    options = loadConfig('reply', 'stm-cli-config.json');
-    Logger.printConfig('reply', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (save && options) {
-    Logger.printConfig('reply', options);
-    saveConfig('reply', options, optionsSource);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (update && options) {
-    const savedOptions = loadConfig('reply', update);
-    // rid opts of default settings
-    Object.keys(optionsSource).forEach((key:string) => {
-      if (optionsSource[key] === 'default') {
-        delete options[key];
-      }
-    })
-    
-    options = { ...savedOptions, ...options }
-    updateConfig('reply', options, optionsSource);
-    Logger.printConfig('reply', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (exec) {
-    const savedOptions = loadConfig('reply', exec);
-    // rid opts of default settings
-    Object.keys(optionsSource).forEach((key:string) => {
-      if (optionsSource[key] === 'default') {
-        delete options[key];
-      }
-    })
-    
-    options = { ...savedOptions, ...options }
-    Logger.printConfig('reply', options);
   }
 
   // check connection params found
@@ -104,6 +37,14 @@ stm reply -U ws://localhost:8008 -v default -u default -p default -t "stm/invent
 
   // check publish topic found
   // checkSubTopicExists(options);
+
+  // if subscriptions are specified, remove the default subscription at pos-0
+  checkForCliTopics('topic', options, optionsSource);
+
+  if (save || saveTo) {
+    saveOrUpdateCommandSettings(options, optionsSource)
+    process.exit(0);
+  }
 
   reply(options);
 }

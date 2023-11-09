@@ -1,19 +1,20 @@
-import { saveConfig, updateConfig, loadConfig } from '../utils/config'
 import { Logger } from '../utils/logger'
-import { checkSempConnectionParamsExists, checkSempQueueParamsExists, checkPersistenceParams,
-        checkSempQueueSubscriptionTopicExists, checkSempQueuePartitionSettings } from '../utils/parse'
 import { SempClient } from '../common/queue-client'
+import { displayHelpExamplesForQueue } from '../utils/examples'
+import { checkForCliTopics, checkSempConnectionParamsExists, checkSempQueueParamsExists, checkSempQueuePartitionSettings, 
+        checkSempQueueSubscriptionTopicExists } from '../utils/checkparams';
+import { saveOrUpdateCommandSettings } from '../utils/config';
 
 const invoke = async (
-  options: ClientOptions
+  options: ManageClientOptions
 ) => {
   const client = new SempClient(options);
   try {
     await client.manageQueue();
   } catch (error:any) {
-    Logger.logDetailedError(`error: queue creation failed with error - `, `${error.toString()}`)
-    if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
-    Logger.error('Exiting...')
+    Logger.logDetailedError(`queue ${options.operation?.toLocaleLowerCase()} failed with error`, `${error.toString()}`)
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.error('exiting...')
     process.exit(1)
   }
 
@@ -21,98 +22,14 @@ const invoke = async (
   process.exit(0);
 }
 
-const queue = (options: ClientOptions, optionsSource: any) => {
-  const { save, view, update, exec, helpExamples } = options
+const queue = (options: ManageClientOptions, optionsSource: any) => {
+  const { helpExamples, save, saveTo } = options
 
-  if (checkPersistenceParams(options) > 1) {
-    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
-    Logger.error('Exiting')
-    process.exit(0)
-  }
-  
   if (helpExamples) {
-        console.log(`
-Examples:
-// create queue on broker 'default' at broker URL 'http://localhost:8008' 
-// with semp username 'admin' and password 'admin' and default settings
-stm queue --operation create --queue-name TestQ1
-
-// create queue on broker 'default' at broker URL 'http://localhost:8008' 
-// with semp username 'admin' and password 'admin', add specified subscriptions 
-// and default queue settings
-stm queue --operation create --queue-name TestQ2 -SU http://localhost:8080 -sv default -su admin -sp admin --add-subscriptions "stm/inventory/*"
-
-// create queue on broker 'default' at broker URL 'http://localhost:8008' 
-// with semp username 'admin' and password 'admin', with egress and ingress enabled 
-// and default queue settings
-stm queue --operation create --queue-name TestQ3 --access-type EXCLUSIVE --egress-enabled true --ingress-enabled true
-
-// update queue - make it non-exclusive queue and set partition settings
-stm queue --operation update --queue-name TestQ3 --access-type NON-EXCLUSIVE --partition-count 10 --partition-rebalance-delay 10 --partition-rebalance-max-handoff-time 10
-
-// update queue - manage subscriptions
-stm queue --operation update --queue-name TestQ3 --remove-subscriptions ">" --add-subscriptions "stm/inventory/*" "stm/logistics/*" 
-
-// delete queue
-stm queue --operation delete --queue-name TestQ3
-        `);
+    displayHelpExamplesForQueue()
     process.exit(0);
   }
 
-  if (typeof view === 'string') {
-    options = loadConfig('queue', view);
-    Logger.printConfig('queue', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  } else if (typeof view === 'boolean') {
-    options = loadConfig('queue', 'stm-cli-config.json');
-    Logger.printConfig('queue', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (save && options) {
-    Logger.printConfig('queue', options);
-    saveConfig('queue', options, optionsSource);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (update && options) {
-    const savedOptions = loadConfig('queue', update);
-    // remove subscription info
-    if (typeof options.addSubscriptions === 'string' && options.addSubscriptions === "") {
-      delete options.addSubscriptions;
-      delete savedOptions.addSubscriptions;
-    } else if (typeof options.removeSubscriptions === 'string' && options.removeSubscriptions === "") {
-      delete options.removeSubscriptions
-      delete savedOptions.removeSubscriptions;
-    }
-
-    options = { ...savedOptions, ...options }
-    updateConfig('queue', options, optionsSource);
-    Logger.printConfig('queue', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (exec) {
-    const savedOptions = loadConfig('queue', exec);
-    // rid opts of default settings
-    Object.keys(optionsSource).forEach((key:string) => {
-      if (optionsSource[key] === 'default') {
-        delete options[key];
-      }
-    })
-    
-    // remove subscription info
-    if (options.addSubscriptions && !options.addSubscriptions.length) delete options.addSubscriptions
-    if (options.removeSubscriptions && !options.removeSubscriptions.length) delete options.removeSubscriptions
-    options = { ...savedOptions, ...options }
-    Logger.printConfig('queue', options);
-  }
-
-  
   // check semp connection params found
   checkSempConnectionParamsExists(options.sempUrl, options.sempVpn, options.sempUsername, options.sempPassword);
 
@@ -125,6 +42,14 @@ stm queue --operation delete --queue-name TestQ3
   // check publish topic found
   checkSempQueueSubscriptionTopicExists(options);
 
+  // if subscriptions are specified, remove the default subscription at pos-0
+  checkForCliTopics('addSubscriptions', options, optionsSource);
+
+  if (save || saveTo) {
+    saveOrUpdateCommandSettings(options, optionsSource)
+    process.exit(0);
+  }
+  
   invoke(options)
 }
 

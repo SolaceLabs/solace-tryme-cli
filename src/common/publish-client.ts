@@ -43,7 +43,7 @@ export class SolaceClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.warn("Already connected and ready to subscribe.");
+        Logger.logWarn("already connected and ready to subscribe.");
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
@@ -81,19 +81,24 @@ export class SolaceClient {
 
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Logger.success('=== Successfully connected and ready to publish events. ===');
+          Logger.logSuccess('=== successfully connected and ready to publish events. ===');
           resolve();
         });
 
         //The CONNECT_FAILED_ERROR implies a connection failure
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.logDetailedError(`error: connection failed to the message router ${sessionEvent.infoStr} -`, `check the connection parameters!`),
+          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} -`, `check the connection parameters!`),
           reject();
+        });
+        
+        //The RECONNECTING_NOTICE implies a reconnect action
+        this.session.on(solace.SessionEventCode.RECONNECTING_NOTICE, (sessionEvent: solace.SessionEvent) => {
+          Logger.logDetailedWarn(`connection failed, attempting to reconnect to the message router ${sessionEvent.infoStr} -`, `reconnect attempt in progress!`)
         });
 
         //DISCONNECTED implies the client was disconnected
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
-          Logger.success('Disconnected')
+          Logger.logSuccess('disconnected')
           if (this.session !== null) {
             this.session.dispose();
             this.session = null;
@@ -103,30 +108,31 @@ export class SolaceClient {
         //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.success("Delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+            Logger.logSuccess("delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
           else
-            Logger.success("Delivery of message confirmed.");
+            Logger.logSuccess("delivery of message confirmed.");
         });
 
         //REJECTED_MESSAGE implies that the vpn has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.warn("Delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+            Logger.logWarn("delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
           else
-            Logger.warn("Delivery of message rejected: " + sessionEvent.infoStr);
+            Logger.logWarn("delivery of message rejected: " + sessionEvent.infoStr);
         });
       } catch (error: any) {
-        Logger.logDetailedError('error: session creation failed - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('session creation failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
 
       // connect the session
       try {
-        Logger.await(`Connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
+        if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
-        Logger.logDetailedError('error: failed to connect to broker - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('failed to connect to broker - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
     });
   }
@@ -134,14 +140,14 @@ export class SolaceClient {
   // Publish a message on a topic
   publish(topicName: string, payload: string | Buffer) {
     if (!this.session) {
-      Logger.warn("Cannot publish because not connected to Solace message router!");
+      Logger.logWarn("cannot publish because not connected to Solace message router!");
       return;
     }
     try {
-      Logger.await('Publishing...');
+      Logger.await('publishing...');
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
-      message.setBinaryAttachment(payload);
+      message.setBinaryAttachment(JSON.stringify(payload));
       message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : topicName);
       this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
@@ -158,27 +164,27 @@ export class SolaceClient {
         message.setUserPropertyMap(propertyMap);    
       } 
       
-      Logger.logSuccess('Message published')
-      Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.pretty);
+      Logger.logSuccess(`message published to topic ${topicName}`)
+      Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
       this.session.send(message);
     } catch (error:any) {
-      Logger.logDetailedError('error: message publish failed - ', error.toString())
-      if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+      Logger.logDetailedError('message publish failed - ', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     }
   }
 
   // Gracefully disconnects from Solace PubSub+ Event Broker
   disconnect = () => {
-    Logger.success('Disconnecting from Solace PubSub+ Event Broker...');
+    Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
       try {
         this.session.disconnect();
       } catch (error:any) {
-        Logger.logDetailedError('error: session disconnect failed - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('session disconnect failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
     } else {
-      Logger.error('error: not connected to Solace PubSub+ Event Broker.');
+      Logger.logError('not connected to Solace PubSub+ Event Broker.');
     }
   };
   
@@ -187,7 +193,7 @@ export class SolaceClient {
       this.disconnect();
     }, 1000); // wait for 1 second to disconnect
     setTimeout(function () {
-      Logger.success('Exiting...')
+      Logger.logSuccess('exiting...')
       process.exit(0);
     }, 2000); // wait for 2 seconds to finish
   };

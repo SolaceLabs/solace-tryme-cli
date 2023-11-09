@@ -1,7 +1,7 @@
 import solace from "solclientjs";
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
-import defaults from "../utils/defaults";
+import { getDefaultTopic } from "../utils/defaults";
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -27,7 +27,7 @@ export class RequestClient {
   constructor(options:any) {
     // record the options
     this.options = options;
-    this.requestor.topicName = this.options.topic ? this.options.topic : defaults.requestTopic;;
+    this.requestor.topicName = this.options.topic ? this.options.topic : getDefaultTopic('request');
 
     //Initializing the solace client library
     let factoryProps = new solace.SolclientFactoryProperties();
@@ -40,7 +40,7 @@ export class RequestClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.warn("Already connected and ready to send requests.");
+        Logger.logWarn("already connected and ready to send requests.");
         return;
       }
 
@@ -70,15 +70,15 @@ export class RequestClient {
 
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Logger.success('=== Successfully connected and ready to send requests. ===');
+          Logger.logSuccess('=== successfully connected and ready to send requests. ===');
           resolve();
         });
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.logDetailedError(`error: connection failed to the message router ${sessionEvent.infoStr} - `, `check the connection parameters!`),
+          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} - `, `check the connection parameters!`),
           reject();
         });
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
-          Logger.success('Disconnected.');
+          Logger.logSuccess('disconnected.');
           this.requestor.subscribed = false;
           if (this.session !== null) {
             this.session.dispose();
@@ -86,35 +86,34 @@ export class RequestClient {
           }
         });
       } catch (error:any) {
-        Logger.logDetailedError('error: session creation failed - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('session creation failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
 
       // connect the session
       try {
-        Logger.await(`Connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, client-name: ${this.options.clientName}` : ''}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
+        if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
-        Logger.logDetailedError('error: failed to connect to broker - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('failed to connect to broker - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
 
     });
   }
 
   // sends one request
-  request = () => {
-    //Check if the session has been established
+  request = (topicName: string, payload: string | Buffer) => {
     if (!this.session) {
-      Logger.warn("Cannot subscribe because not connected to Solace message router!");
+      Logger.logWarn("cannot subscribe because not connected to Solace message router!");
       return;
     }
     
-    var requestText = this.options.message ? this.options.message : defaults.requestMessage;
+    Logger.await('requesting...');
     var request = solace.SolclientFactory.createMessage();
-    request.setDestination(solace.SolclientFactory.createTopicDestination(this.requestor.topicName));
-    request.setBinaryAttachment(requestText);
-    // request.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
+    request.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
+    request.setBinaryAttachment(JSON.stringify(payload));
     this.options.deliveryMode && request.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
     this.options.timeToLive && request.setTimeToLive(this.options.timeToLive);
     this.options.dmqEligible && request.setDMQEligible(true);
@@ -130,41 +129,41 @@ export class RequestClient {
       request.setUserPropertyMap(propertyMap);    
     } 
 
-    Logger.await('Sending request "' + requestText + '" to topic "' + this.requestor.topicName + '"...');
+    Logger.logSuccess(`request sent on topic ${topicName}`)
+    Logger.printMessage(request.dump(0), request.getUserPropertyMap(), request.getBinaryAttachment(), this.options.outputMode);
     try {
-      var prettify = this.options.pretty;
       this.session.sendRequest(
         request,
         5000, // 5 seconds timeout for this operation
         (session:any, message:any) => {
-          Logger.logSuccess('Reply received');
-          Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), prettify);
+          Logger.logSuccess(`reply received for request on topic '${request.getDestination()?.getName()}'`);
+          Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
           this.exit();
         },
         (session:any, event:any) => {
-          Logger.logDetailedError('error: send request failed - ', event.toString())
+          Logger.logDetailedError('send request failed - ', event.infoStr)
           this.exit();
         },
         null // not providing correlation object
       );
     } catch (error:any) {
-      Logger.logDetailedError('error: send request failed - ', error.toString())
-      if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+      Logger.logDetailedError('send request failed - ', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     }
   }
 
   // Gracefully disconnects from Solace PubSub+ Event Broker
   disconnect = () => {
-    Logger.success('Disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
+      Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
       try {
         this.session.disconnect();
       } catch (error:any) {
-        Logger.logDetailedError('error: session disconnect failed - ', error.toString())
-        if (error.cause?.message) Logger.logDetailedError(`error: `, `${error.cause?.message}`)
+        Logger.logDetailedError('session disconnect failed - ', error.toString())
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
     } else {
-      Logger.error('error: not connected to Solace PubSub+ Event Broker.');
+      Logger.logError('not connected to Solace PubSub+ Event Broker.');
     }
   };
 
@@ -173,7 +172,7 @@ export class RequestClient {
       this.disconnect();
     }, 1000); // wait for 1 second to disconnect
     setTimeout(function () {
-      Logger.success('Exiting...')
+      Logger.logSuccess('exiting...')
       process.exit(0);
     }, 2000); // wait for 2 seconds to finish
   };

@@ -1,123 +1,79 @@
 import concat from 'concat-stream'
-import { checkPersistenceParams, checkConnectionParamsExists } from '../utils/parse'
-import { saveConfig, updateConfig, loadConfig } from '../utils/config'
+import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists, checkSaveParameters } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
-import defaults from '../utils/defaults';
+import { defaultMessage, delay } from '../utils/defaults';
+import { displayHelpExamplesForPublish } from '../utils/examples';
+import { saveOrUpdateCommandSettings } from '../utils/config';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const send = async (
-  options: ClientOptions
+const publish = async (
+  options: MessageClientOptions,
+  optionsSource: any
 ) => {
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
   try {
     await publisher.connect()
   } catch (error:any) {
-    Logger.error('Exiting...')
+    Logger.logError('exiting...')
     process.exit(1)
   }
 
-  let message = options.message as string;
-  for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
-    if (message === defaults.message)
-      publisher.publish(options.topic, (count && count > 1) ? message.concat(` [${n}]`) : message);
-    else
-      publisher.publish(options.topic, message);
+  var message:any = options.message as string;
+  message = optionsSource.message === 'default' ? defaultMessage : message;
 
-    if (delay && interval) await delay(interval)
+  if (count === 1) {
+    for (var i=0; i<options.topic.length; i++) {
+      publisher.publish(options.topic[i], message);
+    } 
+  } else {
+    for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
+      for (var i=0; i<options.topic.length; i++) {
+        publisher.publish(options.topic[i], message);
+      }
+      if (interval) await delay(interval)
+    }
   }
 
   publisher.disconnect();
 }
 
-const publisher = (options: ClientOptions, optionsSource: any) => {
-  const { save, view, update, exec, helpExamples } = options
-  
-  if (checkPersistenceParams(options) > 1) {
-    Logger.error('Invalid configuration request, cannot mix save, update, view and exec operations')
-    Logger.error('Exiting')
-    process.exit(0)
-  }
+const publisher = (options: MessageClientOptions, optionsSource: any) => {
+  const { helpExamples, save, saveTo } = options
 
   if (helpExamples) {
-        console.log(`
-Examples:
-// publish a message to broker 'default' at broker URL 'ws://localhost:8008' 
-// with username 'default' and password 'default'
-stm publish
-
-// publish on topic ${defaults.publishTopic} to broker 'default' at broker URL 'ws://localhost:8008' 
-// with username 'default' and password 'default'
-stm publish -t ${defaults.publishTopic}
-
-// publish 5 messages with 3 sec interval between publish on topic '${defaults.publishTopic}' 
-// to broker 'default' at broker URL 'ws://localhost:8008' with username 'default' and password 'default'.
-stm publish -U ws://localhost:8008 -v default -u default -p default -t ${defaults.publishTopic} -c 5 -i 3000
-        `);
+    displayHelpExamplesForPublish()
     process.exit(0);
-  }
-
-  if (typeof view === 'string') {
-    options = loadConfig('publish', view);
-    Logger.printConfig('publish', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  } else if (typeof view === 'boolean') {
-    options = loadConfig('publish', 'stm-cli-config.json');
-    Logger.printConfig('publish', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-
-  }
-
-  if (save && options) {
-    Logger.printConfig('publish', options);
-    saveConfig('publish', options, optionsSource);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (update && options) {
-    Logger.printConfig('publish', options);
-    const savedOptions = loadConfig('publish', update);
-    options = { ...savedOptions, ...options }
-    updateConfig('publish', options, optionsSource);
-    Logger.printConfig('publish', options);
-    Logger.success('Exiting...')
-    process.exit(0);
-  }
-
-  if (exec) {
-    const savedOptions = loadConfig('publish', exec);
-    // rid opts of default settings
-    Object.keys(optionsSource).forEach((key:string) => {
-      if (optionsSource[key] === 'default') {
-        delete options[key];
-      }
-    })
-    
-    options = { ...savedOptions, ...options }
-    Logger.printConfig('publish', options);
   }
 
   // check connection params found
   checkConnectionParamsExists(options.url, options.vpn, options.username, options.password);
 
   // check publish topic found
-  // checkPubTopicExists(options.topic);
+  checkPubTopicExists(options.topic);
+
+  // check save options
+  checkSaveParameters(options);
+
+  if (save || saveTo) {
+    saveOrUpdateCommandSettings(options, optionsSource)
+    process.exit(0);
+  }
+
+  // if subscriptions are specified, remove the default subscription at pos-0
+  checkForCliTopics('topic', options, optionsSource);
 
   if (options.stdin) {
     Logger.ctrlDToPublish();
     process.stdin.pipe(
       concat((data) => {
         options.message = data.toString().slice(0, -1)
-        send(options)
+        optionsSource.message = 'cli'
+        publish(options, optionsSource)
       }),
     )
   } else {
-    send(options)
+    publish(options, optionsSource)
   }
 }
 

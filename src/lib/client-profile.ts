@@ -1,7 +1,7 @@
 import { Logger } from '../utils/logger'
-import { SempClient } from '../common/aclprofile-client'
-import { displayHelpExamplesForAclProfile } from '../utils/examples'
-import { checkSempAclProfileParamsExists, checkSempConnectionParamsExists } from '../utils/checkparams';
+import { SempClient } from '../common/clientprofile-client'
+import { displayHelpExamplesForClientProfile } from '../utils/examples'
+import { checkSempClientProfileParamsExists, checkSempConnectionParamsExists } from '../utils/checkparams';
 import { saveOrUpdateCommandSettings } from '../utils/config';
 
 const invoke = async (
@@ -9,9 +9,9 @@ const invoke = async (
 ) => {
   const client = new SempClient(options);
   try {
-    await client.manageAclProfile();
+    await client.manageClientProfile();
   } catch (error:any) {
-    Logger.logDetailedError(`acl-profile ${options.operation?.toLocaleLowerCase()} failed with error`, `${error.toString()}`)
+    Logger.logDetailedError(`client-profile ${options.operation?.toLocaleLowerCase()} failed with error`, `${error.toString()}`)
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.error('exiting...')
     process.exit(1)
@@ -21,19 +21,19 @@ const invoke = async (
   process.exit(0);
 }
 
-const aclProfile = (options: ManageClientOptions, optionsSource: any) => {
+const clientProfile = (options: ManageClientOptions, optionsSource: any) => {
   const { helpExamples, save, saveTo } = options
 
   if (helpExamples) {
-    displayHelpExamplesForAclProfile()
+    displayHelpExamplesForClientProfile()
     process.exit(0);
   }
 
   // check semp connection params found
   checkSempConnectionParamsExists(options.sempUrl, options.sempVpn, options.sempUsername, options.sempPassword);
 
-  // check semp acl-profile operation params
-  checkSempAclProfileParamsExists(options);
+  // check semp client-profile operation params
+  checkSempClientProfileParamsExists(options);
 
   if (save || saveTo) {
     saveOrUpdateCommandSettings(options, optionsSource)
@@ -43,6 +43,6 @@ const aclProfile = (options: ManageClientOptions, optionsSource: any) => {
   invoke(options)
 }
 
-export default aclProfile
+export default clientProfile
 
-export { aclProfile }
+export { clientProfile }

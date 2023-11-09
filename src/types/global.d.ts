@@ -4,7 +4,7 @@ declare global {
 
   type CommandType = 'publish' | 'receive' | 'request' | 'reply' | 
                       'queue' | 'client-profile' | 'acl-profile' | 'client-username' |
-                      'connection' | 'sempconnection'
+                      'connection' | 'sempconnection' | 'all'
 
   type SempOperationType = 'CREATE' | 'UPDATE' | 'DELETE'
 
@@ -12,60 +12,42 @@ declare global {
 
   type MessageConsumerAcknowledgeMode = solace.MessageConsumerAcknowledgeMode.AUTO | solace.MessageConsumerAcknowledgeMode.CLIENT
 
-  type OutputMode = 'pretty' | 'default'
+  type MessageDeliveryModeType = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.NON_PERSISTENT | solace.MessageDeliveryModeType.PERSISTENT
 
-  interface SempConnectionOptions {
-    // connect options
-    sempUrl: string
-    sempVpn: string
-    sempUsername: string
-    sempPassword: string
+  type OutputMode = 'pretty' | 'compact'
+
+  interface StmConfigOptions {
+    // broker connect options
+    url: string | undefined
+    vpn: string | undefined
+    username: string | undefined
+    password: string | undefined
     
-  }
+    // semp connect options
+    sempUrl: string | undefined
+    sempVpn: string | undefined
+    sempUsername: string | undefined
+    sempPassword: string | undefined
 
-  interface SempOperationOptions {
-    // operation
-    operation: CommandType
+    // file/command options
+    config: string | undefined
+    name: string | undefined
+    from: string | undefined
+    to: string | undefined
 
-    // QUEUE
-    addSub: boolean
-    removeSub: boolean
-
-    queueName?: string
-    accessType?: string
-    addSubscriptions?: string | string[] | any
-    removeSubscriptions?: string | string[] | any
-    deadMessageQueue?: string
-    deliveryCountEnabled?: string
-    egressEnabled?: string
-    ingressEnabled?: string
-    respectTtlEnabled?: string
-    redeliveryEnabled?: string
-    maxRedeliveryCount?: number
-    partitionCount?: number
-    partitionRebalanceDelay?: number
-    partitionRebalanceMaxHandoffTime?: number
-    nonOwnerPermission?: string
-    
-    // Help Examples
+    // help examples
     helpExamples?: boolean
   }
-  
-  interface ConnectionOptions {
-    // connect options
-    url: string
-    vpn: string
-    username: string
-    password: string
 
+  interface MessageConnectionOptions {
     connectionTimeout?: number
     connectionRetries?: number
 
     reconnectRetries?: number
     reconnectRetryWait?: number
 
-    keepAlive?: number
-    keepAliveIntervalLimit?: number
+    keepalive?: number
+    keepaliveIntervalLimit?: number
 
     readTimeout?: number
 
@@ -85,10 +67,10 @@ declare global {
 
     logLevel?: string
   }
-   
-  interface OperationOptions {
+
+  interface MessageOperationOptions {
     // operation
-    mode: CommandType
+    command: CommandType
 
     // misc.
     count?: number
@@ -96,12 +78,12 @@ declare global {
     clientName?: string
     description?: string
 
-    // topic info
-    topic: string | string[] | any
-    queue: any
-    createIfMissing: boolean
+    // topic
+    topic: string[] | any
 
-    // publish options
+    // messaging operation options
+    queue: any
+    createIfMissing: boolean | undefined
     message?: string | Buffer
     stdin?: boolean
     timeToLive?: number
@@ -109,31 +91,97 @@ declare global {
     messageId?: string
     messageType?: string
     correlationKey?: string
-    deliveryMode?: string
+    deliveryMode?: number
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
 
-    // Receiver options
-    replyMessage?: string | Buffer
-    pretty?: boolean
+    outputMode?: string
 
     // Help Examples
-    helpExamples?: boolean
+    helpMore?: boolean
   }
-  interface ConfigOptions {
-    // config options
-    save?: boolean | string
-    view?: boolean | string
-    update?: boolean | string
-    exec?: boolean | string
-  }
-  interface ClientOptions extends SempConnectionOptions, SempOperationOptions, ConnectionOptions, OperationOptions, ConfigOptions {
+  interface MessageInitOptions extends StmConfigOptions {
     [key: string]: any | undefined
   }
 
-  type Config = {
-    [key in CommandType]?:
-      | ClientOptions
+  interface MessageClientOptions extends StmConfigOptions, MessageConnectionOptions, MessageOperationOptions {
+    [key: string]: any | undefined
+  }
+  
+    
+  interface ManageConnectionOptions {
+    // connect options
+    // already captured in StmConfigOptions
+  }
+
+  interface ManageOperationOptions {
+    // operation
+    command: CommandType
+    operation?: string
+    save?: boolean
+    saveTo?: boolean
+    create?: boolean
+    update?: boolean
+    delete?: boolean
+
+    // QUEUE
+    queue?: string
+    owner?: string
+    addSubscriptions?: string | string[] | any
+    removeSubscriptions?: string | string[] | any
+    listSubscriptions?: boolean
+    accessType?: string
+    deadMessageQueue?: boolean
+    deliveryCountEnabled?: boolean
+    deliveryDelay?: number
+    egressEnabled?: boolean
+    ingressEnabled?: boolean
+    maxMsgSize?: number
+    maxMsgSpoolUsage?: number
+    maxRedeliveryCount?: number
+    partitionCount?: number
+    partitionRebalanceDelay?: number
+    partitionRebalanceMaxHandoffTime?: number
+    permission?: string
+    redeliveryEnabled?: boolean
+    respectTtlEnabled?: boolean
+
+    // ACL Profile
+    aclProfileName?: string
+    clientConnectDefaultAction?: string
+    publishTopicDefaultAction?: string
+    subscribeTopicDefaultAction?: string
+  
+    // Client Profile
+    clientProfileName?: string
+    allowGuaranteedEndpointCreateDurability?: string
+    allowGuaranteedEndpointCreateEnabled?: boolean
+    allowGuaranteedMsgReceiveEnabled?: boolean
+    allowGuaranteedMsgSendEnabled?: boolean
+    compressionEnabled?: boolean
+    elidingEnabled?: boolean
+    maxEgressFlowCount?: number
+    maxIngressFlowCount?: number
+    maxSubscriptionCount?: number
+    rejectMsgToSenderOnNoSubscriptionMatchEnabled?: boolean
+
+    // Client Username
+    // aclProfileName - already present in the ACL Profile
+    // clientProfileName - already present in the Client Profile
+    clientUsername?: string
+    enabled?: boolean
+    clientPassword?: string
+
+    // Help Examples
+    helpMore?: boolean
+    helpExamples?: boolean
+  }
+  interface ManageInitOptions extends StmConfigOptions {
+    [key: string]: any | undefined
+  }
+
+  interface ManageClientOptions extends StmConfigOptions, ManageConnectionOptions, ManageOperationOptions {
+    [key: string]: any | undefined
   }
 
 }
