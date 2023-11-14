@@ -62,7 +62,7 @@ For details on CLI parameters, refer to the [parameters](PARAMETERS.md) document
 
 You can also use:
 - _-h_ or _--help_ option on the command to see basic parameters.
-- _-hm_ or _--help_more_ option on the command to see other (advanced) parameters.
+- _-hm_ or _--help-more_ option on the command to see other (advanced) parameters.
 
 
 ### Examples
