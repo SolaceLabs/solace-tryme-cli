@@ -1,0 +1,175 @@
+{
+  "message": {
+    "connection": {
+      "command": "connection",
+      "url": "ws://localhost:8008",
+      "vpn": "default",
+      "username": "default",
+      "password": "default",
+      "compressionLevel": 0,
+      "connectTimeoutInMsecs": 3000,
+      "connectRetries": 3,
+      "connectRetriesPerHost": 3,
+      "generateReceiveTimestamps": false,
+      "generateSendTimestamps": false,
+      "generateSequenceNumber": false,
+      "ignoreDuplicateSubscriptionError": true,
+      "ignoreSubscriptionNotFoundError": true,
+      "includeSenderId": false,
+      "keepAliveIntervalInMsecs": 3000,
+      "keepAliveIntervalsLimit": 3,
+      "readTimeoutInMsecs": 10000,
+      "reapplySubscriptions": false,
+      "reconnectRetries": 3,
+      "reconnectRetryWaitInMsecs": 3000,
+      "sendBufferMaxSize": 65536,
+      "logLevel": "ERROR"
+    },
+    "publish": {
+      "command": "publish",
+      "acknowledgeImmediately": false,
+      "asReplyMessage": false,
+      "deliveryMode": 0,
+      "dmqEligible": true,
+      "elidingEligible": false,
+      "count": 1,
+      "interval": 3000,
+      "description": "Publish application created via Solace Try-Me CLI",
+      "stdin": false,
+      "topic": [
+        "stm/cli/topic"
+      ],
+      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
+      "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeTimeoutInMsecs": 2000,
+      "enabled": false,
+      "windowSize": 50,
+      "outputMode": "COMPACT"
+    },
+    "receive": {
+      "command": "receive",
+      "acknowledgeImmediately": false,
+      "asReplyMessage": false,
+      "deliveryMode": 0,
+      "dmqEligible": true,
+      "elidingEligible": false,
+      "count": 1,
+      "interval": 3000,
+      "description": "Receive application created via Solace Try-Me CLI",
+      "topic": [
+        "stm/cli/topic"
+      ],
+      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
+      "acknowledgeMode": "AUTO",
+      "acknowledgeTimeoutInMsecs": 2000,
+      "enabled": false,
+      "windowSize": 50,
+      "outputMode": "COMPACT"
+    },
+    "request": {
+      "command": "request",
+      "description": "Request application created via Solace Try-Me CLI",
+      "topic": [
+        "stm/cli/request"
+      ],
+      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
+      "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeTimeoutInMsecs": 2000,
+      "enabled": false,
+      "windowSize": 50,
+      "outputMode": "COMPACT"
+    },
+    "reply": {
+      "command": "reply",
+      "description": "Reply application created via Solace Try-Me CLI",
+      "topic": [
+        "stm/cli/request"
+      ],
+      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
+      "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeTimeoutInMsecs": 2000,
+      "enabled": false,
+      "windowSize": 50,
+      "outputMode": "COMPACT"
+    }
+  },
+  "manage": {
+    "sempconnection": {
+      "command": "sempconnection",
+      "sempUrl": "http://localhost:8080",
+      "sempVpn": "default",
+      "sempUsername": "admin",
+      "sempPassword": "admin"
+    },
+    "queue": {
+      "command": "queue",
+      "accessType": "exclusive",
+      "consumerAckPropagationEnabled": true,
+      "deadMsgQueue": "#DEAD_MSG_QUEUE",
+      "deliveryCountEnabled": false,
+      "deliveryDelay": 0,
+      "egressEnabled": true,
+      "ingressEnabled": true,
+      "maxBindCount": 1000,
+      "maxDeliveredUnackedMsgsPerFlow": 10000,
+      "maxMsgSize": 10000000,
+      "maxMsgSpoolUsage": 5000,
+      "maxRedeliveryCount": 0,
+      "maxTtl": 0,
+      "owner": "",
+      "partitionCount": 0,
+      "partitionRebalanceDelay": 5,
+      "partitionRebalanceMaxHandoffTime": 3,
+      "permission": "consume",
+      "queue": "stm-queue",
+      "redeliveryDelayEnabled": false,
+      "redeliveryDelayInitialInterval": 1000,
+      "redeliveryDelayMaxInterval": 64000,
+      "redeliveryDelayMultiplier": 200,
+      "redeliveryEnabled": true,
+      "rejectLowPriorityMsgEnabled": false,
+      "rejectLowPriorityMsgLimit": 0,
+      "rejectMsgToSenderOnDiscardBehavior": "when-queue-enabled",
+      "respectMsgPriorityEnabled": false,
+      "respectTtlEnabled": false,
+      "addSubscriptions": [
+        "stm/cli/topic"
+      ],
+      "removeSubscriptions": [],
+      "listSubscriptions": false,
+      "operation": "CREATE"
+    },
+    "client-profile": {
+      "command": "client-profile",
+      "clientProfile": "stm-client-profile",
+      "allowGuaranteedEndpointCreateDurability": "all",
+      "allowGuaranteedEndpointCreateEnabled": true,
+      "allowGuaranteedMsgReceiveEnabled": true,
+      "allowGuaranteedMsgSendEnabled": true,
+      "compressionEnabled": true,
+      "elidingEnabled": true,
+      "maxEgressFlowCount": 1000,
+      "maxIngressFlowCount": 1000,
+      "maxSubscriptionCount": 256,
+      "rejectMsgToSenderOnNoSubscriptionMatchEnabled": true,
+      "operation": "CREATE"
+    },
+    "acl-profile": {
+      "command": "acl-profile",
+      "aclProfile": "stm-acl-profile",
+      "clientConnectDefaultAction": "allow",
+      "publishTopicDefaultAction": "allow",
+      "subscribeTopicDefaultAction": "allow",
+      "operation": "CREATE"
+    },
+    "client-username": {
+      "command": "client-username",
+      "clientUsername": "stm-client",
+      "aclProfile": "stm-acl-profile",
+      "clientProfile": "stm-client-profile",
+      "enabled": true,
+      "clientPassword": "",
+      "operation": "CREATE"
+    }
+  }
+}

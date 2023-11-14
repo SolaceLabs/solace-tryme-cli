@@ -5,6 +5,7 @@ export class SempClient {
   session:any = { hello: 1};
   sempBody:any = {};
   sempAuth:any = null;
+  urlFixture = '';
 
   constructor(options:any) {
     // record the options
@@ -22,10 +23,12 @@ export class SempClient {
    */
   async manageQueue() {
     let sempUrl = this.options.sempUrl;
+    this.urlFixture = (sempUrl.toLowerCase().indexOf('/semp/v2/config') < 0) ? '/SEMP/v2/config' : '';
     switch (this.options.operation.toUpperCase()) {
-      case 'CREATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues`; break;
-      case 'UPDATE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}`; break;
-      case 'DELETE': sempUrl += `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}`; break;
+      case 'LIST': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues`; break;
+      case 'CREATE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues`; break;
+      case 'UPDATE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}`; break;
+      case 'DELETE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}`; break;
     }
 
     this.sempBody = {            
@@ -49,6 +52,38 @@ export class SempClient {
       permission: this.options?.permission,
     }
   
+    if (this.options.operation.toUpperCase() === 'LIST') {
+      await fetch(sempUrl, {
+        method: "GET",
+        credentials: 'same-origin',
+        cache: 'no-cache',
+        mode: "cors",      
+        headers: {
+          accept: 'application/json;charset=UTF-8',
+          'content-type': 'application/json',
+          'Authorization': 'Basic ' + btoa(this.options?.sempUsername + ":" + this.options?.sempPassword)
+        },
+      })
+      .then(async (response) => {
+        const data = await response.json();
+        if (data.meta.error) {
+          Logger.logDetailedError(`get queues list failed with error`, `${data.meta.error.description.split('Problem with GET: ').pop()}`)
+          Logger.error('exiting...')
+          process.exit(1)
+        } else {
+          Logger.logSuccess(`get queues list successful`)
+          let result = data.data;
+          var queues = "";
+          result.forEach((q:any) => queues += `\n${q.queueName}`)
+          Logger.logDetailedSuccess(`${result.length} queue(s) found on vpn ${this.options.sempVpn}`, queues)
+        }
+      })
+      .catch((error) => {
+        Logger.logDetailedError(`get queues list failed with error`, `${error.toString()}`)
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        throw error;
+      });
+    }
     if (this.options.operation.toUpperCase() === 'CREATE') {
       await fetch(sempUrl, {
         method: "POST",
@@ -146,7 +181,7 @@ export class SempClient {
    */
   async manageSubscription() {
     if (this.options.addSub) {
-      var sempUrl = this.options.sempUrl + `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions`;
+      var sempUrl = this.options.sempUrl + `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions`;
       for (var i=0; i<this.options.addSubscriptions.length; i++) {
         await fetch(sempUrl, {
           method: "POST",
@@ -181,7 +216,7 @@ export class SempClient {
 
     if (this.options.removeSub) {
       for (var i=0; i<this.options.removeSubscriptions.length; i++) {
-        var sempUrl = this.options.sempUrl + `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions/${encodeURIComponent(this.options.removeSubscriptions[i])}`;
+        var sempUrl = this.options.sempUrl + `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions/${encodeURIComponent(this.options.removeSubscriptions[i])}`;
         await fetch(sempUrl, {
           method: "DELETE",
           credentials: 'same-origin',
@@ -209,7 +244,7 @@ export class SempClient {
     }
 
     if (this.options.listSub) {
-      var sempUrl = this.options.sempUrl + `/SEMP/v2/config/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions`;
+      var sempUrl = this.options.sempUrl + `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${this.options.queue}/subscriptions`;
       await fetch(sempUrl, {
         method: "GET",
         credentials: 'same-origin',

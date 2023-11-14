@@ -9,12 +9,7 @@ Solace Try-Me CLI is a CLI Client on the command line to publish and receive mes
 ### Quick Start
 
 Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the executables under **Assets**. Pick the binary based on your OS and download. Rename the downloaded binary as **stm** and move the file to a folder that is in the *PATH* or update the path to contain the folder where the binary file is present.
-<style>
-td, th {
-   border: none!important;
-   height: auto;
-}
-</style>
+
 
 ### Command Structure
 
@@ -22,47 +17,55 @@ The following view captures the command hierarchy of the *stm* cli tool.
 
 ```
 stm/
-├── --version                                 /* output the version number */
-├── -h, --help                                /* display help for command */
-├── publish [options]                         /* Execute a publish command */
+├── --version                                       /* output the version number */
+├── -h, --help                                      /* display help for command */
+├── publish [options]                               /* Execute a publish command */
 │   └── [Connection, Session, Publish, Message and Configuration parameters]
-├── receive [options]                         /* Execute a receive command */
+├── receive [options]                               /* Execute a receive command */
 │   └── [Connection, Queue, Session and Configuration parameters]
-├── request [options]                         /* Execute a request command */
+├── request [options]                               /* Execute a request command */
 │   └── [Connection, Session, Request, Message and Configuration parameters]
-├── reply [options]                           /* Execute a reply command */
+├── reply [options]                                 /* Execute a reply command */
 │   └── [Connection, Session, Reply, Message and Configuration parameters]
-├── config                                    /* Manage command configurations */
-│   ├── init [options]                        /* Initialize command samples */
+├── config                                          /* Manage command configurations */
+│   ├── init [options]                              /* Initialize command samples */
 │   │   └── [Configuration parameters]
-│   ├── list [options]                        /* List command samples */
+│   ├── list [options]                              /* List command samples */
 │   │   └── [Configuration parameters]
-│   ├── view [options]                        /* View command sample */
+│   ├── view [options]                              /* View command sample */
 │   │   └── [Configuration parameters]
-│   ├── delete [options]                      /* Delete command sample */
+│   ├── delete [options]                            /* Delete command sample */
 │   │   └── [Configuration parameters]
-│   └── help [command]                        /* display help for command */  
-├── manage                                    /* Manage broker connection and resources */
-│   ├── queue [options]                       /* Manage a queue */
+│   └── help [command]                              /* display help for command */  
+├── manage                                          /* Manage broker connection and resources */
+│   ├── queue [options]                             /* Manage a queue */
 │   │   └── [SEMP Connection, Operation, Queue and Configuration parameters]
-│   ├── client-profile [options]              /* Manage a client-profile */
+│   ├── client-profile [options]                    /* Manage a client-profile */
 │   │   └── [SEMP Connection, Operation, Client Profile and Configuration parameters]
-│   ├── acl-profile [options]                 /* Manage a acl-profile */
+│   ├── acl-profile [options]                       /* Manage a acl-profile */
 │   │   └── [SEMP Connection, Operation, ACL Profile and Configuration parameters]
-│   ├── client-username [options]             /* Manage a client username */
+│   ├── client-username [options]                   /* Manage a client username */
 │   │   └── [SEMP Connection, Operation, Client Username and Configuration parameters]
-│   ├── vpn-connection [options]              /* Manage VPN connection */
+│   ├── vpn-connection [options]                    /* Manage VPN connection */
 │   │   └── [Connection, Session and Configuration parameters]
-│   ├── semp-connection [options]             /* Manage SEMP connection */
+│   ├── semp-connection [options]                   /* Manage SEMP connection */
 │   │   └── [SEMP Connection, Session and Configuration parameters]
-│   └── help [command]                        /* display help for command */
-└── help [command]                            /* display help for command */
+│   └── help [command]                              /* display help for command */
+└── help [command]                                  /* display help for command */
 ```
+
+
+
+### Examples
 
 For details on CLI parameters, refer to the [parameters](PARAMETERS.md) documentation.
 
+You can also use:
+- _-h_ or _--help_ option on the command to see basic parameters.
+- _-hm_ or _--help_more_ option on the command to see other (advanced) parameters.
 
-###Examples
+
+### Examples
 
 Refer to the [examples](EXAMPLES.md) page for sample commands. 
 

@@ -160,7 +160,7 @@ export const checkSempQueuePartitionSettings = (options: ManageClientOptions) =>
 
 export const checkSempQueueParamsExists = (options: ManageClientOptions) => {
   if (!options.operation) {
-    Logger.error("missing parameter, --operation CREATE, UPDATE or DELETE is expected")
+    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -174,7 +174,7 @@ export const checkSempQueueParamsExists = (options: ManageClientOptions) => {
 
 export const checkSempClientProfileParamsExists = (options: ManageClientOptions) => {
   if (!options.operation) {
-    Logger.error("missing parameter, --operation CREATE, UPDATE or DELETE is expected")
+    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -188,7 +188,7 @@ export const checkSempClientProfileParamsExists = (options: ManageClientOptions)
 
 export const checkSempAclProfileParamsExists = (options: ManageClientOptions) => {
   if (!options.operation) {
-    Logger.error("missing parameter, --operation CREATE, UPDATE or DELETE is expected")
+    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -202,7 +202,7 @@ export const checkSempAclProfileParamsExists = (options: ManageClientOptions) =>
 
 export const checkSempClientUsernameParamsExists = (options: ManageClientOptions) => {
   if (!options.operation) {
-    Logger.error("missing parameter, --operation CREATE, UPDATE or DELETE is expected")
+    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
     Logger.error('exiting...')
     process.exit(1)
   }

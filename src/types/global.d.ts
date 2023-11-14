@@ -6,7 +6,7 @@ declare global {
                       'queue' | 'client-profile' | 'acl-profile' | 'client-username' |
                       'connection' | 'sempconnection' | 'all'
 
-  type SempOperationType = 'CREATE' | 'UPDATE' | 'DELETE'
+  type SempOperationType = 'LIST | CREATE' | 'UPDATE' | 'DELETE'
 
   type PublisherAcknowledgeMode = solace.MessagePublisherAcknowledgeMode.PER_MESSAGE | solace.MessagePublisherAcknowledgeMode.WINDOWED
 
