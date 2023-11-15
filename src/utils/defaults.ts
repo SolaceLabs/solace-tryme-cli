@@ -5,10 +5,7 @@ export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve
 export const defaultMetaKeys = [
   'config',
   'name',
-  'from',
-  'to',
   'save',
-  'saveTo'
 ]
 
 export const defaultMessageHint = JSON.stringify({
@@ -39,10 +36,10 @@ export const defaultRequestMessage = {
 
 export const getDefaultTopic = (commandType: CommandType) => {
   switch (commandType) {
-    case 'publish': return 'stm/cli/topic';
-    case 'receive': return 'stm/cli/topic';
-    case 'request': return 'stm/cli/request';
-    case 'reply': return 'stm/cli/request';
+    case 'publish': return 'solace/try/me';
+    case 'receive': return 'solace/try/me';
+    case 'request': return 'solace/try/me/request';
+    case 'reply': return 'solace/try/me/request';
   }
 }
 
@@ -64,9 +61,11 @@ export const commandClientUsername = 'client-username'
 export const commandGroupMessage = 'message'
 export const commandGroupManage = 'manage'
 export const commandGroupUnknown = 'unknown'
-export const baseCommands = [ commandConnection, commandPublish, commandReceive, commandReply,
-                              commandSempConnection, commandQueue, commandAclProfile, commandClientUsername,
+export const baseCommands = [ commandConnection, commandPublish, commandReceive, commandRequest, commandReply,
+                              commandSempConnection, commandQueue, commandAclProfile, commandClientProfile, commandClientUsername,
                               commandGroupMessage, commandGroupManage ]
+export const messagingCommands = [ commandPublish, commandReceive, commandRequest, commandReply ]
+export const manageCommands = [ commandQueue, commandAclProfile, commandClientProfile, commandClientUsername ]
 
 export const getCommandGroup = (command:any) => {
   if ([ commandConnection, commandPublish, commandReceive, commandRequest, commandReply].includes(command))
@@ -88,8 +87,8 @@ export const defaultMessageConnectionConfig:any = {
 
   // connection settings
   compressionLevel: 0,
-  connectTimeoutInMsecs: 3000,
-  connectRetries: 3,
+  connectionTimeout: 3000,
+  connectionRetries: 3,
   connectRetriesPerHost: 3,
   generateReceiveTimestamps: false,
   generateSendTimestamps: false,
@@ -97,22 +96,19 @@ export const defaultMessageConnectionConfig:any = {
   ignoreDuplicateSubscriptionError: true,
   ignoreSubscriptionNotFoundError: true,
   includeSenderId: false,
-  keepAliveIntervalInMsecs: 3000,
-  keepAliveIntervalsLimit: 3,
-  readTimeoutInMsecs: 10000,
-  reapplySubscriptions: false,
+  keepAliveInterval: 3000,
+  keepAliveIntervalLimit: 3,
+  readTimeout: 10000,
+  reapplySubscriptions: true,
   reconnectRetries: 3,
-  reconnectRetryWaitInMsecs: 3000,
+  reconnectRetryWait: 3000,
   sendBufferMaxSize: 65536,
   // log level
   logLevel: 'ERROR',
 
   // place holders
   config: '',
-  from: '',
-  to: '',
   save: false,
-  saveTo: false
 }
 
 export const defaultMessageConfig:any = {
@@ -150,7 +146,7 @@ export const defaultMessagePublishConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'PER_MESSAGE',
-  acknowledgeTimeoutInMsecs: 2000,
+  acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
   outputMode: 'COMPACT',
@@ -172,7 +168,7 @@ export const defaultMessageReceiveConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'AUTO',
-  acknowledgeTimeoutInMsecs: 2000,
+  acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
   outputMode: 'COMPACT',
@@ -191,7 +187,7 @@ export const defaultMessageRequestConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'PER_MESSAGE',
-  acknowledgeTimeoutInMsecs: 2000,
+  acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
   outputMode: 'COMPACT',
@@ -210,7 +206,7 @@ export const defaultMessageReplyConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'PER_MESSAGE',
-  acknowledgeTimeoutInMsecs: 2000,
+  acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
   outputMode: 'COMPACT',
@@ -228,10 +224,7 @@ export const defaultManageConnectionConfig:any = {
 
   // place holders
   config: '',
-  from: '',
-  to: '',
   save: false,
-  saveTo: false,
 
   command: 'sempconnection',
   name: 'sempconnection',
@@ -271,7 +264,9 @@ export const defaultManageQueueConfig:any = {
   removeSubscriptions: [],
   listSubscriptions: false,
   
-  operation: 'CREATE',
+  // operations
+  operation: "CREATE",
+  
   command: 'queue',
   name: 'queue',
 }
@@ -282,7 +277,9 @@ export const defaultManageAclProfileConfig:any = {
   publishTopicDefaultAction: "allow",
   subscribeTopicDefaultAction: "allow",
 
-  operation: 'CREATE',
+  // operations
+  operation: "CREATE",
+  
   command: 'acl-profile',
   name: 'acl-profile',
 }
@@ -301,7 +298,9 @@ export const defaultManageClientProfileConfig:any = {
   rejectMsgToSenderOnNoSubscriptionMatchEnabled: true,
 
 
-  operation: 'CREATE', 
+  // operations
+  operation: "CREATE",
+  
   command: 'client-profile',
   name: 'client-profile',
 }
@@ -313,7 +312,9 @@ export const defaultManageClientUsernameConfig:any = {
   enabled: true,
   clientPassword: "",
 
-  operation: 'CREATE',
+  // operations
+  operation: "CREATE",
+  
   command: 'client-username',
   name: 'client-username',
 }

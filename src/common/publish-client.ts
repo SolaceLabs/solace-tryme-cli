@@ -1,6 +1,7 @@
 import solace from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
+import { CLIENT_CONNECTED } from "./control-events";
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -82,6 +83,7 @@ export class SolaceClient {
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('=== successfully connected and ready to publish events. ===');
+          // this.publishConnectedCtrlEvent(CLIENT_CONNECTED)
           resolve();
         });
 
@@ -135,6 +137,16 @@ export class SolaceClient {
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
     });
+  }
+
+  publishConnectedCtrlEvent(topicName: string) {
+    if (!process.env.VISUALIZE_EVENTS)
+      return;
+
+    const payload = {
+      clientName: this.options.clientName,
+    }
+    this.publish(topicName, JSON.stringify(payload))
   }
 
   // Publish a message on a topic

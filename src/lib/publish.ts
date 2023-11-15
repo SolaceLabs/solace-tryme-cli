@@ -1,5 +1,5 @@
 import concat from 'concat-stream'
-import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists, checkSaveParameters } from '../utils/checkparams'
+import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
 import { defaultMessage, delay } from '../utils/defaults';
@@ -39,7 +39,7 @@ const publish = async (
 }
 
 const publisher = (options: MessageClientOptions, optionsSource: any) => {
-  const { helpExamples, save, saveTo } = options
+  const { helpExamples, save } = options
 
   if (helpExamples) {
     displayHelpExamplesForPublish()
@@ -52,10 +52,7 @@ const publisher = (options: MessageClientOptions, optionsSource: any) => {
   // check publish topic found
   checkPubTopicExists(options.topic);
 
-  // check save options
-  checkSaveParameters(options);
-
-  if (save || saveTo) {
+  if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);
   }

@@ -6,7 +6,7 @@ declare global {
                       'queue' | 'client-profile' | 'acl-profile' | 'client-username' |
                       'connection' | 'sempconnection' | 'all'
 
-  type SempOperationType = 'LIST | CREATE' | 'UPDATE' | 'DELETE'
+  type OperationType = 'LIST' | 'LIST_ITEM' | 'CREATE' | 'UPDATE' | 'DELETE'
 
   type PublisherAcknowledgeMode = solace.MessagePublisherAcknowledgeMode.PER_MESSAGE | solace.MessagePublisherAcknowledgeMode.WINDOWED
 
@@ -32,8 +32,6 @@ declare global {
     // file/command options
     config: string | undefined
     name: string | undefined
-    from: string | undefined
-    to: string | undefined
 
     // help examples
     helpExamples?: boolean
@@ -117,12 +115,12 @@ declare global {
   interface ManageOperationOptions {
     // operation
     command: CommandType
-    operation?: string
-    save?: boolean
-    saveTo?: boolean
-    create?: boolean
-    update?: boolean
-    delete?: boolean
+    list?: string | boolean
+    create?: string | boolean
+    update?: string | boolean
+    delete?: string | boolean
+    save?: string | boolean
+    operation?: OperationType
 
     // QUEUE
     queue?: string

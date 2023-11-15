@@ -17,12 +17,12 @@ const invoke = async (
     process.exit(1)
   }
 
-  Logger.success('Exiting...')
+  Logger.logSuccess('exiting...')
   process.exit(0);
 }
 
 const aclProfile = (options: ManageClientOptions, optionsSource: any) => {
-  const { helpExamples, save, saveTo } = options
+  const { helpExamples, save } = options
 
   if (helpExamples) {
     displayHelpExamplesForAclProfile()
@@ -33,9 +33,9 @@ const aclProfile = (options: ManageClientOptions, optionsSource: any) => {
   checkSempConnectionParamsExists(options.sempUrl, options.sempVpn, options.sempUsername, options.sempPassword);
 
   // check semp acl-profile operation params
-  checkSempAclProfileParamsExists(options);
+  checkSempAclProfileParamsExists(options, optionsSource);
 
-  if (save || saveTo) {
+  if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);
   }

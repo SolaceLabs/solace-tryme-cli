@@ -2,10 +2,10 @@ import 'core-js'
 import { Command } from 'commander'
 import { version } from '../package.json'
 import { defaultMessageConnectionConfig, defaultManageConnectionConfig } from './utils/defaults';
-import { deleteConfig, initializeConfig, listConfig, viewConfig } from './utils/init'
+import { deleteConfig, initializeConfig, listConfig } from './utils/init'
 
 
-import { addManageVpnConnectionOptions, addManageSempConnectionOptions, 
+import { addManageConnectionOptions, addManageSempConnectionOptions, 
         addConfigInitOptions, addConfigListOptions, addConfigViewOptions,addConfigDeleteOptions,
         addPublishOptions, addReceiveOptions, addRequestOptions,  addReplyOptions, 
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
@@ -18,7 +18,7 @@ import queue from './lib/queue';
 import clientProfile from './lib/client-profile';
 import aclProfile from './lib/acl-profile';
 import clientUsername from './lib/client-username';
-import vpnConnection from './lib/vpn-connection';
+import connection from './lib/connection';
 import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
 import { loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
@@ -40,7 +40,7 @@ export class Commander {
       .description('A Solace Try-Me client for the command line')
       .enablePositionalOptions()
       .allowUnknownOption(false)
-      .version(`${version}`, '--version')
+      .version(`${version}`, '-v, --version')
       
     // stm publish
     const publishCmd = this.program
@@ -157,7 +157,7 @@ export class Commander {
       initializeConfig(options, optionsSource);
     })  
 
-    // stm config init
+    // stm config list
     const configListCmd = configCmd
       .command('list')
       .description('List command samples')
@@ -174,23 +174,7 @@ export class Commander {
       listConfig(options, optionsSource);
     })
 
-    // stm config view
-    const configViewCmd = configCmd
-      .command('view')
-      .description('View command sample')
-      .allowUnknownOption(false)
-    addConfigViewOptions(configViewCmd, this.advanced)
-    configViewCmd.action((options: MessageInitOptions) => {
-      const optionsSource:any = {};
-      const defaultKeys = Object.keys(defaultMessageConnectionConfig);
-      for (var i=0; i<defaultKeys.length; i++) {
-        optionsSource[defaultKeys[i]] = configViewCmd.getOptionValueSource(defaultKeys[i]);
-      }
-
-      viewConfig(options, optionsSource);
-    })
-
-    // stm config view
+    // stm config delete
     const configDeleteCmd = configCmd
       .command('delete')
       .description('Delete command sample')
@@ -301,16 +285,16 @@ export class Commander {
     })  
 
     // stm manage vpn connection
-    const manageVpnConnectionCmd = manageCmd
-      .command('vpn-connection')
-      .description('Manage VPN connection')
+    const manageConnectionCmd = manageCmd
+      .command('connection')
+      .description('Manage message VPN connection')
       .allowUnknownOption(false)
-    addManageVpnConnectionOptions(manageVpnConnectionCmd, this.advanced);
-    manageVpnConnectionCmd.action((options: MessageClientOptions) => {
+    addManageConnectionOptions(manageConnectionCmd, this.advanced);
+    manageConnectionCmd.action((options: MessageClientOptions) => {
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
       for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = manageVpnConnectionCmd.getOptionValueSource(defaultKeys[i]);
+        cliOptions[defaultKeys[i]] = manageConnectionCmd.getOptionValueSource(defaultKeys[i]);
       }
       const configOptions = loadCommandFromConfig('connection', options)
       if (configOptions) {
@@ -319,7 +303,7 @@ export class Commander {
         }
       }
   
-      vpnConnection(options, cliOptions);
+      connection(options, cliOptions);
     })  
 
     // stm manage semp connection

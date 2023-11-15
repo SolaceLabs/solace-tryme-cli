@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { defaultConfigFile, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
 import { buildMessageConfig } from './init'
 
 const defaultPath = `${process.cwd()}/`
@@ -70,6 +70,7 @@ export const readFile = (path: string) => {
 export const compareConfiguration = (updated: any, current: any, commands: any) => {
   let count:number = 0;
   // check messaging settings
+  let connectionChanged = false;
   let keys = Object.keys(updated.message);
   keys.forEach((key) => {
     if (!commands.length || commands.includes(key)) {
@@ -78,14 +79,20 @@ export const compareConfiguration = (updated: any, current: any, commands: any) 
       subKeys.forEach((subKey) => {
         if (!defaultMetaKeys.includes(subKey)) {
           if (current.message[key].hasOwnProperty(subKey) && updated.message[key].hasOwnProperty(subKey) && 
-              JSON.stringify(updated.message[key][subKey]) !== JSON.stringify(current.message[key][subKey]))
+              JSON.stringify(updated.message[key][subKey]) !== JSON.stringify(current.message[key][subKey])) {
             Logger.logInfo(`[${++count}] ${chalk.redBright(subKey)} of ${chalk.greenBright(key)} changed: ${current.message[key][subKey]} => ${updated.message[key][subKey]}`)
+            if (!connectionChanged && key === commandConnection) connectionChanged = true;
+          }
         }
       });
     }
   })
 
+  if (connectionChanged)
+    Logger.logWarn(`VPN Connection settings changed, this would impact all the messaging commands on the configuration`)
+
   // check management settings
+  connectionChanged = false;
   keys = Object.keys(updated.manage);
   keys.forEach((key) => {
     if (!commands.length || commands.includes(key)) {
@@ -94,17 +101,22 @@ export const compareConfiguration = (updated: any, current: any, commands: any) 
       subKeys.forEach((subKey) => {
         if (!defaultMetaKeys.includes(subKey)) {
           if (current.manage[key].hasOwnProperty(subKey) && updated.manage[key].hasOwnProperty(subKey) && 
-              JSON.stringify(updated.manage[key][subKey]) !== JSON.stringify(current.manage[key][subKey]))
+              JSON.stringify(updated.manage[key][subKey]) !== JSON.stringify(current.manage[key][subKey])) {
             Logger.logInfo(`[${++count}] ${chalk.redBright(subKey)} of ${chalk.greenBright(key)} changed: ${current.manage[key][subKey]} => ${updated.manage[key][subKey]}`)
+            if (!connectionChanged && key === commandSempConnection) connectionChanged = true;
+          }
         }
       });
     }
   })
 
+  if (connectionChanged)
+    Logger.logWarn(`VPN SEMP Connection settings changed, this would impact all the management commands on the configuration`)
+
   return count;
 }
 
-export const writeConfig = (data: any) => {
+export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
   try {
     const configFile = data.config;
     delete data.config;
@@ -113,7 +125,7 @@ export const writeConfig = (data: any) => {
     if (!filePath.endsWith('.json')) filePath.concat('.json')
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
-    else Logger.logSuccess(`updated configuration on '${decoratePath(configFile)}' successfully`)
+    else Logger.logSuccess(`${newOrUpdate === 'update' ? 'updated command settings' : 'created new command setting'} '${name}' on configuration file '${decoratePath(configFile)}' successfully`)
   } catch (error: any) {
     Logger.logDetailedError('file write failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -138,15 +150,22 @@ export const saveConfig = (data: any) => {
                                     chalk.greenBright('y') + chalk.whiteBright('/') + 
                                     chalk.redBright('n') + chalk.whiteBright('): ')}`);
         if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+          Logger.logWarn('abort updates to configuration...')
           Logger.logSuccess('exiting...')
           process.exit(0);
         }
+
         updated = true;
       }
     }
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
     else Logger.logSuccess(`${updated ? 'updated configuration' : 'initialized configuration with default command settings'} on '${decoratePath(configFile)}' successfully`)
+  if (!updated) 
+    Logger.logHint(
+  `\nThe initialized configuration points to a local broker running on 'localhost:8080' and the default settings for broker, username and password for messaging and semp operations. You can modify the settings with 'save' option when executing commands.\n` +
+  `\nThe configuration is pre-populated with command configurations with default settings for messaging operations like publish, receive, request and reply. It also comes with a sample resource management commands for creating queue, acl-profile, client-profile and client-name. These management commands can be modified to update or delete resources.\n` +
+  `\nThe command settings can be updated, copied to a new command and referred to by name during the execution. Be sure to checkou the help (-h, --help) for basic options, more help (-hm, --help-examples) for advanced options and command examples  (-he, --help-examples) on the CLI commands.`)
   } catch (error: any) {
     Logger.logDetailedError('file write failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -277,14 +296,10 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
     if (opts.message.connection) {
       delete opts.message.connection.config;
       delete opts.message.connection.name;
-      delete opts.message.connection.from;
-      delete opts.message.connection.to;
     }
     if (opts.manage.sempconnection) {
       delete opts.manage.sempconnection.config;
       delete opts.manage.sempconnection.name;
-      delete opts.manage.sempconnection.from;
-      delete opts.manage.sempconnection.to;
     }
   }
 
@@ -321,32 +336,59 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
     
     // absorb unchanged params from the current -> updated
     Object.keys(optionsSource).forEach(key => {
-      if (optionsSource[key] !== 'cli')
+      if (optionsSource[key] !== 'cli' && optionsSource[key] !== 'implied')
         updated[group][commandName][key] = current[group][commandName] ? current[group][commandName][key] : current[group][options.command][key]
     })
     
     // clear meta fields
     cleanseMetaFields(updated)
+
+    if (options.save && typeof options.save === 'string'  && typeof options.name === 'string' && options.save === options.name) {
+      Logger.error(`the source and save to target command name cannot be same - '${options.save}'`)
+      Logger.error('exiting...');
+      process.exit(1)
+    }
+
+    if (options.save && typeof options.save === 'string') {
+      if (baseCommands.includes(options.save)) {
+        Logger.error(`cannot create a duplicate base command configuration '${options.save}' from the configuration '${options.config}'`)
+        Logger.error('exiting...');
+        process.exit(1)
+      }
+    }
     
-    if (options.saveTo) {
+    var newOrUpdate = (options.save && typeof options.save === 'string' && current[group][options.save] === undefined) ? 'new' : 'update'
+    if (newOrUpdate === 'new') {
       if (group === 'message') {
         current.message.connection = updated.message.connection;
-        current.message[options.saveTo] = updated.message[commandName]
+        current.message[options.save] = updated.message[commandName]
       } else if (group === 'manage') {
         current.manage.sempconnection = updated.manage.sempconnection;
-        current.manage[options.saveTo] = updated.manage[commandName]
+        current.manage[options.save] = updated.manage[commandName]
       }
     } else {
       // if update to existing command settings, do a compare
       if (!newConfigCreated && current[group][commandName]) {
         if (current[group][commandName].command !== updated[group][commandName].command) {
-          Logger.logDetailedError(`expected '${updated.command}' command, but found '${current[group][updated.name].command}'`, `specify a valid command name`)
+          Logger.logDetailedError(`a command with the name '${commandName}' exists, expected '${updated[group][commandName].command}' command type, but found '${current[group][commandName].command}'`, `cannot update command settings`)
+          Logger.logError('exiting...')
+          process.exit(1)
+        }
+
+        if (typeof options.save === 'string' && current[group][options.save].command !== updated[group][commandName].command) {
+          Logger.logDetailedError(`a command with the name '${options.save}' exists, expected '${updated[group][commandName].command}' command type, but found '${current[group][options.save].command}'`, `cannot update command settings!`)
           Logger.logError('exiting...')
           process.exit(1)
         }
 
         cleanseMetaFields(updated)
         // TODO: validateConfig(config)
+
+        // fixup updated for target name
+        if (options.save && typeof options.save === 'string' && commandName !== options.save) {
+          updated[group][options.save] = updated[group][commandName]
+          commandName = options.save
+        }
       
         // compare and save
         var count = compareConfiguration(updated, current, [ group === 'manage' ? 'sempconnection' : 'connection', commandName ]);
@@ -356,9 +398,11 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
                                       chalk.greenBright('y') + chalk.whiteBright('/') + 
                                       chalk.redBright('n') + chalk.whiteBright('): ')}`);
           if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+            Logger.logWarn('abort updates to configuration...')
             Logger.logSuccess('exiting...')
             process.exit(0);
           }
+
         }
       }
 
@@ -371,7 +415,7 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
       }
     }
     current.config = options.config
-    writeConfig(current)
+    writeConfig(current, newOrUpdate, (typeof options.save === 'string' ? options.save : commandName))
   } catch (error: any) {
     Logger.logDetailedError('file read failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)

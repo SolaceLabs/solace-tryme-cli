@@ -10,8 +10,6 @@ const getHelpConfiguration = (args) => {
     return { help: true, helpMore: false, helpExamples: true}
   if (args.indexOf('stm config delete') >= 0)
     return { help: true, helpMore: false, helpExamples: true}
-  if (args.indexOf('stm config view') >= 0)
-    return { help: true, helpMore: false, helpExamples: true}
   if (args.indexOf('stm config list') >= 0)
     return { help: true, helpMore: false, helpExamples: true}
   if (args.indexOf('stm publish') >= 0)
@@ -30,7 +28,7 @@ const getHelpConfiguration = (args) => {
     return { help: true, helpMore: false, helpExamples: true}
   if (args.indexOf('stm manage client-username') >= 0)
     return { help: true, helpMore: false, helpExamples: true}
-  if (args.indexOf('stm manage vpn-connection') >= 0)
+  if (args.indexOf('stm manage connection') >= 0)
     return { help: true, helpMore: true, helpExamples: true}
   if (args.indexOf('stm manage semp-connection') >= 0)
     return { help: true, helpMore: false, helpExamples: true}

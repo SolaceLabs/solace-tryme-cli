@@ -23,22 +23,17 @@ Examples:
 
 ${chalk.greenBright('stm config list')}
 
+# get details of a named command from the named configuration
+
+${chalk.greenBright('stm config list --name publish')}
+
 # list commands from the named configuration
 
 ${chalk.greenBright('stm config list --config cloud-broker.json')}
-  `)
-}
 
-export const displayHelpExamplesForConfigView = () => {
-  console.log(`
-Examples:
-# view command settings from the default configuration 'stm-cli-config.json' 
+# get details of a named command from the named configuration
 
-${chalk.greenBright('stm config view')}
-
-# view a specific command settings from the named configuration
-
-${chalk.greenBright('stm config view --config cloud-broker.json --name publish')}
+${chalk.greenBright('stm config list --config cloud-broker.json --name receive')}
   `)
 }
 
@@ -66,7 +61,10 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm publish')}
 
-${chalk.magentaBright(`HINT: You can view the default publish command settings 'stm config view --name publish'!`)}
+${chalk.magentaBright(`HINT: You can view the default publish command settings 'stm config list --name publish'!`)}
+
+// save an existing command setting to a new name in a configuration file
+${chalk.greenBright('stm publish --config cloud-broker.json --save publish2')}
 
 // execute a specific publish command from the named configuration 
 ${chalk.greenBright('stm publish --config cloud-broker.json --name publish2')}
@@ -92,10 +90,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm publish  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm publish  --name publish2 --config cloud-broker.json --save-to publish3')}
+${chalk.greenBright('stm publish  --name publish2 --config cloud-broker.json --save publish3')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm publish  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save-to publish4')}
+${chalk.greenBright('stm publish  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)
@@ -108,7 +106,13 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm receive')}
 
-${chalk.magentaBright(`HINT: You can view the default receive command settings 'stm config view --name receive'!`)}
+${chalk.magentaBright(`HINT: You can view the default receive command settings 'stm config list --name receive'!`)}
+
+// execute the default receive command with settings defined on the 
+// default configuration 'stm-cli-config.json', but receive from a queue,
+// with optionally creating the queue if found missing, and add subscriptions to the queue
+${chalk.greenBright('stm receive --queue my-queue --create-if-missing --topic "solace/>"')}
+
 
 // execute a specific receive command from the named configuration 
 ${chalk.greenBright('stm receive --config cloud-broker.json --name receive')}
@@ -138,10 +142,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm receive  --name receive --config cloud-broker.json --save-to receive2')}
+${chalk.greenBright('stm receive  --name receive --config cloud-broker.json --save receive2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm receive --topic "stm/logistics/*" --name receive2 --config cloud-broker.json --save-to receive4')}
+${chalk.greenBright('stm receive --topic "stm/logistics/*" --name receive2 --config cloud-broker.json --save receive4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)
@@ -154,7 +158,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm request')}
 
-${chalk.magentaBright(`HINT: You can view the default request command settings 'stm config view --name request'!`)}
+${chalk.magentaBright(`HINT: You can view the default request command settings 'stm config list --name request'!`)}
 
 // execute a specific request command from the named configuration 
 ${chalk.greenBright('stm request --config cloud-broker.json --name request')}
@@ -180,10 +184,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm request --topic "stm/logistics/shipped" --name request --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm request  --name request --config cloud-broker.json --save-to request2')}
+${chalk.greenBright('stm request  --name request --config cloud-broker.json --save request2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker.json --save-to request4')}
+${chalk.greenBright('stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker.json --save request4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
     `)
@@ -196,7 +200,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm reply')}
 
-${chalk.magentaBright(`HINT: You can view the default reply command settings 'stm config view --name reply'!`)}
+${chalk.magentaBright(`HINT: You can view the default reply command settings 'stm config list --name reply'!`)}
 
 // execute a specific reply command from the named configuration 
 ${chalk.greenBright('stm reply --config cloud-broker.json --name reply')}
@@ -222,10 +226,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm reply  --name reply --config cloud-broker.json --save-to reply2')}
+${chalk.greenBright('stm reply  --name reply --config cloud-broker.json --save reply2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker.json --save-to reply4')}
+${chalk.greenBright('stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker.json --save reply4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)
@@ -238,7 +242,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm manage queue')}
 
-${chalk.magentaBright(`HINT: You can view the default queue command settings 'stm config view --name queue'!`)}
+${chalk.magentaBright(`HINT: You can view the default queue command settings 'stm config list --name queue'!`)}
 
 ${chalk.yellowBright('NOTE: The actual operation is determined by the ')}${chalk.greenBright('operation')} parameter - create, update or delete!
 
@@ -247,7 +251,7 @@ ${chalk.greenBright('stm manage queue --config cloud-broker.json --name queue')}
 
 // execute the default queue command with settings defined on the default 
 // configuration 'stm-cli-config.json', but with command-line overrides
-${chalk.greenBright('stm manage queue --operation --add-subscriptions ')}${getDefaultTopic('receive')} "stm/logistics/>"
+${chalk.greenBright('stm manage queue --update --add-subscriptions ')}${getDefaultTopic('receive')} "stm/logistics/>"
 
 ${chalk.yellowBright('NOTE: You can override any of the queue parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -255,20 +259,20 @@ ${chalk.yellowBright('NOTE: You can override any of the queue parameters \n' +
 // If you want to run a queue purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage queue --queue my-queue --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
+${chalk.greenBright('stm manage queue --create my-queue --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
 'setting to a new name!')}
 
 // Update the command setting with the specified command-line parameters (if specified)
-${chalk.greenBright('stm manage queue --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker.json --save')}
+${chalk.greenBright('stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm manage queue  --name queue --config cloud-broker.json --save-to queue2')}
+${chalk.greenBright('stm manage queue --name queue --config cloud-broker.json --save queue2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm manage queue --add-subscriptions "stm/logistics/sipped" --name queue2 --config cloud-broker.json --save-to queue4')}
+${chalk.greenBright('stm manage queue --add-subscriptions "stm/logistics/sipped" --name queue2 --config cloud-broker.json --save queue4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}  
     `)
@@ -281,7 +285,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm manage acl-profile')}
 
-${chalk.magentaBright(`HINT: You can view the default acl-profile command settings 'stm config view --name acl-profile'!`)}
+${chalk.magentaBright(`HINT: You can view the default acl-profile command settings 'stm config list --name acl-profile'!`)}
 
 ${chalk.yellowBright('NOTE: The actual operation is determined by the ')}${chalk.greenBright('operation')} parameter - create, update or delete!
 
@@ -290,7 +294,7 @@ ${chalk.greenBright('stm manage acl-profile --config cloud-broker.json --name ac
 
 // execute the default acl-profile command with settings defined on the default 
 // configuration 'stm-cli-config.json', but with command-line overrides)
-${chalk.greenBright('stm manage acl-profile --operation update --client-connect-default-action allow')}
+${chalk.greenBright('stm manage acl-profile --update --client-connect-default-action allow')}
 
 ${chalk.yellowBright('NOTE: You can override any of the acl-profile parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -298,7 +302,7 @@ ${chalk.yellowBright('NOTE: You can override any of the acl-profile parameters \
 // If you want to run a acl-profile purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage acl-profile --acl-profile my-acl-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow')}
+${chalk.greenBright('stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -308,10 +312,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm manage acl-profile --client-connect-default-action allow --name acl-profile --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm manage acl-profile  --name acl-profile --config cloud-broker.json --save-to acl-profile2')}
+${chalk.greenBright('stm manage acl-profile --name acl-profile --config cloud-broker.json --save acl-profile2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm manage acl-profile --client-connect-default-action allow --name acl-profile2 --config cloud-broker.json --save-to acl-profile4')}
+${chalk.greenBright('stm manage acl-profile --client-connect-default-action allow --name acl-profile2 --config cloud-broker.json --save acl-profile4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}  
     `)
@@ -324,7 +328,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm manage client-profile')}
 
-${chalk.magentaBright(`HINT: You can view the default client-profile command settings 'stm config view --name client-profile'!`)}
+${chalk.magentaBright(`HINT: You can view the default client-profile command settings 'stm config list --name client-profile'!`)}
 
 ${chalk.yellowBright('NOTE: The actual operation is determined by the ')}${chalk.greenBright('operation')} parameter - create, update or delete!
 
@@ -333,7 +337,7 @@ ${chalk.greenBright('stm manage client-profile --config cloud-broker.json --name
 
 // execute the default client-profile command with settings defined on the default 
 // configuration 'stm-cli-config.json', with the command-line overrides
-${chalk.greenBright('stm manage client-profile --operation update --allow-guaranteed-endpoint-create-durability all')}
+${chalk.greenBright('stm manage client-profile --update --allow-guaranteed-endpoint-create-durability all')}
 
 ${chalk.yellowBright('NOTE: You can override any of the client-profile parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -341,7 +345,7 @@ ${chalk.yellowBright('NOTE: You can override any of the client-profile parameter
 // If you want to run a client-profile purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage client-profile --client-profile my-client-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all')}
+${chalk.greenBright('stm manage client-profile --create my-client-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -351,10 +355,10 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm manage client-profile  --name client-profile --config cloud-broker.json --save-to client-profile2')}
+${chalk.greenBright('stm manage client-profile  --name client-profile --config cloud-broker.json --save client-profile2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile2 --config cloud-broker.json --save-to client-profile4')}
+${chalk.greenBright('stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile2 --config cloud-broker.json --save client-profile4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}  
     `)
@@ -367,7 +371,7 @@ Examples:
 // default configuration 'stm-cli-config.json' 
 ${chalk.greenBright('stm manage client-username')}
 
-${chalk.magentaBright(`HINT: You can view the default client-username command settings 'stm config view --name client-username'!`)}
+${chalk.magentaBright(`HINT: You can view the default client-username command settings 'stm config list --name client-username'!`)}
 
 ${chalk.yellowBright('NOTE: The actual operation is determined by the ')}${chalk.greenBright('operation')} parameter - create, update or delete!
 
@@ -376,7 +380,7 @@ ${chalk.greenBright('stm manage client-username --config cloud-broker.json --nam
 
 // execute the default client-username command with settings defined on the default 
 // configuration 'stm-cli-config.json', with the command-line overrides
-${chalk.greenBright('stm manage client-username --operation update --enabled true')}
+${chalk.greenBright('stm manage client-username --update --enabled true')}
 
 ${chalk.yellowBright('NOTE: You can override any of the client-username parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -384,7 +388,7 @@ ${chalk.yellowBright('NOTE: You can override any of the client-username paramete
 // If you want to run a client-username purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage client-username --client-username my-client-username --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --enabled true')}
+${chalk.greenBright('stm manage client-username --create my-client-username --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --enabled true')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -394,26 +398,26 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 ${chalk.greenBright('stm manage client-username --enabled true --name client-username --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm manage client-username  --name client-username --config cloud-broker.json --save-to client-username2')}
+${chalk.greenBright('stm manage client-username  --name client-username --config cloud-broker.json --save client-username2')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm manage client-username --enabled true --name client-username2 --config cloud-broker.json --save-to client-username4')}
+${chalk.greenBright('stm manage client-username --enabled true --name client-username2 --config cloud-broker.json --save client-username4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}  
     `)
 }
 
-export const displayHelpExamplesForVpnConnection = () => {
+export const displayHelpExamplesForConnection = () => {
   console.log(`
 Examples:
-// manage (update) vpn-connection settings on the default configuration 
-${chalk.greenBright('stm manage vpn-connection --url ws://localhost:8008 --vpn default')}
+// manage (update) connection settings on the default configuration 
+${chalk.greenBright('stm manage connection --url ws://localhost:8008 --vpn default')}
 
-// manage (update) vpn-connection settings on the named configuration 
-${chalk.greenBright('stm manage vpn-connection --config cloud-broker.json --url ws://localhost:8008 --vpn default --username default --password default ')}
+// manage (update) connection settings on the named configuration 
+${chalk.greenBright('stm manage connection --config cloud-broker.json --url ws://localhost:8008 --vpn default --username default --password default ')}
 
 
-${chalk.magentaBright(`HINT: You can view the default vpn-connection command settings 'stm config view --name connection'!`)}
+${chalk.magentaBright(`HINT: You can view the default connection command settings 'stm config list --name connection'!`)}
   `)
 }
 export const displayHelpExamplesForSempConnection = () => {
@@ -425,7 +429,7 @@ ${chalk.greenBright('stm manage semp-connection --semp-url http://localhost:8080
 // manage (update) semp-connection settings on the named configuration 
 ${chalk.greenBright('stm manage semp-connection --config cloud-broker.json --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin ')}
 
-${chalk.magentaBright(`HINT: You can view the default semp-connection command settings 'stm config view --name sempconnection'!`)}
+${chalk.magentaBright(`HINT: You can view the default semp-connection command settings 'stm config list --name sempconnection'!`)}
   `)
 }
 

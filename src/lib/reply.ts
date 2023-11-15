@@ -25,7 +25,7 @@ const reply = async (
 }
 
 const replier = (options: MessageClientOptions, optionsSource: any) => {
-  const { helpExamples, save, saveTo } = options
+  const { helpExamples, save } = options
   
   if (helpExamples) {
     displayHelpExamplesForReply()
@@ -41,7 +41,7 @@ const replier = (options: MessageClientOptions, optionsSource: any) => {
   // if subscriptions are specified, remove the default subscription at pos-0
   checkForCliTopics('topic', options, optionsSource);
 
-  if (save || saveTo) {
+  if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);
   }

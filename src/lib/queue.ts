@@ -18,12 +18,12 @@ const invoke = async (
     process.exit(1)
   }
 
-  Logger.success('Exiting...')
+  Logger.logSuccess('exiting...')
   process.exit(0);
 }
 
 const queue = (options: ManageClientOptions, optionsSource: any) => {
-  const { helpExamples, save, saveTo } = options
+  const { helpExamples, save } = options
 
   if (helpExamples) {
     displayHelpExamplesForQueue()
@@ -34,7 +34,7 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
   checkSempConnectionParamsExists(options.sempUrl, options.sempVpn, options.sempUsername, options.sempPassword);
 
   // check semp queue operation params
-  checkSempQueueParamsExists(options);
+  checkSempQueueParamsExists(options, optionsSource);
 
   // check semp queue operation params
   checkSempQueuePartitionSettings(options);
@@ -45,7 +45,7 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
   // if subscriptions are specified, remove the default subscription at pos-0
   checkForCliTopics('addSubscriptions', options, optionsSource);
 
-  if (save || saveTo) {
+  if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);
   }

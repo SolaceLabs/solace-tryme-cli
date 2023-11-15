@@ -1,12 +1,12 @@
 import { saveOrUpdateCommandSettings } from '../utils/config';
-import { displayHelpExamplesForVpnConnection } from '../utils/examples';
+import { displayHelpExamplesForConnection } from '../utils/examples';
 import { Logger } from '../utils/logger';
 
-const vpnConnection = (options: ManageClientOptions, optionsSource: any) => {
+const connection = (options: ManageClientOptions, optionsSource: any) => {
   const { helpExamples } = options
 
   if (helpExamples) {
-    displayHelpExamplesForVpnConnection()
+    displayHelpExamplesForConnection()
     process.exit(0);
   }
 
@@ -22,6 +22,6 @@ const vpnConnection = (options: ManageClientOptions, optionsSource: any) => {
   process.exit(0);
 }
 
-export default vpnConnection
+export default connection
 
-export { vpnConnection }
+export { connection }

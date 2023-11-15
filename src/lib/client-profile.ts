@@ -17,12 +17,12 @@ const invoke = async (
     process.exit(1)
   }
 
-  Logger.success('Exiting...')
+  Logger.logSuccess('exiting...')
   process.exit(0);
 }
 
 const clientProfile = (options: ManageClientOptions, optionsSource: any) => {
-  const { helpExamples, save, saveTo } = options
+  const { helpExamples, save } = options
 
   if (helpExamples) {
     displayHelpExamplesForClientProfile()
@@ -33,9 +33,9 @@ const clientProfile = (options: ManageClientOptions, optionsSource: any) => {
   checkSempConnectionParamsExists(options.sempUrl, options.sempVpn, options.sempUsername, options.sempPassword);
 
   // check semp client-profile operation params
-  checkSempClientProfileParamsExists(options);
+  checkSempClientProfileParamsExists(options, optionsSource);
 
-  if (save || saveTo) {
+  if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);
   }

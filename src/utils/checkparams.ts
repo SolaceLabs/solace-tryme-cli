@@ -1,15 +1,6 @@
 import { getDefaultTopic } from "./defaults"
 import { Logger } from "./logger"
 
-
-export const checkSaveParameters = (options: MessageClientOptions) => {
-  if (options.save && options.saveTo) {
-    Logger.logError("cannot mix update (--save) and duplicate (--save-to) options in a single operation")
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-}
-
 export const checkPubTopicExists = (topic: string) => {
   if (!topic) {
     Logger.logError("required option '--topic <TOPIC...>' not specified")
@@ -52,25 +43,25 @@ export const checkForCliTopics = (key: string, options: MessageClientOptions | M
 export const checkConnectionParamsExists = (url: string | undefined, vpn :string | undefined, 
   username: string | undefined, password: string | undefined) => {
     if (!url) {
-      Logger.logError("required option '-U, --url <URL>' not specified")
+      Logger.logError("required option '--url <URL>' not specified")
       Logger.logError('exiting...')
       process.exit(1)
     }
 
     if (!vpn) {
-      Logger.logError("required option '-v, --vpn <VPN>' not specified")
+      Logger.logError("required option '--vpn <VPN>' not specified")
       Logger.logError('exiting...')
       process.exit(1)
     }
 
     if (!username) {
-      Logger.logError("required option '-u, --username <USER>' not specified")
+      Logger.logError("required option '--username <USER>' not specified")
       Logger.logError('exiting...')
       process.exit(1)
     }
 
     if (!password) {
-      Logger.logError("required option '-p, --password <PASS>' not specified")
+      Logger.logError("required option '--password <PASS>' not specified")
       Logger.logError('exiting...')
       process.exit(1)
   }
@@ -125,8 +116,6 @@ export const checkSempQueueSubscriptionTopicExists = (options: ManageClientOptio
     Logger.error('exiting...')
     process.exit(1)
   }
-  // if (options.addSubscriptions.length > 1 && options.addSubscriptions.includes( getDefaultTopic( 'receive' ) ))
-  //   options.addSubscriptions.splice(options.addSubscriptions.indexOf(getDefaultTopic( 'receive' )), 1)
   options.addSub = options.addSubscriptions.length ? true : false;
 
   if (options.removeSubscriptions.length && typeof options.removeSubscriptions !== 'object') {
@@ -134,14 +123,13 @@ export const checkSempQueueSubscriptionTopicExists = (options: ManageClientOptio
     Logger.error('exiting...')
     process.exit(1)
   }
-  // if (options.removeSubscriptions.includes( getDefaultTopic( 'receive' ) ))
-  //   options.removeSubscriptions.splice(options.removeSubscriptions.indexOf(getDefaultTopic( 'receive' )), 1)
+
   options.removeSub = options.removeSubscriptions.length ? true : false;
 
   if (options.removeSub && options.operation?.toUpperCase() === 'CREATE') {
-    Logger.error("remove subscription option is not applicable while creating a queue")
-    Logger.error('exiting...')
-    process.exit(1)
+    Logger.logWarn("remove subscription option is not applicable while creating a queue, ignoring...")
+    options.removeSub = false;
+    options.removeSubscriptions = []
   }
 
   options.listSub = options?.listSubscriptions ? true : false
@@ -158,23 +146,95 @@ export const checkSempQueuePartitionSettings = (options: ManageClientOptions) =>
   }
 }
 
-export const checkSempQueueParamsExists = (options: ManageClientOptions) => {
+export const checkSempQueueParamsExists = (options: ManageClientOptions, optionsSource: any) => {
+  var count = 0;
+  if (options.list) {
+    count++; 
+    options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
+    optionsSource.operation = 'cli'
+    options.queue = (typeof options.list === 'string') ? options.list : options.queue;
+    optionsSource.queue = (typeof options.list === 'string') ? 'cli' : optionsSource.queue;
+  }
+  if (options.create) {
+    count++; 
+    options.operation = 'CREATE'
+    optionsSource.operation = 'cli'
+    options.queue = (typeof options.create === 'string') ? options.create : options.queue;
+    optionsSource.queue = (typeof options.create === 'string') ? 'cli' : optionsSource.queue;
+  }
+  if (options.update) {
+    count++; 
+    options.operation = 'UPDATE'
+    optionsSource.operation = 'cli'
+    options.queue = (typeof options.update === 'string') ? options.update : options.queue;
+    optionsSource.queue = (typeof options.update === 'string') ? 'cli' : optionsSource.queue;
+  }
+  if (options.delete) {
+    count++; 
+    options.operation = 'DELETE'
+    optionsSource.operation = 'cli'
+    options.queue = (typeof options.delete === 'string') ? options.delete : options.queue;
+    optionsSource.queue = (typeof options.delete === 'string') ? 'cli' : optionsSource.queue;
+  }
+
+  if (count > 1) {
+    Logger.error('only a single operation can be specified')
+    Logger.error('exiting...')
+    process.exit(1)
+  }
+
   if (!options.operation) {
-    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
+    Logger.error('missing parameter, a list, create, update or delete operation expected')
     Logger.error('exiting...')
     process.exit(1)
   }
 
   if (!options.queue) {
-    Logger.error("missing queue name")
+    Logger.error('missing queue name')
     Logger.error('exiting...')
     process.exit(1)
   }
 }
 
-export const checkSempClientProfileParamsExists = (options: ManageClientOptions) => {
+export const checkSempClientProfileParamsExists = (options: ManageClientOptions, optionsSource: any) => {
+  var count = 0;
+  if (options.list) {
+    count++; 
+    options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
+    optionsSource.operation = 'cli'
+    options.clientProfile = (typeof options.list === 'string') ? options.list : options.clientProfile;
+    optionsSource.clientProfile = (typeof options.list === 'string') ? 'cli' : optionsSource.clientProfile;
+  }
+  if (options.create) {
+    count++; 
+    options.operation = 'CREATE'
+    optionsSource.operation = 'cli'
+    options.clientProfile = (typeof options.create === 'string') ? options.create : options.clientProfile;
+    optionsSource.clientProfile = (typeof options.create === 'string') ? 'cli' : optionsSource.clientProfile;
+  }
+  if (options.update) {
+    count++; 
+    options.operation = 'UPDATE'
+    optionsSource.operation = 'cli'
+    options.clientProfile = (typeof options.update === 'string') ? options.update : options.clientProfile;
+    optionsSource.clientProfile = (typeof options.update === 'string') ? 'cli' : optionsSource.clientProfile;
+  }
+  if (options.delete) {
+    count++; 
+    options.operation = 'DELETE'
+    optionsSource.operation = 'cli'
+    options.clientProfile = (typeof options.delete === 'string') ? options.delete : options.clientProfile;
+    optionsSource.clientProfile = (typeof options.delete === 'string') ? 'cli' : optionsSource.clientProfile;
+  }
+
+  if (count > 1) {
+    Logger.error('only a single operation can be specified')
+    Logger.error('exiting...')
+    process.exit(1)
+  }
+
   if (!options.operation) {
-    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
+    Logger.error('missing parameter, a list, create, update or delete operation expected')
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -186,9 +246,45 @@ export const checkSempClientProfileParamsExists = (options: ManageClientOptions)
   }
 }
 
-export const checkSempAclProfileParamsExists = (options: ManageClientOptions) => {
+export const checkSempAclProfileParamsExists = (options: ManageClientOptions, optionsSource: any) => {
+  var count = 0;
+  if (options.list) {
+    count++; 
+    options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
+    optionsSource.operation = 'cli'
+    options.aclProfile = (typeof options.list === 'string') ? options.list : options.aclProfile;
+    optionsSource.aclProfile = (typeof options.list === 'string') ? 'cli' : optionsSource.aclProfile;
+  }
+  if (options.create) {
+    count++; 
+    options.operation = 'CREATE'
+    optionsSource.operation = 'cli'
+    options.aclProfile = (typeof options.create === 'string') ? options.create : options.aclProfile;
+    optionsSource.aclProfile = (typeof options.create === 'string') ? 'cli' : optionsSource.aclProfile;
+  }
+  if (options.update) {
+    count++; 
+    options.operation = 'UPDATE'
+    optionsSource.operation = 'cli'
+    options.aclProfile = (typeof options.update === 'string') ? options.update : options.aclProfile;
+    optionsSource.aclProfile = (typeof options.update === 'string') ? 'cli' : optionsSource.aclProfile;
+  }
+  if (options.delete) {
+    count++; 
+    options.operation = 'DELETE'
+    optionsSource.operation = 'cli'
+    options.aclProfile = (typeof options.delete === 'string') ? options.delete : options.aclProfile;
+    optionsSource.aclProfile = (typeof options.delete === 'string') ? 'cli' : optionsSource.aclProfile;
+  }
+
+  if (count > 1) {
+    Logger.error('only a single operation can be specified')
+    Logger.error('exiting...')
+    process.exit(1)
+  }
+
   if (!options.operation) {
-    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
+    Logger.error('missing parameter, a list, create, update or delete operation expected')
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -200,9 +296,45 @@ export const checkSempAclProfileParamsExists = (options: ManageClientOptions) =>
   }
 }
 
-export const checkSempClientUsernameParamsExists = (options: ManageClientOptions) => {
+export const checkSempClientUsernameParamsExists = (options: ManageClientOptions, optionsSource: any) => {
+  var count = 0;
+  if (options.list) {
+    count++; 
+    options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
+    optionsSource.operation = 'cli'
+    options.clientUsername = (typeof options.list === 'string') ? options.list : options.clientUsername;
+    optionsSource.clientUsername = (typeof options.list === 'string') ? 'cli' : optionsSource.clientUsername;
+  }
+  if (options.create) {
+    count++; 
+    options.operation = 'CREATE'
+    optionsSource.operation = 'cli'
+    options.clientUsername = (typeof options.create === 'string') ? options.create : options.clientUsername;
+    optionsSource.clientUsername = (typeof options.create === 'string') ? 'cli' : optionsSource.clientUsername;
+  }
+  if (options.update) {
+    count++; 
+    options.operation = 'UPDATE'
+    optionsSource.operation = 'cli'
+    options.clientUsername = (typeof options.update === 'string') ? options.update : options.clientUsername;
+    optionsSource.clientUsername = (typeof options.update === 'string') ? 'cli' : optionsSource.clientUsername;
+  }
+  if (options.delete) {
+    count++; 
+    options.operation = 'DELETE'
+    optionsSource.operation = 'cli'
+    options.clientUsername = (typeof options.delete === 'string') ? options.delete : options.clientUsername;
+    optionsSource.clientUsername = (typeof options.delete === 'string') ? 'cli' : optionsSource.clientUsername;
+  }
+
+  if (count > 1) {
+    Logger.error('only a single operation can be specified')
+    Logger.error('exiting...')
+    process.exit(1)
+  }
+
   if (!options.operation) {
-    Logger.error("missing parameter, --operation LIST, CREATE, UPDATE or DELETE is expected")
+    Logger.error('missing parameter, a list, create, update or delete operation expected')
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -211,32 +343,6 @@ export const checkSempClientUsernameParamsExists = (options: ManageClientOptions
     Logger.error("missing client-username")
     Logger.error('exiting...')
     process.exit(1)
-  }
-
-  if (options.operation === 'CREATE') {
-    if (!options.clientProfile) {
-      Logger.error("missing client-profile name")
-      Logger.error('exiting...')
-      process.exit(1)
-    }
-
-    if (!options.aclProfile) {
-      Logger.error("missing aclp-profile name")
-      Logger.error('exiting...')
-      process.exit(1)
-    }
-
-    if (!options.hasOwnProperty('clientPassword')) {
-      Logger.error("missing password")
-      Logger.error('exiting...')
-      process.exit(1)
-    }
-
-    if (!options.hasOwnProperty('enabled')) {
-      Logger.error("missing enabled flag")
-      Logger.error('exiting...')
-      process.exit(1)
-    }
   }
 }
 

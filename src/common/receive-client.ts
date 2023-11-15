@@ -340,7 +340,7 @@ export class SolaceClient {
             this.receiver.consuming = true;
             Logger.logSuccess('ready to receive messages.');
             Logger.await(`waiting for events...`);
-            Logger.logHint(`Use 'stm manage queue --operation update --queue ${this.receiver.queue} --list-subscriptions' to review the topic subscriptions on the queue`)
+            Logger.logHint(`Use 'stm manage queue --list ${this.receiver.queue}' to review the queue and topic subscriptions on the queue`)
 
             // wait to be told to exit
             Logger.logInfo('press Ctrl-C to exit');  
@@ -350,7 +350,7 @@ export class SolaceClient {
             Logger.logDetailedError(`the message receiver could not bind to queue '${this.receiver.queue}'`, error.toString())
             if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
             if (error.toString() === 'OperationError: Unknown Queue')
-              Logger.logHint(`Use 'stm manage queue --queue ${this.receiver.queue}' to create the queue`)
+              Logger.logHint(`Use 'stm manage queue --create ${this.receiver.queue}' to create the queue`)
             Logger.error('exiting...')
             process.exit(1);
           });
@@ -365,7 +365,7 @@ export class SolaceClient {
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) =>  {
             Logger.logDetailedError(`cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
             if (sessionEvent.infoStr === 'Permission Not Allowed') {
-              Logger.logHint(`You may not be the owner of the queue, update owner with 'stm manage queue --queue ${this.receiver.queue} --owner ${this.options.username}' and try again!`)
+              Logger.logHint(`You may not be the owner of the queue, update owner with 'stm manage queue --update ${this.receiver.queue} --owner ${this.options.username}' and try again!`)
               Logger.error('exiting...')
               process.exit(1)
             }

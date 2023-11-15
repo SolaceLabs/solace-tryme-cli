@@ -1,4 +1,5 @@
 import { Logger } from '../utils/logger'
+import { prettyJSON } from '../utils/prettify';
 
 export class SempClient {
   options:any = null;
@@ -26,9 +27,10 @@ export class SempClient {
     this.urlFixture = (sempUrl.toLowerCase().indexOf('/semp/v2/config') < 0) ? '/SEMP/v2/config' : '';
     switch (this.options.operation.toUpperCase()) {
       case 'LIST': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles`; break;
+      case 'LIST_ITEM': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles/${encodeURIComponent(this.options.aclProfile)}`; break;
       case 'CREATE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles`; break;
-      case 'UPDATE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles/${this.options.aclProfile}`; break;
-      case 'DELETE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles/${this.options.aclProfile}`; break;
+      case 'UPDATE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles/${encodeURIComponent(this.options.aclProfile)}`; break;
+      case 'DELETE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/aclProfiles/${encodeURIComponent(this.options.aclProfile)}`; break;
     }
 
     this.sempBody = {            
@@ -39,6 +41,38 @@ export class SempClient {
       subscribeTopicDefaultAction: this.options?.subscribeTopicDefaultAction,
     }
   
+    if (this.options.operation.toUpperCase() === 'LIST_ITEM') {
+      await fetch(sempUrl, {
+        method: "GET",
+        credentials: 'same-origin',
+        cache: 'no-cache',
+        mode: "cors",      
+        headers: {
+          accept: 'application/json;charset=UTF-8',
+          'content-type': 'application/json',
+          'Authorization': 'Basic ' + btoa(this.options?.sempUsername + ":" + this.options?.sempPassword)
+        },
+      })
+      .then(async (response) => {
+        const data = await response.json();
+        if (data.meta.error) {
+          Logger.logDetailedError(`get acl-profile failed with error`, `${data.meta.error.description.split('Problem with GET: ').pop()}`)
+          Logger.error('exiting...')
+          process.exit(1)
+        } else {
+          Logger.logSuccess(`get acl-profile successful`)
+          let result = data.data;
+          var aclProfiles = "";
+          aclProfiles += `\n${prettyJSON(JSON.stringify(result))}`
+          Logger.logDetailedSuccess(`Details of acl-profile ${this.options.aclProfile} on vpn ${this.options.sempVpn}`, aclProfiles)
+        }
+      })
+      .catch((error) => {
+        Logger.logDetailedError(`get acl-profile failed with error`, `${error.toString()}`)
+        if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        throw error;
+      });
+    }
     if (this.options.operation.toUpperCase() === 'LIST') {
       await fetch(sempUrl, {
         method: "GET",

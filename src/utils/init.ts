@@ -12,11 +12,24 @@ import {
   defaultManageConnectionConfig,
   defaultManageQueueConfig,
   getCommandGroup,
-  baseCommands
+  baseCommands,
+  messagingCommands,
+  commandConnection,
+  commandSempConnection,
+  manageCommands
 } from './defaults'
-import { saveConfig, loadConfig, decoratePath, createDefaultConfig, processPath, fileExists, writeConfig } from './config'
+import { saveConfig, loadConfig, decoratePath, processPath, fileExists, writeConfig } from './config'
 import chalk from 'chalk'
-import { displayHelpExamplesForConfigInit, displayHelpExamplesForConfigView, displayHelpExamplesForConfigList, displayHelpExamplesForConfigDelete } from './examples'
+import { displayHelpExamplesForConfigInit, displayHelpExamplesForConfigList, displayHelpExamplesForConfigDelete } from './examples'
+import { prettyJSON } from './prettify'
+
+export const getOperationFromConfig = (options: any) => {
+  if (options?.list) return 'List details of';
+  if (options?.create) return 'Create';
+  if (options?.update) return 'Update';
+  if (options?.delete) return 'Delete';
+  return 'Unknown'
+}
 
 export const initializeConfig = (options:StmConfigOptions, optionsSource: any) => {
   const { helpExamples } = options
@@ -53,7 +66,7 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
   if (optionsSource.name !== 'cli') {
-    Logger.logError("required option '--name <COMMAND_NAME>' not specified")
+    Logger.logError(`required option '--name <COMMAND_NAME>' not specified`)
     Logger.error('exiting...')
     process.exit(1)
   }
@@ -94,29 +107,10 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
 
     delete current.message[options.name]
     delete current.manage[options.name]
-    writeConfig(current)
+    writeConfig(current, 'update', options.name as string)
     Logger.success(`the command '${options.name}' deleted from the configuration '${options.config}'`)
   }
 
-}
-
-export const viewConfig = (options:StmConfigOptions, optionsSource: any) => {
-  const { helpExamples } = options
-
-  if (helpExamples) {
-    displayHelpExamplesForConfigView()
-    process.exit(0);
-  }
-
-  const config = buildConfig(options, optionsSource, 'all');
-
-  if (optionsSource.name === 'cli' && options.name) {
-    Logger.logSettings(`${options.name}`, JSON.stringify(config[options.name], null, 2))
-  } else {
-    Object.keys(config).forEach((key) => {
-      Logger.logSettings(`${key}`, JSON.stringify(config[key], null, 2))
-    })
-  }
 }
 
 export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
@@ -128,6 +122,10 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
   const config = buildConfig(options, optionsSource, 'all');
+  if (options.name) {
+    Logger.logDetailedSuccess(`Command settings of operation: ${options.name}`, prettyJSON(JSON.stringify(config)))
+    process.exit(0)
+  }
 
   var count = 0;
   var list = '\n';
@@ -185,7 +183,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     if (config[key].command === 'queue') {
       count++
       list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${config[key].operation.toUpperCase()} Queue \'` + config[key].queue + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
+      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Queue \'` + config[key].queue + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
     }
   })
 
@@ -194,7 +192,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     if (config[key].command === 'client-profile') {
       count++
       list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${config[key].operation.toUpperCase()} Client Profile \'` + config[key].clientProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
+      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Client Profile \'` + config[key].clientProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
     }
   })
 
@@ -203,7 +201,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     if (config[key].command === 'acl-profile') {
       count++
       list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${config[key].operation.toUpperCase()} ACL Profile \'` + config[key].aclProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
+      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} ACL Profile \'` + config[key].aclProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
   }
   })
 
@@ -212,7 +210,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     if (config[key].command === 'client-username') {
       count++
       list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${config[key].operation.toUpperCase()} Client Username \'` + config[key].clientUsername + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
+      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Client Username \'` + config[key].clientUsername + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
     }
   })
 
@@ -221,18 +219,10 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
 
 export const buildConfig = (options:any, optionsSource: any, commandType: CommandType) => {
   const configFile = optionsSource.config === 'cli' && typeof options.config === 'string' ? options.config : defaultConfigFile;
-  Logger.logDetailedSuccess(`loading configuration from file`, `${decoratePath(configFile)}`)
+  Logger.logDetailedSuccess(`loading ${configFile === defaultConfigFile ? 'from default' : 'from'} configuration file`, `${decoratePath(configFile)}`)
   const config = loadConfig(configFile);
   var commands:string[] = Object.keys(config.message);
   commands = commands.concat(Object.keys(config.manage))
-
-  if (optionsSource.name === 'cli' && typeof options.name === 'string') {
-    if (!commands.includes(options.name)) {
-      Logger.logError(`command name '${options.name}' not found in the ${configFile.endsWith('.json') ? configFile : configFile.concat('.json')}`)
-      Logger.logError('exiting...')
-      process.exit(1)
-    }
-  }
 
   const result:any = {};
   Object.keys(config.message).forEach((key:string) => {
@@ -259,6 +249,26 @@ export const buildConfig = (options:any, optionsSource: any, commandType: Comman
     Logger.logError(`no default ${chalk.greenBright(commandType)} configuration found in ${decoratePath(configFile)}`)
     Logger.logError('exiting...')
     process.exit(1)
+  }
+
+  if (optionsSource.name === 'cli' && typeof options.name === 'string') {
+    if (!commands.includes(options.name)) {
+      Logger.logError(`command name '${options.name}' not found in the ${configFile.endsWith('.json') ? configFile : configFile.concat('.json')}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    const command:any = {}
+    if (messagingCommands.includes(result[options.name].command)) {
+      command[options.name] = result[options.name]
+      command.connection = result[commandConnection]
+    } else if (manageCommands.includes(result[options.name].command)) {
+      command[options.name] = result[options.name]
+      command.connection = result[commandSempConnection]
+    } else {
+      command[options.name] = result[options.name]
+    }
+    return command
   }
 
   return result;
@@ -294,9 +304,6 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
   
   if (result.message.connection) {
     delete result.message.connection.config;
-    // delete result.message.connection.name;
-    delete result.message.connection.from;
-    delete result.message.connection.to;
   }
 
   result.message.publish && Object.keys(defaultMessagePublishConfig).forEach((key:string) => {
@@ -342,9 +349,6 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
   
   if (result.manage.sempconnection) {
     delete result.manage.sempconnection.config;
-    // delete result.manage.sempconnection.name;
-    delete result.manage.sempconnection.from;
-    delete result.manage.sempconnection.to;
   }
 
   result.manage.queue && Object.keys(defaultManageQueueConfig).forEach((key:string) => {

@@ -1,5 +1,5 @@
 import { saveOrUpdateCommandSettings } from '../utils/config';
-import { displayHelpExamplesForSempConnection, displayHelpExamplesForVpnConnection } from '../utils/examples';
+import { displayHelpExamplesForSempConnection } from '../utils/examples';
 import { Logger } from '../utils/logger';
 
 const sempConnection = (options: ManageClientOptions, optionsSource: any) => {

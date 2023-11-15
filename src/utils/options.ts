@@ -2,14 +2,14 @@ import { Command, Option } from 'commander'
 import {
   parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
   parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
-  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, parseSempQueueTopics, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, parseSempEndpointCreateDurability,
+  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, parseSempQueueTopics, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, parseSempEndpointCreateDurability, parseRequestTopic,
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, defaultMessagePublishConfig, defaultMessageConfig, defaultMessage, defaultMessageHint, defaultManageConnectionConfig, commandPublish, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername } from './defaults';
 import chalk from 'chalk';
 
 export const addConfigDeleteOptions = (cmd: Command, advanced: boolean) => {
   cmd
-    // view options
+    // delete options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced))
@@ -33,9 +33,10 @@ export const addConfigViewOptions = (cmd: Command, advanced: boolean) => {
 
 export const addConfigListOptions = (cmd: Command, advanced: boolean) => {
   cmd
-    // view options
+    // list options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -65,8 +66,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--topic <TOPIC...>', 'the message topic(s)') .argParser(parsePublishTopic) .default([ getDefaultTopic('publish')]) .hideHelp(advanced))
-    // .addOption(new Option('--topic <TOPIC>', 'the message topic') .argParser(parseSingleTopic) .default( getDefaultTopic('publish') ) .hideHelp(advanced))
-    .addOption(new Option('--message <BODY>', 'the message body') .default(defaultMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', 'the message body') .default(defaultMessageHint) .hideHelp(advanced))
     .addOption(new Option('--stdin', 'read the message body from stdin') .default(false) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', 'the number of events to publish') .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', 'the time to wait between publish') .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
@@ -75,14 +75,14 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', '[advanced] the application description') .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeoutInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeoutInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <MILLISECONDS>', '[advanced] the number of times to retry connecting during initial connection setup') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
     .addOption(new Option('--reconnect-retries <NUMBER>', '[advanced] the number of times to retry connecting after a connected session goes down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWaitInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
@@ -94,7 +94,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
 
     // guaranteed publisher options
     .addOption(new Option('--window-size <NUMBER>', '[advanced] the maximum number of messages that can be published without acknowledgment') .argParser(parseNumber) .default(defaultMessagePublishConfig.windowSize) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
-    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeoutInMsecs) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
+    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeout) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-mode <MODE>', '[advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED') .argParser( parsePublishAcknowledgeMode) .default(defaultMessagePublishConfig.acknowledgeMode) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
 
     // advanced message options
@@ -103,7 +103,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--message-type <MESSAGE_TYPE>', '[advanced] the application-provided message type') .default(defaultMessageConfig.applicationMessageType) .hideHelp(!advanced))
     .addOption(new Option('--correlation-key <CORRELATION_KEY>', '[advanced] the application-provided message correlation key for acknowledgement management') .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', `[advanced] the application-requested message delivery mode 0-'DIRECT', 1-'PERSISTENT', and 2-'NON_PERSISTENT'`) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
-    .addOption(new Option('--reply-to <TOPIC>', '[advanced] string which is used as the topic name for a response message') .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
+    .addOption(new Option('--reply-to-topic <TOPIC>', '[advanced] string which is used as the topic name for a response message') .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', '[advanced] the user properties (e.g., "name1: value1" "name2: value2")') .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', '[advanced] message print mode: COMPACT, PRETTY, NONE') .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
@@ -112,8 +112,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandPublish))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -139,13 +138,13 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', '[advanced] the application description') .default(defaultMessageConnectionConfig.receiverDescription) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <NUMBER>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeoutInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <NUMBER>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <NUMBER>', '[advanced] the number of times to retry connecting during initial connection setup') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
     .addOption(new Option('--reconnect-retries <NUMBER>', '[advanced] the number of times to retry connecting after a connected session goes down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWaitInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--receive-timestamps [BOOLEAN]', '[advanced] include a receive timestamp on received messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.receiveTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', '[advanced] reapply subscriptions upon calling on a disconnected session') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
@@ -159,8 +158,7 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandReceive))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -181,21 +179,21 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--topic <TOPIC>', 'the message topic') .argParser(parseSingleTopic) .default( getDefaultTopic('request') ) .hideHelp(advanced))
-    .addOption(new Option('--message <BODY>', 'the message body') .default(defaultRequestMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', 'the message body') .default(defaultRequestMessageHint) .hideHelp(advanced))
     .addOption(new Option('--stdin', 'read the message body from stdin') .default(false) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', 'the time before a message is discarded or moved to a DMQ') .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', 'the DMQ eligible flag') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.dmqEligible) .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', '[advanced] the application description') .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeoutInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeoutInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <MILLISECONDS>', '[advanced] the number of times to retry connecting during initial connection setup') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
     .addOption(new Option('--reconnect-retries <NUMBER>', '[advanced] the number of times to retry connecting after a connected session goes down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWaitInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
@@ -207,7 +205,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
 
     // guaranteed requestor options
     .addOption(new Option('--window-size <NUMBER>', '[advanced] the maximum number of messages that can be published without acknowledgment') .argParser(parseNumber) .default(defaultMessagePublishConfig.windowSize) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
-    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeoutInMsecs) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
+    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeout) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-mode <MODE>', '[advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED') .default(defaultMessagePublishConfig.acknowledgeMode) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
 
     // advanced message options
@@ -224,9 +222,8 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandRequest))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandRequest))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -246,21 +243,21 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', 'the message topic(s)') .argParser(parsePublishTopic) .default([ getDefaultTopic('publish')]) .hideHelp(advanced))
-    .addOption(new Option('--message <BODY>', 'the message body') .default(defaultRequestMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--topic <TOPIC...>', 'the message topic(s)') .argParser(parseRequestTopic) .default([ getDefaultTopic('publish')]) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', 'the message body') .default(defaultRequestMessageHint) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', 'the time before a message is discarded or moved to a DMQ') .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', 'the DMQ eligible flag') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.dmqEligible) .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', '[advanced] the client name') .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', '[advanced] the application description') .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeoutInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeoutInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <MILLISECONDS>', '[advanced] the number of times to retry connecting during initial connection setup') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
     .addOption(new Option('--reconnect-retries <NUMBER>', '[advanced] the number of times to retry connecting after a connected session goes down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWaitInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
@@ -272,7 +269,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // guaranteed publisher options
     .addOption(new Option('--window-size <NUMBER>', '[advanced] the maximum number of messages that can be published without acknowledgment') .argParser(parseNumber) .default(defaultMessagePublishConfig.windowSize) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
-    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeoutInMsecs) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
+    .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', '[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages') .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeout) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-mode <MODE>', '[advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED') .default(defaultMessagePublishConfig.acknowledgeMode) .implies({ guaranteedPublisher: true }) .hideHelp(!advanced))
 
     // advanced message options
@@ -289,9 +286,8 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandReply))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandReply))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -311,12 +307,14 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-op, --operation <OPERATION>', 'create, update or delete a queue') .argParser(parseSempOperation) .default(defaultManageQueueConfig.operation) .hideHelp(advanced))
+    .addOption(new Option('--list [QUEUE]', 'list existing queues, fetch details if queue specified') .argParser(parseSempOperation) .default(defaultManageQueueConfig.list) .implies({operation: 'LIST'}).hideHelp(advanced))
+    .addOption(new Option('--create [QUEUE]', 'create a queue') .argParser(parseSempOperation) .default(defaultManageQueueConfig.create) .implies({operation: 'CREATE'}) .hideHelp(advanced))
+    .addOption(new Option('--update [QUEUE]', 'update a queue') .argParser(parseSempOperation) .default(defaultManageQueueConfig.update) .implies({operation: 'UPDATE'}) .hideHelp(advanced))
+    .addOption(new Option('--delete [QUEUE]', 'delete a queue') .argParser(parseSempOperation) .default(defaultManageQueueConfig.delete) .implies({operation: 'DELETE'}) .hideHelp(advanced))
 
     // semp QUEUE
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('QUEUE SETTINGS')} */`))
-    .addOption(new Option('--queue <QUEUE>', 'the name of the Queue') .default( defaultManageQueueConfig.queue ) .hideHelp(advanced))
     .addOption(new Option('--owner <OWNER>', '[advanced] the name of Client Username that owns the Queue') .default( defaultManageQueueConfig.owner ) .hideHelp(!advanced))
     .addOption(new Option('--access-type <ACCESS_TYPE>', 'access type for delivering messages to consumers: EXCLUSIVE or NON-EXCLUSIVE') .default( defaultManageQueueConfig.accessType) .argParser(parseSempQueueAccessType) .hideHelp(advanced))
     .addOption(new Option('--add-subscriptions <TOPIC...>', 'the topic subscriptions to be added') .argParser(parseReceiveTopic) .default( defaultManageQueueConfig.addSubscriptions ) .hideHelp(advanced))
@@ -328,7 +326,7 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--egress-enabled [BOOLEAN]', '[advanced] enable transmission of messages from the queue') .default(defaultManageQueueConfig.egressEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--ingress-enabled [BOOLEAN]', '[advanced] enable reception of messages to the queue') .argParser(parseBoolean) .default(defaultManageQueueConfig.ingressEnabled) .hideHelp(!advanced))
     .addOption(new Option('--max-msg-size <NUMBER>', '[advanced] the maximum message size allowed in the Queue, in bytes (B)') .argParser(parseNumber) .default(defaultManageQueueConfig.maxMsgSize) .hideHelp(!advanced))
-    .addOption(new Option('--max-spool-usage <NUMBER>', '[advanced] the maximum message spool usage allowed by the Queue, in megabytes (MB)') .argParser(parseNumber) .default(defaultManageQueueConfig.maxMsgSpoolUsage) .hideHelp(!advanced))
+    .addOption(new Option('--max-msg-spool-usage <NUMBER>', '[advanced] the maximum message spool usage allowed by the Queue, in megabytes (MB)') .argParser(parseNumber) .default(defaultManageQueueConfig.maxMsgSpoolUsage) .hideHelp(!advanced))
     .addOption(new Option('--max-redelivery-count <NUMBER>', '[advanced] maximum number of times the queue will attempt redelivery') .argParser(parseNumber) .default(defaultManageQueueConfig.maxRedeliveryCount) .hideHelp(!advanced))
     .addOption(new Option('--partition-count <NUMBER>', '[advanced] the count of partitions of the queue') .argParser(parseNumber) .default(defaultManageQueueConfig.partitionCount) .hideHelp(!advanced))
     .addOption(new Option('--partition-rebalance-delay <NUMBER>', '[advanced] the delay (in seconds) before a partition rebalance is started once needed') .argParser(parseNumber) .default(defaultManageQueueConfig.partitionRebalanceDelay) .hideHelp(!advanced))
@@ -340,9 +338,8 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandQueue))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandQueue))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -362,11 +359,13 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-op, --operation <OPERATION>', 'create, update or delete a acl profile') .argParser(parseSempOperation) .default(defaultManageQueueConfig.operation) .hideHelp(advanced))
+    .addOption(new Option('--list [ACL_PROFILE]', 'list existing acl-profiles, fetch details if acl-profile specified') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.list) .hideHelp(advanced))
+    .addOption(new Option('--create [ACL_PROFILE]', 'create an acl-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.create) .hideHelp(advanced))
+    .addOption(new Option('--update [ACL_PROFILE]', 'update an acl-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.update) .hideHelp(advanced))
+    .addOption(new Option('--delete [ACL_PROFILE]', 'delete an acl-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.delete) .hideHelp(advanced))
 
     // semp ACL PROFILE
     .addOption(new Option(`\n/* ${chalk.whiteBright('ACL PROFILE SETTINGS')} */`))
-    .addOption(new Option('--acl-profile <ACL_PROFILE>', 'the name of the ACL profile') .default( defaultManageAclProfileConfig.aclProfile ) .hideHelp(advanced))
     .addOption(new Option('--client-connect-default-action <ACCESS_TYPE>', 'the default action to take when a client using the ACL Profile connects to massage VPN (allow or disallow)') .default( defaultManageAclProfileConfig.clientConnectDefaultAction) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
     .addOption(new Option('--publish-topic-default-action <ACCESS_TYPE>', 'the default action to take when a client using the ACL Profile publishes to a topic (allow or disallow)') .default( defaultManageAclProfileConfig.publishTopicDefaultAction) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
     .addOption(new Option('--subscribe-topic-default-action <ACCESS_TYPE>', 'the default action to take when a client using the ACL Profile subscribes to a topic (allow or disallow)') .default( defaultManageAclProfileConfig.subscribeTopicDefaultAction ) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
@@ -374,9 +373,8 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandAclProfile))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandAclProfile))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
       
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -395,12 +393,14 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-op, --operation <OPERATION>', 'create, update or delete a client profile') .argParser(parseSempOperation) .default(defaultManageQueueConfig.operation) .hideHelp(advanced))
+    .addOption(new Option('--list [CLIENT_PROFILE]', 'list existing client-profiles, fetch details if client-profile specified') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.list) .hideHelp(advanced))
+    .addOption(new Option('--create [CLIENT_PROFILE]', 'create a client-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.create) .hideHelp(advanced))
+    .addOption(new Option('--update [CLIENT_PROFILE]', 'update a client-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.update) .hideHelp(advanced))
+    .addOption(new Option('--delete [CLIENT_PROFILE]', 'delete a client-profile') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.delete) .hideHelp(advanced))
 
     // semp CLIENT PROFILE
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT PROFILE SETTINGS')} */`))
-    .addOption(new Option('--client-profile <CLIENT_PROFILE>', 'the name of the Client profile') .default( defaultManageClientProfileConfig.clientProfile ) .hideHelp(advanced))
     .addOption(new Option('--allow-guaranteed-endpoint-create-durability <TYPE>', '[advanced] the types of Queues and Topic Endpoints that clients can create (all, durable or non-durable') .default( defaultManageClientProfileConfig.allowGuaranteedEndpointCreateDurability) .argParser(parseSempEndpointCreateDurability) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-endpoint-create-enabled <BOOLEAN>', '[advanced] enable or disable the Client Username') .default( defaultManageClientProfileConfig.allowGuaranteedEndpointCreateEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-msg-receive-enabled <BOOLEAN>', '[advanced] enable or disable allowing clients to receive guaranteed messages.') .default( defaultManageClientProfileConfig.allowGuaranteedMsgReceiveEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
@@ -415,9 +415,8 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandClientProfile))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandClientProfile))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
       
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -437,11 +436,13 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-op, --operation <OPERATION>', 'create, update or delete a client username') .argParser(parseSempOperation) .default(defaultManageQueueConfig.operation) .hideHelp(advanced))
+    .addOption(new Option('--list [CLIENT_USERNAME]', 'list existing client-usernames, fetch details if client-username specified') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.list) .hideHelp(advanced))
+    .addOption(new Option('--create [CLIENT_USERNAME]', 'create a client-username') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.create) .hideHelp(advanced))
+    .addOption(new Option('--update [CLIENT_USERNAME]', 'update a client-username') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.update) .hideHelp(advanced))
+    .addOption(new Option('--delete [CLIENT_USERNAME]', 'delete a client-username') .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.delete) .hideHelp(advanced))
 
     // semp CLIENT USERNAME
     .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT USERNAME SETTINGS')} */`))
-    .addOption(new Option('--client-username <CLIENT_USERNAME>', 'the name of the Client Username') .default( defaultManageClientUsernameConfig.clientUsername ) .hideHelp(advanced))
     .addOption(new Option('--client-profile <CLIENT_PROFILE>', 'the name of the Client profile') .default( defaultManageClientUsernameConfig.clientProfile ) .hideHelp(advanced))
     .addOption(new Option('--acl-profile <ACL_PROFILE>', 'the name of the ACL profile') .default( defaultManageClientUsernameConfig.aclProfile ) .hideHelp(advanced))
     .addOption(new Option('--enabled <BOOLEAN>', 'enable or disable the Client Username') .default( defaultManageClientUsernameConfig.enabled) .argParser(parseBoolean) .hideHelp(advanced))
@@ -450,9 +451,8 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>','the configuration file') .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name [COMMAND_NAME]', 'the command name') .hideHelp(advanced) .default(commandClientUsername))
-    .addOption(new Option('--save', 'save/update the command settings') .hideHelp(advanced) .default(false))
-    .addOption(new Option('--save-to <COMMAND_NAME>', 'duplicate the command settings') .hideHelp(advanced) .default(false))
+    .addOption(new Option('--name <COMMAND_NAME>', 'the command name') .hideHelp(advanced) .default(commandClientUsername))
+    .addOption(new Option('--save [COMMAND_NAME]', 'update existing or create a new command settings') .hideHelp(advanced) .default(false))
       
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -460,7 +460,7 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
     .allowUnknownOption(false)
 }
 
-export const addManageVpnConnectionOptions = (cmd: Command, advanced: boolean) => {
+export const addManageConnectionOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // messaging CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
@@ -471,12 +471,12 @@ export const addManageVpnConnectionOptions = (cmd: Command, advanced: boolean) =
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', '[advanced] the application description') .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeoutInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeoutInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', '[advanced] the read timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', '[advanced] the timeout period for a connect operation') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <MILLISECONDS>', '[advanced] the number of times to retry connecting during initial connection setup') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
     .addOption(new Option('--reconnect-retries <NUMBER>', '[advanced] the number of times to retry connecting after a connected session goes down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWaitInMsecs) .hideHelp(!advanced))
-    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalInMsecs) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', '[advanced] the amount of time between each attempt to connect to a host') .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--keepalive <MILLISECONDS>', '[advanced] the amount of time to wait between sending out keep-alive messages to the VPN') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
@@ -488,7 +488,7 @@ export const addManageVpnConnectionOptions = (cmd: Command, advanced: boolean) =
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', 'display more help for command with options not shown in basic help'))
-    .addOption(new Option('-he, --help-examples', 'show cli vpn-connection examples'))
+    .addOption(new Option('-he, --help-examples', 'show cli connection examples'))
 }
 
 export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) => {

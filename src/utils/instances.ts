@@ -11,10 +11,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   sempPassword: string | undefined
   config: string | undefined
   name: string | undefined
-  save: boolean | undefined
-  saveTo: boolean | undefined
-  from: string | undefined
-  to: string | undefined
+  save: boolean | string | undefined
   helpExamples?: boolean | undefined
   connectionTimeout?: number | undefined
   connectionRetries?: number | undefined
@@ -35,7 +32,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   acknowledgeMode?: PublisherAcknowledgeMode | MessageConsumerAcknowledgeMode | undefined
   logLevel?: string | undefined
   command: CommandType
-  operation: string | undefined
+  operation: OperationType
   count?: number | undefined
   interval?: number | undefined
   clientName?: string | undefined
@@ -67,10 +64,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.sempPassword = ""
     this.config = ""
     this.name = ""
-    this.from = ""
-    this.to = ""
     this.save = false
-    this.saveTo = false
     this.helpExamples = false
     this.connectionTimeout = 1
     this.connectionRetries = 1
@@ -93,7 +87,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
                               solace.MessageConsumerAcknowledgeMode.AUTO
     this.logLevel = ""
     this.command = commandType
-    this.operation = ""
+    this.operation = "CREATE"
     this.count = 1
     this.interval = 1
     this.clientName = ""
@@ -127,13 +121,10 @@ export class ManageClientOptionsEmpty implements StmConfigOptions, ManageConnect
   sempPassword: string | undefined
   config: string | undefined
   name: string | undefined
-  save: boolean | undefined
-  saveTo: boolean | undefined
-  from: string | undefined
-  to: string | undefined
+  save: boolean | string | undefined
   helpExamples?: boolean | undefined
   command: CommandType
-  operation: string | undefined
+  operation: OperationType
   queue?: string | undefined
   owner?: string | undefined
   addSubscriptions?: any
@@ -188,13 +179,10 @@ export class ManageClientOptionsEmpty implements StmConfigOptions, ManageConnect
     this.sempPassword =  ""
     this.config =  ""
     this.name =  ""
-    this.from =  ""
-    this.to =  ""
     this.save = false
-    this.saveTo = false
     this.helpExamples =  false
     this.command =  commandType
-    this.operation = ""
+    this.operation = "CREATE"
     this.queue =  ""
     this.owner = ""
     this.addSubscriptions =  []

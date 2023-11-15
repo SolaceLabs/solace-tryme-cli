@@ -202,13 +202,7 @@ export const parseReplyTopic = (value: string, previous: string[] | undefined) =
 }
 
 export const parseSempOperation = (value: string) => {
-  if (!['LIST', 'CREATE', 'UPDATE', 'DELETE'].includes(value.toUpperCase())) {
-    Logger.error(`only 'LIST', 'CREATE', 'UPDATE' and 'DELETE' operations are supported.`)
-    Logger.error('exiting...')
-    process.exit(1)
-  }
-  
-  return value.toUpperCase();
+  return (!value) ? true : value;
 }
 
 export const parseSempQueueTopics = (value: string, previous: string[] | undefined) => {

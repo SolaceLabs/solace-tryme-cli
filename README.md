@@ -8,7 +8,7 @@ Solace Try-Me CLI is a CLI Client on the command line to publish and receive mes
 
 ### Quick Start
 
-Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the executables under **Assets**. Pick the binary based on your OS and download. Rename the downloaded binary as **stm** and move the file to a folder that is in the *PATH* or update the path to contain the folder where the binary file is present.
+Go to [Git Releases](https:/* github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the executables under **Assets**. Pick the binary based on your OS and download. Rename the downloaded binary as **stm** and move the file to a folder that is in the *PATH* or update the path to contain the folder where the binary file is present.
 
 
 ### Command Structure
@@ -17,7 +17,7 @@ The following view captures the command hierarchy of the *stm* cli tool.
 
 ```
 stm/
-├── --version                                       /* output the version number */
+├── -v, --version                                   /*  output the version number */
 ├── -h, --help                                      /* display help for command */
 ├── publish [options]                               /* Execute a publish command */
 │   └── [Connection, Session, Publish, Message and Configuration parameters]
@@ -32,11 +32,9 @@ stm/
 │   │   └── [Configuration parameters]
 │   ├── list [options]                              /* List command samples */
 │   │   └── [Configuration parameters]
-│   ├── view [options]                              /* View command sample */
-│   │   └── [Configuration parameters]
 │   ├── delete [options]                            /* Delete command sample */
 │   │   └── [Configuration parameters]
-│   └── help [command]                              /* display help for command */  
+│   └── help [command]                              /* display help for command   */
 ├── manage                                          /* Manage broker connection and resources */
 │   ├── queue [options]                             /* Manage a queue */
 │   │   └── [SEMP Connection, Operation, Queue and Configuration parameters]
@@ -46,12 +44,13 @@ stm/
 │   │   └── [SEMP Connection, Operation, ACL Profile and Configuration parameters]
 │   ├── client-username [options]                   /* Manage a client username */
 │   │   └── [SEMP Connection, Operation, Client Username and Configuration parameters]
-│   ├── vpn-connection [options]                    /* Manage VPN connection */
+│   ├── connection [options]                        /* Manage message VPN connection */
 │   │   └── [Connection, Session and Configuration parameters]
 │   ├── semp-connection [options]                   /* Manage SEMP connection */
 │   │   └── [SEMP Connection, Session and Configuration parameters]
 │   └── help [command]                              /* display help for command */
 └── help [command]                                  /* display help for command */
+
 ```
 
 
@@ -141,8 +140,8 @@ Commands:
 ```
 ## Technology Stack
 
-- [TypeScript](https://www.typescriptlang.org/)
-- [Node.js](https://nodejs.org/en/)
-- [pkg](https://github.com/vercel/pkg)
-- [PubSub+ JavaScript API](https://docs.solace.com/API-Developer-Online-Ref-Documentation/nodejs/index.html)
+- [TypeScript](https:/* www.typescriptlang.org/)
+- [Node.js](https:/* nodejs.org/en/)
+- [pkg](https:/* github.com/vercel/pkg)
+- [PubSub+ JavaScript API](https:/* docs.solace.com/API-Developer-Online-Ref-Documentation/nodejs/index.html)
 

@@ -1,6 +1,7 @@
 'use strict';
 
 import { prettyPrint } from '@base2/pretty-print-object';
+import { Logger } from './logger';
 var _os = require('os');
 
 var stringTimesN = function stringTimesN(n:number, char:string) {
@@ -62,10 +63,11 @@ function prettyJSON(str: string) {
         indent: '  ',
         singleQuotes: false
       });
-  } catch (e) {
-      return false;
+  } catch (error: any) {
+    Logger.logDetailedError(`prettyJSON failed, returning original content`, `${error.toString()}`)
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    return str;
   }
-  return true;
 }
 
 
