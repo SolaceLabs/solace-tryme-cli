@@ -95,37 +95,18 @@ yarn run dev
 
 # Compiles and minifies for production
 yarn run build
-```
 
-After a successful build, the corresponding file for the successful build will appear in the `dist` directory and will need to be used in a Node.js environment.
-
-If you need to package a binary executable, please refer to the following command.
-
-```shell
-# Install pkg lib
-npm install pkg -g
-
-# Build binary
-pkg package.json
+# Creates packages for target platforms
+yarn run package
 ```
 
 After a successful build, you will see the binary executable for each system in the `release` directory.
 
 ##### Run from build
-
-Install the required node modules and build the project.
-
-```
-npm install --save
-npm run build
-```
-
-If you are planning to run from the build, ensure that the ``ts-node`` is installed via ``npm install ts-node``
-
-No you can run from the build using ts-node.
+After running `yarn install` above you can now run from the build using `yarn run index [command]`
 
 ```
-$ ts-node bin/index.js help
+$ yarn run index help
 
 Usage: stm [options] [command]
 
@@ -144,6 +125,7 @@ Commands:
   manage             Manage broker connection and resources
   help [command]     display help for command
 ```
+
 ## Technology Stack
 
 - [TypeScript](https:/* www.typescriptlang.org/)
