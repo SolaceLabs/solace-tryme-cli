@@ -26,5 +26,7 @@ jobs:
       - name: List
         run: ls -a release
         
-      # - name: Release
-      # uses: softprops/action-gh-release@v1
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
