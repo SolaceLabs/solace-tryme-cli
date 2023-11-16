@@ -1,9 +1,8 @@
 name: Release Artifacts
 on:
   push:
-    branches: [main]
     tags:
-     - "test*"
+     - "v*"
 
 jobs:
   release:
@@ -19,8 +18,11 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install
-        
+
       - name: Build
+        run: yarn run build
+        
+      - name: Package
         run: yarn run package
       
       - name: Release
