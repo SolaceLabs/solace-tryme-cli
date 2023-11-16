@@ -27,14 +27,6 @@ stm/
 │   └── [Connection, Session, Request, Message and Configuration parameters]
 ├── reply [options]                                 /* Execute a reply command */
 │   └── [Connection, Session, Reply, Message and Configuration parameters]
-├── config                                          /* Manage command configurations */
-│   ├── init [options]                              /* Initialize command samples */
-│   │   └── [Configuration parameters]
-│   ├── list [options]                              /* List command samples */
-│   │   └── [Configuration parameters]
-│   ├── delete [options]                            /* Delete command sample */
-│   │   └── [Configuration parameters]
-│   └── help [command]                              /* display help for command   */
 ├── manage                                          /* Manage broker connection and resources */
 │   ├── queue [options]                             /* Manage a queue */
 │   │   └── [SEMP Connection, Operation, Queue and Configuration parameters]
@@ -49,26 +41,40 @@ stm/
 │   ├── semp-connection [options]                   /* Manage SEMP connection */
 │   │   └── [SEMP Connection, Session and Configuration parameters]
 │   └── help [command]                              /* display help for command */
+├── config                                          /* Manage command configurations */
+│   ├── init [options]                              /* Initialize command samples */
+│   │   └── [Configuration parameters]
+│   ├── list [options]                              /* List command samples */
+│   │   └── [Configuration parameters]
+│   ├── delete [options]                            /* Delete command sample */
+│   │   └── [Configuration parameters]
+│   └── help [command]                              /* display help for command   */
 └── help [command]                                  /* display help for command */
 
 ```
 
 
 
-### Examples
+### Command Parameters
 
-For details on CLI parameters, refer to the [parameters](PARAMETERS.md) documentation.
+For details on CLI parameters, refer to the [parameters](PARAMETERS.md) document.
 
 You can also use:
 - _-h_ or _--help_ option on the command to see basic parameters.
 - _-hm_ or _--help-more_ option on the command to see other (advanced) parameters.
 
 
-### Examples
+### Command Examples
 
 Refer to the [examples](EXAMPLES.md) page for sample commands. 
 
 You can also use the _-he_ or _--help-examples_ option on the command to see corresponding examples.
+
+### Command Persistence
+
+The __stm__ utility supports persisting command settings to a file, that can be referenced by name. In fact, the default configuration file present is populated with messaging and manage comments with default settings.
+
+To know more about configuration file and how to create and manage commands, refer to [configuration](CONFIGURATION.md) document.
 
 ## Develop
 
