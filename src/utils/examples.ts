@@ -4,13 +4,13 @@ import { getDefaultTopic } from "./defaults"
 export const displayHelpExamplesForConfigInit = () => {
   console.log(`
 Examples:
-# create a default configuration  'stm-cli-config.json' 
-# and initialize commands with default settings
+// create a default configuration  'stm-cli-config.json' 
+// and initialize commands with default settings
 
 ${chalk.greenBright('stm config init')}
 
-# create and initialize a named configuration
-# and initialize commands with default settings
+// create and initialize a named configuration
+// and initialize commands with default settings
 
 ${chalk.greenBright('stm config init --config cloud-broker.json')}
   `)
@@ -19,19 +19,19 @@ ${chalk.greenBright('stm config init --config cloud-broker.json')}
 export const displayHelpExamplesForConfigList = () => {
   console.log(`
 Examples:
-# list commands from the default configuration 'stm-cli-config.json' 
+// list commands from the default configuration 'stm-cli-config.json' 
 
 ${chalk.greenBright('stm config list')}
 
-# get details of a named command from the named configuration
+// get details of a named command from the named configuration
 
 ${chalk.greenBright('stm config list --name publish')}
 
-# list commands from the named configuration
+// list commands from the named configuration
 
 ${chalk.greenBright('stm config list --config cloud-broker.json')}
 
-# get details of a named command from the named configuration
+// get details of a named command from the named configuration
 
 ${chalk.greenBright('stm config list --config cloud-broker.json --name receive')}
   `)
@@ -40,11 +40,11 @@ ${chalk.greenBright('stm config list --config cloud-broker.json --name receive')
 export const displayHelpExamplesForConfigDelete = () => {
   console.log(`
 Examples:
-# delete a specific command from the default configuration 'stm-cli-config.json' 
+// delete a specific command from the default configuration 'stm-cli-config.json' 
 
 ${chalk.greenBright('stm config delete --name publish2')}
 
-# delete a specific command from the named configuration 
+// delete a specific command from the named configuration 
 
 ${chalk.greenBright('stm config delete --config cloud-broker.json --name publish2')}
 

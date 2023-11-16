@@ -86,6 +86,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
@@ -106,7 +107,6 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--reply-to-topic <TOPIC>', '[advanced] string which is used as the topic name for a response message') .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', '[advanced] the user properties (e.g., "name1: value1" "name2: value2")') .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', '[advanced] message print mode: COMPACT, PRETTY, NONE') .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
-    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
@@ -149,10 +149,10 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--receive-timestamps [BOOLEAN]', '[advanced] include a receive timestamp on received messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.receiveTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', '[advanced] reapply subscriptions upon calling on a disconnected session') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
     .addOption(new Option('--output-mode <MODE>', '[advanced] message print mode: COMPACT, PRETTY, NONE') .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
-    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // consumer options
     .addOption(new Option('--acknowledge-mode <MODE>', '[advanced] the acknowledgement mode - AUTO or CLIENT') .argParser( parseReceiverAcknowledgeMode) .default(defaultMessageReceiveConfig.acknowledgeMode) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
@@ -197,6 +197,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // request options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SETTINGS')} */`) .hideHelp(!advanced))
@@ -217,7 +218,6 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--reply-to <TOPIC>', '[advanced] string which is used as the topic name for a response message') .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', '[advanced] the user properties (e.g., "name1: value1" "name2: value2")') .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', '[advanced] message print mode: COMPACT, PRETTY, NONE') .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
-    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
@@ -261,6 +261,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--keepalive-interval-limit <NUMBER>', '[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down') .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalsLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', '[advanced] include a sender ID on sent messages') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', '[advanced] include sequence number on messages sent') .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REPLY SETTINGS')} */`) .hideHelp(!advanced))
@@ -281,7 +282,6 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--reply-to <TOPIC>', '[advanced] string which is used as the topic name for a response message') .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', '[advanced] the user properties (e.g., "name1: value1" "name2: value2")') .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', '[advanced] message print mode: COMPACT, PRETTY, NONE') .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
-    .addOption(new Option('--log-level <LEVEL>', '[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE') .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
@@ -400,7 +400,7 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
 
     // semp CLIENT PROFILE
 
-    .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT PROFILE SETTINGS')} */`))
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT PROFILE SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-endpoint-create-durability <TYPE>', '[advanced] the types of Queues and Topic Endpoints that clients can create (all, durable or non-durable') .default( defaultManageClientProfileConfig.allowGuaranteedEndpointCreateDurability) .argParser(parseSempEndpointCreateDurability) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-endpoint-create-enabled <BOOLEAN>', '[advanced] enable or disable the Client Username') .default( defaultManageClientProfileConfig.allowGuaranteedEndpointCreateEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-msg-receive-enabled <BOOLEAN>', '[advanced] enable or disable allowing clients to receive guaranteed messages.') .default( defaultManageClientProfileConfig.allowGuaranteedMsgReceiveEnabled) .argParser(parseBoolean) .hideHelp(!advanced))

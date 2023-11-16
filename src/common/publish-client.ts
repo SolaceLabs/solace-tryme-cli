@@ -1,7 +1,6 @@
 import solace from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
-import { CLIENT_CONNECTED } from "./control-events";
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
