@@ -7,8 +7,8 @@
       "username": "default",
       "password": "default",
       "compressionLevel": 0,
-      "connectTimeoutInMsecs": 3000,
-      "connectRetries": 3,
+      "connectionTimeout": 3000,
+      "connectionRetries": 3,
       "connectRetriesPerHost": 3,
       "generateReceiveTimestamps": false,
       "generateSendTimestamps": false,
@@ -16,12 +16,12 @@
       "ignoreDuplicateSubscriptionError": true,
       "ignoreSubscriptionNotFoundError": true,
       "includeSenderId": false,
-      "keepAliveIntervalInMsecs": 3000,
-      "keepAliveIntervalsLimit": 3,
-      "readTimeoutInMsecs": 10000,
-      "reapplySubscriptions": false,
+      "keepAliveInterval": 3000,
+      "keepAliveIntervalLimit": 3,
+      "readTimeout": 10000,
+      "reapplySubscriptions": true,
       "reconnectRetries": 3,
-      "reconnectRetryWaitInMsecs": 3000,
+      "reconnectRetryWait": 3000,
       "sendBufferMaxSize": 65536,
       "logLevel": "ERROR"
     },
@@ -37,11 +37,11 @@
       "description": "Publish application created via Solace Try-Me CLI",
       "stdin": false,
       "topic": [
-        "stm/cli/topic"
+        "solace/try/me"
       ],
       "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
       "acknowledgeMode": "PER_MESSAGE",
-      "acknowledgeTimeoutInMsecs": 2000,
+      "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
       "outputMode": "COMPACT"
@@ -57,11 +57,11 @@
       "interval": 3000,
       "description": "Receive application created via Solace Try-Me CLI",
       "topic": [
-        "stm/cli/topic"
+        "solace/try/me"
       ],
       "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
       "acknowledgeMode": "AUTO",
-      "acknowledgeTimeoutInMsecs": 2000,
+      "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
       "outputMode": "COMPACT"
@@ -70,11 +70,11 @@
       "command": "request",
       "description": "Request application created via Solace Try-Me CLI",
       "topic": [
-        "stm/cli/request"
+        "solace/try/me/request"
       ],
       "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
       "acknowledgeMode": "PER_MESSAGE",
-      "acknowledgeTimeoutInMsecs": 2000,
+      "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
       "outputMode": "COMPACT"
@@ -83,11 +83,11 @@
       "command": "reply",
       "description": "Reply application created via Solace Try-Me CLI",
       "topic": [
-        "stm/cli/request"
+        "solace/try/me/request"
       ],
       "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
       "acknowledgeMode": "PER_MESSAGE",
-      "acknowledgeTimeoutInMsecs": 2000,
+      "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
       "outputMode": "COMPACT"
@@ -133,7 +133,7 @@
       "respectMsgPriorityEnabled": false,
       "respectTtlEnabled": false,
       "addSubscriptions": [
-        "stm/cli/topic"
+        "solace/try/me"
       ],
       "removeSubscriptions": [],
       "listSubscriptions": false,
