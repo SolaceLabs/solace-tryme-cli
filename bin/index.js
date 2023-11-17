@@ -41,7 +41,10 @@ try {
   const commander = new Commander(help, helpMore)
   const helpConfig = getHelpConfiguration(process.argv.join(' '))
   if (helpConfig.helpMore && helpMore) process.argv.push('-h')
-
+  if (process.argv.length === 2) {
+    process.argv.push('-h')
+  }
+  
   commander.init();
   commander.program.parse(process.argv)
 } catch (e) {
