@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "dev": "tsc -w",
-    "index" : "ts-node bin/index.js",
+    "index": "ts-node bin/index.js",
     "build": "tsc",
     "package": "pkg package.json"
   },
@@ -29,7 +29,7 @@
     "@types/long": "^5.0.0",
     "@types/node": "^20.8.9",
     "chalk": "~4.1.2",
-    "commander": "^9.3.0",
+    "commander": "^11.1.0",
     "concat-stream": "^2.0.0",
     "core-js": "^3.26.0",
     "pkg": "^5.8.1",
