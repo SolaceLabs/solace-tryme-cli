@@ -5,7 +5,7 @@ import chalk from 'chalk'
 import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
 import { buildMessageConfig } from './init'
 
-const defaultPath = `${process.cwd()}/`
+const defaultPath = `${require('os').homedir()}/`
 
 export const fileExists = (filePath: string) => fs.existsSync(filePath)
 
@@ -121,7 +121,9 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
     const configFile = data.config;
     delete data.config;
 
-    const filePath = processPath(`${process.cwd()}/${configFile}`)
+    // const filePath = processPath(`${process.cwd()}/${configFile}`)
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${configFile}`)  
     if (!filePath.endsWith('.json')) filePath.concat('.json')
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
@@ -140,8 +142,10 @@ export const saveConfig = (data: any) => {
     delete data.config;
 
     var updated = false;
-    const filePath = processPath(`${process.cwd()}/${configFile}`)
-    if (!filePath.endsWith('.json')) filePath.concat('.json')
+    // const filePath = processPath(`${process.cwd()}/${configFile}`)
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${configFile}`)
+      if (!filePath.endsWith('.json')) filePath.concat('.json')
     if (fileExists(filePath)) {
       const config:any = readFile(filePath)
       if (data.message.connection && compareConfiguration(data, config, []) > 0) {
@@ -161,11 +165,11 @@ export const saveConfig = (data: any) => {
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
     else Logger.logSuccess(`${updated ? 'updated configuration' : 'initialized configuration with default command settings'} on '${decoratePath(configFile)}' successfully`)
-  if (!updated) 
-    Logger.logHint(
-  `\nThe initialized configuration points to a local broker running on 'localhost:8080' and the default settings for broker, username and password for messaging and semp operations. You can modify the settings with 'save' option when executing commands.\n` +
-  `\nThe configuration is pre-populated with command configurations with default settings for messaging operations like publish, receive, request and reply. It also comes with a sample resource management commands for creating queue, acl-profile, client-profile and client-name. These management commands can be modified to update or delete resources.\n` +
-  `\nThe command settings can be updated, copied to a new command and referred to by name during the execution. Be sure to checkou the help (-h, --help) for basic options, more help (-hm, --help-examples) for advanced options and command examples  (-he, --help-examples) on the CLI commands.`)
+    // if (!updated) 
+    //   Logger.logHint(
+    // `\nThe initialized configuration points to a local broker running on 'localhost:8080' and the default settings for broker, username and password for messaging and semp operations. You can modify the settings with 'save' option when executing commands.\n` +
+    // `\nThe configuration is pre-populated with command configurations with default settings for messaging operations like publish, receive, request and reply. It also comes with a sample resource management commands for creating queue, acl-profile, client-profile and client-name. These management commands can be modified to update or delete resources.\n` +
+    // `\nThe command settings can be updated, copied to a new command and referred to by name during the execution. Be sure to checkou the help (-h, --help) for basic options, more help (-hm, --help-examples) for advanced options and command examples  (-he, --help-examples) on the CLI commands.`)
   } catch (error: any) {
     Logger.logDetailedError('file write failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -174,16 +178,18 @@ export const saveConfig = (data: any) => {
   }
 }
 
-export const loadConfig = (loadPath: string) => {
+export const loadConfig = (configFile: string) => {
   try {
-    const filePath = processPath(loadPath)
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${configFile}`)  
+    // const filePath = processPath(loadPath)
     if (fileExists(filePath)) {
-      Logger.info(`loading configuration '${loadPath}'`)
+      Logger.info(`loading configuration '${configFile}'`)
       const config = readFile(filePath)
       // TODO: validateConfig(config)
       return config;   
     } else {
-      Logger.logDetailedError(`configuration not found`, `${decoratePath(loadPath)}`)
+      Logger.logDetailedError(`configuration not found`, `${decoratePath(configFile)}`)
       Logger.logError('exiting...')
       process.exit(1)
     }
@@ -229,7 +235,9 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     }
 
     var commandName = options.name ? options.name : cmd
-    const filePath = processPath(options.config as string)
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
+    // const filePath = processPath(options.config as string)
     if (fileExists(filePath)) {
       const config = readFile(filePath)
       Logger.info(`loading '${commandName}' command from configuration '${options.config}'`)

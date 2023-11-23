@@ -22,6 +22,7 @@ import connection from './lib/connection';
 import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
 import { loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
+import chalk from 'chalk';
 
 export class Commander {
   program: Command
@@ -37,7 +38,7 @@ export class Commander {
   init(): void {
     this.program
       .name('stm')
-      .description('A Solace Try-Me client for the command line')
+      .description(chalk.whiteBright('A Solace Try-Me client for the command line'))
       .enablePositionalOptions()
       .allowUnknownOption(false)
       .version(`${version}`, '-v, --version')
@@ -45,7 +46,7 @@ export class Commander {
     // stm publish
     const publishCmd = this.program
       .command('publish')
-      .description('Execute a publish command')
+      .description(chalk.whiteBright('Execute a publish command'))
       .allowUnknownOption(false)
     addPublishOptions(publishCmd, this.advanced);
     publishCmd.action((options: MessageClientOptions) => {
@@ -66,7 +67,7 @@ export class Commander {
     // stm receive
     const receiveCmd = this.program
       .command('receive')
-      .description('Execute a receive command')
+      .description(chalk.whiteBright('Execute a receive command'))
       .allowUnknownOption(false)
     addReceiveOptions(receiveCmd, this.advanced);
     receiveCmd.action((options: MessageClientOptions) => {
@@ -88,7 +89,7 @@ export class Commander {
     // stm request
     const requestCmd = this.program
       .command('request')
-      .description('Execute a request command')
+      .description(chalk.whiteBright('Execute a request command'))
       .allowUnknownOption(false)
     addRequestOptions(requestCmd, this.advanced);
     requestCmd.action((options: MessageClientOptions) => {
@@ -110,7 +111,7 @@ export class Commander {
     // stm reply
     const replyCmd = this.program
       .command('reply')
-      .description('Execute a reply command')
+      .description(chalk.whiteBright('Execute a reply command'))
       .allowUnknownOption(false)
     addReplyOptions(replyCmd, this.advanced);
     replyCmd.action((options: MessageClientOptions) => {
@@ -132,13 +133,13 @@ export class Commander {
     // stm config
     const configCmd = this.program
       .command('config')
-      .description('Manage command configurations')
+      .description(chalk.whiteBright('Manage command configurations'))
       .allowUnknownOption(false)
 
     // stm config init
     const configInitCmd = configCmd
       .command('init')
-      .description('Initialize command samples')
+      .description(chalk.whiteBright('Initialize command samples'))
       .allowUnknownOption(false)
     addConfigInitOptions(configInitCmd, this.advanced)
     
@@ -160,7 +161,7 @@ export class Commander {
     // stm config list
     const configListCmd = configCmd
       .command('list')
-      .description('List command samples')
+      .description(chalk.whiteBright('List command samples'))
       .allowUnknownOption(false)
     addConfigListOptions(configListCmd, this.advanced)
 
@@ -177,7 +178,7 @@ export class Commander {
     // stm config delete
     const configDeleteCmd = configCmd
       .command('delete')
-      .description('Delete command sample')
+      .description(chalk.whiteBright('Delete command sample'))
       .allowUnknownOption(false)
     addConfigDeleteOptions(configDeleteCmd, this.advanced)
     configDeleteCmd.action((options: MessageInitOptions) => {
@@ -193,101 +194,13 @@ export class Commander {
     // stm manage
     const manageCmd = this.program
       .command('manage')
-      .description('Manage broker connection and resources')
+      .description(chalk.whiteBright('Manage broker connection and resources'))
       .allowUnknownOption(false)
-
-    // stm manage queue
-    const manageQueueCmd = manageCmd
-      .command('queue')
-      .description('Manage a queue')
-      .allowUnknownOption(false)
-    addManageQueueOptions(manageQueueCmd, this.advanced);
-    manageQueueCmd.action((options: ManageClientOptions) => {
-      const cliOptions:any = {};
-      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('queue'));
-      for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = manageQueueCmd.getOptionValueSource(defaultKeys[i]);
-      }
-      const configOptions = loadCommandFromConfig('queue', options)
-      if (configOptions) {
-        for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
-        }
-      }
-  
-      queue(options, cliOptions);
-    })  
-
-    // stm manage client-profile
-    const manageClientProfileCmd = manageCmd
-      .command('client-profile')
-      .description('Manage a client-profile')
-      .allowUnknownOption(false)
-    addManageClientProfileOptions(manageClientProfileCmd, this.advanced);
-    manageClientProfileCmd.action((options: ManageClientOptions) => {
-      const cliOptions:any = {};
-      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-profile'));
-      for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = manageClientProfileCmd.getOptionValueSource(defaultKeys[i]);
-      }
-      const configOptions = loadCommandFromConfig('client-profile', options)
-      if (configOptions) {
-        for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
-        }
-      }
-  
-      clientProfile(options, cliOptions);
-    })  
-
-    // stm manage acl profile
-    const manageAclProfileCmd = manageCmd
-      .command('acl-profile')
-      .description('Manage a acl-profile')
-      .allowUnknownOption(false)
-    addManageAclProfileOptions(manageAclProfileCmd, this.advanced);
-    manageAclProfileCmd.action((options: ManageClientOptions) => {
-      const cliOptions:any = {};
-      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('acl-profile'));
-      for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = manageAclProfileCmd.getOptionValueSource(defaultKeys[i]);
-      }
-      const configOptions = loadCommandFromConfig('acl-profile', options)
-      if (configOptions) {
-        for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
-        }
-      }
-  
-      aclProfile(options, cliOptions);
-    })  
-
-    // stm manage client username
-    const manageClientUsernameCmd = manageCmd
-      .command('client-username')
-      .description('Manage a client username')
-      .allowUnknownOption(false)
-    addManageClientUsernameOptions(manageClientUsernameCmd, this.advanced);
-    manageClientUsernameCmd.action((options: ManageClientOptions) => {
-      const cliOptions:any = {};
-      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-username'));
-      for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = manageClientUsernameCmd.getOptionValueSource(defaultKeys[i]);
-      }
-      const configOptions = loadCommandFromConfig('client-username', options)
-      if (configOptions) {
-        for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
-        }
-      }
-  
-      clientUsername(options, cliOptions);
-    })  
 
     // stm manage vpn connection
     const manageConnectionCmd = manageCmd
       .command('connection')
-      .description('Manage message VPN connection')
+      .description(chalk.whiteBright('Manage message VPN connection'))
       .allowUnknownOption(false)
     addManageConnectionOptions(manageConnectionCmd, this.advanced);
     manageConnectionCmd.action((options: MessageClientOptions) => {
@@ -309,7 +222,7 @@ export class Commander {
     // stm manage semp connection
     const manageSempConnectionCmd = manageCmd
       .command('semp-connection')
-      .description('Manage SEMP connection')
+      .description(chalk.whiteBright('Manage SEMP connection'))
       .allowUnknownOption(false)
     addManageSempConnectionOptions(manageSempConnectionCmd, this.advanced);
     manageSempConnectionCmd.action((options: ManageClientOptions) => {
@@ -326,6 +239,94 @@ export class Commander {
       }
   
       sempConnection(options, cliOptions);
+    })  
+
+    // stm manage queue
+    const manageQueueCmd = manageCmd
+      .command('queue')
+      .description(chalk.whiteBright('Manage a queue'))
+      .allowUnknownOption(false)
+    addManageQueueOptions(manageQueueCmd, this.advanced);
+    manageQueueCmd.action((options: ManageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('queue'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = manageQueueCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('queue', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+  
+      queue(options, cliOptions);
+    })  
+
+    // stm manage client-profile
+    const manageClientProfileCmd = manageCmd
+      .command('client-profile')
+      .description(chalk.whiteBright('Manage a client-profile'))
+      .allowUnknownOption(false)
+    addManageClientProfileOptions(manageClientProfileCmd, this.advanced);
+    manageClientProfileCmd.action((options: ManageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-profile'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = manageClientProfileCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('client-profile', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+  
+      clientProfile(options, cliOptions);
+    })  
+
+    // stm manage acl profile
+    const manageAclProfileCmd = manageCmd
+      .command('acl-profile')
+      .description(chalk.whiteBright('Manage a acl-profile'))
+      .allowUnknownOption(false)
+    addManageAclProfileOptions(manageAclProfileCmd, this.advanced);
+    manageAclProfileCmd.action((options: ManageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('acl-profile'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = manageAclProfileCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('acl-profile', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+  
+      aclProfile(options, cliOptions);
+    })  
+
+    // stm manage client username
+    const manageClientUsernameCmd = manageCmd
+      .command('client-username')
+      .description(chalk.whiteBright('Manage a client username'))
+      .allowUnknownOption(false)
+    addManageClientUsernameOptions(manageClientUsernameCmd, this.advanced);
+    manageClientUsernameCmd.action((options: ManageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-username'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = manageClientUsernameCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('client-username', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+  
+      clientUsername(options, cliOptions);
     })  
 
   }

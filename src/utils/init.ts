@@ -40,7 +40,9 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
   }
 
   const configFile = options.config ? options.config : defaultConfigFile;
-  const filePath = processPath(`${process.cwd()}/${configFile}`)
+  // const filePath = processPath(`${process.cwd()}/${configFile}`)
+  const homedir = require('os').homedir();
+  const filePath = processPath(`${homedir}/.stm/${configFile}`)
   if (!filePath.endsWith('.json')) filePath.concat('.json')
   if (fileExists(filePath)) {
     var prompt = require('prompt-sync')();
