@@ -24,6 +24,17 @@ jobs:
         
       - name: Package
         run: yarn run package
+
+      - name: Rename stm-macos
+        run: mv release/stm-macos release/stm
+
+      - name: Bundle stm-macos
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r stm-macos.zip stm
+
+      - name: Remove stm      
+        run: rm release/stm
       
       - name: Release
         uses: softprops/action-gh-release@v1
