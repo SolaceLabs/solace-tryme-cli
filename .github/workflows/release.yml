@@ -34,7 +34,7 @@ jobs:
           args: zip -qq -r release/stm-macos.zip stm
 
       - name: Remove stm (of macos)
-        run: rm stm release/stm-macos
+        run: rm stm
       
       - name: Rename stm-linux
         run: mv release/stm-linux stm
@@ -45,7 +45,7 @@ jobs:
           args: zip -qq -r release/stm-linux.zip stm
 
       - name: Remove stm (of linux)
-        run: rm stm release/stm-linux
+        run: rm stm
 
       - name: Rename stm-alpine
         run: mv release/stm-alpine stm
@@ -56,7 +56,7 @@ jobs:
           args: zip -qq -r release/stm-alpine.zip stm
 
       - name: Remove stm (of alpine)
-        run: rm stm release/stm-alpine
+        run: rm stm
 
       - name: Rename stm-win
         run: mv release/stm-win.exe stm.exe
@@ -64,10 +64,10 @@ jobs:
       - name: Bundle stm-win
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r release/stm-win.zip stm
+          args: zip -qq -r release/stm-win.zip stm.exe
 
       - name: Remove stm (of win)
-        run: rm stm release/stm-win.exe
+        run: rm stm.exe
 
       - name: Release
         uses: softprops/action-gh-release@v1
