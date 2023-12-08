@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 work
+store
 
 # local env files
 .env.local
@@ -28,3 +29,6 @@ dist
 
 # config json fils
 *.json
+
+# test scripts
+*.sh

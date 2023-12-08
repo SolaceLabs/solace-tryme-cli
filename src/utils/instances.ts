@@ -53,6 +53,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   userProperties?: Record<string, string | string[]> | undefined
   outputMode?: string | undefined
   helpMore?: boolean | undefined
+  visualization?: string | boolean | undefined
   constructor(commandType: CommandType) {
     this.url = ""
     this.vpn = ""
@@ -107,6 +108,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.userProperties = { "key": "value" }
     this.outputMode = ""
     this.helpMore = false
+    this.visualization = false
   }
 }
 

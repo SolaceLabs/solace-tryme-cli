@@ -1,6 +1,10 @@
 import solace from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel } from "solclientjs";
+import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED, STM_EVENT_RECEIVED } from "../utils/controlevents";
+import { getDefaultClientName } from "../utils/defaults";
+import { VisualizeClient } from "./visualize-client";
+const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -11,15 +15,18 @@ const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['TRACE', LogLevel.TRACE]
 ]);
 
-export class SolaceClient {
+export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
   session:any = null;
   active:boolean = false;
   receiver:any = {};
   replier:any = {};
+  clientName:string = ""
 
   constructor(options:any) {
+    super();
+    
     // record the options
     this.options = options;
 
@@ -32,6 +39,7 @@ export class SolaceClient {
     this.receiver.queue = this.options.queue;
     this.receiver.consuming = false;    
     this.receiver.messageConsumer = null;    
+    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('recv')  
   }
 
   /**
@@ -50,7 +58,7 @@ export class SolaceClient {
           vpnName: this.options.vpn,
           userName: this.options.username,
           password: this.options.password,
-          clientName: this.options.clientName,
+          clientName: this.clientName,
           applicationDescription: this.options.description,
           connectTimeoutInMsecs: this.options.connectionTimeout,
           connectRetries: this.options.connectionRetries,
@@ -77,6 +85,9 @@ export class SolaceClient {
 
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
+          this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
+            type: 'receiver', clientName: this.clientName, uuid: uuid() 
+          })    
           Logger.logSuccess('=== successfully connected and ready to receive events. ===');
           resolve();
         });
@@ -89,6 +100,9 @@ export class SolaceClient {
 
         //DISCONNECTED implies the client was disconnected
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
+          this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, { 
+            type: 'receiver', clientName: this.clientName, uuid: uuid() 
+          })    
           Logger.logSuccess('disconnected')
           if (this.session !== null) {
             this.session.dispose();
@@ -162,6 +176,10 @@ export class SolaceClient {
               return;
             }
           } 
+
+          this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
+            type: 'receiver', topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
+          })        
           Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
         });
       } catch (error: any) {
@@ -171,7 +189,7 @@ export class SolaceClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
         if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
@@ -381,6 +399,9 @@ export class SolaceClient {
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.MESSAGE, (message: any) => {
             Logger.logSuccess(`message Received - ${message.getDestination()}`)
             Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+            this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
+              type: 'receiver', queue: this.receiver.queue, topicName: message.getDestination().getName(), clientName: this.clientName, uuid: uuid() 
+            })        
 
             // Need to explicitly ack otherwise it will not be deleted from the message router
             message.acknowledge();
@@ -403,6 +424,9 @@ export class SolaceClient {
     Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
       try {
+        this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, { 
+          type: 'receiver', clientName: this.clientName , uuid: uuid()
+        })    
         this.session.disconnect();
       } catch (error:any) {
         Logger.logDetailedError('session disconnect failed - ', error.toString())

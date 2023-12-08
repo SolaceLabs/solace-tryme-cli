@@ -1,6 +1,6 @@
 import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
-import { RequestClient } from '../common/request-client'
+import { SolaceClient } from '../common/request-client'
 import { displayHelpExamplesForRequest } from '../utils/examples';
 import { defaultRequestMessage, delay } from '../utils/defaults';
 import { saveOrUpdateCommandSettings } from '../utils/config';
@@ -10,7 +10,7 @@ const request = async (
   optionsSource: any
 ) => {
   const { count, interval } = options;
-  const requestor = new RequestClient(options);
+  const requestor = new SolaceClient(options);
   try {
     await requestor.connect();
 

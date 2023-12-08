@@ -8,7 +8,7 @@ import { deleteConfig, initializeConfig, listConfig } from './utils/init'
 import { addManageConnectionOptions, addManageSempConnectionOptions, 
         addConfigInitOptions, addConfigListOptions, addConfigViewOptions,addConfigDeleteOptions,
         addPublishOptions, addReceiveOptions, addRequestOptions,  addReplyOptions, 
-        addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
+        addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, addVisualizeOptions, addVisualizeLaunchOptions, 
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -19,6 +19,7 @@ import clientProfile from './lib/client-profile';
 import aclProfile from './lib/acl-profile';
 import clientUsername from './lib/client-username';
 import connection from './lib/connection';
+import visualize from './utils/visualize';
 import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
 import { loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
@@ -58,9 +59,10 @@ export class Commander {
       const configOptions = loadCommandFromConfig('publish', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
+
       publisher(options, cliOptions);
     })  
   
@@ -79,7 +81,7 @@ export class Commander {
       const configOptions = loadCommandFromConfig('receive', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
 
@@ -101,10 +103,9 @@ export class Commander {
       const configOptions = loadCommandFromConfig('request', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
-
       requestor(options, cliOptions);
     })  
 
@@ -123,13 +124,80 @@ export class Commander {
       const configOptions = loadCommandFromConfig('reply', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
   
       replier(options, cliOptions);
     })  
 
+if (process.env.SHOW_VISUALIZATION) {
+    // stm visualize
+    const visualizeCmd = this.program
+      .command('visualize')
+      .description(chalk.whiteBright('Visualize event flow'))
+      .allowUnknownOption(false)
+
+    // stm visualize on
+    const visualizeOnCmd = visualizeCmd
+      .command('on')
+      .description(chalk.whiteBright('Turn on visualization'))
+      .allowUnknownOption(false)          
+    addVisualizeOptions(visualizeOnCmd, this.advanced);
+    visualizeOnCmd.action((options: MessageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = visualizeOnCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('connection', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+      options['command'] = 'connection';
+      options['visualization'] = 'on';
+      cliOptions['visualization'] = 'cli';
+  
+      connection(options, cliOptions);
+    })  
+
+    // stm visualization off
+    const visualizeOffCmd = visualizeCmd
+      .command('off')
+      .description(chalk.whiteBright('Turn off visualization'))
+      .allowUnknownOption(false)
+    addVisualizeOptions(visualizeOffCmd, this.advanced);
+    visualizeOffCmd.action((options: MessageClientOptions) => {
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = visualizeOffCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('connection', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+      options['command'] = 'connection';
+      options['visualization'] = 'off';
+      cliOptions['visualization'] = 'cli';
+  
+      connection(options, cliOptions);
+    })  
+
+    // stm visualization launch
+    const visualizeLaunchCmd = visualizeCmd
+      .command('launch')
+      .description(chalk.whiteBright('Launch visualization'))
+      .allowUnknownOption(false)
+    addVisualizeLaunchOptions(visualizeLaunchCmd, this.advanced)
+    visualizeLaunchCmd.action((options: MessageClientOptions) => {
+      visualize(options);
+    })  
+  }
     // stm config
     const configCmd = this.program
       .command('config')
@@ -256,7 +324,7 @@ export class Commander {
       const configOptions = loadCommandFromConfig('queue', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
   
@@ -278,7 +346,7 @@ export class Commander {
       const configOptions = loadCommandFromConfig('client-profile', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
   
@@ -300,7 +368,7 @@ export class Commander {
       const configOptions = loadCommandFromConfig('acl-profile', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
   
@@ -322,7 +390,7 @@ export class Commander {
       const configOptions = loadCommandFromConfig('client-username', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
-          options[defaultKeys[i]] = cliOptions[defaultKeys[i]] === 'cli' ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
   

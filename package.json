@@ -28,15 +28,19 @@
     "@base2/pretty-print-object": "^1.0.2",
     "@types/long": "^5.0.0",
     "@types/node": "^20.8.9",
+    "ascii-table": "^0.0.9",
     "chalk": "~4.1.2",
     "commander": "^11.1.0",
     "concat-stream": "^2.0.0",
     "core-js": "^3.26.0",
+    "live-server": "^1.2.2",
+    "node-localstorage": "^3.0.5",
     "pkg": "^5.8.1",
     "prompt-sync": "^4.2.0",
     "signale": "^1.4.0",
     "solclientjs": "^10.15.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@types/concat-stream": "^2.0.0",

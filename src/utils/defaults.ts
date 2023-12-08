@@ -43,8 +43,8 @@ export const getDefaultTopic = (commandType: CommandType) => {
   }
 }
 
-export const getDefaultClientName = () => {
-  return `stm_${Math.random().toString(16).substring(2, 10)}`
+export const getDefaultClientName = (type: string) => {
+  return `stm_${type}_${Math.random().toString(16).substring(2, 10)}`
 }
 export const defaultConfigFile = 'stm-cli-config.json'
 
@@ -83,6 +83,7 @@ export const defaultMessageConnectionConfig:any = {
   password: 'default',
   command: 'connection',
   name: 'connection',
+  visualization: 'off',
 
 
   // connection settings
@@ -148,6 +149,7 @@ export const defaultMessagePublishConfig:any = {
   acknowledgeMode: 'PER_MESSAGE',
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
+  guaranteedPublisher: false,
   windowSize: 50,
   outputMode: 'COMPACT',
 

@@ -1,7 +1,10 @@
-# stm Commands
+# Solace Try-Me CLI - Commands
+
+---
 
 __The stm cli utility__
 
+```
 Usage: stm [options] [command]
 
 A Solace Try-Me client for the command line
@@ -18,6 +21,7 @@ Commands:
   config             Manage command configurations
   manage             Manage broker connection and resources
   help [command]     display help for command
+```
 
 # Messaging Commands
 
@@ -25,6 +29,7 @@ __Issue messaging commands: publish, receive, request and reply__
 
 ## Publish Events
 
+```
 Usage: stm publish [options]
 
 Execute a publish command
@@ -101,9 +106,10 @@ Options:
   -hm, --help-more                         display more help for command with options not shown in basic help
   -he, --help-examples                     show cli publish examples
   -h, --help                               display help for command
-
+```
 
 ## Receive Events
+```
 Usage: stm receive [options]
 
 Execute a receive command
@@ -154,9 +160,9 @@ Options:
   -hm, --help-more                         display more help for command with options not shown in basic help
   -he, --help-examples                     show cli receive examples
   -h, --help                               display help for command
-
+```
 ## Send Request Events
-Usage: stm request [options]
+```Usage: stm request [options]
 
 Execute a request command
 
@@ -230,9 +236,10 @@ Options:
   -hm, --help-more                         display more help for command with options not shown in basic help
   -he, --help-examples                     show cli request examples
   -h, --help                               display help for command
-
+```
 ## Receive Reply Events
 
+```
 Usage: stm reply [options]
 
 Execute a reply command
@@ -326,9 +333,10 @@ Commands:
   connection [options]       Manage message VPN connection
   semp-connection [options]  Manage SEMP connection
   help [command]             display help for command
-
+```
 ## Manage Queue
 
+```
 Usage: stm manage queue [options]
 
 Manage a queue
@@ -396,9 +404,10 @@ Options:
                                              help
   -he, --help-examples                       show cli queue examples
   -h, --help                                 display help for command
-
+```
 ## Manage Client Profile
 
+```
 Usage: stm manage client-profile [options]
 
 Manage a client-profile
@@ -458,8 +467,10 @@ Options:
                                              help
   -he, --help-examples                       show cli client-profile examples
   -h, --help                                 display help for command
+```
 
 ## Manage ACL Profile
+```
 Usage: stm manage acl-profile [options]
 
 Manage a acl-profile
@@ -499,9 +510,10 @@ Options:
   /* HELP OPTIONS */
   -he, --help-examples                            show cli acl-profile examples
   -h, --help                                      display help for command
-
+```
 ## Manage Client Username
 
+```
 Usage: stm manage client-username [options]
 
 Manage a client username
@@ -536,11 +548,12 @@ Options:
   /* HELP OPTIONS */
   -he, --help-examples                       show cli client-username examples
   -h, --help                                 display help for command
-
+```
 # Configuration Commands
 
 __Commands to manage persistence of commands for reuse.__
 
+```
 Usage: stm config [options] [command]
 
 Manage command configurations
@@ -567,9 +580,10 @@ Options:
   /* HELP OPTIONS */
   -he, --help-examples                    show cli init commands examples
   -h, --help                              display help for command
-
+```
 ## List commands from the configuration
 
+```
 Usage: stm config list [options]
 
 List command samples
@@ -583,9 +597,10 @@ Options:
   -he, --help-examples                    show cli list commands examples
   -h, --help                              display help for command
 
-
+```
 ## Delete commands in the configuration
 
+```
 Usage: stm config delete [options]
 
 Delete command sample
@@ -598,3 +613,4 @@ Options:
   /* HELP OPTIONS */
   -he, --help-examples                    show cli delete command examples
   -h, --help                              display help for command
+```

@@ -1,3 +1,4 @@
+import concat from 'concat-stream'
 import { SolaceClient } from '../common/receive-client'
 import { displayHelpExamplesForReceive } from '../utils/examples';
 import { Logger } from '../utils/logger'

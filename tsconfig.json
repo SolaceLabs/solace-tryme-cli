@@ -12,5 +12,5 @@
     "types": ["@types/signale"],
     "sourceMap": true
   },
-  "include": ["src"]
+  "include": ["src", "html"]
 }

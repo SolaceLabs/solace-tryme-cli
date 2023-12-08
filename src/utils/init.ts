@@ -40,7 +40,6 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
   }
 
   const configFile = options.config ? options.config : defaultConfigFile;
-  // const filePath = processPath(`${process.cwd()}/${configFile}`)
   const homedir = require('os').homedir();
   const filePath = processPath(`${homedir}/.stm/${configFile}`)
   if (!filePath.endsWith('.json')) filePath.concat('.json')
@@ -74,7 +73,8 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
   if (!options.config) options.config = defaultConfigFile
-  const filePath = processPath(options.config)
+  const homedir = require('os').homedir();
+  const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
   if (!fileExists(filePath)) {
     Logger.error(`no configuration ${options.config} found`)
     Logger.error('exiting...');
@@ -117,6 +117,7 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
 
 export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   const { helpExamples } = options
+  var AsciiTable = require('ascii-table')
 
   if (helpExamples) {
     displayHelpExamplesForConfigList()
@@ -129,102 +130,91 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     process.exit(0)
   }
 
+
   var count = 0;
-  var list = '\n';
-  list += `\n${chalk.whiteBright.bold.underline('Messaging Commands')}\n`
-
-  list += `\n${chalk.whiteBright.italic('VPN Connection')}\n`
-  list += `\    ${chalk.whiteBright('[host: \'' + config.connection.url + '\'' +
-        ', vpn: \'' + config.connection.vpn + '\', username:  \'' + config.connection.username + '\', password: \'' + config.connection.password + '\']')}`
+  var table = new AsciiTable('Connection Settings')
+  table.setHeading('Operation', 'Name', 'Broker URL', 'Message VPN', 'Username', 'Password' )
   count++
-  list += `\n\n${chalk.whiteBright.italic.underline('Publish Commands')}\n`
+  table.addRow(config.connection.command, config.connection.command.toUpperCase(), 
+                config.connection.url, config.connection.vpn, config.connection.username, 
+                config.connection.password)
+  table.addRow(config.sempconnection.command, config.sempconnection.command.toUpperCase(), 
+                config.sempconnection.sempUrl, config.sempconnection.sempVpn, config.sempconnection.sempUsername, 
+                config.sempconnection.sempPassword)
+  table.setJustify(false);
+  console.log(table.toString());
+
+  var table = new AsciiTable('Messaging Commands')
+  table.setHeading('Operation', 'Name', 'Topic(s)', 'Broker URL', 'Message VPN', 'Credentials' )
+  
+  let commands:any = {};
+  messagingCommands.forEach(c => commands[c] = []);
   Object.keys(config).forEach((key) => {
-    if (config[key].command === 'publish') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright('Publish events on topic ' + JSON.stringify(config[key].topic) + ' on broker \'' + config.connection.vpn + '\' at \'' + config.connection.url) + '\''}`
+    if (messagingCommands.includes(config[key].command)) {
+      config[key].name = key;
+      commands[config[key].command].push(config[key])
     }
-  })
+  });
 
-  list += `\n\n${chalk.whiteBright.italic.underline('Receive Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'receive') {
+  let lastOp = '';
+  Object.keys(commands).forEach((key) => {
+    commands[key].forEach((selected:any) => {
       count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright('Receive events on topic ' + JSON.stringify(config[key].topic) + ' on broker \'' + config.connection.vpn + '\' at \'' + config.connection.url) + '\''}`
+      if (typeof selected.topic !== 'object' || (typeof selected.topic === 'object' && selected.topic.length === 1)) {
+        table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
+                      selected.name, JSON.stringify(selected.topic), config.connection.url,
+                      config.connection.vpn, config.connection.username + '/' + config.connection.password)
+      } else {
+        table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
+                      selected.name, '[ ', config.connection.url,
+                      config.connection.vpn, config.connection.username + '/' + config.connection.password)
+        for (var i=0; i<selected.topic.length; i++) {
+          table.addRow('', '', '  "' + selected.topic[i] + (i === selected.topic.length-1 ? '"' : '",'), '', '', '');
+        }
+        table.addRow('', '', ']', '', '', '');
+      }
+      lastOp = selected.command.toUpperCase();
+    });
+  });
+  table.setJustify(false);
+  console.log(table.toString());
+
+  table = new AsciiTable('Management Commands')
+  table.setHeading('Resource', 'Operation', 'Name', 'Broker SEMP URL', 'Message VPN', 'Credentials' )
+  
+  commands = {};
+  manageCommands.forEach(c => commands[c] = []);
+  Object.keys(config).forEach((key) => {
+    if (manageCommands.includes(config[key].command)) {
+      config[key].name = key;
+      commands[config[key].command].push(config[key])
     }
-  })
+  });
 
-  list += `\n\n${chalk.whiteBright.italic.underline('Request Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'request') {
+  lastOp = '';
+  Object.keys(commands).forEach((key) => {
+    commands[key].forEach((selected:any) => {
       count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright('Send request events on topic ' + JSON.stringify(config[key].topic) + ' on broker \'' + config.connection.vpn + '\' at \'' + config.connection.url) + '\''}`
-    }
-  })
+      table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
+                    selected.operation.toUpperCase(), selected.name, 
+                    config.sempconnection.sempUrl, config.sempconnection.sempVpn, 
+                    config.sempconnection.sempUsername + '/' + config.sempconnection.sempPassword)
+      lastOp = selected.command.toUpperCase();
+    });
+  });
+  table.setJustify(false);
+  console.log(table.toString());
 
-  list += `\n\n${chalk.whiteBright.italic.underline('Reply Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'reply') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright('Send reply events on topic ' + JSON.stringify(config[key].topic) + ' on broker \'' + config.connection.vpn + '\' at \'' + config.connection.url) + '\''}`
-    }
-  })
-
-  list += `\n\n${chalk.whiteBright.bold.underline('Management Commands')}\n`
-
-  list += `\n${chalk.whiteBright.italic.underline('SEMP VPN Connection')}\n`
-  list += `\    ${chalk.whiteBright('[host: \'' + config.sempconnection.sempUrl + '\'' +
-        ', vpn: \'' + config.sempconnection.sempVpn + '\', username:  \'' + config.sempconnection.sempUsername + '\', password: \'' + config.sempconnection.sempPassword + '\']')}`
-  count++
-
-  list += `\n\n${chalk.whiteBright.italic.underline('Queue Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'queue') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Queue \'` + config[key].queue + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
-    }
-  })
-
-  list += `\n\n${chalk.whiteBright.italic.underline('Client Profile Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'client-profile') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Client Profile \'` + config[key].clientProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
-    }
-  })
-
-  list += `\n\n${chalk.whiteBright.italic.underline('ACL Profile Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'acl-profile') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} ACL Profile \'` + config[key].aclProfile + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
-  }
-  })
-
-  list += `\n\n${chalk.whiteBright.italic.underline('Client Username Commands')}\n`
-  Object.keys(config).forEach((key) => {
-    if (config[key].command === 'client-username') {
-      count++
-      list += `\n${chalk.greenBright(key)}`
-      list += `\n\    ${chalk.whiteBright(`${getOperationFromConfig(config[key])} Client Username \'` + config[key].clientUsername + '\' on broker \'' + config.sempconnection.sempVpn + '\' at \'' + config.sempconnection.sempUrl) + '\''}`
-    }
-  })
-
-  Logger.logDetailedSuccess(`[${count}] commands found in configuration ${options.config}:`, list)
+  Logger.success(`[${count}] commands found in configuration ${options.config}`);
 }
 
 export const buildConfig = (options:any, optionsSource: any, commandType: CommandType) => {
   const configFile = optionsSource.config === 'cli' && typeof options.config === 'string' ? options.config : defaultConfigFile;
   Logger.logDetailedSuccess(`loading ${configFile === defaultConfigFile ? 'from default' : 'from'} configuration file`, `${decoratePath(configFile)}`)
   const config = loadConfig(configFile);
-  var commands:string[] = Object.keys(config.message);
+  var commands:string[] = [];
   commands = commands.concat(Object.keys(config.manage))
+  commands = commands.concat(Object.keys(config.message))
 
   const result:any = {};
   Object.keys(config.message).forEach((key:string) => {

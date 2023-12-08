@@ -1,13 +1,13 @@
 import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
 import { saveOrUpdateCommandSettings } from '../utils/config'
-import { ReplyClient } from '../common/reply-client'
+import { SolaceClient } from '../common/reply-client'
 import { displayHelpExamplesForReply } from '../utils/examples'
 
 const reply = async (
   options: MessageClientOptions
 ) => {
-  const replier = new ReplyClient(options);
+  const replier = new SolaceClient(options);
   try {
     await replier.connect();
     replier.subscribe(options.topic);

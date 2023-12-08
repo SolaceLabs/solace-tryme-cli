@@ -1,0 +1,448 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Style the body */
+body {
+  font-family: Arial;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Header/logo Title */
+.header {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  /* background: #1abc9c; */
+  background-color: #06a78e;
+  color: white;
+  font-size: calc(18px + (32 - 18) * ((100vw - 320px) / (2560 - 320)));
+
+}
+
+.eventsHeader {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  /* color: #1abc9c; */
+  /* background: white; */
+  color: #06a78e;
+  background-color: #181818;
+  font-size: calc(18px + (32 - 18) * ((100vw - 320px) / (2560 - 320)));
+}
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #424141;
+  overflow-x: hidden;
+  transition: 0.5s;
+  /* padding-top: 60px; */
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  top: 0;
+  font-size: 36px;
+}
+
+/* Column container */
+.row {  
+  display: flex;
+  flex-wrap: wrap;
+  /* height: 100%; */
+  height: calc(100% - 66px)
+}
+
+/* Create two unequal columns that sits next to each other */
+/* Sidebar/left column */
+.side {
+  flex: 20%;
+  background-color: #f1f1f1;
+  padding: 10px;
+  overflow-y:scroll;
+  flex-grow: 1;
+  height: 100%;
+}
+
+#navMain {
+  transition: margin-left .5s;
+}
+
+#eventsList {
+  z-index: 1000;
+}
+
+/* Main column */
+.main {
+  flex: 70%;
+  background-color: white;
+  height: 100%;
+}
+
+/* Fake image, just for this example */
+.eventEntry {
+  /* background-color: #aaa; */
+  background-color: #424141;
+  color: #ffffffb3;
+  border-top: 1px solid rgba(255,255,255,.2);
+  width: 100%;
+  padding: 20px;
+  height:60px;
+}
+
+.eventEntry:hover {
+  /* background-color: #aaa; */
+  cursor: pointer;
+  color: #06a78e;
+}
+
+/* Footer */
+.footer {
+  padding: 50px;
+  text-align: center;
+  background: #ddd;
+  height: 5%;
+}
+
+/* VISUALIZE */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* border: 1px solid #000; */
+  overflow: hidden;
+}
+svg {
+  width: 100%;
+  height: 100%;
+}
+.eventFlow {
+  position: absolute;
+  z-index: 900;
+}
+.gridView {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.gridView line {
+  stroke: #ddd;
+  stroke-width: 1;
+  z-index: -1000;
+}
+.publisher {
+  fill: #059103;
+}
+.PUBLISHER {
+  background-color: #059103;
+  color: white;
+}
+.receiver {
+  fill: #E94C4E;
+}
+.RECEIVER {
+  background-color: #E94C4E;
+  color: white;
+}
+.zombie-receiver {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScvPgogIDxwYXRoIGQ9J00tMSwxIGwyLC0yCiAgICAgICAgICAgTTAsMTAgbDEwLC0xMAogICAgICAgICAgIE05LDExIGwyLC0yJyBzdHJva2U9JyM1NTk0ZTcnIHN0cm9rZS13aWR0aD0nMScvPgo8L3N2Zz4K");
+  background-repeat: repeat;
+  fill: #E94C4E;
+}
+.requestor {
+  fill: #FF8E2B;
+}
+.replier {
+  fill: #015B82;
+}
+.zombie-replier {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScvPgogIDxwYXRoIGQ9J00tMSwxIGwyLC0yCiAgICAgICAgICAgTTAsMTAgbDEwLC0xMAogICAgICAgICAgIE05LDExIGwyLC0yJyBzdHJva2U9JyM1NTk0ZTcnIHN0cm9rZS13aWR0aD0nMScvPgo8L3N2Zz4K");
+  background-repeat: repeat;
+  fill: #015B82;
+}
+.broker {
+  fill: #00C895;
+}
+.event {
+  fill: #647481;
+}
+.event-number {
+  fill: white;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+.eventNameText {
+  font-family: Arial, sans-serif;
+  font-weight: 700 !important;
+  /* color: #000000cc; */
+  color: #1c175e;
+}
+.clientNameText {
+  font-family: Arial, sans-serif;
+  font-weight: 800 !important;
+  color: #273749;
+}
+.connection {
+  stroke: #273749;
+  stroke-width: 3;
+  z-index: -700;
+}
+.label {
+  color: #00c895;
+}
+.text {
+  fill: white;
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  stroke: "#51c5cf";
+  stroke-width: "2px";
+  dy: ".3em";
+}
+.invisible {
+  visibility: hidden;
+}
+
+/* List */
+ul {
+  counter-reset: index;  
+  padding: 0;
+  max-width: 300px;
+}
+
+/* List element */
+li {
+  counter-increment: index; 
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  box-sizing: border-box;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* Element counter */
+li::before {
+  content: counters(index, ".", decimal-leading-zero);
+  font-size: 1.5rem;
+  text-align: right;
+  font-weight: bold;
+  min-width: 50px;
+  padding-right: 12px;
+  font-variant-numeric: tabular-nums;
+  align-self: flex-start;
+  background-image: linear-gradient(to bottom, aquamarine, orangered);
+  background-attachment: fixed;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* Element separation */
+li + li {
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.currentspeed {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 24px;
+}
+.rewindandreplay {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.fileopen {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.filesave {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.paused {
+  font-size: 10px;
+  color: #c01f1f;
+  padding-left: 10px;
+  display: none;
+}
+
+.dropdownSlider {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.controls {
+  display: flex;
+  background-color: #06a78e;
+  justify-content: space-evenly;
+  box-sizing: border-box ;
+}
+
+.speedItem {
+  font-size: 14px;
+  padding: 5px;
+}
+
+.checkmark {
+  font-style: italic;
+  font-weight: 600;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  width: 120px;
+  top: 50px;
+  left: 5%;
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  margin: 5px;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1200;
+}
+
+.left .tooltip .tooltiptext {
+  top: -5px;
+  right: 105%;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.dropbtn {
+  background-color: #04AA6D;
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #3e8e41;
+}
+
+.dropdown {
+  float: right;
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  right: 0;
+  z-index: 2000;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}

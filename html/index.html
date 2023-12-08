@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Solace Try-Me Event Flow Visualization</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="styles/visualize.css">
+				<script type="text/javascript" src="scripts/SolaceClient.js"></script>
+        <script type="text/javascript" src="scripts/visualize.js"></script>
+				<script type="text/javascript" src="scripts/paho-mqtt.js"></script>
+		</head>
+    <body>
+        <div id="eventsList" class="sidenav">
+          <div class="eventsHeader">
+            <span style="font-size:30px;cursor:pointer;" class="closebtn" style="font-size:30px;cursor:pointer;" onclick="closeNav()">&times;</span>          
+            <h3 style="margin: auto;" >Events</h3>
+          </div>
+          <div class="controls">
+            <div class="tooltip">
+              <button class="rewindandreplay" onclick="rewindAndReplay()"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+              <span class="tooltiptext">Rewind & Replay</span>
+            </div>
+            <div class="tooltip">
+              <button id="fileopen" class="fileopen" onclick="loadFromFile()"><i class="fa fa-folder-open" aria-hidden="true"></i></button>
+              <span class="tooltiptext">Open</span>
+            </div>
+            <div class="tooltip">
+              <button class="filesave" onclick="saveToFile()"><i class="fa fa-floppy-o" aria-hidden="true"></i></button>
+              <span class="tooltiptext" style="left: -20px">Save</span>
+            </div>
+          </div>
+          <div id="events"></div>
+        </div>
+        <div id="loadFileModal" class="modal">
+          <!-- Modal content -->
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <input type="file" name="inputfile" id="inputfile">
+          </div>        
+        </div>
+        
+        <div id="navMain">
+          <div class="header">
+            <span style="font-size:30px;cursor:pointer;" onclick="openNav()">&#9776;</span>          
+            <h3 style="margin: auto;display:inline-flex">Solace Try-Me Event Flow Visualization<span id='heading' class='paused'>[paused]</span></h3>
+            <div class="dropdown">
+              <button class="dropdownSlider" onclick="showDropdown()"><i class="fa fa-sliders" aria-hidden="true"></i></button>
+              <div id="speedDropDown" class="dropdown-content">
+                <a id="zero25" class="speedItem" href="#" onclick="setSpeed('zero25', 0.25)">0.25</a>
+                <a id="zero5" class="speedItem" href="#" onclick="setSpeed('zero5', 0.5)">0.5</a>
+                <a id="zero75" class="speedItem" href="#" onclick="setSpeed('zero75', 0.75)">0.75</a>
+                <a id="normal" class="speedItem checkmark" href="#" onclick="setSpeed('normal', 1)">Normal</a>
+                <a id="one25" class="speedItem" href="#" onclick="setSpeed('one25', 1.25)">1.25</a>
+                <a id="one5" class="speedItem" href="#" onclick="setSpeed('one5', 1.5)">1.5</a>
+                <a id="one75" class="speedItem" href="#" onclick="setSpeed('one75', 1.75)">1.75</a>
+                <a id="two" class="speedItem" href="#" onclick="setSpeed('two', 2.0)">2.0</a>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        <div class="row">
+            <div class="main">
+              <div class="container">
+                <svg class="gridView" id="gridView"></svg>
+                <svg class="eventFlow" id="eventFlow"></svg>
+              </div>
+            </div>
+        </div>
+    </body>
+    <script></script>
+</html>

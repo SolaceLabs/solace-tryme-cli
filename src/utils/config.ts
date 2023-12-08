@@ -121,7 +121,6 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
     const configFile = data.config;
     delete data.config;
 
-    // const filePath = processPath(`${process.cwd()}/${configFile}`)
     const homedir = require('os').homedir();
     const filePath = processPath(`${homedir}/.stm/${configFile}`)  
     if (!filePath.endsWith('.json')) filePath.concat('.json')
@@ -142,7 +141,6 @@ export const saveConfig = (data: any) => {
     delete data.config;
 
     var updated = false;
-    // const filePath = processPath(`${process.cwd()}/${configFile}`)
     const homedir = require('os').homedir();
     const filePath = processPath(`${homedir}/.stm/${configFile}`)
       if (!filePath.endsWith('.json')) filePath.concat('.json')
@@ -182,7 +180,6 @@ export const loadConfig = (configFile: string) => {
   try {
     const homedir = require('os').homedir();
     const filePath = processPath(`${homedir}/.stm/${configFile}`)  
-    // const filePath = processPath(loadPath)
     if (fileExists(filePath)) {
       Logger.info(`loading configuration '${configFile}'`)
       const config = readFile(filePath)
@@ -237,7 +234,6 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     var commandName = options.name ? options.name : cmd
     const homedir = require('os').homedir();
     const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
-    // const filePath = processPath(options.config as string)
     if (fileExists(filePath)) {
       const config = readFile(filePath)
       Logger.info(`loading '${commandName}' command from configuration '${options.config}'`)
@@ -329,7 +325,8 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
 
     
     if (!options.config) options.config = defaultConfigFile
-    const filePath = processPath(options.config)
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
     if (!fileExists(filePath)) {
       newConfigCreated = true;
       Logger.aid(`Hoho! No default configuration found, creating one for you...`)

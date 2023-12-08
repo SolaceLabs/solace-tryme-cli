@@ -1,8 +1,11 @@
 import solace from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel } from "solclientjs";
-import { defaultMessage, getDefaultTopic } from "../utils/defaults";
+import { defaultMessage, getDefaultClientName, getDefaultTopic } from "../utils/defaults";
+import { VisualizeClient } from "./visualize-client";
+import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
 const os = require('os');
+const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -13,13 +16,16 @@ const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['TRACE', LogLevel.TRACE]
 ]);
 
-export class ReplyClient {
+export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
   replier:any = {};
   session:any = null;
+  clientName:string = ""
 
   constructor(options:any) {
+    super();
+
     // record the options
     this.options = options;
     this.replier.subscribed = [];
@@ -29,6 +35,7 @@ export class ReplyClient {
     factoryProps.profile = solace.SolclientFactoryProfiles.version10;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
+    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('rep')
   }
 
   // Establishes connection to Solace PubSub+ Event Broker
@@ -65,6 +72,9 @@ export class ReplyClient {
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('=== successfully connected and ready to subscribe to request topic. ===');
+          this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
+            type: 'replier', clientName: this.clientName, uuid: uuid()
+          })    
           resolve();
         });
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
@@ -101,7 +111,11 @@ export class ReplyClient {
             payload.hasOwnProperty('freeMem') ? payload.freeMem = os.freemem() : ''
             payload.hasOwnProperty('totalMem') ? payload.totalMem = os.totalmem() : ''
             payload.hasOwnProperty('timeZone') ? payload.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone : ''
-          
+            
+            this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUEST_RECEIVED, { 
+              type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid() 
+            })    
+
             this.reply(request, payload);
           } catch (error:any) {
             Logger.logDetailedError('send reply failed - ', error.toString())
@@ -115,7 +129,7 @@ export class ReplyClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
         if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
@@ -182,6 +196,9 @@ export class ReplyClient {
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(JSON.stringify(payload));
       this.session.sendReply(message, reply);
+      this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLIED, { 
+        type: 'replier', topicName: message.getDestination().getName() + ' [reply]', clientName: this.clientName, uuid: uuid() 
+      })    
       Logger.logSuccess('replied.');
     } else {
       Logger.logError('cannot reply because not connected to Solace PubSub+ Event Broker.');
@@ -193,6 +210,9 @@ export class ReplyClient {
     Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
       try {
+        this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, {
+          type: 'replier', clientName: this.clientName, uuid: uuid() 
+        })    
         this.session.disconnect();
       } catch (error:any) {
         Logger.logDetailedError('session disconnect failed - ', error.toString())

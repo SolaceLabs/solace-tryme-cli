@@ -64,6 +64,7 @@ declare global {
     acknowledgeMode?: PublisherAcknowledgeMode | MessageConsumerAcknowledgeMode
 
     logLevel?: string
+    visualization?: string | boolean
   }
 
   interface MessageOperationOptions {

@@ -1,6 +1,11 @@
 import solace from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
+import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } from "../utils/controlevents";
+import { getDefaultClientName } from "../utils/defaults";
+import { VisualizeClient } from "./visualize-client";
+import { randomUUID } from "crypto";
+const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -17,7 +22,7 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
   ['NON_PERSISTENT', MessageDeliveryModeType.NON_PERSISTENT],
 ]);
 
-export class SolaceClient {
+export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
   session:any = null;
@@ -25,8 +30,11 @@ export class SolaceClient {
   active:boolean = false;
   receiver:any = {};
   replier:any = {};
+  clientName:string = ""
 
   constructor(options:any) {
+    super();
+
     // record the options
     this.options = options;
 
@@ -35,6 +43,7 @@ export class SolaceClient {
     factoryProps.profile = solace.SolclientFactoryProfiles.version10;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
+    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('pub')
   }
 
   /**
@@ -53,7 +62,7 @@ export class SolaceClient {
           vpnName: this.options.vpn,
           userName: this.options.username,
           password: this.options.password,
-          clientName: this.options.clientName,
+          clientName: this.clientName,
           applicationDescription: this.options.description,
           connectTimeoutInMsecs: this.options.connectionTimeout,
           connectRetries: this.options.connectionRetries,
@@ -82,7 +91,9 @@ export class SolaceClient {
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('=== successfully connected and ready to publish events. ===');
-          // this.publishConnectedCtrlEvent(CLIENT_CONNECTED)
+          this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
+            type: 'publisher', clientName: this.clientName, uuid: uuid()
+          })    
           resolve();
         });
 
@@ -128,24 +139,14 @@ export class SolaceClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
-        if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
+        if (this.options.clientName) Logger.info(`client name: ${this.clientName}`)
         this.session.connect();
       } catch (error:any) {
         Logger.logDetailedError('failed to connect to broker - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
     });
-  }
-
-  publishConnectedCtrlEvent(topicName: string) {
-    if (!process.env.VISUALIZE_EVENTS)
-      return;
-
-    const payload = {
-      clientName: this.options.clientName,
-    }
-    this.publish(topicName, JSON.stringify(payload))
   }
 
   // Publish a message on a topic
@@ -155,7 +156,7 @@ export class SolaceClient {
       return;
     }
     try {
-      Logger.await('publishing...');
+      if (!topicName.startsWith('@STM')) Logger.await('publishing...');
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       message.setBinaryAttachment(JSON.stringify(payload));
@@ -164,6 +165,7 @@ export class SolaceClient {
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
       this.options.dmqEligible && message.setDMQEligible(true);
       this.options.messageId && message.setApplicationMessageId(this.options.messageId);
+      if (this.options.visualization === 'on' && !this.options.messageId) message.setApplicationMessageId(randomUUID());
       this.options.messageType && message.setApplicationMessageType(this.options.messageType);
       this.options.replyToTopic && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
       if (this.options.userProperties) {
@@ -178,6 +180,9 @@ export class SolaceClient {
       Logger.logSuccess(`message published to topic ${topicName}`)
       Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
       this.session.send(message);
+      this.publishVisualizationEvent(this.session, this.options, STM_EVENT_PUBLISHED, { 
+        type: 'publisher', topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
+      })    
     } catch (error:any) {
       Logger.logDetailedError('message publish failed - ', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -189,6 +194,9 @@ export class SolaceClient {
     Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
     if (this.session !== null) {
       try {
+        this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, {
+          type: 'publisher', clientName: this.clientName, uuid: uuid() 
+        })    
         this.session.disconnect();
       } catch (error:any) {
         Logger.logDetailedError('session disconnect failed - ', error.toString())

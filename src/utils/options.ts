@@ -1,8 +1,8 @@
-import { Command, Option } from 'commander'
+import { Command, Option, program } from 'commander'
 import {
   parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
   parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
-  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, parseSempQueueTopics, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, parseSempEndpointCreateDurability, parseRequestTopic,
+  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, parseSempQueueTopics, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, parseSempEndpointCreateDurability, parseRequestTopic, parseVisualizeSettings,
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, defaultMessagePublishConfig, defaultMessageConfig, defaultMessage, defaultMessageHint, defaultManageConnectionConfig, commandPublish, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername } from './defaults';
 import chalk from 'chalk';
@@ -75,7 +75,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
@@ -123,6 +123,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
 
 export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
   cmd
+    .exitOverride()
     // connect options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced))
@@ -138,7 +139,7 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('recv'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageConnectionConfig.receiverDescription) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <NUMBER>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectRetries) .hideHelp(!advanced))
@@ -186,7 +187,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('req'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
@@ -250,7 +251,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName(), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('rep'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectTimeout) .hideHelp(!advanced))
@@ -508,3 +509,17 @@ export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) 
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli semp-connection examples')))
 }
+
+export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    // config options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
+    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+}
+
+export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    // config options
+    .addOption(new Option('--port <PORT>',chalk.whiteBright('the server port')) .argParser(parseNumber) .default(8181))
+}
+

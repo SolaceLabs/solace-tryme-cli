@@ -201,6 +201,16 @@ export const parseReplyTopic = (value: string, previous: string[] | undefined) =
   return previous;
 }
 
+export const parseVisualizeSettings = (value: string) => {
+  if (!['on', 'off'].includes(value.toLowerCase())) {
+    Logger.error(`only 'on', 'off' are supported.`)
+    Logger.error('exiting...')
+    process.exit(1)
+  }
+  
+  return value.toLowerCase();
+}
+
 export const parseSempOperation = (value: string) => {
   return (!value) ? true : value;
 }

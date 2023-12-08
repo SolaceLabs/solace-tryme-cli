@@ -1,7 +1,10 @@
 import solace from "solclientjs";
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { getDefaultTopic } from "../utils/defaults";
+import { getDefaultClientName, getDefaultTopic } from "../utils/defaults";
+import { VisualizeClient } from "./visualize-client";
+import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REQUESTED, STM_EVENT_REPLY_RECEIVED } from "../utils/controlevents";
+const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['FATAL', LogLevel.FATAL],
@@ -17,14 +20,17 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
   ['PERSISTENT', MessageDeliveryModeType.PERSISTENT],
   ['NON_PERSISTENT', MessageDeliveryModeType.NON_PERSISTENT],
 ]);
-export class RequestClient {
+export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
   callback:any = null;
   requestor:any = {};
   session:any = null;
+  clientName:string = ""
 
   constructor(options:any) {
+    super();
+
     // record the options
     this.options = options;
     this.requestor.topicName = this.options.topic ? this.options.topic : getDefaultTopic('request');
@@ -34,6 +40,7 @@ export class RequestClient {
     factoryProps.profile = solace.SolclientFactoryProfiles.version10;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
+    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('req')
   }
 
   // Establishes connection to Solace PubSub+ Event Broker
@@ -71,6 +78,9 @@ export class RequestClient {
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('=== successfully connected and ready to send requests. ===');
+          this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
+            type: 'requestor', clientName: this.clientName, uuid: uuid()
+          })    
           resolve();
         });
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
@@ -92,7 +102,7 @@ export class RequestClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}${this.options.clientName ? `, password: ${this.options.password}` : ''}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
         if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
@@ -138,6 +148,9 @@ export class RequestClient {
         (session:any, message:any) => {
           Logger.logSuccess(`reply received for request on topic '${request.getDestination()?.getName()}'`);
           Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+          this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLY_RECEIVED, { 
+            type: 'requestor', topicName: topicName + ' [reply]', clientName: this.clientName, uuid: uuid() 
+          })    
           this.exit();
         },
         (session:any, event:any) => {
@@ -146,6 +159,9 @@ export class RequestClient {
         },
         null // not providing correlation object
       );
+      this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUESTED, { 
+        type: 'requestor', topicName, clientName: this.clientName, uuid: uuid() 
+      })    
     } catch (error:any) {
       Logger.logDetailedError('send request failed - ', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -157,6 +173,9 @@ export class RequestClient {
     if (this.session !== null) {
       Logger.logSuccess('disconnecting from Solace PubSub+ Event Broker...');
       try {
+        this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, {
+          type: 'requestor', clientName: this.clientName, uuid: uuid() 
+        })    
         this.session.disconnect();
       } catch (error:any) {
         Logger.logDetailedError('session disconnect failed - ', error.toString())
