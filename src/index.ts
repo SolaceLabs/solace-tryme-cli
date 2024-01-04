@@ -6,9 +6,10 @@ import { deleteConfig, initializeConfig, listConfig } from './utils/init'
 
 
 import { addManageConnectionOptions, addManageSempConnectionOptions, 
-        addConfigInitOptions, addConfigListOptions, addConfigViewOptions,addConfigDeleteOptions,
-        addPublishOptions, addReceiveOptions, addRequestOptions,  addReplyOptions, 
-        addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, addVisualizeOptions, addVisualizeLaunchOptions, 
+        addConfigInitOptions, addConfigListOptions, addConfigDeleteOptions,
+        addReceiveOptions, addRequestOptions,  addReplyOptions, 
+        addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
+        addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, 
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -44,23 +45,28 @@ export class Commander {
       .allowUnknownOption(false)
       .version(`${version}`, '-v, --version')
       
-    // stm publish
-    const publishCmd = this.program
-      .command('publish')
-      .description(chalk.whiteBright('Execute a publish command'))
+    // stm send
+    const sendCmd = this.program
+      .command('send')
+      .description(chalk.whiteBright('Execute a send command'))
       .allowUnknownOption(false)
-    addPublishOptions(publishCmd, this.advanced);
-    publishCmd.action((options: MessageClientOptions) => {
+    addSendOptions(sendCmd, this.advanced);
+    sendCmd.action((options: MessageClientOptions) => {
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('publish'));
       for (var i=0; i<defaultKeys.length; i++) {
-        cliOptions[defaultKeys[i]] = publishCmd.getOptionValueSource(defaultKeys[i]);
+        cliOptions[defaultKeys[i]] = sendCmd.getOptionValueSource(defaultKeys[i]);
       }
-      const configOptions = loadCommandFromConfig('publish', options)
+      const configOptions = loadCommandFromConfig('send', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
           options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
+      }
+
+      if (options.deliveryMode === 'PERSISTENT') {
+        cliOptions.guaranteedPublisher = 'implied';
+        options.guaranteedPublisher = true;        
       }
 
       publisher(options, cliOptions);

@@ -48,7 +48,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   messageId?: string | undefined
   messageType?: string | undefined
   correlationKey?: string | undefined
-  deliveryMode?: number | undefined
+  deliveryMode?: string | undefined
   replyToTopic?: string | undefined
   userProperties?: Record<string, string | string[]> | undefined
   outputMode?: string | undefined
@@ -78,7 +78,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.includeSenderId = false
     this.generateSequenceNumber = false
     this.sendBufferMaxSize = 1
-    this.guaranteedPublisher = false
+    this.guaranteedPublisher = true
     this.windowSize = 1
     this.receiveTimestamps = false
     this.reapplySubscriptions = false
@@ -103,7 +103,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.messageId = ""
     this.messageType = ""
     this.correlationKey = ""
-    this.deliveryMode = 0
+    this.deliveryMode = 'PERSISTENT'
     this.replyToTopic = ""
     this.userProperties = { "key": "value" }
     this.outputMode = ""

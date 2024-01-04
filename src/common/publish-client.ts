@@ -31,6 +31,7 @@ export class SolaceClient extends VisualizeClient {
   receiver:any = {};
   replier:any = {};
   clientName:string = ""
+  exited:boolean = false;
 
   constructor(options:any) {
     super();
@@ -44,6 +45,10 @@ export class SolaceClient extends VisualizeClient {
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
     this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('pub')
+  }
+
+  setExited(exited: boolean) {
+    this.exited = exited;
   }
 
   /**
@@ -92,7 +97,7 @@ export class SolaceClient extends VisualizeClient {
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('=== successfully connected and ready to publish events. ===');
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
-            type: 'publisher', clientName: this.clientName, uuid: uuid()
+            type: 'sender', clientName: this.clientName, uuid: uuid()
           })    
           resolve();
         });
@@ -151,6 +156,8 @@ export class SolaceClient extends VisualizeClient {
 
   // Publish a message on a topic
   publish(topicName: string, payload: string | Buffer) {
+    if (this.exited) return;
+    
     if (!this.session) {
       Logger.logWarn("cannot publish because not connected to Solace message router!");
       return;
@@ -181,7 +188,7 @@ export class SolaceClient extends VisualizeClient {
       Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
       this.session.send(message);
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_PUBLISHED, { 
-        type: 'publisher', topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
+        type: 'sender', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
       })    
     } catch (error:any) {
       Logger.logDetailedError('message publish failed - ', error.toString())
@@ -195,7 +202,7 @@ export class SolaceClient extends VisualizeClient {
     if (this.session !== null) {
       try {
         this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_DISCONNECTED, {
-          type: 'publisher', clientName: this.clientName, uuid: uuid() 
+          type: 'sender', clientName: this.clientName, uuid: uuid() 
         })    
         this.session.disconnect();
       } catch (error:any) {

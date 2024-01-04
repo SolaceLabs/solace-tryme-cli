@@ -90,7 +90,7 @@ declare global {
     messageId?: string
     messageType?: string
     correlationKey?: string
-    deliveryMode?: number
+    deliveryMode?: string
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
 

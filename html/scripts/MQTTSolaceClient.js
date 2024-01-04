@@ -21,7 +21,7 @@ class SolaceClient {
       // eslint-disable-next-line radix
       parseInt(MQTT_PORT),
       '/',
-      'XYZ');
+      'visualizer');
   }
 
   getTime = () => {
@@ -114,6 +114,8 @@ class SolaceClient {
     if (this.isConnected()) {
       const star = /\*/g;
       let fixTopicName = topicName.replace(star, '([A-Za-z0-9]+)*');
+      const dollar = /\$/g;
+      fixTopicName = fixTopicName.replace(dollar, '\\$');
       const plus = /\+/g;
       fixTopicName = fixTopicName.replace(plus, '([A-Za-z0-9]+)*');
       const gt = />/g;

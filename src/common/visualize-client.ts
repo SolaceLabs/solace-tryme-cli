@@ -9,11 +9,10 @@ export class VisualizeClient {
   // Publish a message on a topic
   publishVisualizeEvent(session: any, options: any,  topicName: string, payload: string | Buffer): void {
     if (!session) {
-      Logger.logWarn("cannot publish because not connected to Solace message router!");
+      // Logger.logWarn("cannot publish because not connected to Solace message router!");
       return;
     }
     try {
-      // if (!topicName.startsWith('@STM')) Logger.await('publishing...');
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       message.setBinaryAttachment(JSON.stringify(payload));
@@ -21,12 +20,12 @@ export class VisualizeClient {
       options.dmqEligible && message.setDMQEligible(false);
       options.messageId && message.setApplicationMessageId(options.messageId);
       options.messageType && message.setApplicationMessageType('VISUALIZATION_EVENT');
-      // Logger.logSuccess(`visualize message published to topic ${topicName}`)
+      Logger.logSuccess(`visualize message published to topic ${topicName}`)
       // Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), options.outputMode);
       session.send(message);
     } catch (error:any) {
-      Logger.logDetailedError('visualization publish failed - ', error.toString())
-      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      // Logger.logDetailedError('visualization publish failed - ', error.toString())
+      // if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     }
   }
 }

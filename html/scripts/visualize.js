@@ -135,8 +135,8 @@ function renderClients() {
 
 		removeElement(`${clients[i].uuid}`);
 
-    let clientClass = 'publisher';
-    if (clients[i].type === 'publisher')  clientClass = 'publisher'
+    let clientClass = 'sender';
+    if (clients[i].type === 'sender')  clientClass = 'sender'
 		else if (clients[i].type === 'receiver')  clientClass = 'receiver'
 		else if (clients[i].type === 'requestor')  clientClass = 'requestor'
 		else if (clients[i].type === 'replier')  clientClass = 'replier'
@@ -155,7 +155,7 @@ function renderClients() {
 		removeElement(`tip-${clients[i].uuid}`);
 		const tip = document.createElementNS(svgNS, "title");
 		tip.setAttribute('id', `tip-${clients[i].uuid}`);
-		if (clients[i].type === 'publisher')  tip.textContent = `Publisher: ${clients[i].clientName}`
+		if (clients[i].type === 'sender')  tip.textContent = `Sender: ${clients[i].clientName}`
 		else if (clients[i].type === 'receiver')  tip.textContent = `Receiver: ${clients[i].clientName}`
 		else if (clients[i].type === 'requestor')  tip.textContent = `Requestor: ${clients[i].clientName}`
 		else if (clients[i].type === 'replier')  tip.textContent = `Replier: ${clients[i].clientName}`
@@ -308,6 +308,72 @@ function animate(groupId, evIndex, _client, event, text, startX, startY, endX, e
   window.requestAnimationFrame(step);
 }
 
+function renderEventReplied(_event) {
+	// console.log('renderEventReplied');
+  let clients = local.clients;
+  let clIndex = clients.findIndex(cl => cl.clientName === _event.clientName);
+  if (clIndex < 0) return;
+
+  let evIndex = local.events.findIndex(ev => ev.uuid === _event.uuid);
+  if (evIndex < 0) {
+    console.log('Something went wrong - missing event')
+    return;
+  }
+
+  if (local.events[evIndex].playing || local.events[evIndex].played)
+    return;
+  
+  let source = local.events.findIndex(ev => ev.msgId === _event.msgId && ev.action === STM_EVENT_REQUEST_RECEIVED);
+  if (source < 0 || source === evIndex) {
+    ; // no source pub event found, ok to proceed
+  } else if (source && !local.events[source].played) {
+      return;
+  }
+  
+  local.clients[clIndex].inUse++;
+  local.events[evIndex].playing = true;
+
+  let _client = clients[clIndex];
+  let client = document.getElementById(`${_client.uuid}`);
+  let broker = document.getElementById('broker');
+  const startX = Number(client.getAttribute('cx'));
+  const startY = Number(client.getAttribute('cy'));
+  const endX = Number(broker.getAttribute('cx'));
+  const endY = Number(broker.getAttribute('cy'));
+
+  let groupId = `group-${_event.uuid}`;
+  // console.log(groupId);
+  var g = document.createElementNS(svgNS, "g");
+  g.setAttribute('id', groupId);
+  g.setAttribute('shape-rendering', 'inherit');
+  g.setAttribute('pointer-events', 'all');
+
+  const event = document.createElementNS(svgNS, 'circle');
+  event.setAttributeNS(null, 'r', '13');
+  event.setAttributeNS(null, 'cx', startX);
+  event.setAttributeNS(null, 'cy', startY);
+  event.setAttributeNS(null, 'class', 'event');
+  if (_event.deliveryMode === 1) {
+    event.setAttributeNS(null, 'stroke', "black");
+    event.setAttributeNS(null, 'stroke-width', "3");
+    event.setAttributeNS(null, 'fill', "darkgrey");
+  }
+  g.appendChild(event);
+
+  const text = document.createElementNS(svgNS, 'text');
+  text.setAttribute('x', startX + 100);
+  text.setAttribute('y', startY + 85);
+  text.setAttributeNS(null, 'class', 'eventNameText')
+  local.publishedCount[_event.clientName] = local.publishedCount[_event.clientName] ? local.publishedCount[_event.clientName] + 1 : 1;
+  text.textContent = _event.topicName; // + ` ${local.publishedCount[_event.clientName]}`;
+  g.appendChild(text);
+
+  mySvg.appendChild(g);
+
+  let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
+  animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
+}
+
 function renderEventPublished(_event) {
 	// console.log('renderEventPublished');
   let clients = local.clients;
@@ -346,19 +412,93 @@ function renderEventPublished(_event) {
   event.setAttributeNS(null, 'cx', startX);
   event.setAttributeNS(null, 'cy', startY);
   event.setAttributeNS(null, 'class', 'event');
+  if (_event.deliveryMode === 1) {
+    event.setAttributeNS(null, 'stroke', "black");
+    event.setAttributeNS(null, 'stroke-width', "3");
+    event.setAttributeNS(null, 'fill', "darkgrey");
+  }
   g.appendChild(event);
 
   const text = document.createElementNS(svgNS, 'text');
-  text.setAttributeNS(null, 'x', startX + 100);
-  text.setAttributeNS(null, 'y', startY + 65);
+  text.setAttribute('x', startX + 100);
+  text.setAttribute('y', startY + 85);
   text.setAttributeNS(null, 'class', 'eventNameText')
   local.publishedCount[_event.clientName] = local.publishedCount[_event.clientName] ? local.publishedCount[_event.clientName] + 1 : 1;
-  text.textContent = _event.topicName + ` ${local.publishedCount[_event.clientName]}`;
+  text.textContent = _event.topicName; // + ` ${local.publishedCount[_event.clientName]}`;
   g.appendChild(text);
 
   mySvg.appendChild(g);
 
   let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
+  animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
+}
+
+function renderEventReplyReceived(_event) {
+	// console.log('renderEventReplyReceived')
+
+  let clients = local.clients;
+	let clIndex = clients.findIndex(cl => cl.clientName === _event.clientName);
+  if (clIndex < 0) return;
+
+	let evIndex = local.events.findIndex(ev => ev.uuid === _event.uuid);
+  if (evIndex < 0) {
+    console.log('Something went wrong - missing event')
+    return;
+  }
+
+  if (local.events[evIndex].playing || local.events[evIndex].played)
+    return;
+  
+  let source = local.events.findIndex(ev => ev.msgId === _event.msgId && ev.action === STM_EVENT_REPLIED);
+  if (source < 0 || source === evIndex) {
+    ; // no source pub event found, ok to proceed
+  } else if (source && !local.events[source].played) {
+      return;
+  }
+
+  local.clients[clIndex].inUse++;
+  local.events[evIndex].playing = true;
+
+	let _client = clients[clIndex];
+	let client = document.getElementById(`${_client.uuid}`);
+	let broker = document.getElementById('broker');
+	const endX = Number(client.getAttribute('cx'));
+	const endY = Number(client.getAttribute('cy'));
+	const startX = Number(broker.getAttribute('cx'));
+	const startY = Number(broker.getAttribute('cy'));
+
+	let groupId = `group-${_event.uuid}`;
+	var g = document.createElementNS(svgNS, "g");
+	g.setAttribute('id', groupId);
+	g.setAttribute('shape-rendering', 'inherit');
+	g.setAttribute('pointer-events', 'all');
+
+	const event = document.createElementNS(svgNS, 'circle');
+	event.setAttributeNS(null, 'r', '13');
+	event.setAttributeNS(null, 'cx', startX);
+	event.setAttributeNS(null, 'cy', startY);
+	event.setAttributeNS(null, 'class', 'event');
+  if (_event.deliveryMode === 1) {
+    event.setAttributeNS(null, 'stroke', "black");
+    event.setAttributeNS(null, 'stroke-width', "3");
+    event.setAttributeNS(null, 'fill', "darkgrey");
+  }
+
+	g.appendChild(event);
+
+	const text = document.createElementNS(svgNS, 'text');
+	text.setAttribute("class", "eventNameText");
+	text.setAttribute('x', startX + 100);
+	text.setAttribute('y', startY + 85);
+  local.receivedCount[_event.clientName] = local.receivedCount[_event.clientName] ? local.receivedCount[_event.clientName] + 1 : 1;
+  text.textContent = _event.topicName; // + ` ${local.receivedCount[_event.clientName]}`;
+	g.appendChild(text);
+
+	mySvg.appendChild(g);
+  // console.log(_event.clientName + ' :: ' + String(local.receivedCount[_event.clientName]).padStart(3, '0') + ' :: ' + _event.msgId )
+
+  let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
+  console.log(Date.now(), ': Speed: ', speed);
   animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
 }
 
@@ -415,14 +555,89 @@ function renderEventReceived(_event) {
 	event.setAttributeNS(null, 'cx', startX);
 	event.setAttributeNS(null, 'cy', startY);
 	event.setAttributeNS(null, 'class', 'event');
+  if (_event.deliveryMode === 1) {
+    event.setAttributeNS(null, 'stroke', "black");
+    event.setAttributeNS(null, 'stroke-width', "3");
+    event.setAttributeNS(null, 'fill', "darkgrey");
+  }
+
 	g.appendChild(event);
 
 	const text = document.createElementNS(svgNS, 'text');
 	text.setAttribute("class", "eventNameText");
-	text.setAttributeNS(null, 'x', startX + 100);
-	text.setAttributeNS(null, 'y', startY + 65);
+	text.setAttribute('x', startX + 100);
+	text.setAttribute('y', startY + 85);
   local.receivedCount[_event.clientName] = local.receivedCount[_event.clientName] ? local.receivedCount[_event.clientName] + 1 : 1;
-  text.textContent = _event.topicName + ` ${local.receivedCount[_event.clientName]}`;
+  text.textContent = _event.topicName; // + ` ${local.receivedCount[_event.clientName]}`;
+	g.appendChild(text);
+
+	mySvg.appendChild(g);
+  // console.log(_event.clientName + ' :: ' + String(local.receivedCount[_event.clientName]).padStart(3, '0') + ' :: ' + _event.msgId )
+
+  let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
+  console.log(Date.now(), ': Speed: ', speed);
+  animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
+}
+
+function renderEventRequestReceived(_event) {
+	// console.log('renderEventRequestReceived')
+
+  let clients = local.clients;
+	let clIndex = clients.findIndex(cl => cl.clientName === _event.clientName);
+  if (clIndex < 0) return;
+
+	let evIndex = local.events.findIndex(ev => ev.uuid === _event.uuid);
+  if (evIndex < 0) {
+    console.log('Something went wrong - missing event')
+    return;
+  }
+
+  if (local.events[evIndex].playing || local.events[evIndex].played)
+    return;
+  
+  let source = local.events.findIndex(ev => ev.msgId === _event.msgId);
+  if (source < 0 || source === evIndex) {
+    ; // no source pub event found, ok to proceed
+  } else if (source && !local.events[source].played) {
+      return;
+  }
+
+  local.clients[clIndex].inUse++;
+  local.events[evIndex].playing = true;
+
+	let _client = clients[clIndex];
+	let client = document.getElementById(`${_client.uuid}`);
+	let broker = document.getElementById('broker');
+	const endX = Number(client.getAttribute('cx'));
+	const endY = Number(client.getAttribute('cy'));
+	const startX = Number(broker.getAttribute('cx'));
+	const startY = Number(broker.getAttribute('cy'));
+
+	let groupId = `group-${_event.uuid}`;
+	var g = document.createElementNS(svgNS, "g");
+	g.setAttribute('id', groupId);
+	g.setAttribute('shape-rendering', 'inherit');
+	g.setAttribute('pointer-events', 'all');
+
+	const event = document.createElementNS(svgNS, 'circle');
+	event.setAttributeNS(null, 'r', '13');
+	event.setAttributeNS(null, 'cx', startX);
+	event.setAttributeNS(null, 'cy', startY);
+	event.setAttributeNS(null, 'class', 'event');
+  if (_event.deliveryMode === 1) {
+    event.setAttributeNS(null, 'stroke', "black");
+    event.setAttributeNS(null, 'stroke-width', "3");
+    event.setAttributeNS(null, 'fill', "darkgrey");
+  }
+
+	g.appendChild(event);
+
+	const text = document.createElementNS(svgNS, 'text');
+	text.setAttribute("class", "eventNameText");
+	text.setAttribute('x', startX + 100);
+	text.setAttribute('y', startY + 85);
+  local.receivedCount[_event.clientName] = local.receivedCount[_event.clientName] ? local.receivedCount[_event.clientName] + 1 : 1;
+  text.textContent = _event.topicName; // + ` ${local.receivedCount[_event.clientName]}`;
 	g.appendChild(text);
 
 	mySvg.appendChild(g);
@@ -443,9 +658,9 @@ async function renderEvent(event) {
 		case STM_EVENT_PUBLISHED: renderEventPublished(event); break;
 		case STM_EVENT_RECEIVED: renderEventReceived(event); break;
 		case STM_EVENT_REQUESTED: renderEventPublished(event); break;
-		case STM_EVENT_REPLY_RECEIVED: renderEventReceived(event); break;
-		case STM_EVENT_REQUEST_RECEIVED: renderEventReceived(event); break;
-		case STM_EVENT_REPLIED: renderEventPublished(event); break;
+		case STM_EVENT_REPLY_RECEIVED: renderEventReplyReceived(event); break;
+		case STM_EVENT_REQUEST_RECEIVED: renderEventRequestReceived(event); break;
+		case STM_EVENT_REPLIED: renderEventReplied(event); break;
 		default: console.log('Unknown event');
 	}
 	renderBroker();
@@ -533,6 +748,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clients.splice(clIndex, 1);
       local.events.filter(ev => ev.playing).map(ev1 => ev1.redraw = true);    
       renderClients()
+      renderBroker();
     }
   },500)
 

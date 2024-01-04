@@ -1,6 +1,13 @@
+import path from 'path';
 import { Logger } from './logger'
+import { updateVisualizeConfig } from './config';
+import { defaultConfigFile } from './defaults';
 
 const visualize = (options: ManageClientOptions) => {
+  const configFile = options.config ? options.config : defaultConfigFile;
+
+  updateVisualizeConfig(configFile, 'on');
+
   var liveServer = require("live-server");
 
   var params = {
@@ -17,8 +24,15 @@ const visualize = (options: ManageClientOptions) => {
   Logger.logSuccess('Starting visualization server');
   liveServer.start(params);
   Logger.logSuccess('Opening visualization...');
-}
 
+  process.on('SIGINT', function () {
+    'use strict';
+    updateVisualizeConfig(configFile, 'off');
+    Logger.logWarn('exiting...')
+    process.exit(0);
+  });
+
+}
 export default visualize
 
 export { visualize }

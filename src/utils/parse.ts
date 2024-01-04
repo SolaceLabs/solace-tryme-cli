@@ -72,8 +72,8 @@ export const parseOutputMode = (value: string) => {
 }
 
 export const parseDeliveryMode = (value: any) => {
-  if (![0, 1, 2].includes(value)) {
-    Logger.logError(`only 0-'DIRECT', 1-'PERSISTENT', and 2-'NON_PERSISTENT' are supported.`)
+  if (!['DIRECT', 'PERSISTENT'].includes(value)) {
+    Logger.logError(`only 'DIRECT' or 'PERSISTENT' are supported.`)
     Logger.logError('exiting...')
     process.exit(1)
   }

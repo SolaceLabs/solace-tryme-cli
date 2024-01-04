@@ -271,7 +271,7 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
     config: optionsSource.config === 'cli' && typeof options.config === 'string' ? options.config : defaultConfigFile,
     message: {
       connection: (!commands.length || commands.includes('connection')) ? { command: 'connection'} : undefined,
-      publish: (!commands.length || commands.includes('publish')) ? { command: 'publish' } : undefined,
+      send: (!commands.length || commands.includes('send')) ? { command: 'send' } : undefined,
       receive: (!commands.length || commands.includes('receive')) ? { command: 'receive' } : undefined,
       request: (!commands.length || commands.includes('request')) ? { command: 'request' } : undefined,
       reply: (!commands.length || commands.includes('reply')) ? { command: 'reply' } : undefined,

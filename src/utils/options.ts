@@ -2,9 +2,15 @@ import { Command, Option, program } from 'commander'
 import {
   parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
   parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
-  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, parseSempQueueTopics, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, parseSempEndpointCreateDurability, parseRequestTopic, parseVisualizeSettings,
+  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
+  parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
+  parseSempEndpointCreateDurability, parseRequestTopic
 } from './parse';
-import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, defaultMessagePublishConfig, defaultMessageConfig, defaultMessage, defaultMessageHint, defaultManageConnectionConfig, commandPublish, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername } from './defaults';
+import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
+        defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
+        commandSend, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, 
+        defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, 
+        defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername } from './defaults';
 import chalk from 'chalk';
 
 export const addConfigDeleteOptions = (cmd: Command, advanced: boolean) => {
@@ -54,7 +60,7 @@ export const addConfigInitOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli init commands examples')))
 }
 
-export const addPublishOptions = (cmd: Command, advanced: boolean) => {
+export const addSendOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // connect options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
@@ -103,7 +109,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application-provided message ID')) .default(defaultMessageConfig.applicationMessageId) .hideHelp(!advanced))
     .addOption(new Option('--message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application-provided message type')) .default(defaultMessageConfig.applicationMessageType) .hideHelp(!advanced))
     .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application-provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
-    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 0-'DIRECT', 1-'PERSISTENT', and 2-'NON_PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
+    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
@@ -111,7 +117,7 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
-    .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandPublish))
+    .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandSend))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
     // help options
@@ -123,7 +129,6 @@ export const addPublishOptions = (cmd: Command, advanced: boolean) => {
 
 export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
   cmd
-    .exitOverride()
     // connect options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced))
@@ -215,7 +220,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application-provided message ID')) .default(defaultMessageConfig.applicationMessageId) .hideHelp(!advanced))
     .addOption(new Option('--message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application-provided message type')) .default(defaultMessageConfig.applicationMessageType) .hideHelp(!advanced))
     .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application-provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
-    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 0-'DIRECT', 1-'PERSISTENT', and 2-'NON_PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
+    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
@@ -279,7 +284,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application-provided message ID')) .default(defaultMessageConfig.applicationMessageId) .hideHelp(!advanced))
     .addOption(new Option('--message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application-provided message type')) .default(defaultMessageConfig.applicationMessageType) .hideHelp(!advanced))
     .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application-provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
-    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 0-'DIRECT', 1-'PERSISTENT', and 2-'NON_PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
+    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConnectionConfig.outputMode) .hideHelp(!advanced))
@@ -520,6 +525,6 @@ export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
 export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
-    .addOption(new Option('--port <PORT>',chalk.whiteBright('the server port')) .argParser(parseNumber) .default(8181))
+    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 

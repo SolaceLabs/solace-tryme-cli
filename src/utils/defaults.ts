@@ -49,7 +49,7 @@ export const getDefaultClientName = (type: string) => {
 export const defaultConfigFile = 'stm-cli-config.json'
 
 export const commandConnection = 'connection'
-export const commandPublish = 'publish'
+export const commandSend = 'send'
 export const commandReceive = 'receive'
 export const commandRequest = 'request'
 export const commandReply = 'reply'
@@ -61,14 +61,14 @@ export const commandClientUsername = 'client-username'
 export const commandGroupMessage = 'message'
 export const commandGroupManage = 'manage'
 export const commandGroupUnknown = 'unknown'
-export const baseCommands = [ commandConnection, commandPublish, commandReceive, commandRequest, commandReply,
+export const baseCommands = [ commandConnection, commandSend, commandReceive, commandRequest, commandReply,
                               commandSempConnection, commandQueue, commandAclProfile, commandClientProfile, commandClientUsername,
                               commandGroupMessage, commandGroupManage ]
-export const messagingCommands = [ commandPublish, commandReceive, commandRequest, commandReply ]
+export const messagingCommands = [ commandSend, commandReceive, commandRequest, commandReply ]
 export const manageCommands = [ commandQueue, commandAclProfile, commandClientProfile, commandClientUsername ]
 
 export const getCommandGroup = (command:any) => {
-  if ([ commandConnection, commandPublish, commandReceive, commandRequest, commandReply].includes(command))
+  if ([ commandConnection, commandSend, commandReceive, commandRequest, commandReply].includes(command))
     return 'message'
   else if ([ commandSempConnection, commandQueue, commandClientProfile, commandAclProfile, commandClientUsername].includes(command))
     return 'manage'
@@ -113,13 +113,13 @@ export const defaultMessageConnectionConfig:any = {
 }
 
 export const defaultMessageConfig:any = {
-  acknowledgeImmediately: false,
+  // acknowledgeImmediately: false,
   applicationMessageId: undefined,
   applicationMessageType: undefined,
   asReplyMessage: false,
   correlationId: undefined,
   correlationKey: undefined,
-  deliveryMode: 0,  // DIRECT
+  deliveryMode: 'PERSISTENT',
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
   dmqEligible: true,
   elidingEligible: false,
@@ -137,7 +137,7 @@ export const defaultMessageConfig:any = {
 export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
   count: 1,
-  interval: 3000,
+  interval: 1000,
   clientName: undefined,
   description: 'Publish application created via Solace Try-Me CLI',
   stdin: false,
@@ -148,8 +148,8 @@ export const defaultMessagePublishConfig:any = {
 
   acknowledgeMode: 'PER_MESSAGE',
   acknowledgeTimeout: 2000,
-  enabled: false, // guaranteed publisher
-  guaranteedPublisher: false,
+  enabled: true, // guaranteed publisher
+  guaranteedPublisher: true,
   windowSize: 50,
   outputMode: 'COMPACT',
 
@@ -323,7 +323,7 @@ export const defaultManageClientUsernameConfig:any = {
 
 export const getDefaultConfig = (commandType:any) => {
   switch (commandType) {
-    case 'publish': return defaultMessagePublishConfig
+    case 'send': return defaultMessagePublishConfig
     case 'receive': return defaultMessageReceiveConfig
     case 'request': return defaultMessageRequestConfig
     case 'reply': return defaultMessageReplyConfig
@@ -340,10 +340,10 @@ export const getDefaultConfig = (commandType:any) => {
 export const getCommandDescription = (commandType:any) => {
   switch (commandType) {
     case 'connection': return "VPN connection settings"
-    case 'publish': return "Publish Application"
-    case 'receive': return "Receive Application"
-    case 'request': return "Request Application"
-    case 'reply': return "Reply Application"
+    case 'send': return "Send Message"
+    case 'receive': return "Receive Message"
+    case 'request': return "Send Request Message"
+    case 'reply': return "Send Reply Message"
     case 'sempconnection': return "Manage VPN SEMP connection settings"
     case 'queue': return "Manage Queue command"
     case 'client-profile': return "Manage Client Profile command"

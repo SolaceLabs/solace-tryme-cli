@@ -22,6 +22,12 @@ const request = async (
     Logger.logError('exiting...')
     process.exit(1)
   }
+
+  process.on('SIGINT', function () {
+    'use strict';
+    Logger.logWarn('operation interrupted...')
+    requestor.exit();
+  });
 }
 
 const requestor = (options: MessageClientOptions, optionsSource: any) => {

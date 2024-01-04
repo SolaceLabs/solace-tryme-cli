@@ -19,6 +19,13 @@ const publish = async (
     process.exit(1)
   }
 
+  process.on('SIGINT', function () {
+    'use strict';
+    Logger.logWarn('operation interrupted...')
+    publisher.setExited(true);
+    publisher.exit();
+  });
+
   var message:any = options.message as string;
   message = optionsSource.message === 'default' ? defaultMessage : message;
 
@@ -26,6 +33,7 @@ const publish = async (
     for (var i=0; i<options.topic.length; i++) {
       publisher.publish(options.topic[i], message);
     } 
+    publisher.disconnect();
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
@@ -33,9 +41,8 @@ const publish = async (
       }
       if (interval) await delay(interval)
     }
+    publisher.disconnect();
   }
-
-  publisher.disconnect();
 }
 
 const publisher = (options: MessageClientOptions, optionsSource: any) => {

@@ -1,6 +1,5 @@
-import solace from "solclientjs";
+import solace, { LogLevel } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { LogLevel } from "solclientjs";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED, STM_EVENT_RECEIVED } from "../utils/controlevents";
 import { getDefaultClientName } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
@@ -21,7 +20,6 @@ export class SolaceClient extends VisualizeClient {
   session:any = null;
   active:boolean = false;
   receiver:any = {};
-  replier:any = {};
   clientName:string = ""
 
   constructor(options:any) {
@@ -178,7 +176,7 @@ export class SolaceClient extends VisualizeClient {
           } 
 
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
-            type: 'receiver', topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
+            type: 'receiver', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
           })        
           Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
         });
@@ -400,7 +398,8 @@ export class SolaceClient extends VisualizeClient {
             Logger.logSuccess(`message Received - ${message.getDestination()}`)
             Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
-              type: 'receiver', queue: this.receiver.queue, topicName: message.getDestination().getName(), clientName: this.clientName, uuid: uuid() 
+              type: 'receiver', deliveryMode: message.getDeliveryMode(), queue: this.receiver.queue, topicName: message.getDestination().getName(), 
+              clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
             })        
 
             // Need to explicitly ack otherwise it will not be deleted from the message router

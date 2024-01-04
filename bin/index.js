@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 const { Commander } = require('..')
-// suppress ExperimentalWarning emitted by fetch()
-// https://github.com/nodejs/node/issues/30810#issuecomment-1433950987
-const { emit: originalEmit } = process;
 const chalk = require('chalk')
-// const customChalk = new Chalk({level: 3});
-// import chalk from 'chalk';
-process.emit = (event, error) => event === 'warning' && error.name === 'ExperimentalWarning' ? false : originalEmit.apply(process, arguments);
+const process = require('node:process');
 
 const getHelpConfiguration = (args) => {
   if (args.indexOf('stm config init') >= 0)
@@ -45,7 +40,7 @@ try {
   const helpConfig = getHelpConfiguration(process.argv.join(' '))
   if (helpConfig.helpMore && helpMore) process.argv.push('-h')
   const rootHelp = (process.argv.length === 2) || process.argv.includes('help') ? true : false
-  if (rootHelp) process.argv.push('-h')
+  if (rootHelp || helpMore) process.argv.push('-h')
   
   console.log("")
   console.log(chalk.hex('#00c895').bold("█████╗ █████╗ ██╗    ████╗  ████╗████╗  ████████╗█████╗ ██╗   ██╗    ███╗  ███╗█████╗"))

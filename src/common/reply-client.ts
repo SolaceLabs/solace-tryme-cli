@@ -1,9 +1,9 @@
-import solace from "solclientjs";
+import solace, { LogLevel } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { LogLevel } from "solclientjs";
 import { defaultMessage, getDefaultClientName, getDefaultTopic } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
+import { randomUUID } from "crypto";
 const os = require('os');
 const { uuid } = require('uuidv4');
 
@@ -113,7 +113,7 @@ export class SolaceClient extends VisualizeClient {
             payload.hasOwnProperty('timeZone') ? payload.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone : ''
             
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUEST_RECEIVED, { 
-              type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid() 
+              type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
             })    
 
             this.reply(request, payload);
@@ -173,7 +173,7 @@ export class SolaceClient extends VisualizeClient {
         Logger.logInfo('unsubscribing from topic: ' + topicName);
         try {
           this.session.unsubscribe(
-            solace.SolclientFactory.createTopicDestination(this.replier.topicName),
+            solace.SolclientFactory.createTopicDestination(topicName),
             true, // generate confirmation when subscription is removed successfully
             topicName, // use topic name as correlation key
             10000 // 10 seconds timeout for this operation
@@ -195,9 +195,10 @@ export class SolaceClient extends VisualizeClient {
     if (this.session !== null) {
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(JSON.stringify(payload));
+      reply.setApplicationMessageId(message.getApplicationMessageId());
       this.session.sendReply(message, reply);
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLIED, { 
-        type: 'replier', topicName: message.getDestination().getName() + ' [reply]', clientName: this.clientName, uuid: uuid() 
+        type: 'replier', topicName: message.getDestination().getName() + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: reply.getApplicationMessageId() 
       })    
       Logger.logSuccess('replied.');
     } else {
@@ -224,7 +225,7 @@ export class SolaceClient extends VisualizeClient {
   };
 
   exit = () => {
-    this.unsubscribe();
+    if (this.session !== null) this.unsubscribe();
     setTimeout(() => {
       this.disconnect();
     }, 1000); // wait for 1 second to disconnect

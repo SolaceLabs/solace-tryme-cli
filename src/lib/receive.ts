@@ -20,6 +20,7 @@ const receive = async (
   process.stdin.resume();
   process.on('SIGINT', function () {
     'use strict';
+    Logger.logWarn('operation interrupted...')
     receiver.exit();
   });
 }

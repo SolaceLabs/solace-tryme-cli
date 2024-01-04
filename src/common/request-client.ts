@@ -1,9 +1,9 @@
-import solace from "solclientjs";
-import { LogLevel, MessageDeliveryModeType } from "solclientjs";
+import solace, { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
 import { getDefaultClientName, getDefaultTopic } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REQUESTED, STM_EVENT_REPLY_RECEIVED } from "../utils/controlevents";
+import { randomUUID } from "crypto";
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -128,6 +128,7 @@ export class SolaceClient extends VisualizeClient {
     this.options.timeToLive && request.setTimeToLive(this.options.timeToLive);
     this.options.dmqEligible && request.setDMQEligible(true);
     this.options.messageId && request.setApplicationMessageId(this.options.messageId);
+    if (this.options.visualization === 'on' && !this.options.messageId) request.setApplicationMessageId(randomUUID());
     this.options.messageType && request.setApplicationMessageType(this.options.messageType);
     this.options.replyToTopic && request.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
     if (this.options.userProperties) {
@@ -149,7 +150,7 @@ export class SolaceClient extends VisualizeClient {
           Logger.logSuccess(`reply received for request on topic '${request.getDestination()?.getName()}'`);
           Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLY_RECEIVED, { 
-            type: 'requestor', topicName: topicName + ' [reply]', clientName: this.clientName, uuid: uuid() 
+            type: 'requestor', topicName: topicName + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
           })    
           this.exit();
         },
@@ -160,7 +161,7 @@ export class SolaceClient extends VisualizeClient {
         null // not providing correlation object
       );
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUESTED, { 
-        type: 'requestor', topicName, clientName: this.clientName, uuid: uuid() 
+        type: 'requestor', topicName, clientName: this.clientName, uuid: uuid(), msgId: request.getApplicationMessageId()
       })    
     } catch (error:any) {
       Logger.logDetailedError('send request failed - ', error.toString())

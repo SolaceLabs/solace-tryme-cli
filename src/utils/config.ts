@@ -135,6 +135,28 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
   }
 }
 
+export const updateVisualizeConfig = (configFile: string, visualize:string) => {
+  try {
+    const homedir = require('os').homedir();
+    const filePath = processPath(`${homedir}/.stm/${configFile}`)
+    if (!filePath.endsWith('.json')) filePath.concat('.json')
+    if (fileExists(filePath)) {
+      const config:any = readFile(filePath)
+      config.message.connection.visualization = visualize;
+      writeFile(filePath, config)
+    } else {
+      Logger.error(`sorry, could not find the configuration file ${configFile}`);
+      Logger.error('exiting...')
+      process.exit(0);
+    }
+  } catch (error: any) {
+    Logger.logDetailedError('visualize settings update failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
 export const saveConfig = (data: any) => {
   try {
     const configFile = data.config;
