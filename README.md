@@ -84,6 +84,7 @@ As you can see from the messages, the Try-Me CLI created a default configuration
 On a different window/terminal, you can launch a publisher and see the events received on the receiver.
 
 ``` code
+stm send
 ℹ  info      info: loading 'send' command from configuration 'stm-cli-config.json'
 …  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: default]
 ✔  success   success: === successfully connected and ready to publish events. ===
@@ -93,6 +94,14 @@ On a different window/terminal, you can launch a publisher and see the events re
 {"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
 ✔  success   success: disconnecting from Solace PubSub+ Event Broker...
 ✔  success   success: disconnected
+```
+
+At this point, you would be able to see the event received on the receiver.
+
+```code
+✔  success   success: message received - [Topic solace/try/me]
+ℹ  info      info: Message Payload:
+{"osType":"Darwin","freeMem":86634496,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
 ```
 
 ### Working with Cloud Broker
