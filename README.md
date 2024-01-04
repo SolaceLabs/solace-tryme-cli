@@ -101,7 +101,7 @@ At this point, you would be able to see the event received on the receiver.
 ```code
 ✔  success   success: message received - [Topic solace/try/me]
 ℹ  info      info: Message Payload:
-{"osType":"Darwin","freeMem":86634496,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
+{"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
 ```
 
 ### Working with Cloud Broker
