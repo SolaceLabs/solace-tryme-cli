@@ -4,7 +4,6 @@ __Issue messaging commands: publish, receive, request and reply__
 
 ## Publish Events
 
-
 // execute the default publish command with settings defined on the
 // default configuration 'stm-cli-config.json'
 __stm send__

@@ -203,7 +203,7 @@ if (process.env.SHOW_VISUALIZATION) {
     visualizeLaunchCmd.action((options: MessageClientOptions) => {
       visualize(options);
     })  
-  }
+}
     // stm config
     const configCmd = this.program
       .command('config')
