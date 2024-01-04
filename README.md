@@ -16,44 +16,29 @@ Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), l
 The following view captures the command hierarchy of the *stm* cli tool.
 
 ```
-stm/
+stm
 ├── -v, --version                                   /*  output the version number */
 ├── -h, --help                                      /* display help for command */
-├── publish [options]                               /* Execute a publish command */
-│   └── [Connection, Session, Publish, Message and Configuration parameters]
+├── send [options]                                  /* Execute a publish command */
 ├── receive [options]                               /* Execute a receive command */
-│   └── [Connection, Queue, Session and Configuration parameters]
 ├── request [options]                               /* Execute a request command */
-│   └── [Connection, Session, Request, Message and Configuration parameters]
 ├── reply [options]                                 /* Execute a reply command */
-│   └── [Connection, Session, Reply, Message and Configuration parameters]
-├── manage                                          /* Manage broker connection and resources */
-│   ├── queue [options]                             /* Manage a queue */
-│   │   └── [SEMP Connection, Operation, Queue and Configuration parameters]
-│   ├── client-profile [options]                    /* Manage a client-profile */
-│   │   └── [SEMP Connection, Operation, Client Profile and Configuration parameters]
-│   ├── acl-profile [options]                       /* Manage a acl-profile */
-│   │   └── [SEMP Connection, Operation, ACL Profile and Configuration parameters]
-│   ├── client-username [options]                   /* Manage a client username */
-│   │   └── [SEMP Connection, Operation, Client Username and Configuration parameters]
-│   ├── connection [options]                        /* Manage message VPN connection */
-│   │   └── [Connection, Session and Configuration parameters]
-│   ├── semp-connection [options]                   /* Manage SEMP connection */
-│   │   └── [SEMP Connection, Session and Configuration parameters]
-│   └── help [command]                              /* display help for command */
 ├── config                                          /* Manage command configurations */
 │   ├── init [options]                              /* Initialize command samples */
-│   │   └── [Configuration parameters]
 │   ├── list [options]                              /* List command samples */
-│   │   └── [Configuration parameters]
 │   ├── delete [options]                            /* Delete command sample */
-│   │   └── [Configuration parameters]
 │   └── help [command]                              /* display help for command   */
+├── manage                                          /* Manage broker connection and resources */
+│   ├── connection [options]                        /* Manage message VPN connection */
+│   ├── semp-connection [options]                   /* Manage SEMP connection */
+│   ├── queue [options]                             /* Manage a queue */
+│   ├── client-profile [options]                    /* Manage a client-profile */
+│   ├── acl-profile [options]                       /* Manage a acl-profile */
+│   ├── client-username [options]                   /* Manage a client username */
+│   └── help [command]                              /* display help for command */
 └── help [command]                                  /* display help for command */
 
 ```
-
-
 
 ### Command Parameters
 
@@ -75,6 +60,27 @@ You can also use the _-he_ or _--help-examples_ option on the command to see cor
 The __stm__ utility supports persisting command settings to a file, that can be referenced by name. In fact, the default configuration file present is populated with messaging and manage comments with default settings.
 
 To know more about configuration file and how to create and manage commands, refer to [configuration](CONFIGURATION.md) document.
+
+## Run
+
+If you have Solace Software Broker running on your local machine, you can simply run the following commands to see publish-subscribe in action. It is because, the CLI automatically creates a configuration pointing to local broker with default settings.
+
+``` code
+stm receive
+ℹ  info      info: loading 'receive' command from configuration 'stm-cli-config.json'
+…  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: default]
+✔  success   success: === successfully connected and ready to receive events. ===
+(node:62705) DeprecationWarning: uuidv4() is deprecated. Use v4() from the uuid module instead.
+(Use `stm --trace-deprecation ...` to show where the warning was created)
+ℹ  info      info: subscribing to solace/try/me
+ℹ  info      info: press Ctrl-C to exit
+✔  success   success: successfully subscribed to topic: solace/try/me
+```
+
+On a different window/terminal, you can launch a publisher and see the events received on the receiver.
+
+``` code
+```
 
 ## Develop
 

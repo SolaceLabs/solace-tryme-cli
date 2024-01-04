@@ -298,11 +298,11 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
     delete result.message.connection.config;
   }
 
-  result.message.publish && Object.keys(defaultMessagePublishConfig).forEach((key:string) => {
+  result.message.send && Object.keys(defaultMessagePublishConfig).forEach((key:string) => {
     if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.publish[key] = defaultMessagePublishConfig[key];
+      result.message.send[key] = defaultMessagePublishConfig[key];
     } else {
-      result.message.publish[key] = options[key];
+      result.message.send[key] = options[key];
     }
   })
 

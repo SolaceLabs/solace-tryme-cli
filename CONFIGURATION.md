@@ -21,8 +21,8 @@ A configuration file contains __message__ and __manage__ sections at a high-leve
       "password": "default",
       ...other connection parameters
     },
-    "publish": {
-      "command": "publish",
+    "send": {
+      "command": "send",
       "count": 1,
       "interval": 3000,
       "topic": [
@@ -115,15 +115,15 @@ In here, each key name under the _message_ and _manage_ object represents the na
   - Contains connection and messaging command settings pointing to the local broker (connection, publish, receive, request, reply)
   - Contains semp connection and management command settings pointing to the local broker (sempconnection, queue, client-profile, acl-profile and client-username)
 - When executing a CLI command, if a command name is not specified - the basic command setting with the name same as the command will be picked and applied.
-  - Example: `stm publish` - will simply pick up the command by name `publish` in the default configuration file `stm-cli-configuration.json`
+  - Example: `stm send` - will simply pick up the command by name `publish` in the default configuration file `stm-cli-configuration.json`
 - You can specify the command name `--name <COMMAND_NAME>` at runtime to hint at the command settings that need to be used
-  - Example: `stm publish --name publish`
-  - Optionally, you can also specify override parameters in the command-line `stm publish --name publish --time-to-live 60000` which will be applied only for that execution instance
+  - Example: `stm send --name publish`
+  - Optionally, you can also specify override parameters in the command-line `stm send --name publish --time-to-live 60000` which will be applied only for that execution instance
 - You can update the command settings at runtime when executing corresponding `cli` command, and issuing a `--save` parameter.
-  - Example: `stm publish --time-to-live 600000 --save` will update the named command `publish` in the default configuration file.
-  - Example: `stm publish --config cloud-broker.json --name publish2 --time-to-live 600000 --save` will update the named command `publish2` on the `cloud-broker.json` configuration file.
+  - Example: `stm send --time-to-live 600000 --save` will update the named command `publish` in the default configuration file.
+  - Example: `stm send --config cloud-broker.json --name publish2 --time-to-live 600000 --save` will update the named command `publish2` on the `cloud-broker.json` configuration file.
 - You can duplicate a command setting from an existing command setting
-  - Example: `stm publish --name publish --time-to-live 60000 --save publishWithTTL60Secs` will create a new command with the name `publishWithTTL60Secs` with settings defined on the command name `publish` and with `time-to-live` parameter updated with value specified in the command-line
+  - Example: `stm send --name publish --time-to-live 60000 --save publishWithTTL60Secs` will create a new command with the name `publishWithTTL60Secs` with settings defined on the command name `publish` and with `time-to-live` parameter updated with value specified in the command-line
 - You can delete a command settings by name (except for the basic command and connection settings created by the `stm config init` command - i.e, connection, publish, receive, request, reply, sempconnection, queue, client-profile, acl-profile and client-username)
   - Example: `stm config delete --name publishWithTTL60Secs`
 

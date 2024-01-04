@@ -36,7 +36,7 @@ export const defaultRequestMessage = {
 
 export const getDefaultTopic = (commandType: CommandType) => {
   switch (commandType) {
-    case 'publish': return 'solace/try/me';
+    case 'send': return 'solace/try/me';
     case 'receive': return 'solace/try/me';
     case 'request': return 'solace/try/me/request';
     case 'reply': return 'solace/try/me/request';
@@ -141,7 +141,7 @@ export const defaultMessagePublishConfig:any = {
   clientName: undefined,
   description: 'Publish application created via Solace Try-Me CLI',
   stdin: false,
-  topic: [ getDefaultTopic('publish') ],
+  topic: [ getDefaultTopic('send') ],
   message: defaultMessageHint,
   queue: undefined,
   createIfMissing: undefined,
@@ -153,8 +153,8 @@ export const defaultMessagePublishConfig:any = {
   windowSize: 50,
   outputMode: 'COMPACT',
 
-  command: 'publish',
-  name: 'publish',
+  command: 'send',
+  name: 'send',
 }
 
 export const defaultMessageReceiveConfig:any = {
@@ -164,7 +164,7 @@ export const defaultMessageReceiveConfig:any = {
   clientName: undefined,
   description: 'Receive application created via Solace Try-Me CLI',
 
-  topic: [ getDefaultTopic('publish') ],
+  topic: [ getDefaultTopic('send') ],
   message: defaultMessageHint,
   queue: undefined,
   createIfMissing: undefined,
@@ -262,7 +262,7 @@ export const defaultManageQueueConfig:any = {
   rejectMsgToSenderOnDiscardBehavior: "when-queue-enabled",
   respectMsgPriorityEnabled: false,
   respectTtlEnabled: false,
-  addSubscriptions: [ getDefaultTopic('publish') ],
+  addSubscriptions: [ getDefaultTopic('send') ],
   removeSubscriptions: [],
   listSubscriptions: false,
   

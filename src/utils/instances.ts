@@ -38,7 +38,6 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   clientName?: string | undefined
   description?: string | undefined
   topic: any
-  topics: any
   queue: any
   createIfMissing: boolean | undefined
   message?: string | Buffer | undefined
@@ -83,7 +82,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.receiveTimestamps = false
     this.reapplySubscriptions = false
     this.acknowledgeTimeout = 1
-    this.acknowledgeMode = (commandType === 'publish') ? 
+    this.acknowledgeMode = (commandType === 'send') ? 
                               solace.MessagePublisherAcknowledgeMode.PER_MESSAGE :
                               solace.MessageConsumerAcknowledgeMode.AUTO
     this.logLevel = ""

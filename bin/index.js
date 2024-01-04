@@ -2,6 +2,7 @@
 const { Commander } = require('..')
 const chalk = require('chalk')
 const process = require('node:process');
+process.noDeprecation = true
 
 const getHelpConfiguration = (args) => {
   if (args.indexOf('stm config init') >= 0)
@@ -10,7 +11,7 @@ const getHelpConfiguration = (args) => {
     return { help: true, helpMore: false, helpExamples: true}
   if (args.indexOf('stm config list') >= 0)
     return { help: true, helpMore: false, helpExamples: true}
-  if (args.indexOf('stm publish') >= 0)
+  if (args.indexOf('stm send') >= 0)
   return { help: true, helpMore: true, helpExamples: true}
     if (args.indexOf('stm receive') >= 0)
     return { help: true, helpMore: true, helpExamples: true}

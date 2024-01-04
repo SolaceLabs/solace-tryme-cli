@@ -7,20 +7,20 @@ __Issue messaging commands: publish, receive, request and reply__
 
 // execute the default publish command with settings defined on the
 // default configuration 'stm-cli-config.json'
-__stm publish__
+__stm send__
 
 HINT: You can view the default publish command settings 'stm config list --name publish'!
 
 // save an existing command setting to a new name in a configuration file
-__stm publish --config cloud-broker.json --save publish2__
+__stm send --config cloud-broker.json --save publish2__
 
 // execute a specific publish command from the named configuration
-__stm publish --config cloud-broker.json --name publish2__
+__stm send --config cloud-broker.json --name publish2__
 
 // execute the default publish command with settings defined on the default
 // configuration 'stm-cli-config.json', but publish on topic specified in the
 // command-line (overriding the command settings)
-__stm publish --topic solace/try/me__
+__stm send --topic solace/try/me__
 
 NOTE: You can override any of the publish parameters
 that are applied only for this instance of execution!
@@ -28,20 +28,20 @@ that are applied only for this instance of execution!
 // If you want to run a publish purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-__stm publish --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me --count 5 --interval 1000__
+__stm send --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me --count 5 --interval 1000__
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
 setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
-__stm publish  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save__
+__stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save__
 
 // Duplicate the command setting
-__stm publish  --name publish2 --config cloud-broker.json --save publish3__
+__stm send  --name publish2 --config cloud-broker.json --save publish3__
 
 // Duplicate the command setting with the specified command-line parameters
-__stm publish  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4__
+__stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4__
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
 

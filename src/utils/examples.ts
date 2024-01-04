@@ -59,20 +59,20 @@ export const displayHelpExamplesForPublish = () => {
 Examples:
 // execute the default publish command with settings defined on the 
 // default configuration 'stm-cli-config.json' 
-${chalk.greenBright('stm publish')}
+${chalk.greenBright('stm send')}
 
 ${chalk.magentaBright(`HINT: You can view the default publish command settings 'stm config list --name publish'!`)}
 
 // save an existing command setting to a new name in a configuration file
-${chalk.greenBright('stm publish --config cloud-broker.json --save publish2')}
+${chalk.greenBright('stm send --config cloud-broker.json --save publish2')}
 
 // execute a specific publish command from the named configuration 
-${chalk.greenBright('stm publish --config cloud-broker.json --name publish2')}
+${chalk.greenBright('stm send --config cloud-broker.json --name publish2')}
 
 // execute the default publish command with settings defined on the default 
 // configuration 'stm-cli-config.json', but publish on topic specified in the 
 // command-line (overriding the command settings)
-${chalk.greenBright('stm publish --topic ' + getDefaultTopic('publish'))}
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send'))}
 
 ${chalk.yellowBright('NOTE: You can override any of the publish parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -80,20 +80,20 @@ ${chalk.yellowBright('NOTE: You can override any of the publish parameters \n' +
 // If you want to run a publish purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm publish --url ws://localhost:8008 --vpn default --username default --password default --topic ' + getDefaultTopic('publish') + ' --count 5 --interval 1000')}
+${chalk.greenBright('stm send --url ws://localhost:8008 --vpn default --username default --password default --topic ' + getDefaultTopic('send') + ' --count 5 --interval 1000')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
 'setting to a new name!')}
 
 // Update the command setting with the specified command-line parameters (if specified)
-${chalk.greenBright('stm publish  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save')}
+${chalk.greenBright('stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save')}
 
 // Duplicate the command setting
-${chalk.greenBright('stm publish  --name publish2 --config cloud-broker.json --save publish3')}
+${chalk.greenBright('stm send  --name publish2 --config cloud-broker.json --save publish3')}
 
 // Duplicate the command setting with the specified command-line parameters
-${chalk.greenBright('stm publish  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4')}
+${chalk.greenBright('stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)

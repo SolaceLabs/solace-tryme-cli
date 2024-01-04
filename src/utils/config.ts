@@ -60,7 +60,7 @@ export const readFile = (path: string) => {
     const config = fs.readFileSync(path, 'utf-8')
     return JSON.parse(config)
   } catch (error: any) {
-    Logger.logDetailedError('read write failed', error.toString())
+    Logger.logDetailedError('read file failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.logError('exiting...')
     process.exit(1)
@@ -291,7 +291,11 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
   
         // load configuration
         Logger.info(`loading configuration '${defaultConfigFile}'`)
-        const config = readFile(defaultConfigFile)
+        const homedir = require('os').homedir();
+        const filePath = processPath(`${homedir}/.stm/${defaultConfigFile}`)
+        if (!filePath.endsWith('.json')) filePath.concat('.json')
+      
+        const config = readFile(filePath)
         const configOptions:any = {}
         const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
         for (var i=0; i<connectionKeys.length; i++) {

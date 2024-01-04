@@ -71,7 +71,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .argParser(parsePublishTopic) .default([ getDefaultTopic('publish')]) .hideHelp(advanced))
+    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parsePublishTopic) .hideHelp(advanced))
     .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultMessageHint) .hideHelp(advanced))
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .default(false) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
@@ -135,7 +135,7 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced))
     .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced))
     .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .argParser(parseReceiveTopic) .default( [ getDefaultTopic('receive') ]) .hideHelp(advanced))
+    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default( [ getDefaultTopic('receive') ]) .argParser(parseReceiveTopic) .hideHelp(advanced))
 
     // receive from queue
     .addOption(new Option(`\n/* ${chalk.whiteBright('QUEUE SETTINGS')} */`))
@@ -184,7 +184,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC>', chalk.whiteBright('the message topic')) .argParser(parseSingleTopic) .default( getDefaultTopic('request') ) .hideHelp(advanced))
+    .addOption(new Option('--topic <TOPIC>', chalk.whiteBright('the message topic')) .default( getDefaultTopic('request') ) .argParser(parseSingleTopic) .hideHelp(advanced))
     .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultRequestMessageHint) .hideHelp(advanced))
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .default(false) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
@@ -249,7 +249,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .argParser(parseRequestTopic) .default([ getDefaultTopic('publish')]) .hideHelp(advanced))
+    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parseRequestTopic) .hideHelp(advanced))
     .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultRequestMessageHint) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.dmqEligible) .hideHelp(advanced))

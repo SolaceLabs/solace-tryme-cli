@@ -30,7 +30,7 @@ __Issue messaging commands: publish, receive, request and reply__
 ## Publish Events
 
 ```
-Usage: stm publish [options]
+Usage: stm send [options]
 
 Execute a publish command
 
@@ -78,8 +78,7 @@ Options:
                                          
   /* MESSAGE SETTINGS */
   --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
-  --message <MESSAGE>                      the message body (default:
-                                           "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}")
+  --message <MESSAGE>                      the message body (default: {"osType":"OS_TYPE","freeMem":"FREE_MEM","totalMem":"TOTAL_MEM","timeZone":"TIME_ZONE"})
   --stdin                                  read the message body from stdin (default: false)
   --count <COUNT>                          the number of events to publish (default: 1)
   --interval <MILLISECONDS>                the time to wait between publish (default: 3000)

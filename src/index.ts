@@ -53,7 +53,7 @@ export class Commander {
     addSendOptions(sendCmd, this.advanced);
     sendCmd.action((options: MessageClientOptions) => {
       const cliOptions:any = {};
-      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('publish'));
+      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('send'));
       for (var i=0; i<defaultKeys.length; i++) {
         cliOptions[defaultKeys[i]] = sendCmd.getOptionValueSource(defaultKeys[i]);
       }
