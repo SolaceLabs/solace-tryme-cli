@@ -128,7 +128,7 @@ In here, each key name under the _message_ and _manage_ object represents the na
   - Example: `stm config delete --name publishWithTTL60Secs`
 
 
-##Recommendation
+## Recommendation
 
 1. Create a configuration file for each broker that you intend to operate against
 2. Create a named command if you see a repeated use of a specific or set of parameters at runtime
