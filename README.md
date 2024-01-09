@@ -8,7 +8,7 @@ Solace Try-Me CLI is a CLI Client on the command line to publish and receive mes
 
 ### Quick Start
 
-Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the executables under **Assets**. Pick the binary based on your OS and download. Rename the downloaded binary as **stm** and move the file to a folder that is in the *PATH* or update the path to contain the folder where the binary file is present.
+Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
 
 
 ### Command Structure
