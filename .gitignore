@@ -33,3 +33,4 @@ dist
 # test scripts
 *.sh
 config
+yarn.lock

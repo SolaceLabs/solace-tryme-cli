@@ -253,7 +253,7 @@ Options:
   --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
   --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for acknowledgement management
   --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
-  --reply-to <TOPIC>                     [advanced] string which is used as the topic name for a response message
+  --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
 
@@ -333,7 +333,7 @@ Options:
   --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
   --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for acknowledgement management
   --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
-  --reply-to <TOPIC>                     [advanced] string which is used as the topic name for a response message
+  --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
 
