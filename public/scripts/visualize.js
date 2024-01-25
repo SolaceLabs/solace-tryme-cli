@@ -194,7 +194,7 @@ function renderBroker() {
 																					broker.connected ? "#00C895" : "red");
 
 	const tip = document.createElementNS(svgNS, "title");
-	tip.textContent = `Solace PubSub+ Broker:\nURL: ${MQTT_HOST}:${MQTT_PORT}`;
+	tip.textContent = `Solace PubSub+ Broker:\nURL: ${connection.MQTT_HOST}:${connection.MQTT_PORT}`;
 	_broker.appendChild(tip);
 
 	mySvg.appendChild(_broker);
@@ -688,8 +688,10 @@ function renderGrid() {
 	}
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-	mySvg = document.getElementById('eventFlow');
+document.addEventListener("DOMContentLoaded", async function () {
+  await getEndpoints();
+
+  mySvg = document.getElementById('eventFlow');
 	gridSvg = document.getElementById('gridView');
 	width = mySvg.getBoundingClientRect().width;
 	height = mySvg.getBoundingClientRect().height;
@@ -863,7 +865,6 @@ const loadFromFile = () => {
       console.log(fr.result)
   }
 }
-
 
 function openNav() {
   if (navOpen) {

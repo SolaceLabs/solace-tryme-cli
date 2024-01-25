@@ -1,4 +1,3 @@
-import concat from 'concat-stream'
 import { SolaceClient } from '../common/receive-client'
 import { displayHelpExamplesForReceive } from '../utils/examples';
 import { Logger } from '../utils/logger'
@@ -23,6 +22,13 @@ const receive = async (
     Logger.logWarn('operation interrupted...')
     receiver.exit();
   });
+
+  if (options.exitAfter) {
+    setTimeout(function exit() {
+      Logger.logWarn(`exiting session (exit-after set for ${options.exitAfter})...`);
+      receiver.exit();
+    }, options.exitAfter * 1000);
+  }
 }
 
 const receiver = (options: MessageClientOptions, optionsSource: any) => {

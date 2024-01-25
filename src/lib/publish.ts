@@ -1,10 +1,11 @@
+import * as fs from 'fs'
 import concat from 'concat-stream'
 import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
 import { defaultMessage, delay } from '../utils/defaults';
 import { displayHelpExamplesForPublish } from '../utils/examples';
-import { saveOrUpdateCommandSettings } from '../utils/config';
+import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 
 const publish = async (
   options: MessageClientOptions,
@@ -26,8 +27,35 @@ const publish = async (
     publisher.exit();
   });
 
+  if (options.exitAfter) {
+    setTimeout(function exit() {
+      Logger.logWarn(`exiting session (exit-after set for ${options.exitAfter})...`);
+      publisher.exit();
+    }, options.exitAfter * 1000);
+  }
+
   var message:any = options.message as string;
   message = optionsSource.message === 'default' ? defaultMessage : message;
+
+  var file:any = options.file as string;
+  if (file) {
+    if (!fileExists(file)) {
+      Logger.logSuccess(`missing file '${file}'`);
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+    
+    try {
+      var content = fs.readFileSync(file, 'utf-8')
+      var obj = JSON.parse(content);
+      message = JSON.stringify(obj);
+    } catch (error: any) {
+      Logger.logDetailedError('read file failed', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }  
+  }
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {

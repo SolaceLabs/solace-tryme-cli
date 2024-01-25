@@ -95,7 +95,7 @@ export class SolaceClient extends VisualizeClient {
 
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Logger.logSuccess('=== successfully connected and ready to publish events. ===');
+          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to publish events. ===');
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
             type: 'sender', clientName: this.clientName, uuid: uuid()
           })    
@@ -167,7 +167,7 @@ export class SolaceClient extends VisualizeClient {
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       message.setBinaryAttachment(JSON.stringify(payload));
-      message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : topicName);
+      message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : randomUUID());
       this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
       this.options.dmqEligible && message.setDMQEligible(true);
@@ -215,6 +215,7 @@ export class SolaceClient extends VisualizeClient {
   };
   
   exit() {
+    this.setExited(true);
     setTimeout(() => {
       this.disconnect();
     }, 1000); // wait for 1 second to disconnect

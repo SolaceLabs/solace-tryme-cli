@@ -137,6 +137,7 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
 
 export const updateVisualizeConfig = (configFile: string, visualize:string) => {
   try {
+    console.log('In updateVisualizeConfig')
     const homedir = require('os').homedir();
     const filePath = processPath(`${homedir}/.stm/${configFile}`)
     if (!filePath.endsWith('.json')) filePath.concat('.json')

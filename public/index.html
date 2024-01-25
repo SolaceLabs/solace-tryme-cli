@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="styles/visualize.css">
+        <script type="text/javascript" src="scripts/config.js"></script>
         <script type="text/javascript" src="scripts/MQTTSolaceClient.js"></script>
         <script type="text/javascript" src="scripts/visualize.js"></script>
         <script type="text/javascript" src="scripts/paho-mqtt.js"></script>
@@ -69,5 +70,10 @@
             </div>
         </div>
     </body>
-    <script></script>
+    <script>
+      window.addEventListener("load", (event) => {
+        console.log("page is fully loaded");
+        // (async () => { await getEndpoints() })();
+      });
+    </script>
 </html>

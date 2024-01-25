@@ -57,7 +57,7 @@ export class SolaceClient extends VisualizeClient {
           vpnName: this.options.vpn,
           userName: this.options.username,
           password: this.options.password,
-          clientName: this.options.clientName,
+          clientName: this.clientName,
           applicationDescription: this.options.description,
           connectTimeoutInMsecs: this.options.connectionTimeout,
           connectRetries: this.options.connectionRetries,
@@ -72,12 +72,11 @@ export class SolaceClient extends VisualizeClient {
           keepAliveIntervalsLimit: this.options.keepAliveIntervalLimit,
           reapplySubscriptions: this.options.reapplySubscriptions,
           sendBufferMaxSize: this.options.sendBufferMaxSize,
-
         });
 
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Logger.logSuccess('=== successfully connected and ready to send requests. ===');
+          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to send requests. ===');
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
             type: 'requestor', clientName: this.clientName, uuid: uuid()
           })    
@@ -145,7 +144,7 @@ export class SolaceClient extends VisualizeClient {
     try {
       this.session.sendRequest(
         request,
-        5000, // 5 seconds timeout for this operation
+        this.options.timeout, // 5 seconds timeout for this operation
         (session:any, message:any) => {
           Logger.logSuccess(`reply received for request on topic '${request.getDestination()?.getName()}'`);
           Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);

@@ -83,6 +83,7 @@ declare global {
     // messaging operation options
     queue: any
     createIfMissing: boolean | undefined
+    file?: string | undefined
     message?: string | Buffer
     stdin?: boolean
     timeToLive?: number
@@ -94,6 +95,7 @@ declare global {
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
 
+    exitAfter?: number
     outputMode?: string
 
     // Help Examples

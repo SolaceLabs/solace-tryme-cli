@@ -1,26 +1,55 @@
+import * as fs from 'fs'
 import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
 import { SolaceClient } from '../common/request-client'
 import { displayHelpExamplesForRequest } from '../utils/examples';
 import { defaultRequestMessage, delay } from '../utils/defaults';
-import { saveOrUpdateCommandSettings } from '../utils/config';
+import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 
 const request = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
-  const { count, interval } = options;
   const requestor = new SolaceClient(options);
+  var message:any = options.message as string;
+  optionsSource.message === 'default' ? message = defaultRequestMessage : message;
+  
+  var file:any = options.file as string;
+  if (file) {
+    if (!fileExists(file)) {
+      Logger.logSuccess(`missing file '${file}'`);
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+    
+    try {
+      var content = fs.readFileSync(file, 'utf-8')
+      var obj = JSON.parse(content);
+      message = JSON.stringify(obj);
+    } catch (error: any) {
+      Logger.logDetailedError('read file failed', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }  
+  }
+
   try {
     await requestor.connect();
-
-    var message:any = options.message as string;
-    optionsSource.message === 'default' ? message = defaultRequestMessage : message;
+    // if (options.replyToTopic)
+    //   requestor.subscribe(options.replyToTopic)
     var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
     requestor.request(topicName, message);
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)
+  }
+
+  if (options.exitAfter) {
+    setTimeout(function exit() {
+      Logger.logWarn(`exiting session (exit-after set for ${options.exitAfter})...`);
+      requestor.exit();
+    }, options.exitAfter * 1000);
   }
 
   process.on('SIGINT', function () {

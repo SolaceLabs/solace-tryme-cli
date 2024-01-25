@@ -124,7 +124,8 @@ export const defaultMessageConfig:any = {
   dmqEligible: true,
   elidingEligible: false,
   priority: undefined,
-  replyTo: undefined,
+  replyToTopic: undefined,
+  timeout: 5000,
   // senderId:  NOT CONSIDERED as we want the session includeSenderId to cover this
   // senderTimeStamp: NOT CONSIDERED as we want thr generateSendTimestamps to cover this
   // sequenceNumber: NOT CONSIDERED as we want thr generateSequenceNumber to cover this
@@ -132,6 +133,8 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
+  outputMode: 'COMPACT',
+
 }
 
 export const defaultMessagePublishConfig:any = {
@@ -146,12 +149,11 @@ export const defaultMessagePublishConfig:any = {
   queue: undefined,
   createIfMissing: undefined,
 
-  acknowledgeMode: 'PER_MESSAGE',
+  acknowledgeMode: 'WINDOWED',
   acknowledgeTimeout: 2000,
   enabled: true, // guaranteed publisher
   guaranteedPublisher: true,
   windowSize: 50,
-  outputMode: 'COMPACT',
 
   command: 'send',
   name: 'send',
@@ -173,7 +175,6 @@ export const defaultMessageReceiveConfig:any = {
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
-  outputMode: 'COMPACT',
   
   command: 'receive',
   name: 'receive',
@@ -192,7 +193,6 @@ export const defaultMessageRequestConfig:any = {
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
-  outputMode: 'COMPACT',
 
   command: 'request',
   name: 'request',
@@ -204,6 +204,7 @@ export const defaultMessageReplyConfig:any = {
 
   topic: [ getDefaultTopic('reply') ],
   message: defaultRequestMessageHint,
+  file: undefined,
   queue: undefined,
   createIfMissing: undefined,
 
@@ -211,7 +212,8 @@ export const defaultMessageReplyConfig:any = {
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
-  outputMode: 'COMPACT',
+
+  exitAfter: 0,
 
   command: 'reply',
   name: 'reply',
@@ -227,6 +229,7 @@ export const defaultManageConnectionConfig:any = {
   // place holders
   config: '',
   save: false,
+  description: 'SEMP manage application created via Solace Try-Me CLI',
 
   command: 'sempconnection',
   name: 'sempconnection',

@@ -1,8 +1,3 @@
-const MQTT_HOST = "localhost";
-const MQTT_PORT = "8000";
-const MQTT_USER_NAME = "default";
-const MQTT_PASSWORD = "default";
-
 /* eslint-disable no-plusplus */
 /* eslint-disable no-useless-escape */
 /* eslint-disable arrow-body-style */
@@ -17,9 +12,9 @@ class SolaceClient {
     this.onConnectionError = onConnectionError;
     this.onConnectionLost = onConnectionLost;
     this.client = new Paho.MQTT.Client(
-      MQTT_HOST,
+      connection.MQTT_HOST,
       // eslint-disable-next-line radix
-      parseInt(MQTT_PORT),
+      parseInt(connection.MQTT_PORT),
       '/',
       'visualizer');
   }
@@ -40,14 +35,14 @@ class SolaceClient {
 
     // define connection options
     const connectOptions = {};
-    connectOptions.useSSL = MQTT_HOST.indexOf('localhost') === -1;
+    connectOptions.useSSL = connection.MQTT_HOST.indexOf('localhost') === -1;
     connectOptions.mqttVersion = 3;
     connectOptions.reconnect = true;
-    connectOptions.userName = MQTT_USER_NAME;
-    connectOptions.password = MQTT_PASSWORD;
+    connectOptions.userName = connection.MQTT_USER_NAME;
+    connectOptions.password = connection.MQTT_PASSWORD;
     connectOptions.invocationContext = { code: this.code };
     connectOptions.onSuccess = ((invocationContext) => {
-      console.log(this.getTime(), `Client connected to: ${MQTT_HOST}:${MQTT_PORT}`);
+      console.log(this.getTime(), `Client connected to: ${connection.MQTT_HOST}:${connection.MQTT_PORT}`);
       this.connected = true;
       this.onConnectionSuccess(this, this.code);
       return true;

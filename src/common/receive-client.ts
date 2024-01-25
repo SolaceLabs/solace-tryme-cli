@@ -71,12 +71,6 @@ export class SolaceClient extends VisualizeClient {
           keepAliveIntervalsLimit: this.options.keepAliveIntervalLimit,
           reapplySubscriptions: this.options.reapplySubscriptions,
           sendBufferMaxSize: this.options.sendBufferMaxSize,
-          publisherProperties: {
-            enabled: this.options.guaranteedPublisher ? true : false,
-            windowSize: this.options.guaranteedPublisher ? this.options.windowSize : undefined,
-            acknowledgeTimeoutInMsecs: this.options.guaranteedPublisher? this.options.acknowledgeTimeout : undefined,
-            acknowledgeMode: this.options.guaranteedPublisher && this.options.acknowledgeMode ? this.options.acknowledgeMode : undefined,
-          }
         });
 
         // define session event listeners
@@ -86,7 +80,7 @@ export class SolaceClient extends VisualizeClient {
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
             type: 'receiver', clientName: this.clientName, uuid: uuid() 
           })    
-          Logger.logSuccess('=== successfully connected and ready to receive events. ===');
+          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to receive events. ===');
           resolve();
         });
 
@@ -356,7 +350,7 @@ export class SolaceClient extends VisualizeClient {
             this.receiver.consuming = true;
             Logger.logSuccess('ready to receive messages.');
             Logger.await(`waiting for events...`);
-            Logger.logHint(`Use 'stm manage queue --list ${this.receiver.queue}' to review the queue and topic subscriptions on the queue`)
+            Logger.logHint(`Use 'stm manage queue --list ${this.receiver.queue}` + (this.options.config ? ` --config ${this.options.config}` : '') + '\' to review the queue and topic subscriptions on the queue')
 
             // wait to be told to exit
             Logger.logInfo('press Ctrl-C to exit');  
@@ -366,7 +360,7 @@ export class SolaceClient extends VisualizeClient {
             Logger.logDetailedError(`the message receiver could not bind to queue '${this.receiver.queue}'`, error.toString())
             if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
             if (error.toString() === 'OperationError: Unknown Queue')
-              Logger.logHint(`Use 'stm manage queue --create ${this.receiver.queue}' to create the queue`)
+              Logger.logHint(`Use 'stm manage queue --create ${this.receiver.queue}` + (this.options.config ? ` --config ${this.options.config}` : '') + `' to create the queue`)
             Logger.error('exiting...')
             process.exit(1);
           });
@@ -381,7 +375,7 @@ export class SolaceClient extends VisualizeClient {
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) =>  {
             Logger.logDetailedError(`cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
             if (sessionEvent.infoStr === 'Permission Not Allowed') {
-              Logger.logHint(`You may not be the owner of the queue, update owner with 'stm manage queue --update ${this.receiver.queue} --owner ${this.options.username}' and try again!`)
+              Logger.logHint(`You may not be the owner of the queue, update owner with 'stm manage queue --update ${this.receiver.queue} --owner ${this.options.username}` + (this.options.config ? ` --config ${this.options.config}` : '') + `' and try again!`)
               Logger.error('exiting...')
               process.exit(1)
             }

@@ -296,6 +296,15 @@ li + li {
   cursor: pointer;
 }
 
+.clearevents {
+  background-color: #06a78e;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
 .paused {
   font-size: 10px;
   color: #c01f1f;

@@ -1,10 +1,8 @@
-import solace, { LogLevel } from "solclientjs";
+import solace, { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { defaultMessage, getDefaultClientName, getDefaultTopic } from "../utils/defaults";
+import { getDefaultClientName } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
-import { randomUUID } from "crypto";
-const os = require('os');
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -15,13 +13,19 @@ const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['DEBUG', LogLevel.DEBUG],
   ['TRACE', LogLevel.TRACE]
 ]);
+const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, MessageDeliveryModeType>([
+  ['DIRECT', MessageDeliveryModeType.DIRECT],
+  ['PERSISTENT', MessageDeliveryModeType.PERSISTENT],
+  ['NON_PERSISTENT', MessageDeliveryModeType.NON_PERSISTENT],
+]);
 
 export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
   replier:any = {};
   session:any = null;
-  clientName:string = ""
+  clientName:string = "";
+  payload:any = null;
 
   constructor(options:any) {
     super();
@@ -52,7 +56,7 @@ export class SolaceClient extends VisualizeClient {
           vpnName: this.options.vpn,
           userName: this.options.username,
           password: this.options.password,
-          clientName: this.options.clientName,
+          clientName: this.clientName,
           applicationDescription: this.options.description,
           connectTimeoutInMsecs: this.options.connectionTimeout,
           connectRetries: this.options.connectionRetries,
@@ -71,7 +75,7 @@ export class SolaceClient extends VisualizeClient {
 
         // define session event listeners
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
-          Logger.logSuccess('=== successfully connected and ready to subscribe to request topic. ===');
+          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to subscribe to request topic. ===');
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
             type: 'replier', clientName: this.clientName, uuid: uuid()
           })    
@@ -106,17 +110,11 @@ export class SolaceClient extends VisualizeClient {
         this.session.on(solace.SessionEventCode.MESSAGE, (message: any) => {
           try {
             var request:any = message as string;
-            var payload = request.getDestination().getName() === getDefaultTopic('request') ? defaultMessage : JSON.parse(request.getBinaryAttachment());
-            payload.hasOwnProperty('osType') ? payload.osType = os.type() : ''
-            payload.hasOwnProperty('freeMem') ? payload.freeMem = os.freemem() : ''
-            payload.hasOwnProperty('totalMem') ? payload.totalMem = os.totalmem() : ''
-            payload.hasOwnProperty('timeZone') ? payload.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone : ''
-            
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUEST_RECEIVED, { 
               type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
             })    
 
-            this.reply(request, payload);
+            this.reply(request, this.payload);
           } catch (error:any) {
             Logger.logDetailedError('send reply failed - ', error.toString())
             if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -140,7 +138,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Subscribes to request topic on Solace PubSub+ Event Broker
-  subscribe = (topicNames: any) => {
+  subscribe = (topicNames: any, payload: any) => {
     //Check if the session has been established
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
@@ -148,6 +146,7 @@ export class SolaceClient extends VisualizeClient {
     }
 
     try {
+      this.payload = payload;
       topicNames.forEach((topicName:any) => {
         Logger.logInfo(`subscribing to ${topicName}`);
   
@@ -176,7 +175,7 @@ export class SolaceClient extends VisualizeClient {
             solace.SolclientFactory.createTopicDestination(topicName),
             true, // generate confirmation when subscription is removed successfully
             topicName, // use topic name as correlation key
-            10000 // 10 seconds timeout for this operation
+            this.options.readTimeout ? this.options.readTimeout : 10000 // 10 seconds timeout for this operation, if not specified
           );
         } catch (error:any) {
           Logger.logDetailedError(`failed to unsubscribe to topic ${topicName} - `, error.toString())
@@ -196,7 +195,13 @@ export class SolaceClient extends VisualizeClient {
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(JSON.stringify(payload));
       reply.setApplicationMessageId(message.getApplicationMessageId());
+      this.options.deliveryMode && reply.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.session.sendReply(message, reply);
+      // reply.setDestination(message.getReplyTo());
+      // this.session.send(reply)
+      Logger.logSuccess(`reply sent`);
+      Logger.printMessage(reply.dump(0), reply.getUserPropertyMap(), reply.getBinaryAttachment(), this.options.outputMode);
+
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLIED, { 
         type: 'replier', topicName: message.getDestination().getName() + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: reply.getApplicationMessageId() 
       })    

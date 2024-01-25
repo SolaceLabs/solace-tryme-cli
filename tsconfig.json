@@ -12,5 +12,7 @@
     "types": ["@types/signale"],
     "sourceMap": true
   },
-  "include": ["src", "html"]
+  "include": [
+    "src/**/*"
+  ]
 }
