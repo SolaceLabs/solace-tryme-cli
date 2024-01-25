@@ -19,7 +19,7 @@ const visualize = async (options: MessageClientOptions) => {
   app.get('/config', (req:any, res:any) => {
     var configuration = {
       "MQTT_HOST": `${url.hostname}`,
-      "MQTT_PORT": 8443, //`${config.url.substring(config.url.lastIndexOf(':')+1)}`,
+      "MQTT_PORT": (url.hostname === 'localhost' ? 8000: 8443), //`${config.url.substring(config.url.lastIndexOf(':')+1)}`,
       "MQTT_USER_NAME":   `${config.username}`,
       "MQTT_PASSWORD": `${config.password}`
     };

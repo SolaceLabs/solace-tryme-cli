@@ -72,7 +72,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parsePublishTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default('a default payload') .hideHelp(advanced))
     .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message')  .conflicts('file').default(false) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
@@ -99,7 +99,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed publisher options
     .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessagePublishConfig.windowSize) .hideHelp(!advanced))
@@ -157,11 +157,11 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--receive-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a receive timestamp on received messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateReceiveTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', chalk.whiteBright('[advanced] reapply subscriptions upon calling on a disconnected session')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // consumer options
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement mode - AUTO or CLIENT')) .argParser( parseReceiverAcknowledgeMode) .default(defaultMessageReceiveConfig.acknowledgeMode) .hideHelp(!advanced))
     .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
-    .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
@@ -188,13 +188,13 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--topic <TOPIC>', chalk.whiteBright('the message topic')) .default( getDefaultTopic('request') ) .argParser(parseSingleTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultRequestMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default('a default payload') .hideHelp(advanced))
     .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('file') .default(false) .hideHelp(advanced))
-    .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
+    // .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
-    .addOption(new Option('--timeout <MILLISECONDS>', chalk.whiteBright('the timeout value')) .argParser(parseNumber) .default(defaultMessageConfig.timeout) .hideHelp(!advanced))
+    .addOption(new Option('--timeout <MILLISECONDS>', chalk.whiteBright('the timeout value')) .argParser(parseNumber) .default(defaultMessageConfig.timeout) .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
@@ -215,7 +215,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     // request options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed requestor options
     .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessageRequestConfig.windowSize) .hideHelp(!advanced))
@@ -257,7 +257,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parseRequestTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default(defaultRequestMessageHint) .hideHelp(advanced))
+    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .default('a default payload') .hideHelp(advanced))
     .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
@@ -281,7 +281,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REPLY SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed publisher options
     .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessageReplyConfig.windowSize) .hideHelp(!advanced))
@@ -293,7 +293,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application-provided message ID')) .default(defaultMessageConfig.applicationMessageId) .hideHelp(!advanced))
     .addOption(new Option('--message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application-provided message type')) .default(defaultMessageConfig.applicationMessageType) .hideHelp(!advanced))
     .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application-provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
-    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
+    // .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))

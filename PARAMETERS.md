@@ -47,7 +47,8 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
-  --message <MESSAGE>                      the message body (default: "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}")
+  --message <MESSAGE>                      the message body (a default payload)
+  --file <FILENAME>                        the filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
   --count <COUNT>                          the number of events to publish (default: 1)
   --interval <MILLISECONDS>                the time to wait between publish (default: 1000)
@@ -91,8 +92,7 @@ Options:
 
   /* PUBLISH SETTINGS */
   --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session (default:
-                                         65536)
+  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. (default: 65536)
   --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published without acknowledgment (default: 50)
   --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages (default: 2000)
   --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED (default: "PER_MESSAGE")
@@ -199,9 +199,11 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC>                          the message topic (default: "solace/try/me/request")
-  --message <MESSAGE>                      the message body (default: "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}")
+  --message <MESSAGE>                      the message body (a default payload)
+  --file <FILENAME>                        the filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
+  --timeout <MILLISECONDS>                 the timeout value
   --dmq-eligible [BOOLEAN]                 the DMQ eligible flag
 
   /* CONFIGURATION SETTINGS */
@@ -242,8 +244,7 @@ Options:
 
   /* REQUEST SETTINGS */
   --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session (default:
-                                         65536)
+  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. (default: 65536)
   --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published without acknowledgment (default: 50)
   --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages (default: 2000)
   --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED (default: "PER_MESSAGE")
@@ -282,7 +283,8 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
-  --message <MESSAGE>                      the message body (default: "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}")
+  --message <MESSAGE>                      the message body (a default payload)
+  --file <FILENAME>                        the filename containing the message content
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
   --dmq-eligible [BOOLEAN]                 the DMQ eligible flag
 
@@ -322,8 +324,7 @@ Options:
 
   /* REPLY SETTINGS */
   --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. This size must be bigger than the largest message an application intends to send on the session (default:
-                                         65536)
+  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport session. (default: 65536)
   --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published without acknowledgment (default: 50)
   --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages (default: 2000)
   --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or WINDOWED (default: "PER_MESSAGE")
@@ -332,7 +333,6 @@ Options:
   --message-id <MESSAGE_ID>              [advanced] the application-provided message ID
   --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
   --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for acknowledgement management
-  --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
   --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
@@ -572,7 +572,7 @@ Manage a client-profile
 Options:
 
   /* CLIENT PROFILE SETTINGS */
-  --allow-guaranteed-endpoint-create-durability <TYPE>               [advanced] the types of Queues and Topic Endpoints that clients can create (all, durable or non-durable (default: "all")
+  --allow-guaranteed-endpoint-create-durability <TYPE>               [advanced] the types of Queues that clients can create (all, durable or non-durable (default: "all")
   --allow-guaranteed-endpoint-create-enabled <BOOLEAN>               [advanced] enable or disable the Client Username (default: true)
   --allow-guaranteed-msg-receive-enabled <BOOLEAN>                   [advanced] enable or disable allowing clients to receive guaranteed messages. (default: true)
   --allow-guaranteed-msg-send-enabled <BOOLEAN>                      [advanced] enable or disable allowing clients to send guaranteed messages (default: true)
@@ -656,7 +656,7 @@ Options:
   --client-profile <CLIENT_PROFILE>          the name of the Client profile (default: "stm-client-profile")
   --acl-profile <ACL_PROFILE>                the name of the ACL profile (default: "stm-acl-profile")
   --enabled <BOOLEAN>                        enable or disable the Client Username (default: true)
-  --client-password <VPN_NAME>               the password for the Client Username (default: "")
+  --client-password <CLIENT_PASSWORD>        the password for the Client Username (default: "")
 
   /* CONFIGURATION SETTINGS */
   --config <CONFIG_FILE>                     the configuration file (default: "stm-cli-config.json")
