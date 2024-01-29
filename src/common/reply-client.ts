@@ -201,8 +201,8 @@ export class SolaceClient extends VisualizeClient {
         reply.setDestination(message.getReplyTo());
       Logger.logInfo('Reply To: ' + message.getReplyTo() + ' - ' + this.options.replyToTopic);
       this.options.deliveryMode && reply.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
-      // this.session.sendReply(message, reply);
-      this.session.send(reply)
+      this.session.sendReply(message, reply);
+      // this.session.send(reply)
       Logger.logSuccess(`reply sent`);
       Logger.printMessage(reply.dump(0), reply.getUserPropertyMap(), reply.getBinaryAttachment(), this.options.outputMode);
 
