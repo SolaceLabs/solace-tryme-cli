@@ -4,6 +4,19 @@ const chalk = require('chalk')
 const process = require('node:process');
 process.noDeprecation = true
 
+const {emitWarning} = process;
+process.emitWarning = (warning, ...args) => {
+	if (args[0] === 'ExperimentalWarning') {
+		return;
+	}
+
+	if (args[0] && typeof args[0] === 'object' && args[0].type === 'ExperimentalWarning') {
+		return;
+	}
+
+	return emitWarning(warning, ...args);
+};
+
 const getHelpConfiguration = (args) => {
   if (args.indexOf('stm config init') >= 0)
     return { help: true, helpMore: false, helpExamples: true}

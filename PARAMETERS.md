@@ -287,6 +287,7 @@ Options:
   --file <FILENAME>                        the filename containing the message content
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
   --dmq-eligible [BOOLEAN]                 the DMQ eligible flag
+  --partition-key <KEY>                    the partition key (SECOND or MILLISECOND, derives a value from publish time and set as partition key)
 
   /* CONFIGURATION SETTINGS */
   --config <CONFIG_FILE>                   the configuration file (default: "stm-cli-config.json")

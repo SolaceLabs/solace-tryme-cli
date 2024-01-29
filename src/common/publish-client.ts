@@ -1,4 +1,4 @@
-import solace from "solclientjs";
+import solace, { Message } from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } from "../utils/controlevents";
@@ -182,7 +182,24 @@ export class SolaceClient extends VisualizeClient {
           propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
         });
         message.setUserPropertyMap(propertyMap);    
-      } 
+      }
+
+      if (this.options.partitionKey) {
+        let propertyMap = message.getUserPropertyMap();
+        if (!propertyMap) propertyMap = new solace.SDTMapContainer();
+        
+        var pKey = 'key-' + Date.now() % 4;
+        const now = new Date();
+        switch (this.options.partitionKey) {
+          case 'MINUTE': pKey = 'key-' + now.getMinutes() % 5; break;
+          case 'SECOND': pKey = 'key-' + now.getSeconds() % 5; break;
+          case 'MILLISECOND': pKey = 'key-' + Date.now() % 5; break;
+          default:  break;
+        }
+
+        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey));
+        message.setUserPropertyMap(propertyMap);    
+      }
       
       Logger.logSuccess(`message published to topic ${topicName}`)
       Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);

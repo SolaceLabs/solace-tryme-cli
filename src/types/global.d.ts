@@ -88,6 +88,7 @@ declare global {
     stdin?: boolean
     timeToLive?: number
     dmqEligible?: boolean
+    partitionKey?: string
     messageId?: string
     messageType?: string
     correlationKey?: string

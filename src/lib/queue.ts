@@ -6,7 +6,8 @@ import { checkForCliTopics, checkSempConnectionParamsExists, checkSempQueueParam
 import { saveOrUpdateCommandSettings } from '../utils/config';
 
 const invoke = async (
-  options: ManageClientOptions
+  options: ManageClientOptions,
+  optionsSource: any
 ) => {
   const client = new SempClient(options);
   try {
@@ -50,7 +51,7 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
     process.exit(0);
   }
   
-  invoke(options)
+  invoke(options, optionsSource)
 }
 
 export default queue

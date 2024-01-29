@@ -4,7 +4,7 @@ import {
   parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
   parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
-  parseSempEndpointCreateDurability, parseRequestTopic
+  parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKey
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -79,6 +79,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
+    .addOption(new Option('--partition-key <KEY>', chalk.whiteBright('the partition key (SECOND or MILLISECOND, derives a value from publish time and set as partition key)')) .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
@@ -331,7 +332,7 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('QUEUE SETTINGS')} */`))
     .addOption(new Option('--owner <OWNER>', chalk.whiteBright('[advanced] the name of Client Username that owns the Queue')) .default( defaultManageQueueConfig.owner ) .hideHelp(!advanced))
-    .addOption(new Option('--access-type <ACCESS_TYPE>', chalk.whiteBright('access type for delivering messages to consumers: EXCLUSIVE or NON-EXCLUSIVE')) .default( defaultManageQueueConfig.accessType) .argParser(parseSempQueueAccessType) .hideHelp(advanced))
+    .addOption(new Option('--access-type <ACCESS_TYPE>', chalk.whiteBright('access type for delivering messages to consumers: EXCLUSIVE or NON-EXCLUSIVE')) .argParser(parseSempQueueAccessType) .hideHelp(advanced))
     .addOption(new Option('--add-subscriptions <TOPIC...>', chalk.whiteBright('the topic subscriptions to be added')) .argParser(parseReceiveTopic) .default( defaultManageQueueConfig.addSubscriptions ) .hideHelp(advanced))
     .addOption(new Option('--remove-subscriptions <TOPIC...>', chalk.whiteBright('[advanced] the topic subscriptions to be removed')) .default( defaultManageQueueConfig.removeSubscriptions ) .hideHelp(!advanced))
     .addOption(new Option('--list-subscriptions [BOOLEAN]', chalk.whiteBright('the topic subscriptions on the queue')) .default( defaultManageQueueConfig.listSubscriptions ) .hideHelp(advanced))

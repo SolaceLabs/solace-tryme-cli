@@ -81,6 +81,16 @@ export const parseDeliveryMode = (value: any) => {
   return value;
 }
 
+export const parsePartitionKey = (value: any) => {
+  if (!['MINUTE', 'SECOND', 'MILLISECOND' ].includes(value.toUpperCase())) {
+    Logger.logError(`only ''MINUTE', 'SECOND', or 'MILLISECOND' supported.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  
+  return value.toUpperCase();
+}
+
 export const parseUserProperties = (value: string, previous?: Record<string, string | string[]>) => {
   const [key, val] = value.split(': ')
   if (key && val) {
