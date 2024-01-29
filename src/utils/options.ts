@@ -315,10 +315,10 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // messaging SEMP CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SEMP CONNECTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.url) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker semp url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.sempUrl) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.sempVpn) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the semp username')) .default(defaultManageConnectionConfig.sempUsername) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the semp password')) .default(defaultManageConnectionConfig.sempPassword) .hideHelp(advanced))
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
@@ -367,10 +367,10 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // messaging SEMP CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SEMP CONNECTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.url) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker semp url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.sempUrl) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.sempVpn) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the semp username')) .default(defaultManageConnectionConfig.sempUsername) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the semp password')) .default(defaultManageConnectionConfig.sempPassword) .hideHelp(advanced))
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
@@ -401,10 +401,10 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
   cmd
     // messaging SEMP CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SEMP CONNECTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.url) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker semp url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.sempUrl) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.sempVpn) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the semp username')) .default(defaultManageConnectionConfig.sempUsername) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the semp password')) .default(defaultManageConnectionConfig.sempPassword) .hideHelp(advanced))
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
@@ -444,10 +444,10 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
   cmd
     // messaging SEMP CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SEMP CONNECTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.url) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker semp url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.sempUrl) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.sempVpn) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the semp username')) .default(defaultManageConnectionConfig.sempUsername) .hideHelp(advanced)) 
+    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the semp password')) .default(defaultManageConnectionConfig.sempPassword) .hideHelp(advanced))
 
     // operation scope
     .addOption(new Option(`\n/* ${chalk.whiteBright('OPERATION SETTINGS')} */`) .hideHelp(advanced))
@@ -510,10 +510,10 @@ export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) 
   cmd
     // messaging SEMP CONNECTION options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SEMP CONNECTION SETTINGS')} */`))
-    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.url)) 
-    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.vpn)) 
-    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.username)) 
-    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.password))
+    .addOption(new Option('--semp-url <URL>', chalk.whiteBright('the broker url')) .argParser(parseManageProtocol) .default(defaultManageConnectionConfig.sempUrl)) 
+    .addOption(new Option('--semp-vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultManageConnectionConfig.sempVpn)) 
+    .addOption(new Option('--semp-username <USERNAME>', chalk.whiteBright('the username')) .default(defaultManageConnectionConfig.sempUsername)) 
+    .addOption(new Option('--semp-password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultManageConnectionConfig.sempPassword))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))

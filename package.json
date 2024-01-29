@@ -51,8 +51,8 @@
   },
   "signale": {
     "displayLabel": false,
-    "displayDate": true,
-    "displayTimestamp": true
+    "displayDate": false,
+    "displayTimestamp": false
   },
   "pkg": {
     "targets": [

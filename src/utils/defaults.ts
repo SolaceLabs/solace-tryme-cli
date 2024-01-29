@@ -221,7 +221,7 @@ export const defaultMessageReplyConfig:any = {
 
 export const defaultManageConnectionConfig:any = {
   // CONNECTION
-  sempUrl: 'http://localhost:8080',
+  sempUrl: 'http://localhost:8080/SEMP/v2/config',
   sempVpn: 'default',
   sempUsername: 'admin',
   sempPassword: 'admin',

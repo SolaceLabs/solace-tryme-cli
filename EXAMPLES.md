@@ -235,7 +235,7 @@ that are applied only for this instance of execution!
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage queue --create my-queue --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions__
+__stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions__
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -283,7 +283,7 @@ that are applied only for this instance of execution!
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage client-profile --create my-client-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all__
+__stm manage client-profile --create my-client-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all__
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -331,7 +331,7 @@ that are applied only for this instance of execution!
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow__
+__stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow__
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -379,7 +379,7 @@ that are applied only for this instance of execution!
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage client-username --create my-client-username --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --enabled true__
+__stm manage client-username --create my-client-username --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --enabled true__
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command

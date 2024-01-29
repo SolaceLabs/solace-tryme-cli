@@ -38,7 +38,7 @@ export const parseMessageProtocol = (value: string) => {
     Logger.logError('exiting...')
     process.exit(1)
   }
-  return value.toLowerCase()
+  return value;
 }
 
 export const parseManageProtocol = (value: string) => {
@@ -48,7 +48,7 @@ export const parseManageProtocol = (value: string) => {
     Logger.logError('exiting...')
     process.exit(1)
   }
-  return value.toLowerCase()
+  return value;
 }
 
 export const parseLogLevel = (value: string) => {

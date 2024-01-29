@@ -142,6 +142,16 @@ export class SolaceClient extends VisualizeClient {
     Logger.logSuccess(`request sent on topic ${topicName}`)
     Logger.printMessage(request.dump(0), request.getUserPropertyMap(), request.getBinaryAttachment(), this.options.outputMode);
     try {
+      if (this.options.replyToTopic) {
+        //Session subscription
+        this.session.subscribe(
+          solace.SolclientFactory.createTopicDestination(this.options.replyToTopic),
+          true, // generate confirmation when subscription is added successfully
+          this.options.replyToTopic, // use topic name as correlation key
+          this.options.readTimeout ? this.options.readTimeout : 10000 // 10 seconds timeout for this operation, if not specified
+        );                
+      }
+      
       this.session.sendRequest(
         request,
         this.options.timeout, // 5 seconds timeout for this operation

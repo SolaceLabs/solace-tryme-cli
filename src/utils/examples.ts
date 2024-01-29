@@ -259,7 +259,7 @@ ${chalk.yellowBright('NOTE: You can override any of the queue parameters \n' +
 // If you want to run a queue purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage queue --create my-queue --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
+${chalk.greenBright('stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -302,7 +302,7 @@ ${chalk.yellowBright('NOTE: You can override any of the acl-profile parameters \
 // If you want to run a acl-profile purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow')}
+${chalk.greenBright('stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -345,7 +345,7 @@ ${chalk.yellowBright('NOTE: You can override any of the client-profile parameter
 // If you want to run a client-profile purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage client-profile --create my-client-profile --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all')}
+${chalk.greenBright('stm manage client-profile --create my-client-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -388,7 +388,7 @@ ${chalk.yellowBright('NOTE: You can override any of the client-username paramete
 // If you want to run a client-username purely command based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
-${chalk.greenBright('stm manage client-username --create my-client-username --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin --enabled true')}
+${chalk.greenBright('stm manage client-username --create my-client-username --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --enabled true')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
@@ -427,7 +427,7 @@ Examples:
 ${chalk.greenBright('stm manage semp-connection --semp-url http://localhost:8080 --semp-vpn default')}
 
 // manage (update) semp-connection settings on the named configuration 
-${chalk.greenBright('stm manage semp-connection --config cloud-broker --semp-url http://localhost:8080 --semp-vpn default --semp-username admin --semp-password admin ')}
+${chalk.greenBright('stm manage semp-connection --config cloud-broker --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin ')}
 
 ${chalk.magentaBright(`HINT: You can view the default semp-connection command settings 'stm config list --name sempconnection'!`)}
   `)

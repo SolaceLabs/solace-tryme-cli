@@ -195,10 +195,14 @@ export class SolaceClient extends VisualizeClient {
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(JSON.stringify(payload));
       reply.setApplicationMessageId(message.getApplicationMessageId());
+      if (this.options.replyToTopic) 
+        reply.setDestination(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic));
+      else
+        reply.setDestination(message.getReplyTo());
+      Logger.logInfo('Reply To: ' + message.getReplyTo() + ' - ' + this.options.replyToTopic);
       this.options.deliveryMode && reply.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
-      this.session.sendReply(message, reply);
-      // reply.setDestination(message.getReplyTo());
-      // this.session.send(reply)
+      // this.session.sendReply(message, reply);
+      this.session.send(reply)
       Logger.logSuccess(`reply sent`);
       Logger.printMessage(reply.dump(0), reply.getUserPropertyMap(), reply.getBinaryAttachment(), this.options.outputMode);
 

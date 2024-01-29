@@ -57,7 +57,7 @@ A configuration file contains __message__ and __manage__ sections at a high-leve
   "manage": {
     "sempconnection": {
       "command": "sempconnection",
-      "sempUrl": "http://localhost:8080",
+      "sempUrl": "http://localhost:8080/SEMP/v2/config",
       "sempVpn": "default",
       "sempUsername": "admin",
       "sempPassword": "admin"

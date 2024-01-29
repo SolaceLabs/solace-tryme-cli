@@ -149,7 +149,7 @@ stm manage semp-connection \
 ℹ  info      info: loading 'sempconnection' command from configuration 'stm-cloud-broker'
 ℹ  info      info: loading configuration 'stm-cloud-broker'
 ℹ  info      info: checking settings for operation - sempconnection
-ℹ  info      info: [1] sempUrl of sempconnection changed: http://localhost:8080 => https://mr-connection-xxxxx.messaging.solace.cloud:943/semp/v2/config
+ℹ  info      info: [1] sempUrl of sempconnection changed: http://localhost:8080/SEMP/v2/config => https://mr-connection-xxxxx.messaging.solace.cloud:943/semp/v2/config
 ℹ  info      info: [2] sempVpn of sempconnection changed: default => your-broker
 ℹ  info      info: [3] sempUsername of sempconnection changed: admin => your-broker-admin
 ℹ  info      info: [4] sempPassword of sempconnection changed: admin => xxxxx
