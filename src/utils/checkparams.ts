@@ -139,7 +139,7 @@ export const checkSempQueuePartitionSettings = (options: ManageClientOptions) =>
   if (options.partitionCount === undefined && options.partitionRebalanceDelay === undefined && 
       options.partitionRebalanceMaxHandoffTime === undefined) return;
 
-  if (options.partitionCount && options.accessType && options.accessType.toUpperCase() === 'EXCLUSIVE') {
+  if (options.operation === 'CREATE' && options.partitionCount && options.accessType && options.accessType.toUpperCase() === 'EXCLUSIVE') {
     Logger.error("partitioned queue settings are applicable only on queues with non-exclusive access type")
     Logger.error('exiting...')
     process.exit(1)

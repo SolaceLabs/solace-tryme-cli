@@ -40,6 +40,16 @@ const clientProfile = (options: ManageClientOptions, optionsSource: any) => {
     process.exit(0);
   }
   
+  // if a direct cli execution without reference to named command, reset all default options (except semp parameters)
+  if (!options.config) {
+    Object.keys(options).forEach((option) => {
+      if (!option.startsWith('semp')) {
+        if (optionsSource[option] !== 'cli')
+          options[option] = undefined;
+      }
+    })
+  }
+
   invoke(options)
 }
 
