@@ -63,7 +63,8 @@
     ],
     "outputPath": "release",
     "assets": [
-      "node_modules/solclientjs/**/*.js"
+      "node_modules/solclientjs/**/*.js",
+      "public/**/*"
     ]
   }
 }

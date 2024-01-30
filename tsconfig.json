@@ -10,9 +10,11 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "types": ["@types/signale"],
-    "sourceMap": true
+    "sourceMap": true,
+    "rootDirs": ["src", "public"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "public/**/*"
   ]
 }

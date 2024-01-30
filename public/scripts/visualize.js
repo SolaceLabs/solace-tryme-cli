@@ -498,7 +498,7 @@ function renderEventReplyReceived(_event) {
   // console.log(_event.clientName + ' :: ' + String(local.receivedCount[_event.clientName]).padStart(3, '0') + ' :: ' + _event.msgId )
 
   let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
-  console.log(Date.now(), ': Speed: ', speed);
+  // console.log(Date.now(), ': Speed: ', speed);
   animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
 }
 
@@ -575,7 +575,7 @@ function renderEventReceived(_event) {
   // console.log(_event.clientName + ' :: ' + String(local.receivedCount[_event.clientName]).padStart(3, '0') + ' :: ' + _event.msgId )
 
   let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
-  console.log(Date.now(), ': Speed: ', speed);
+  // console.log(Date.now(), ': Speed: ', speed);
   animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
 }
 
@@ -644,7 +644,7 @@ function renderEventRequestReceived(_event) {
   // console.log(_event.clientName + ' :: ' + String(local.receivedCount[_event.clientName]).padStart(3, '0') + ' :: ' + _event.msgId )
 
   let speed = (2 - local.speed) * 3000 ? (2 - local.speed) * 3000 : 100;
-  console.log(Date.now(), ': Speed: ', speed);
+  // console.log(Date.now(), ': Speed: ', speed);
   animate(groupId, evIndex, _client, event, text, startX, startY, endX, endY, speed);
 }
 
@@ -689,7 +689,9 @@ function renderGrid() {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
+  console.log('DOM Loaded');
   await getEndpoints();
+  console.log('gotEndpoints', connection);
 
   mySvg = document.getElementById('eventFlow');
 	gridSvg = document.getElementById('gridView');

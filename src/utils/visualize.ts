@@ -10,16 +10,20 @@ const visualize = async (options: MessageClientOptions) => {
   const url = new URL(config.url);
   console.log(config.url, '\n', url);
   console.log(url.hostname, config.url.substring(config.url.lastIndexOf(':')+1), config.username, config.password);
-  console.log(__dirname);
+  var publicDir = __dirname.substring(0, __dirname.lastIndexOf('solace-tryme-cli') + 16);
 
-    // Imports
   const express = require('express');
   const app = express();
-  app.use(express.static('public'));
+  app.use(express.static(publicDir + '/public'));
+  app.use(function(req:any, res:any, next:any) {
+    console.log('Request on ', req.path);
+    next();
+  });
+  
   app.get('/config', (req:any, res:any) => {
     var configuration = {
       "MQTT_HOST": `${url.hostname}`,
-      "MQTT_PORT": (url.hostname === 'localhost' ? 8000: 8443), //`${config.url.substring(config.url.lastIndexOf(':')+1)}`,
+      "MQTT_PORT": (url.hostname === 'localhost' ? 8000: 8443),
       "MQTT_USER_NAME":   `${config.username}`,
       "MQTT_PASSWORD": `${config.password}`
     };
