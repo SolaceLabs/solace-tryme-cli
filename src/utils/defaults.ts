@@ -122,7 +122,8 @@ export const defaultMessageConfig:any = {
   deliveryMode: 'PERSISTENT',
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
   dmqEligible: true,
-  partitionKey: 'SECOND',
+  partitionKey: undefined,
+  partitionKeys: [],
   elidingEligible: false,
   priority: undefined,
   replyToTopic: undefined,

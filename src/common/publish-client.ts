@@ -155,7 +155,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer) {
+  publish(topicName: string, payload: string | Buffer, iteration: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -184,20 +184,26 @@ export class SolaceClient extends VisualizeClient {
         message.setUserPropertyMap(propertyMap);    
       }
 
-      if (this.options.partitionKey) {
+      if (this.options.partitionKeys && this.options.partitionKeys.length) {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey = 'key-' + Date.now() % 4;
+        var pKey1 = this.options.partitionKeys[iteration % this.options.partitionKeys.length];
+        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
+        message.setUserPropertyMap(propertyMap);    
+      } else if (this.options.partitionKey) {
+        let propertyMap = message.getUserPropertyMap();
+        if (!propertyMap) propertyMap = new solace.SDTMapContainer();
+        
+        var pKey2 = 'partition-key-' + Date.now() % 5;
         const now = new Date();
         switch (this.options.partitionKey) {
-          case 'MINUTE': pKey = 'key-' + now.getMinutes() % 5; break;
-          case 'SECOND': pKey = 'key-' + now.getSeconds() % 5; break;
-          case 'MILLISECOND': pKey = 'key-' + Date.now() % 5; break;
+          case 'SECOND': pKey2 = 'partition-key-' + now.getSeconds() % 5; break;
+          case 'MILLISECOND': pKey2 = 'partition-key-' + Date.now() % 5; break;
           default:  break;
         }
 
-        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey));
+        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);    
       }
       
@@ -239,6 +245,6 @@ export class SolaceClient extends VisualizeClient {
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 2000); // wait for 2 seconds to finish
+    }, 1000); // wait for 2 seconds to finish
   };
 }

@@ -67,20 +67,18 @@ const Logger = {
       properties = newProps;
     }
     
-    if (outputMode?.toUpperCase() === 'COMPACT') {
+    if (outputMode?.toUpperCase() === 'COMPACT' || !outputMode) {
       Logger.logInfo(`Message Payload:\r\n${payload.trim()}`);
     } else if (outputMode?.toUpperCase() === 'PRETTY') {
+      Logger.logInfo(`Message Properties\r\n${properties}`)
       if  (userProperties) {
         properties = properties.replace(/User Property Map:.*entries\n/, '')
-        Logger.logInfo(`Message Properties\r\n${properties}`)
         let keys = userProperties.getKeys();
         let userProps = '';
         keys.forEach((key: any) => {
           userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
         });
         Logger.logInfo(`Message User Properties${userProps}`)
-      } else {
-        Logger.logInfo(`Message Properties\r\n${properties}`)
       }
       var prettyPayload = prettyJSON(payload);
       if (prettyPayload)

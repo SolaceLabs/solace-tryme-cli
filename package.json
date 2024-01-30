@@ -1,6 +1,6 @@
 {
   "name": "stm",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "description": "Solace Try-Me Command Line Tool",
   "keywords": [
     "solace",

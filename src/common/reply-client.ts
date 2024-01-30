@@ -189,7 +189,7 @@ export class SolaceClient extends VisualizeClient {
 
   reply = (message:any, payload:any) => {
     Logger.logSuccess('request received');
-    Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.pretty);
+    Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
     Logger.await(`replying to request on topic '${message.getDestination().getName()}'...`);
     if (this.session !== null) {
       var reply = solace.SolclientFactory.createMessage();
@@ -241,6 +241,6 @@ export class SolaceClient extends VisualizeClient {
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 2000); // wait for 2 seconds to finish
+    }, 1000); // wait for 2 seconds to finish
   };
 }

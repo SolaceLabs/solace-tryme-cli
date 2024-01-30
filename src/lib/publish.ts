@@ -59,13 +59,13 @@ const publish = async (
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
-      publisher.publish(options.topic[i], message);
+      publisher.publish(options.topic[i], message, 0);
     } 
     publisher.disconnect();
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
-        publisher.publish(options.topic[i], message);
+        publisher.publish(options.topic[i], message, n-1);
       }
       if (interval) await delay(interval)
     }

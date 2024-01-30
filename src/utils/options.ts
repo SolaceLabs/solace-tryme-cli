@@ -4,7 +4,7 @@ import {
   parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
   parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
-  parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKey
+  parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKey, parsePartitionKeys
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -79,7 +79,8 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
-    .addOption(new Option('--partition-key <KEY>', chalk.whiteBright('the partition key (SECOND or MILLISECOND, derives a value from publish time and set as partition key)')) .hideHelp(advanced))
+    .addOption(new Option('--partition-key <KEY>', chalk.whiteBright('the simulated partition key option (SECOND or MILLISECOND, derives a value from publish time and set as partition key)')) .argParser(parsePartitionKey) .hideHelp(advanced))
+    .addOption(new Option('--partition-keys <KEY...>', chalk.whiteBright('the partition key(s) list')) .argParser(parsePartitionKeys) .conflicts('partitionKey') .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))

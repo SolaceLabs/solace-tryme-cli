@@ -89,6 +89,7 @@ declare global {
     timeToLive?: number
     dmqEligible?: boolean
     partitionKey?: string
+    partitionKeys?: string[] | any
     messageId?: string
     messageType?: string
     correlationKey?: string

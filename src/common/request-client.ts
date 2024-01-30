@@ -203,6 +203,6 @@ export class SolaceClient extends VisualizeClient {
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 2000); // wait for 2 seconds to finish
+    }, 1000); // wait for 2 seconds to finish
   };
 }

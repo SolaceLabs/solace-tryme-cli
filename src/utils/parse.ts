@@ -72,18 +72,8 @@ export const parseOutputMode = (value: string) => {
 }
 
 export const parseDeliveryMode = (value: any) => {
-  if (!['DIRECT', 'PERSISTENT'].includes(value)) {
+  if (!['DIRECT', 'PERSISTENT'].includes(value.toUpperCase())) {
     Logger.logError(`only 'DIRECT' or 'PERSISTENT' are supported.`)
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-  
-  return value;
-}
-
-export const parsePartitionKey = (value: any) => {
-  if (!['MINUTE', 'SECOND', 'MILLISECOND' ].includes(value.toUpperCase())) {
-    Logger.logError(`only ''MINUTE', 'SECOND', or 'MILLISECOND' supported.`)
     Logger.logError('exiting...')
     process.exit(1)
   }
@@ -91,21 +81,55 @@ export const parsePartitionKey = (value: any) => {
   return value.toUpperCase();
 }
 
+export const parsePartitionKey = (value: any) => {
+  if (!['SECOND', 'MILLISECOND' ].includes(value.toUpperCase())) {
+    Logger.logError(`only 'SECOND' or 'MILLISECOND' supported.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  
+  return value.toUpperCase();
+}
+
+export const parsePartitionKeys = (value: string, previous: string[] | undefined) => {
+  if (!value) {
+    Logger.logError("required option '--partition-keys <KEY...>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof value !== 'string' && typeof value !== 'object') {
+    Logger.logError("invalid key specified, one or more key is expected")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+
+  if (previous) {
+    previous.push(value.toString());
+    return previous;
+  } else {
+    return [ value ];    
+  }
+}  
+
 export const parseUserProperties = (value: string, previous?: Record<string, string | string[]>) => {
-  const [key, val] = value.split(': ')
+  const [key, val] = value.split(':')
   if (key && val) {
+    var _key = key.trim();
+    var _val = val.trim();
     if (!previous) {
-      return { [key]: val }
+      return { [_key]: _val }
     } else {
-      if (previous[key]) {
-        previous[key] = (previous[key] as string).concat(` ${val}`)
+      if (previous[_key]) {
+        previous[_key] = (previous[_key] as string).concat(` ${_val}`)
         return previous
       } else {
-        return { ...previous, [key]: val }
+        return { ...previous, [_key]: _val }
       }
     }
   } else {
-    Logger.logError('not a valid user property.')
+    Logger.logError(`invalid user property - '${value}'`)
     Logger.logError('exiting...')
     process.exit(1)
   }
