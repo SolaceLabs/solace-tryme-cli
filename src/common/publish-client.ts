@@ -144,7 +144,7 @@ export class SolaceClient extends VisualizeClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ******]`)
         if (this.options.clientName) Logger.info(`client name: ${this.clientName}`)
         this.session.connect();
       } catch (error:any) {
@@ -241,10 +241,10 @@ export class SolaceClient extends VisualizeClient {
     this.setExited(true);
     setTimeout(() => {
       this.disconnect();
-    }, 1000); // wait for 1 second to disconnect
+    }, 500); // wait for 1 second to disconnect
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 1000); // wait for 2 seconds to finish
+    }, 1500); // wait for 1 second to finish
   };
 }

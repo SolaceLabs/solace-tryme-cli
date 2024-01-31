@@ -97,6 +97,7 @@ declare global {
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
 
+    waitBeforeExit?: number
     exitAfter?: number
     outputMode?: string
 

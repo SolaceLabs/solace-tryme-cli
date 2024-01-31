@@ -127,7 +127,7 @@ export class SolaceClient extends VisualizeClient {
 
       // connect the session
       try {
-        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ${this.options.password}]`)
+        Logger.await(`connecting to broker [${this.options.url}, vpn: ${this.options.vpn}, username: ${this.options.username}, password: ******]`)
         if (this.options.clientName) Logger.info(`client name: ${this.options.clientName}`)
         this.session.connect();
       } catch (error:any) {
@@ -199,7 +199,7 @@ export class SolaceClient extends VisualizeClient {
         reply.setDestination(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic));
       else
         reply.setDestination(message.getReplyTo());
-      Logger.logInfo('Reply To: ' + message.getReplyTo() + ' - ' + this.options.replyToTopic);
+      Logger.logInfo('Reply To: ' + message.getReplyTo());
       this.options.deliveryMode && reply.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.session.sendReply(message, reply);
       // this.session.send(reply)
@@ -237,10 +237,10 @@ export class SolaceClient extends VisualizeClient {
     if (this.session !== null) this.unsubscribe();
     setTimeout(() => {
       this.disconnect();
-    }, 1000); // wait for 1 second to disconnect
+    }, 500); // wait for 1 second to disconnect
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 1000); // wait for 2 seconds to finish
+    }, 1500); // wait for 1 second to finish
   };
 }

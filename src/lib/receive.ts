@@ -51,6 +51,10 @@ const receiver = (options: MessageClientOptions, optionsSource: any) => {
   // if subscriptions are specified, remove the default subscription at pos-0
   checkForCliTopics('topic', options, optionsSource);
 
+  // remove default subscription addition for queues
+  if (options.queue)
+    options.topic = undefined;
+
   if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)
     process.exit(0);

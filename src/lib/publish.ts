@@ -61,7 +61,14 @@ const publish = async (
     for (var i=0; i<options.topic.length; i++) {
       publisher.publish(options.topic[i], message, 0);
     } 
-    publisher.disconnect();
+    if (options.waitBeforeExit) {
+      setTimeout(function exit() {
+        Logger.logWarn(`exiting session (waited-before-exit set for ${options.waitBeforeExit})...`);
+        publisher.exit();
+      }, options.waitBeforeExit * 1000);
+    } else {
+      publisher.exit();
+    }
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
@@ -69,7 +76,14 @@ const publish = async (
       }
       if (interval) await delay(interval)
     }
-    publisher.disconnect();
+    if (options.waitBeforeExit) {
+      setTimeout(function exit() {
+        Logger.logWarn(`exiting session (waited-before-exit set for ${options.waitBeforeExit})...`);
+        publisher.exit();
+      }, options.waitBeforeExit * 1000);
+    } else {
+      publisher.exit();
+    }
   }
 }
 

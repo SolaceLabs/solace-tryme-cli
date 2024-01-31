@@ -72,7 +72,7 @@ stm receive
 🎅  santa     Hoho! No default configuration found, creating one for you...
 ✔  success   success: initialized configuration with default command settings on 'stm-cli-config.json' successfully
 ℹ  info      info: loading configuration 'stm-cli-config.json'
-…  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: default]
+…  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: ******]
 ✔  success   success: === successfully connected and ready to receive events. ===
 ℹ  info      info: subscribing to solace/try/me
 ℹ  info      info: press Ctrl-C to exit
@@ -86,7 +86,7 @@ On a different window/terminal, you can launch a publisher and see the events re
 ``` code
 stm send
 ℹ  info      info: loading 'send' command from configuration 'stm-cli-config.json'
-…  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: default]
+…  awaiting  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: ******]
 ✔  success   success: === successfully connected and ready to publish events. ===
 …  awaiting  publishing...
 ✔  success   success: message published to topic solace/try/me
@@ -165,7 +165,7 @@ A receive command to cloud broker via the CLI:
 ``` code
 stm receive --config stm-cloud-broker
 ℹ  info      info: loading 'receive' command from configuration 'stm-cloud-broker'
-…  awaiting  connecting to broker [wss://mr-connection-xxxx.messaging.solace.cloud:443, vpn: your-broker, username: solace-cloud-client, password: xxxx]
+…  awaiting  connecting to broker [wss://mr-connection-******].messaging.solace.cloud:443, vpn: your-broker, username: solace-cloud-client, password: ******]
 ✔  success   success: === successfully connected and ready to receive events. ===
 ℹ  info      info: subscribing to solace/try/me
 ℹ  info      info: press Ctrl-C to exit
@@ -176,7 +176,7 @@ A send command to cloud broker via the CLI:
 ```
 stm send --config stm-cloud-broker
 ℹ  info      info: loading 'send' command from configuration 'stm-cloud-broker'
-…  awaiting  connecting to broker [wss://mr-connection-xxxx.messaging.solace.cloud:443, vpn: your-broker, username: solace-cloud-client, password: xxxx]
+…  awaiting  connecting to broker [wss://mr-connection-******.messaging.solace.cloud:443, vpn: your-broker, username: solace-cloud-client, password: ******]
 ✔  success   success: === successfully connected and ready to publish events. ===
 …  awaiting  publishing...
 ✔  success   success: message published to topic solace/try/me

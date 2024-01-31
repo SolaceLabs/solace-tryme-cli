@@ -215,6 +215,7 @@ export const defaultMessageReplyConfig:any = {
   enabled: false, // guaranteed publisher
   windowSize: 50,
 
+  waitBeforeExit: 0,
   exitAfter: 0,
 
   command: 'reply',
