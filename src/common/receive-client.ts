@@ -382,7 +382,7 @@ export class SolaceClient extends VisualizeClient {
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) =>  {
             if (sessionEvent.infoStr === 'Subscription Already Exists') {
-              Logger.logWarn('subscription already exists for topic: ' + sessionEvent.correlationKey);
+              Logger.logInfo('subscription already exists for topic: ' + sessionEvent.correlationKey);
             } else {
               Logger.logSuccess('successfully subscribed to topic: ' + sessionEvent.correlationKey);
             }

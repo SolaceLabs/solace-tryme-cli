@@ -4,7 +4,7 @@ import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkpa
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config'
 import { SolaceClient } from '../common/reply-client'
 import { displayHelpExamplesForReply } from '../utils/examples'
-import { defaultMessage } from '../utils/defaults'
+import { getDefaultMessage } from '../utils/defaults'
 
 const reply = async (
   options: MessageClientOptions,
@@ -12,7 +12,7 @@ const reply = async (
 ) => {
   const replier = new SolaceClient(options);
   var message:any = options.message as string;
-  optionsSource.message === 'default' ? message = defaultMessage : message;
+  optionsSource.message === 'default' ? message = getDefaultMessage() : message;
 
   var file:any = options.file as string;
   if (file) {
@@ -36,7 +36,7 @@ const reply = async (
 
   try {
     await replier.connect();
-    replier.subscribe(options.topic, message);
+    replier.subscribe(options.topic, message, optionsSource.message === 'default');
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

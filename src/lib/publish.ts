@@ -3,7 +3,7 @@ import concat from 'concat-stream'
 import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
-import { defaultMessage, delay } from '../utils/defaults';
+import { getDefaultMessage, delay } from '../utils/defaults';
 import { displayHelpExamplesForPublish } from '../utils/examples';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 
@@ -35,7 +35,7 @@ const publish = async (
   }
 
   var message:any = options.message as string;
-  message = optionsSource.message === 'default' ? defaultMessage : message;
+  message = optionsSource.message === 'default' ? getDefaultMessage() : message;
 
   var file:any = options.file as string;
   if (file) {
@@ -59,6 +59,7 @@ const publish = async (
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
+      if (optionsSource.message === 'default') message = getDefaultMessage();
       publisher.publish(options.topic[i], message, 0);
     } 
     if (options.waitBeforeExit) {
@@ -72,6 +73,7 @@ const publish = async (
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
+        if (optionsSource.message === 'default') message = getDefaultMessage();
         publisher.publish(options.topic[i], message, n-1);
       }
       if (interval) await delay(interval)

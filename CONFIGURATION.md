@@ -28,7 +28,7 @@ A configuration file contains __message__ and __manage__ sections at a high-leve
       "topic": [
         "solace/try/me"
       ],
-      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
+      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"dateTime\":\"DATE_TIME\"}",
       ...other publish parameters
     },
     "receive": {
@@ -43,7 +43,7 @@ A configuration file contains __message__ and __manage__ sections at a high-leve
       "topic": [
         "solace/try/me/request"
       ],
-      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
+      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"dateTime\":\"boolean\"}",
       ...other request parameters
     },
     "reply": {

@@ -12,26 +12,29 @@ export const defaultMessageHint = JSON.stringify({
   osType: "OS_TYPE",
   freeMem: "FREE_MEM",
   totalMem: "TOTAL_MEM",
-  timeZone: "TIME_ZONE"
+  dateTime: "DATE_TIME"
 })
-export const defaultMessage = {
-  osType: os.type(),
-  freeMem: os.freemem(),
-  totalMem: os.totalmem(),
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+
+export const getDefaultMessage = () => {
+  return {
+    osType: os.type(),
+    freeMem: os.freemem(),
+    totalMem: os.totalmem(),
+    dateTime: (new Date()).toISOString()
+  }
 }
 
 export const defaultRequestMessageHint = JSON.stringify({
   osType: "boolean",
   freeMem: "boolean",
   totalMem: "boolean",
-  timeZone: "boolean",
+  dateTime: "boolean",
 })
 export const defaultRequestMessage = {
   osType: true,
   freeMem: true,
   totalMem: true,
-  timeZone: true
+  dateTime: true
 }
 
 export const getDefaultTopic = (commandType: CommandType) => {

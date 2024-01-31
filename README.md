@@ -91,7 +91,7 @@ stm send
 …  awaiting  publishing...
 ✔  success   success: message published to topic solace/try/me
 ℹ  info      info: Message Payload:
-{"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
+{"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"dateTime":"2024-01-31T14:25:18.482Z"}
 ✔  success   success: disconnecting from Solace PubSub+ Event Broker...
 ✔  success   success: disconnected
 ```
@@ -101,7 +101,7 @@ At this point, you would be able to see the event received on the receiver.
 ```code
 ✔  success   success: message received - [Topic solace/try/me]
 ℹ  info      info: Message Payload:
-{"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
+{"osType":"Darwin","freeMem":70725632,"totalMem":17179869184,"dateTime":"2024-01-31T14:25:18.482Z"}
 ```
 
 ### Working with Cloud Broker
@@ -181,7 +181,7 @@ stm send --config stm-cloud-broker
 …  awaiting  publishing...
 ✔  success   success: message published to topic solace/try/me
 ℹ  info      info: Message Payload:
-{"osType":"Darwin","freeMem":58310656,"totalMem":17179869184,"timeZone":"Asia/Calcutta"}
+{"osType":"Darwin","freeMem":58310656,"totalMem":17179869184,"dateTime":"2024-01-31T14:25:18.482Z"}
 ✔  success   success: disconnecting from Solace PubSub+ Event Broker...
 ✔  success   success: disconnected
 ```

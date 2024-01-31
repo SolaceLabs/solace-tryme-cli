@@ -1,6 +1,6 @@
 import solace, { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { getDefaultClientName } from "../utils/defaults";
+import { getDefaultClientName, getDefaultMessage } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
 const { uuid } = require('uuidv4');
@@ -26,6 +26,7 @@ export class SolaceClient extends VisualizeClient {
   session:any = null;
   clientName:string = "";
   payload:any = null;
+  defaultMessage:boolean = false;
 
   constructor(options:any) {
     super();
@@ -138,7 +139,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Subscribes to request topic on Solace PubSub+ Event Broker
-  subscribe = (topicNames: any, payload: any) => {
+  subscribe = (topicNames: any, payload: any, defaultMessage: boolean) => {
     //Check if the session has been established
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
@@ -147,6 +148,7 @@ export class SolaceClient extends VisualizeClient {
 
     try {
       this.payload = payload;
+      this.defaultMessage = defaultMessage;
       topicNames.forEach((topicName:any) => {
         Logger.logInfo(`subscribing to ${topicName}`);
   
@@ -192,6 +194,7 @@ export class SolaceClient extends VisualizeClient {
     Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
     Logger.await(`replying to request on topic '${message.getDestination().getName()}'...`);
     if (this.session !== null) {
+      if (this.defaultMessage) payload = getDefaultMessage();
       var reply = solace.SolclientFactory.createMessage();
       reply.setBinaryAttachment(JSON.stringify(payload));
       reply.setApplicationMessageId(message.getApplicationMessageId());
