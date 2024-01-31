@@ -55,7 +55,7 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
   if (!options.config && options.operation === 'UPDATE') {
     Object.keys(options).forEach((option) => {
       if (!option.startsWith('semp')) {
-        if (optionsSource[option] !== 'cli')
+        if (optionsSource[option] && optionsSource[option] !== 'cli')
           options[option] = undefined;
       }
     })
