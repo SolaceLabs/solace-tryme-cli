@@ -61,7 +61,7 @@ export const checkConnectionParamsExists = (url: string | undefined, vpn :string
     }
 
     if (!password) {
-      Logger.logError("required option '--password <PASS>' not specified")
+      Logger.logError("required option '--password <PASSWORD>' not specified")
       Logger.logError('exiting...')
       process.exit(1)
   }

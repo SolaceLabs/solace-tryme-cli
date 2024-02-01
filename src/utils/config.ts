@@ -186,11 +186,6 @@ export const saveConfig = (data: any) => {
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
     else Logger.logSuccess(`${updated ? 'updated configuration' : 'initialized configuration with default command settings'} on '${decoratePath(configFile)}' successfully`)
-    // if (!updated) 
-    //   Logger.logHint(
-    // `\nThe initialized configuration points to a local broker running on 'localhost:8080' and the default settings for broker, username and password for messaging and semp operations. You can modify the settings with 'save' option when executing commands.\n` +
-    // `\nThe configuration is pre-populated with command configurations with default settings for messaging operations like publish, receive, request and reply. It also comes with a sample resource management commands for creating queue, acl-profile, client-profile and client-name. These management commands can be modified to update or delete resources.\n` +
-    // `\nThe command settings can be updated, copied to a new command and referred to by name during the execution. Be sure to checkou the help (-h, --help) for basic options, more help (-hm, --help-examples) for advanced options and command examples  (-he, --help-examples) on the CLI commands.`)
   } catch (error: any) {
     Logger.logDetailedError('file write failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)

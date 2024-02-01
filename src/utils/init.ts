@@ -137,10 +137,10 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   count++
   table.addRow(config.connection.command, config.connection.command.toUpperCase(), 
                 config.connection.url, config.connection.vpn, config.connection.username, 
-                config.connection.password)
+                "******")
   table.addRow(config.sempconnection.command, config.sempconnection.command.toUpperCase(), 
                 config.sempconnection.sempUrl, config.sempconnection.sempVpn, config.sempconnection.sempUsername, 
-                config.sempconnection.sempPassword)
+                "******")
   table.setJustify(false);
   console.log(table.toString());
 
@@ -163,11 +163,11 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
       if (typeof selected.topic !== 'object' || (typeof selected.topic === 'object' && selected.topic.length === 1)) {
         table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
                       selected.name, JSON.stringify(selected.topic), config.connection.url,
-                      config.connection.vpn, config.connection.username + '/' + config.connection.password)
+                      config.connection.vpn, config.connection.username + '/' + "******")
       } else {
         table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
                       selected.name, '[ ', config.connection.url,
-                      config.connection.vpn, config.connection.username + '/' + config.connection.password)
+                      config.connection.vpn, config.connection.username + '/' + "******")
         for (var i=0; i<selected.topic.length; i++) {
           table.addRow('', '', '  "' + selected.topic[i] + (i === selected.topic.length-1 ? '"' : '",'), '', '', '');
         }
@@ -198,7 +198,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
       table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
                     selected.operation.toUpperCase(), selected.name, 
                     config.sempconnection.sempUrl, config.sempconnection.sempVpn, 
-                    config.sempconnection.sempUsername + '/' + config.sempconnection.sempPassword)
+                    config.sempconnection.sempUsername + '/' + "******")
       lastOp = selected.command.toUpperCase();
     });
   });

@@ -9,7 +9,7 @@ const visualize = async (options: MessageClientOptions) => {
   const config = loadCommandFromConfig('connection', options);
   const url = new URL(config.url);
   console.log(config.url, '\n', url);
-  console.log(url.hostname, config.url.substring(config.url.lastIndexOf(':')+1), config.username, config.password);
+  console.log(url.hostname, config.url.substring(config.url.lastIndexOf(':')+1), config.username, "******");
   var publicDir = __dirname.substring(0, __dirname.lastIndexOf('solace-tryme-cli') + 16);
 
   const express = require('express');
