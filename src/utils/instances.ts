@@ -58,6 +58,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   exitAfter?: number | undefined
   helpMore?: boolean | undefined
   visualization?: string | boolean | undefined
+  visualizationPort?: number | undefined
   constructor(commandType: CommandType) {
     this.url = ""
     this.vpn = ""
@@ -118,6 +119,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.exitAfter = 0
     this.helpMore = false
     this.visualization = false
+    this.visualizationPort = 0
   }
 }
 

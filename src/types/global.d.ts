@@ -65,6 +65,7 @@ declare global {
 
     logLevel?: string
     visualization?: string | boolean
+    visualizationPort?: number
   }
 
   interface MessageOperationOptions {

@@ -538,6 +538,7 @@ export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
 export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
+    .addOption(new Option('--visualization-port [PORT]',chalk.whiteBright('the port for the visualizer')) .argParser(parseNumber) .default(0))
     .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 

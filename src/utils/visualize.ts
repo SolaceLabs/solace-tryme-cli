@@ -4,6 +4,7 @@ import { defaultConfigFile } from './defaults';
 
 const visualize = async (options: MessageClientOptions) => {
   const configFile = options.config ? options.config : defaultConfigFile;
+  const visualizationPort = options.visualizationPort ? options.visualizationPort : 0;
   updateVisualizeConfig(configFile, 'on');
 
   const config = loadCommandFromConfig('connection', options);
@@ -31,9 +32,14 @@ const visualize = async (options: MessageClientOptions) => {
     res.json(configuration);
   })
 
+  app.post('/config', (req:any, res:any) => {
+    console.log('Received: ', req.body);
+    res.send("Success");
+  })
+
   let http = require('http');
   let server = http.createServer(app);
-  server.listen(0, () => {
+  server.listen(visualizationPort, () => {
     console.info(`App listening on port ${server.address().port}`);
     var opener = require("opener");
     opener(`http://localhost:${server.address().port}`)

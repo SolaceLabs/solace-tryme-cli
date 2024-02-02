@@ -87,6 +87,7 @@ export const defaultMessageConnectionConfig:any = {
   command: 'connection',
   name: 'connection',
   visualization: 'off',
+  visualizationPort: 0,
 
 
   // connection settings

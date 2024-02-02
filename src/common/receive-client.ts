@@ -154,6 +154,9 @@ export class SolaceClient extends VisualizeClient {
             let matched:boolean = false;
             for (let topic of Array.from(this.receiver.topics.keys())) {
               let sub = topic as string
+              if (sub.startsWith('#share'))
+                sub = sub.split('/').slice(2).join('/');;
+
               //Replace all * in the topic filter with a .* to make it regex compatible
               let regexSub = sub.replace(/\*/g, ".*");
 
@@ -165,9 +168,8 @@ export class SolaceClient extends VisualizeClient {
             }
             if (!matched) {
               Logger.logError('💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
-              return;
             }
-          } 
+          }
 
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
             type: 'receiver', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
