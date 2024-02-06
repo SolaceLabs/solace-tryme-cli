@@ -20,7 +20,7 @@ export class VisualizeClient {
       options.dmqEligible && message.setDMQEligible(false);
       options.messageId && message.setApplicationMessageId(options.messageId);
       options.messageType && message.setApplicationMessageType('VISUALIZATION_EVENT');
-      Logger.logSuccess(`visualize message published to topic ${topicName}`)
+      if (options.traceVisualization) Logger.logSuccess(`visualize message published to topic ${topicName}`)
       // Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), options.outputMode);
       session.send(message);
     } catch (error:any) {

@@ -221,6 +221,7 @@ export const defaultMessageReplyConfig:any = {
 
   waitBeforeExit: 0,
   exitAfter: 0,
+  traceVisualization: false,
 
   command: 'reply',
   name: 'reply',

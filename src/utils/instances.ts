@@ -56,6 +56,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   outputMode?: string | undefined
   waitBeforeExit?: number | undefined;
   exitAfter?: number | undefined
+  traceVisualization?: boolean | undefined;
   helpMore?: boolean | undefined
   visualization?: string | boolean | undefined
   visualizationPort?: number | undefined
@@ -117,6 +118,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.outputMode = ""
     this.waitBeforeExit = 0;
     this.exitAfter = 0
+    this.traceVisualization = false;
     this.helpMore = false
     this.visualization = false
     this.visualizationPort = 0

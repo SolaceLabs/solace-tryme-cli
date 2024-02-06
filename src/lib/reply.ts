@@ -36,7 +36,7 @@ const reply = async (
 
   try {
     await replier.connect();
-    replier.subscribe(options.topic, message, optionsSource.message === 'default');
+    replier.subscribe(options.topic, message, optionsSource.message === 'cli');
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

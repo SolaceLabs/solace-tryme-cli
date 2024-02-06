@@ -101,6 +101,7 @@ declare global {
     waitBeforeExit?: number
     exitAfter?: number
     outputMode?: string
+    traceVisualization?: boolean
 
     // Help Examples
     helpMore?: boolean

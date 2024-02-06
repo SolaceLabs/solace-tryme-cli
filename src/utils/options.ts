@@ -98,6 +98,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
     .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
@@ -161,6 +162,7 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', chalk.whiteBright('[advanced] reapply subscriptions upon calling on a disconnected session')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY, NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // consumer options
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement mode - AUTO or CLIENT')) .argParser( parseReceiverAcknowledgeMode) .default(defaultMessageReceiveConfig.acknowledgeMode) .hideHelp(!advanced))
@@ -215,6 +217,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
     .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // request options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SETTINGS')} */`) .hideHelp(!advanced))
@@ -281,6 +284,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
     .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REPLY SETTINGS')} */`) .hideHelp(!advanced))
