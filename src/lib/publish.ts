@@ -48,7 +48,8 @@ const publish = async (
     try {
       var content = fs.readFileSync(file, 'utf-8')
       var obj = JSON.parse(content);
-      message = JSON.stringify(obj);
+      message = JSON.stringify(obj, null, 2);
+      optionsSource.message = 'file'
     } catch (error: any) {
       Logger.logDetailedError('read file failed', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
