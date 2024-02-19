@@ -49,14 +49,18 @@ function prettifyXml(xmlInput:string, options: any) {
 }
 
 function prettyXML(str: string, indent: number) {
-  if (str.startsWith('<')) {
+  if (!str) return str;
+  if (str.trim().startsWith('<')) {
     var result = prettifyXml(str, {indent: indent, newline: '\n'});
     return result;
-  } else
+  } else {
+    Logger.warn(`not a valid xml payload`)
     return str;
+  }
 }
 
 function prettyJSON(str: string) {
+  if (!str) return str;
   try {
       var obj = JSON.parse(str);
       return prettyPrint(obj, {
@@ -64,8 +68,7 @@ function prettyJSON(str: string) {
         singleQuotes: false
       });
   } catch (error: any) {
-    Logger.logDetailedError(`prettyJSON failed, returning original content`, `${error.toString()}`)
-    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.warn(`not a valid json payload`)
     return str;
   }
 }

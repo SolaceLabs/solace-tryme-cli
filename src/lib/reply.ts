@@ -5,38 +5,17 @@ import { fileExists, saveOrUpdateCommandSettings } from '../utils/config'
 import { SolaceClient } from '../common/reply-client'
 import { displayHelpExamplesForReply } from '../utils/examples'
 import { getDefaultMessage } from '../utils/defaults'
+import { StdinRead } from '../utils/stdinread'
 
 const reply = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
   const replier = new SolaceClient(options);
-  var message:any = options.message as string;
-  optionsSource.message === 'default' ? message = getDefaultMessage() : message;
-
-  var file:any = options.file as string;
-  if (file) {
-    if (!fileExists(file)) {
-      Logger.logSuccess(`missing file '${file}'`);
-      Logger.logError('exiting...')
-      process.exit(1)
-    }
-    
-    try {
-      var content = fs.readFileSync(file, 'utf-8')
-      var obj = JSON.parse(content);
-      message = JSON.stringify(obj);
-    } catch (error: any) {
-      Logger.logDetailedError('read file failed', error.toString())
-      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
-      Logger.logError('exiting...')
-      process.exit(1)
-    }  
-  }
+  var interrupted = false;
 
   try {
     await replier.connect();
-    replier.subscribe(options.topic, message, optionsSource.message === 'cli');
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)
@@ -49,13 +28,53 @@ const reply = async (
     }, options.exitAfter * 1000);
   }
 
-  Logger.logInfo('press Ctrl-C to exit');  
-  process.stdin.resume();
   process.on('SIGINT', function () {
     'use strict';
+    if (interrupted) return;
+    interrupted = true;
     Logger.logWarn('operation interrupted...')
     replier.exit();
   });
+
+  var message:any = options.message as string;
+  message = (optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+
+  var contentType:any = options.contentType as string;
+
+  var file:any = options.file as string;
+  if (file) {
+    if (!fileExists(file)) {
+      Logger.logSuccess(`missing file '${file}'`);
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+    
+    try {
+      message = fs.readFileSync(file, 'utf-8')
+    } catch (error: any) {
+      Logger.logDetailedError('read file failed', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }  
+  }
+
+  if (options.stdin) {
+    Logger.ctrlDToPublish();
+    var readLines = new StdinRead();
+    await readLines.getData();
+    message = readLines.data();
+  }
+
+  try {
+    replier.subscribe(options.topic, message, contentType);
+  } catch (error:any) {
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  Logger.logInfo('press Ctrl-C to exit');  
+  process.stdin.resume();
 }
 
 const replier = (options: MessageClientOptions, optionsSource: any) => {

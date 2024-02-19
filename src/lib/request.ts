@@ -3,43 +3,19 @@ import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
 import { SolaceClient } from '../common/request-client'
 import { displayHelpExamplesForRequest } from '../utils/examples';
-import { defaultRequestMessage, delay } from '../utils/defaults';
+import { defaultRequestMessage, delay, getDefaultMessage } from '../utils/defaults';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
+import { StdinRead } from '../utils/stdinread'
 
 const request = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
   const requestor = new SolaceClient(options);
-  var message:any = options.message as string;
-  optionsSource.message === 'default' ? message = defaultRequestMessage : message;
-  
-  var file:any = options.file as string;
-  if (file) {
-    if (!fileExists(file)) {
-      Logger.logSuccess(`missing file '${file}'`);
-      Logger.logError('exiting...')
-      process.exit(1)
-    }
-    
-    try {
-      var content = fs.readFileSync(file, 'utf-8')
-      var obj = JSON.parse(content);
-      message = JSON.stringify(obj);
-    } catch (error: any) {
-      Logger.logDetailedError('read file failed', error.toString())
-      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
-      Logger.logError('exiting...')
-      process.exit(1)
-    }  
-  }
+  var interrupted = false;
 
   try {
-    await requestor.connect();
-    // if (options.replyToTopic)
-    //   requestor.subscribe(options.replyToTopic)
-    var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
-    requestor.request(topicName, message);
+    await requestor.connect()
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)
@@ -54,9 +30,51 @@ const request = async (
 
   process.on('SIGINT', function () {
     'use strict';
+    if (interrupted) return;
+    interrupted = true;
     Logger.logWarn('operation interrupted...')
     requestor.exit();
   });
+
+  var message:any = options.message as string;
+  message = (optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+  
+  var contentType:any = options.contentType as string;
+
+  var file:any = options.file as string;
+  if (file) {
+    if (!fileExists(file)) {
+      Logger.logSuccess(`missing file '${file}'`);
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+    
+    try {
+      message = fs.readFileSync(file, 'utf-8')
+    } catch (error: any) {
+      Logger.logDetailedError('read file failed', error.toString())
+      if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }  
+  }
+
+  if (options.stdin) {
+    Logger.ctrlDToPublish();
+    var readLines = new StdinRead();
+    await readLines.getData();
+    message = readLines.data();
+  }
+
+  try {
+    // if (options.replyToTopic)
+    //   requestor.subscribe(options.replyToTopic)
+    var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
+    requestor.request(topicName, message, contentType);
+  } catch (error:any) {
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
 }
 
 const requestor = (options: MessageClientOptions, optionsSource: any) => {

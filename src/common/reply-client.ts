@@ -1,6 +1,6 @@
 import solace, { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { Logger } from '../utils/logger'
-import { getDefaultClientName, getDefaultMessage } from "../utils/defaults";
+import { getDefaultClientName, getDefaultMessage, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
 const { uuid } = require('uuidv4');
@@ -26,7 +26,7 @@ export class SolaceClient extends VisualizeClient {
   session:any = null;
   clientName:string = "";
   payload:any = null;
-  defaultMessage:boolean = false;
+  contentType:string = "";
 
   constructor(options:any) {
     super();
@@ -115,7 +115,7 @@ export class SolaceClient extends VisualizeClient {
               type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
             })    
 
-            this.reply(request, this.payload);
+            this.reply(request, this.payload, this.contentType);
           } catch (error:any) {
             Logger.logDetailedError('send reply failed - ', error.toString())
             if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -139,7 +139,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Subscribes to request topic on Solace PubSub+ Event Broker
-  subscribe = (topicNames: any, payload: any, defaultMessage: boolean) => {
+  subscribe = (topicNames: any, payload: string | Buffer | undefined, contentType: string) => {
     //Check if the session has been established
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
@@ -148,7 +148,7 @@ export class SolaceClient extends VisualizeClient {
 
     try {
       this.payload = payload;
-      this.defaultMessage = defaultMessage;
+      this.contentType = contentType;
       topicNames.forEach((topicName:any) => {
         Logger.logInfo(`subscribing to ${topicName}`);
   
@@ -189,14 +189,37 @@ export class SolaceClient extends VisualizeClient {
     }
   };
 
-  reply = (message:any, payload:any) => {
-    Logger.logSuccess('request received');
-    Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+  reply = (message:any, payload: string | Buffer | undefined, contentType: string) => {
+    Logger.logSuccess(`request Received - ${message.getDestination()}, type - ${getType(message)}`)
+    Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
     Logger.await(`replying to request on topic '${message.getDestination().getName()}'...`);
     if (this.session !== null) {
-      if (this.defaultMessage) payload = getDefaultMessage();
       var reply = solace.SolclientFactory.createMessage();
-      reply.setBinaryAttachment(JSON.stringify(payload));
+      if (payload) {
+        if (contentType === 'application/xml' || contentType === 'text/plain') {
+          if (typeof payload === 'string')
+            reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
+          else
+            reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        } else if (contentType === 'application/json') {
+            reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        } else {
+          if (typeof payload === 'object') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(JSON.stringify(payload)); 
+            reply.setBinaryAttachment(result);
+          } else if (typeof payload === 'string') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(payload); 
+            reply.setBinaryAttachment(result);
+          } else {
+            reply.setBinaryAttachment(payload);
+          }
+        }
+      } else {
+        reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
+      }
+
       reply.setApplicationMessageId(message.getApplicationMessageId());
       if (this.options.replyToTopic) 
         reply.setDestination(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic));
@@ -207,7 +230,7 @@ export class SolaceClient extends VisualizeClient {
       this.session.sendReply(message, reply);
       // this.session.send(reply)
       Logger.logSuccess(`reply sent`);
-      Logger.printMessage(reply.dump(0), reply.getUserPropertyMap(), reply.getBinaryAttachment(), this.options.outputMode);
+      Logger.dumpMessage(reply, this.options.contentType, this.options.outputMode);
 
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLIED, { 
         type: 'replier', topicName: message.getDestination().getName() + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: reply.getApplicationMessageId() 

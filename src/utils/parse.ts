@@ -71,6 +71,18 @@ export const parseOutputMode = (value: string) => {
   return value.toUpperCase();
 }
 
+export const parseContentType = (value: string) => {
+  var contentType = 'text/plain';
+  if (value.toLowerCase().match(/application\/[^+]*[+]json/))
+    contentType = 'application/json';
+  else if (value.toLowerCase().match(/application\/[^+]*[+]xml/))
+    contentType = 'application/xml';
+  else if (value.toLowerCase().match(/application\/[^+]*[+]binary/) || value.toLowerCase().match(/application\/octet-stream/))
+    contentType = 'application/binary';
+  
+  return value.toLowerCase();
+}
+
 export const parseDeliveryMode = (value: any) => {
   if (!['DIRECT', 'PERSISTENT'].includes(value.toUpperCase())) {
     Logger.logError(`only 'DIRECT' or 'PERSISTENT' are supported.`)

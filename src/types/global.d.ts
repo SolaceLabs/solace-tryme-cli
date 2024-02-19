@@ -85,7 +85,8 @@ declare global {
     queue: any
     createIfMissing: boolean | undefined
     file?: string | undefined
-    message?: string | Buffer
+    message?: string | Buffer | undefined
+    defaultMessage?: boolean
     stdin?: boolean
     timeToLive?: number
     dmqEligible?: boolean
@@ -97,10 +98,10 @@ declare global {
     deliveryMode?: string
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
-
     waitBeforeExit?: number
     exitAfter?: number
     outputMode?: string
+    contentType?: string | undefined
     traceVisualization?: boolean
 
     // Help Examples

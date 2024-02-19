@@ -1,3 +1,5 @@
+import solace from "solclientjs";
+
 const os = require('os');
 
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -139,7 +141,8 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
-  outputMode: 'COMPACT',
+  outputMode: 'NONE',
+  contentType: 'text/plain'
 
 }
 
@@ -151,7 +154,7 @@ export const defaultMessagePublishConfig:any = {
   description: 'Publish application created via Solace Try-Me CLI',
   stdin: false,
   topic: [ getDefaultTopic('send') ],
-  message: defaultMessageHint,
+  message: undefined,
   queue: undefined,
   createIfMissing: undefined,
 
@@ -173,7 +176,7 @@ export const defaultMessageReceiveConfig:any = {
   description: 'Receive application created via Solace Try-Me CLI',
 
   topic: [ getDefaultTopic('send') ],
-  message: defaultMessageHint,
+  message: undefined,
   queue: undefined,
   createIfMissing: undefined,
 
@@ -191,7 +194,7 @@ export const defaultMessageRequestConfig:any = {
   description: 'Request application created via Solace Try-Me CLI',
 
   topic: [ getDefaultTopic('request') ],
-  message: defaultRequestMessageHint,
+  message: undefined,
   queue: undefined,
   createIfMissing: undefined,
 
@@ -199,6 +202,9 @@ export const defaultMessageRequestConfig:any = {
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
+
+  outputMode: 'NONE',
+  contentType: 'text/plain',
 
   command: 'request',
   name: 'request',
@@ -209,7 +215,7 @@ export const defaultMessageReplyConfig:any = {
   description: 'Reply application created via Solace Try-Me CLI',
 
   topic: [ getDefaultTopic('reply') ],
-  message: defaultRequestMessageHint,
+  message: undefined,
   file: undefined,
   queue: undefined,
   createIfMissing: undefined,
@@ -223,6 +229,9 @@ export const defaultMessageReplyConfig:any = {
   exitAfter: 0,
   traceVisualization: false,
 
+  outputMode: 'NONE',
+  contentType: 'text/plain',
+  
   command: 'reply',
   name: 'reply',
 }
@@ -360,5 +369,15 @@ export const getCommandDescription = (commandType:any) => {
     case 'client-profile': return "Manage Client Profile command"
     case 'acl-profile': return "Manage ACL Profile command"
     case 'client-username': return "Manage Client Username command"
+  }
+}
+
+export const getType = (message:solace.Message) => {
+  switch (message.getType()) {
+    case 0: return 'BINARY';
+    case 1: return 'MAP';
+    case 2: return 'STREAM';
+    case 3: return 'TEXT';
+    default: return 'UNKNOWN';
   }
 }

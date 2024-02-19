@@ -47,13 +47,17 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
-  --message <MESSAGE>                      the message body (a default payload)
-  --file <FILENAME>                        the filename containing the message content
+  --message <MESSAGE>                      the message body
+  --default-message                        use default message body
+  --file <FILENAME>                        filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
   --count <COUNT>                          the number of events to publish (default: 1)
   --interval <MILLISECONDS>                the time to wait between publish (default: 1000)
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
-  --dmq-eligible [BOOLEAN]                 the DMQ eligible flag
+  --dmq-eligible [BOOLEAN]                 the DMQ eligible flag (default: true)
+  --partition-key <KEY>                    the simulated partition key option (SECOND or MILLISECOND,
+                                           derives a value from publish time and set as partition key)
+  --partition-keys <KEY...>                the partition key(s) list
 
   /* CONFIGURATION SETTINGS */
   --config <CONFIG_FILE>                   the configuration file (default: "stm-cli-config.json")
@@ -104,6 +108,7 @@ Options:
   --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
   --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
 
   /* HELP OPTIONS */
@@ -128,9 +133,9 @@ Options:
   --vpn <VPN>                              the message VPN name (default: "default")
   --username <USERNAME>                    the username (default: "default")
   --password <PASSWORD>                    the password (default: "default")
-  --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
 
   /* QUEUE SETTINGS */
+  --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
   --queue <QUEUE>                          the message queue
 
   /* CONFIGURATION SETTINGS */
@@ -169,8 +174,9 @@ Options:
   --keepalive-interval-limit <NUMBER>    [advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down
   --receive-timestamps [BOOLEAN]         [advanced] include a receive timestamp on received messages
   --reapply-subscriptions [BOOLEAN]      [advanced] reapply subscriptions upon calling on a disconnected session (default: true)
-  --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
   --acknowledge-mode <MODE>              [advanced] the acknowledgement mode - AUTO or CLIENT (default: "AUTO")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
+  --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
   --log-level <LEVEL>                    [advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* HELP OPTIONS */
@@ -199,8 +205,9 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC>                          the message topic (default: "solace/try/me/request")
-  --message <MESSAGE>                      the message body (a default payload)
-  --file <FILENAME>                        the filename containing the message content
+  --message <MESSAGE>                      the message body
+  --default-message                        use default message body
+  --file <FILENAME>                        filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
   --timeout <MILLISECONDS>                 the timeout value
@@ -256,6 +263,7 @@ Options:
   --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
   --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
 
   /* HELP OPTIONS */
@@ -283,8 +291,10 @@ Options:
 
   /* MESSAGE SETTINGS */
   --topic <TOPIC...>                       the message topic(s) (default: ["solace/try/me"])
-  --message <MESSAGE>                      the message body (a default payload)
-  --file <FILENAME>                        the filename containing the message content
+  --message <MESSAGE>                      the message body
+  --default-message                        use default message body
+  --file <FILENAME>                        filename containing the message content
+  --stdin                                  read the message body from stdin (default: false)
   --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
   --dmq-eligible [BOOLEAN]                 the DMQ eligible flag
   --partition-key <KEY>                    the partition key (SECOND or MILLISECOND, derives a value from publish time and set as partition key)
@@ -336,6 +346,7 @@ Options:
   --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for acknowledgement management
   --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2: value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: COMPACT, PRETTY, NONE
 
   /* HELP OPTIONS */

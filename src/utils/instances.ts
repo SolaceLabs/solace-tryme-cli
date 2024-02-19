@@ -41,6 +41,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   queue: any
   createIfMissing: boolean | undefined
   message?: string | Buffer | undefined
+  defaultMessage?: boolean | undefined;
   file?: string | undefined
   stdin?: boolean | undefined
   timeToLive?: number | undefined
@@ -54,6 +55,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   replyToTopic?: string | undefined
   userProperties?: Record<string, string | string[]> | undefined
   outputMode?: string | undefined
+  contentType?: string | undefined
   waitBeforeExit?: number | undefined;
   exitAfter?: number | undefined
   traceVisualization?: boolean | undefined;
@@ -103,6 +105,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.queue = ""
     this.createIfMissing = false
     this.message = ""
+    this.defaultMessage = false;
     this.file = ""
     this.stdin = false
     this.timeToLive = 1
@@ -116,6 +119,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.replyToTopic = ""
     this.userProperties = { "key": "value" }
     this.outputMode = ""
+    this.contentType = "text/plain"
     this.waitBeforeExit = 0;
     this.exitAfter = 0
     this.traceVisualization = false;

@@ -9,6 +9,7 @@ const receive = async (
   optionsSource: any
 ) => {
   const receiver = new SolaceClient(options);
+  var interrupted = false;
   try {
     await receiver.connect();
     receiver.subscribe(options);
@@ -16,9 +17,10 @@ const receive = async (
     Logger.logError('exiting...')
     process.exit(1)
   }
-  process.stdin.resume();
   process.on('SIGINT', function () {
     'use strict';
+    if (interrupted) return;
+    interrupted = true;
     Logger.logWarn('operation interrupted...')
     receiver.exit();
   });
@@ -29,6 +31,8 @@ const receive = async (
       receiver.exit();
     }, options.exitAfter * 1000);
   }
+
+  process.stdin.resume();
 }
 
 const receiver = (options: MessageClientOptions, optionsSource: any) => {

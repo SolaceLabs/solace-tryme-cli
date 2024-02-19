@@ -2,7 +2,7 @@ import solace, { Message } from "solclientjs";
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } from "../utils/controlevents";
-import { getDefaultClientName } from "../utils/defaults";
+import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
 const { uuid } = require('uuidv4');
@@ -155,7 +155,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer, iteration: number = 0) {
+  publish(topicName: string, payload: string | Buffer | undefined, contentType: string, iteration: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -166,7 +166,31 @@ export class SolaceClient extends VisualizeClient {
       if (!topicName.startsWith('@STM')) Logger.await('publishing...');
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
-      message.setBinaryAttachment(JSON.stringify(payload));
+      if (payload) {
+        if (contentType === 'application/xml' || contentType === 'text/plain') {
+          if (typeof payload === 'string')
+            message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
+          else
+            message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        } else if (contentType === 'application/json') {
+          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        } else {
+          if (typeof payload === 'object') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(JSON.stringify(payload)); 
+            message.setBinaryAttachment(result);
+          } else if (typeof payload === 'string') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(payload); 
+            message.setBinaryAttachment(result);
+          } else {
+            message.setBinaryAttachment(payload);
+          }
+        }
+      } else {
+        message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
+      }
+
       message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : randomUUID());
       this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
@@ -207,8 +231,8 @@ export class SolaceClient extends VisualizeClient {
         message.setUserPropertyMap(propertyMap);    
       }
       
-      Logger.logSuccess(`message published to topic ${topicName}`)
-      Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+      Logger.logSuccess(`message published to topic - ${message.getDestination()}, type - ${getType(message)}`)
+      Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
       this.session.send(message);
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_PUBLISHED, { 
         type: 'sender', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()

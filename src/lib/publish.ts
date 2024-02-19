@@ -1,11 +1,11 @@
 import * as fs from 'fs'
-import concat from 'concat-stream'
 import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
 import { getDefaultMessage, delay } from '../utils/defaults';
 import { displayHelpExamplesForPublish } from '../utils/examples';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
+import { StdinRead } from '../utils/stdinread'
 
 const publish = async (
   options: MessageClientOptions,
@@ -13,6 +13,7 @@ const publish = async (
 ) => {
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
+  var interrupted = false;
   try {
     await publisher.connect()
   } catch (error:any) {
@@ -22,6 +23,8 @@ const publish = async (
 
   process.on('SIGINT', function () {
     'use strict';
+    if (interrupted) return;
+    interrupted = true;
     Logger.logWarn('operation interrupted...')
     publisher.setExited(true);
     publisher.exit();
@@ -35,7 +38,9 @@ const publish = async (
   }
 
   var message:any = options.message as string;
-  message = optionsSource.message === 'default' ? getDefaultMessage() : message;
+  message = (optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+
+  var contentType:any = options.contentType as string;
 
   var file:any = options.file as string;
   if (file) {
@@ -46,10 +51,7 @@ const publish = async (
     }
     
     try {
-      var content = fs.readFileSync(file, 'utf-8')
-      var obj = JSON.parse(content);
-      message = JSON.stringify(obj, null, 2);
-      optionsSource.message = 'file'
+      message = fs.readFileSync(file, 'utf-8')
     } catch (error: any) {
       Logger.logDetailedError('read file failed', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -58,10 +60,17 @@ const publish = async (
     }  
   }
 
+  if (options.stdin) {
+    Logger.ctrlDToPublish();
+    var readLines = new StdinRead();
+    await readLines.getData();
+    message = readLines.data();
+  }
+
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
-      if (optionsSource.message === 'default') message = getDefaultMessage();
-      publisher.publish(options.topic[i], message, 0);
+      if (optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
+      publisher.publish(options.topic[i], message, contentType, 0);
     } 
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
@@ -74,8 +83,8 @@ const publish = async (
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
-        if (optionsSource.message === 'default') message = getDefaultMessage();
-        publisher.publish(options.topic[i], message, n-1);
+        if (optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
+        publisher.publish(options.topic[i], message, contentType, n-1);
       }
       if (interval) await delay(interval)
     }
@@ -112,18 +121,7 @@ const publisher = (options: MessageClientOptions, optionsSource: any) => {
   // if subscriptions are specified, remove the default subscription at pos-0
   checkForCliTopics('topic', options, optionsSource);
 
-  if (options.stdin) {
-    Logger.ctrlDToPublish();
-    process.stdin.pipe(
-      concat((data) => {
-        options.message = data.toString().slice(0, -1)
-        optionsSource.message = 'cli'
-        publish(options, optionsSource)
-      }),
-    )
-  } else {
-    publish(options, optionsSource)
-  }
+  publish(options, optionsSource)
 }
 
 export default publisher

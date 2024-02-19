@@ -1,7 +1,7 @@
 import solace, { LogLevel } from "solclientjs";
 import { Logger } from '../utils/logger'
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED, STM_EVENT_RECEIVED } from "../utils/controlevents";
-import { getDefaultClientName } from "../utils/defaults";
+import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 const { uuid } = require('uuidv4');
 
@@ -77,10 +77,10 @@ export class SolaceClient extends VisualizeClient {
 
         //The UP_NOTICE dictates whether the session has been established
         this.session.on(solace.SessionEventCode.UP_NOTICE, (sessionEvent: solace.SessionEvent) => {
+          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to receive events. ===');
           this.publishVisualizationEvent(this.session, this.options, STM_CLIENT_CONNECTED, { 
             type: 'receiver', clientName: this.clientName, uuid: uuid() 
           })    
-          Logger.logSuccess('=== ' + this.clientName + ' successfully connected and ready to receive events. ===');
           resolve();
         });
 
@@ -146,7 +146,7 @@ export class SolaceClient extends VisualizeClient {
 
         //Message callback function
         this.session.on(solace.SessionEventCode.MESSAGE, (message:any) => {
-          Logger.logSuccess(`message received - ${message.getDestination()}`)
+          Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
 
           //Get the topic name from the message's destination
           let topicName: string = message.getDestination().getName();
@@ -166,15 +166,12 @@ export class SolaceClient extends VisualizeClient {
               matched = matched || topicName.match(regexSub) !== null;
               if (matched) break;
             }
-            if (!matched) {
-              Logger.logError('💣💣 Hmm.. received message on an unsubscribed topic 💥💥')
-            }
           }
 
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
             type: 'receiver', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
           })        
-          Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+          Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
         });
       } catch (error: any) {
         Logger.logDetailedError('session creation failed - ', error.toString())
@@ -391,8 +388,8 @@ export class SolaceClient extends VisualizeClient {
           });
           // Define message received event listener
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.MESSAGE, (message: any) => {
-            Logger.logSuccess(`message Received - ${message.getDestination()}`)
-            Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), this.options.outputMode);
+            Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
+            Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
               type: 'receiver', deliveryMode: message.getDeliveryMode(), queue: this.receiver.queue, topicName: message.getDestination().getName(), 
               clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
