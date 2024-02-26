@@ -37,7 +37,7 @@ const request = async (
   });
 
   var message:any = options.message as string;
-  message = (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+  message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
   
   var contentType:any = options.contentType as string;
 
