@@ -37,7 +37,7 @@ const reply = async (
   });
 
   var message:any = options.message as string;
-  message = (optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+  message = (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
 
   var contentType:any = options.contentType as string;
 

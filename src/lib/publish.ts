@@ -38,7 +38,7 @@ const publish = async (
   }
 
   var message:any = options.message as string;
-  message = (optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
+  message = (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli') ? getDefaultMessage() : message;
 
   var contentType:any = options.contentType as string;
 
@@ -69,7 +69,7 @@ const publish = async (
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
-      if (optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
+      if (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
       publisher.publish(options.topic[i], message, contentType, 0);
     } 
     if (options.waitBeforeExit) {
@@ -83,7 +83,7 @@ const publish = async (
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
-        if (optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
+        if (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli') message = getDefaultMessage();
         publisher.publish(options.topic[i], message, contentType, n-1);
       }
       if (interval) await delay(interval)
