@@ -35,7 +35,7 @@ jobs:
       - name: Bundle stm-macos
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r release/stm-macos-${{ steps.package-version.outputs.current-version}}.zip stm
+          args: zip -qq -r release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of macos)
         run: rm stm
@@ -46,7 +46,7 @@ jobs:
       - name: Bundle stm-linux
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r release/stm-linux-${{ steps.package-version.outputs.current-version}}.zip stm
+          args: zip -qq -r release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of linux)
         run: rm stm
@@ -57,7 +57,7 @@ jobs:
       - name: Bundle stm-alpine
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r release/stm-alpine-${{ steps.package-version.outputs.current-version}}.zip stm
+          args: zip -qq -r release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of alpine)
         run: rm stm
@@ -68,7 +68,7 @@ jobs:
       - name: Bundle stm-win
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r release/stm-win-${{ steps.package-version.outputs.current-version}}.zip stm.exe
+          args: zip -qq -r release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip stm.exe
 
       - name: Remove stm (of win)
         run: rm stm.exe
