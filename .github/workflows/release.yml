@@ -38,7 +38,7 @@ jobs:
           args: zip -qq -r release/stm-macos-${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of macos)
-        run: rm stm
+        run: rm stm release/stm-macos.zip
       
       - name: Rename stm-linux
         run: mv release/stm-linux stm
@@ -49,7 +49,7 @@ jobs:
           args: zip -qq -r release/stm-linux-${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of linux)
-        run: rm stm
+        run: rm stm release/stm-linux.zip
 
       - name: Rename stm-alpine
         run: mv release/stm-alpine stm
@@ -60,7 +60,7 @@ jobs:
           args: zip -qq -r release/stm-alpine-${{ steps.package-version.outputs.current-version}}.zip stm
 
       - name: Remove stm (of alpine)
-        run: rm stm
+        run: rm stm release/stm-alpine.zip
 
       - name: Rename stm-win
         run: mv release/stm-win.exe stm.exe
@@ -71,7 +71,7 @@ jobs:
           args: zip -qq -r release/stm-win-${{ steps.package-version.outputs.current-version}}.zip stm.exe
 
       - name: Remove stm (of win)
-        run: rm stm.exe
+        run: rm stm.exe release/stm-win.zip
 
       - name: Release
         uses: softprops/action-gh-release@v1
