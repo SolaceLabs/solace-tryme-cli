@@ -6,10 +6,56 @@ Solace Try-Me CLI is a CLI Client on the command line to publish and receive mes
 
 ## Documentation
 
-### Quick Start
+### Installation
+Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release, and download the zip file for your OS from **Assets**. Extract the binary/executable and add it to your path. 
 
-Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
+<details>
+<summary>Windows Install Details</summary>
+You will find an extracted binary <code>stm.exe</code> and is ready for use.
+  
+Make sure that either the binary file is copied over to a directory that is in the <code>%PATH%</code> or the <code>%PATH%</code> is updated with the directory where the binary is present.
 
+Note that the configuration files created by stm will be stored in <code>%USERPROFILE%\.stm</code> folder.
+</details>
+
+<details>
+<summary>Linux Install Details</summary>
+You will find an extracted binary <code>stm</code> and is ready for use.  
+  
+Make sure that either the binary file is copied over to a directory that is in the <code>$PATH</code> or the <code>$PATH</code> is updated with the directory where the binary is present.  
+  
+Note that the configuration files created by stm will be stored in <code>$HOME/.stm</code> (or <code>~/.stm</code>) folder.
+</details>
+
+<details>
+<summary>Mac Install Details</summary>
+You will find an extracted binary <code>stm</code>.
+
+MacOS would complain that the executable is from an unidentified developer, run the following command to fix this. 
+
+<code>xattr -dr com.apple.quarantine stm</code>
+
+Make sure that either the binary file is copied over to a directory that is in the <code>$PATH</code> or the <code>$PATH</code> is updated with the directory where the binary is present.  
+
+Note that the configuration files created by stm will be stored in <code>$HOME/.stm</code> (or <code>~/.stm</code>) folder.
+</details>
+
+#### Verify Installation
+Run the version command `stm -v` to ensure that you have downloaded the latest release.
+```
+$ stm -v
+█████╗ █████╗ ██╗    ████╗  ████╗████╗  ████████╗█████╗ ██╗   ██╗    ███╗  ███╗█████╗
+█╔═══╝██╔══██╗██║   ██╔═██╗██╔══╝██══╝  ╚══██╔══╝██╔═██╗╚██╗ ██╔╝    ████╗ ███║██╔══╝
+█████╗██║  ██║██║   ██████║██║   ███╗      ██║   █████╔╝ ╚████╔╝     ██╔███╔██║███╗
+╚══██║██║  ██║██║   ██╔═██║██║   ██╔╝      ██║   ██╔═██╗  ╚██╔╝ ███  ██║╚██╝██║██╔╝
+█████║╚█████╔╝█████╗██║ ██║╚████╗████╗     ██║   ██║ ██║   ██║       ██║ ╚╝ ██║█████╗
+╚════╝ ╚════╝ ╚════╝╚═╝ ╚═╝ ╚═══╝╚═══╝     ╚═╝   ╚═╝ ╚═╝   ╚═╝       ╚═╝    ╚═╝╚════╝
+
+0.0.32
+```
+NOTE: The version number should match the stm version you downloaded.
+
+The stm command is instrumented to use default settings for various parameters relevant in a messaging context, like event topic, message content and subscriptions. The session, message and connection settings also assume default values as documented by the Javascript API. However, you can modify these parameters by passing desired values at runtime. Review the commands, parameters and examples documentation in the GitHub repository for detailed information.
 
 ### Command Structure
 
