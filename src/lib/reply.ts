@@ -39,8 +39,6 @@ const reply = async (
   var message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
 
-  var contentType:any = options.contentType as string;
-
   var file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
@@ -67,7 +65,7 @@ const reply = async (
   }
 
   try {
-    replier.subscribe(options.topic, message, contentType);
+    replier.subscribe(options.topic, message);
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

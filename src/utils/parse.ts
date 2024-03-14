@@ -62,25 +62,13 @@ export const parseLogLevel = (value: string) => {
 }
 
 export const parseOutputMode = (value: string) => {
-  if (!['COMPACT', 'PRETTY', 'NONE'].includes(value.toUpperCase())) {
-    Logger.logError(`only 'COMPACT', 'PRETTY', 'NONE' are supported.`)
+  if (!['DEFAULT', 'CONCISE', 'FULL'].includes(value.toUpperCase())) {
+    Logger.logError(`only 'DEFAULT', 'CONCISE', 'FULL' are supported, and if not specified a DEFAULT mode is used.`)
     Logger.logError('exiting...')
     process.exit(1)
   }
   
   return value.toUpperCase();
-}
-
-export const parseContentType = (value: string) => {
-  var contentType = 'text/plain';
-  if (value.toLowerCase().match(/application\/[^+]*[+]json/))
-    contentType = 'application/json';
-  else if (value.toLowerCase().match(/application\/[^+]*[+]xml/))
-    contentType = 'application/xml';
-  else if (value.toLowerCase().match(/application\/[^+]*[+]binary/) || value.toLowerCase().match(/application\/octet-stream/))
-    contentType = 'application/binary';
-  
-  return value.toLowerCase();
 }
 
 export const parseDeliveryMode = (value: any) => {

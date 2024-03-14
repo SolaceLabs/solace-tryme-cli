@@ -21,7 +21,6 @@ export class VisualizeClient {
       options.messageId && message.setApplicationMessageId(options.messageId);
       options.messageType && message.setApplicationMessageType('VISUALIZATION_EVENT');
       if (options.traceVisualization) Logger.logSuccess(`visualize message published to topic ${topicName}`)
-      // Logger.printMessage(message.dump(0), message.getUserPropertyMap(), message.getBinaryAttachment(), options.outputMode);
       session.send(message);
     } catch (error:any) {
       // Logger.logDetailedError('visualization publish failed - ', error.toString())

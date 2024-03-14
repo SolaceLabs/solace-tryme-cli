@@ -9,7 +9,7 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addConfigInitOptions, addConfigListOptions, addConfigDeleteOptions,
         addReceiveOptions, addRequestOptions,  addReplyOptions, 
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
-        addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, 
+        addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, addManageHelpOptions, 
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -25,6 +25,7 @@ import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/ins
 import { loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
 import chalk from 'chalk';
+import { displayConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
 
 export class Commander {
   program: Command
@@ -38,12 +39,17 @@ export class Commander {
   }
 
   init(): void {
-    this.program
+    const rootCmd = this.program
       .name('stm')
       .description(chalk.whiteBright('A Solace Try-Me client for the command line'))
       .enablePositionalOptions()
       .allowUnknownOption(false)
       .version(`${version}`, '-v, --version')
+    addRootHelpOptions(rootCmd);
+    rootCmd.action((options) => {
+      if (options.helpExamples) 
+        displayRootHelpExamples();
+    });
       
     // stm send
     const sendCmd = this.program
@@ -204,11 +210,19 @@ if (process.env.SHOW_VISUALIZATION) {
       visualize(options);
     })  
 }
+
     // stm config
     const configCmd = this.program
       .command('config')
       .description(chalk.whiteBright('Manage command configurations'))
       .allowUnknownOption(false)
+    configCmd.action((options) => {
+      if (options.helpExamples) 
+        displayConfigHelpExamples();
+      else 
+        configCmd.help();
+    });
+    addConfigHelpOptions(configCmd);
 
     // stm config init
     const configInitCmd = configCmd
@@ -270,6 +284,13 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('manage')
       .description(chalk.whiteBright('Manage broker connection and resources'))
       .allowUnknownOption(false)
+    manageCmd.action((options) => {
+      if (options.helpExamples) 
+        displayManageHelpExamples();
+      else 
+        manageCmd.help();
+    });
+    addManageHelpOptions(manageCmd);
 
     // stm manage vpn connection
     const manageConnectionCmd = manageCmd

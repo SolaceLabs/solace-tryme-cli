@@ -39,8 +39,6 @@ const request = async (
   var message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
   
-  var contentType:any = options.contentType as string;
-
   var file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
@@ -70,7 +68,7 @@ const request = async (
     // if (options.replyToTopic)
     //   requestor.subscribe(options.replyToTopic)
     var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
-    requestor.request(topicName, message, contentType);
+    requestor.request(topicName, message);
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

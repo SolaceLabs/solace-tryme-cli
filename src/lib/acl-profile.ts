@@ -41,9 +41,10 @@ const aclProfile = (options: ManageClientOptions, optionsSource: any) => {
   }
   
   // if a direct cli execution without reference to named command, reset all default options (except semp parameters)
-  if (!options.config && options.operation === 'UPDATE') {
+  if (options.update) {
+    const noReset = [ "command", "aclProfile" ];
     Object.keys(options).forEach((option) => {
-      if (!option.startsWith('semp')) {
+      if (!option.startsWith('semp') && !noReset.includes(option)) {
         if (optionsSource[option] !== 'cli')
           options[option] = undefined;
       }

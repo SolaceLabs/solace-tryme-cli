@@ -41,9 +41,11 @@ const clientUsername = (options: ManageClientOptions, optionsSource: any) => {
   }
   
   // if a direct cli execution without reference to named command, reset all default options (except semp parameters)
-  if (!options.config) {
+  if (options.update) {
+    const noReset = [ "command", "clientUsername" ];
+
     Object.keys(options).forEach((option) => {
-      if (!option.startsWith('semp')) {
+      if (!option.startsWith('semp') && !noReset.includes(option)) {
         if (optionsSource[option] !== 'cli')
           options[option] = undefined;
       }

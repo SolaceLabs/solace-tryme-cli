@@ -171,7 +171,7 @@ export class SolaceClient extends VisualizeClient {
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
             type: 'receiver', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
           })        
-          Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
+          Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
         });
       } catch (error: any) {
         Logger.logDetailedError('session creation failed - ', error.toString())
@@ -389,7 +389,7 @@ export class SolaceClient extends VisualizeClient {
           // Define message received event listener
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.MESSAGE, (message: any) => {
             Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
-            Logger.dumpMessage(message, this.options.contentType, this.options.outputMode);
+            Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
               type: 'receiver', deliveryMode: message.getDeliveryMode(), queue: this.receiver.queue, topicName: message.getDestination().getName(), 
               clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()

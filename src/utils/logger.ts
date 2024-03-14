@@ -33,6 +33,10 @@ const options = {
 
 const Signal = new Signale(options)
 
+const displayMessageProperties = [
+  'Destination'
+];
+
 const Logger = {
   ctrlDToPublish: () => Signal.success('Connected, press Ctrl+D to publish, and Ctrl+C to exit\nEnter the payload now...'),
 
@@ -66,28 +70,13 @@ const Logger = {
 
   await: (message: string) => Signal.await(chalk.cyanBright(message)),
 
-  printMessage: (properties:any, userProperties:any, payload:any, outputMode:string) => {
-    if (properties) {
-      var arr = properties.split('\n');
-      var newProps = '';
-      arr.forEach((element:any) => {
-        if (element.startsWith('TimeToLive'))
-          newProps += newProps ? '\n' + element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)') : 
-                      element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)')
-        else if (!element.startsWith('Class Of Service') && 
-            !element.startsWith('Correlation Tag Pointer') &&
-            !element.startsWith('Binary Attachment'))
-          newProps += newProps ? '\n' + element : element;
-      })
-      properties = newProps;
-    }
-    
-    if (outputMode?.toUpperCase() === 'COMPACT' || !outputMode) {
-      payload && Logger.logInfo(`Message Payload:\r\n${payload.trim()}`);
-    } else if (outputMode?.toUpperCase() === 'PRETTY') {
+  prettyPrintMessage: (properties:any, userProperties:any, payload:any, outputMode:string, pretty: boolean) => {
+    var outputStr = '';
+
+    if (outputMode?.toUpperCase() === 'FULL') {
+      properties = properties.replace(/User Property Map:.*entries\n/, '')
       Logger.logInfo(`Message Properties\r\n${properties}`)
       if  (userProperties) {
-        properties = properties.replace(/User Property Map:.*entries\n/, '')
         let keys = userProperties.getKeys();
         let userProps = '';
         keys.forEach((key: any) => {
@@ -95,89 +84,53 @@ const Logger = {
         });
         Logger.logInfo(`Message User Properties${userProps}`)
       }
-
-      var prettyPayload = prettyJSON(payload);
-      if (prettyPayload)
-        payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
-      else
-        payload && Logger.logInfo(`Message Payload:\r\n${prettyXML(payload.trimStart(), 2)}`);
-    } else {
-      if  (userProperties) {
-        properties = properties.replace(/User Property Map:.*entries\n/, '')
-        Logger.logInfo(`Message Properties\r\n${properties}`)
-        Logger.logInfo(`Message User Properties`)
-        let keys = userProperties.getKeys();
-        let userProps = '';
-        keys.forEach((key: any) => {
-          userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
-        });
-        Logger.logInfo(`Message User Properties${userProps}`)
-      } else {
-        Logger.logInfo(`Message Properties\r\n${properties}`);
-      }
-      payload && Logger.logInfo(`Message Payload:\r\n${payload.trim()}`);
-    }
-  },
-  
-  prettyPrintMessage: (properties:any, userProperties:any, payload:any, contentType:string, outputMode:string) => {
-    if (properties) {
-      var arr = properties.split('\n');
-      var newProps = '';
-      arr.forEach((element:any) => {
-        if (element.startsWith('TimeToLive'))
-          newProps += newProps ? '\n' + element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)') : 
-                      element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)')
-        else if (!element.startsWith('Class Of Service') && 
-            !element.startsWith('Correlation Tag Pointer') &&
-            !element.startsWith('Binary Attachment'))
-          newProps += newProps ? '\n' + element : element;
-      })
-      properties = newProps;
-    }
-    
-    if (outputMode?.toUpperCase() === 'PRETTY') {
-      Logger.logInfo(`Message Properties\r\n${properties}`)
-      if  (userProperties) {
-        properties = properties.replace(/User Property Map:.*entries\n/, '')
-        let keys = userProperties.getKeys();
-        let userProps = '';
-        keys.forEach((key: any) => {
-          userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
-        });
-        Logger.logInfo(`Message User Properties${userProps}`)
-      }
-
-      Logger.logInfo(`Message Payload (bytes): ${payload ? payload.length : 0}`);
-      if (contentType === 'application/json') {
-        var prettyPayload = prettyJSON(payload.trim());
-        payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
-      } else if (contentType === 'application/xml') {
-        var prettyPayload = prettyXML(payload.trim(), 2);
-        payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
+      if (pretty) {
+        if (payload.startsWith('<?xml')) {
+          var prettyPayload = prettyXML(payload.trim(), 2);
+          payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
+        } else {
+          var prettyPayload = prettyJSON(payload.trim());
+          payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
+        }
       } else {
         payload && Logger.logInfo(`Message Payload:\r\n${payload}`);
       }
-    } else if (outputMode?.toUpperCase() === 'COMPACT') {
+    } else if (outputMode?.toUpperCase() === 'CONCISE') {
+      properties = properties.replace(/User Property Map:.*entries\n/, '')
+      Logger.logInfo(`Message Properties\r\n${properties}`)
       if  (userProperties) {
-        properties = properties.replace(/User Property Map:.*entries\n/, '')
-        Logger.logInfo(`Message Properties\r\n${properties}`)
-        Logger.logInfo(`Message User Properties`)
         let keys = userProperties.getKeys();
         let userProps = '';
         keys.forEach((key: any) => {
           userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
         });
         Logger.logInfo(`Message User Properties${userProps}`)
-      } else {
-        Logger.logInfo(`Message Properties\r\n${properties}`);
       }
       Logger.logInfo(`Message Payload (bytes): ${payload ? payload.length : 0}`);
     } else {
+      if (properties) {
+        var arr = properties.split('\n');
+        var newProps = '';
+        arr.forEach((element:any) => {
+          if (!displayMessageProperties.filter(option => element.startsWith(option)).length) return;
+          
+          if (element.startsWith('TimeToLive'))
+            newProps += newProps ? '\n' + element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)') : 
+                        element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)')
+          else if (!element.startsWith('Class Of Service') && 
+              !element.startsWith('Correlation Tag Pointer') &&
+              !element.startsWith('Binary Attachment'))
+            newProps += newProps ? '\n' + element : element;
+        })
+        properties = newProps;
+      }
+      
+      Logger.logInfo(`Message Properties\r\n${properties}`);
       Logger.logInfo(`Message Payload (bytes): ${payload ? payload.length : 0}`);
     }
   },
-  
-  dumpMessage: (message: any, contentType: string, outputMode: string) => {
+
+  dumpMessage: (message: any, outputMode: string, pretty: boolean) => {
     var payload = undefined;
     if (message.getType() === 0) { // binary
       payload = message.getBinaryAttachment();
@@ -185,7 +138,7 @@ const Logger = {
       payload = message.getSdtContainer().getValue();
     }
 
-    Logger.prettyPrintMessage(message.dump(0), message.getUserPropertyMap(), payload, contentType, outputMode)
+    Logger.prettyPrintMessage(message.dump(0), message.getUserPropertyMap(), payload.trim(), outputMode, pretty)
   },
 
 

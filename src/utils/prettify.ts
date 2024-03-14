@@ -54,7 +54,7 @@ function prettyXML(str: string, indent: number) {
     var result = prettifyXml(str, {indent: indent, newline: '\n'});
     return result;
   } else {
-    Logger.warn(`not a valid xml payload`)
+    // Logger.warn(`not a valid xml payload`)
     return str;
   }
 }
@@ -68,7 +68,7 @@ function prettyJSON(str: string) {
         singleQuotes: false
       });
   } catch (error: any) {
-    Logger.warn(`not a valid json payload`)
+    // Logger.warn(`not a valid json payload`)
     return str;
   }
 }

@@ -14,8 +14,6 @@ declare global {
 
   type MessageDeliveryModeType = solace.MessageDeliveryModeType.DIRECT | solace.MessageDeliveryModeType.NON_PERSISTENT | solace.MessageDeliveryModeType.PERSISTENT
 
-  type OutputMode = 'pretty' | 'compact'
-
   interface StmConfigOptions {
     // broker connect options
     url: string | undefined
@@ -101,7 +99,7 @@ declare global {
     waitBeforeExit?: number
     exitAfter?: number
     outputMode?: string
-    contentType?: string | undefined
+    pretty?: boolean
     traceVisualization?: boolean
 
     // Help Examples

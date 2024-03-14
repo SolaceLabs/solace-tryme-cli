@@ -1,38 +1,41 @@
 # Messaging Commands
 
-__Issue messaging commands: publish, receive, request and reply__
+<details>
+<summary>Publish Events: <i><b>stm send -he</b></i> </summary>
 
-## Publish Events
+```
+ℹ  info: loading 'send' command from configuration 'stm-cli-config.json'
 
+Examples:
 // execute the default publish command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm send__
+stm send
 
-HINT: You can view the default publish command settings 'stm config list --name publish'!
+HINT: You can view the default publish command settings 'stm config list --name send'!
 
 // save an existing command setting to a new name in a configuration file
 
-__stm send --config cloud-broker.json --save publish2__
+stm send --config cloud-broker --save publish2
 
 // execute a specific publish command from the named configuration
 
-__stm send --config cloud-broker.json --name publish2__
+stm send --config cloud-broker --name publish2
 
 // execute the default publish command with settings defined on the default
 // configuration 'stm-cli-config.json', but publish on topic specified in the
 // command-line (overriding the command settings)
 
-__stm send --topic solace/try/me__
+stm send --topic solace/try/me
 
 NOTE: You can override any of the publish parameters
 that are applied only for this instance of execution!
 
-// If you want to run a publish purely command based on the command-line parameters
+// If you want to run a publish entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm send --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me --count 5 --interval 1000__
+stm send --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me --count 5 --interval 1000
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -40,24 +43,32 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker.json --save__
+stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm send  --name publish2 --config cloud-broker.json --save publish3__
+stm send  --name publish2 --config cloud-broker --save publish3
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker.json --save publish4__
+stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker --save publish4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Receive Events
+</details>
 
+<details>
+<summary>Receive Events: <i><b>stm receive -he</b></i> </summary>
+
+```
+ℹ  info: loading 'receive' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default receive command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm receive__
+stm receive
 
 HINT: You can view the default receive command settings 'stm config list --name receive'!
 
@@ -65,32 +76,32 @@ HINT: You can view the default receive command settings 'stm config list --name 
 // default configuration 'stm-cli-config.json', but receive from a queue,
 // with optionally creating the queue if found missing, and add subscriptions to the queue
 
-__stm receive --queue my-queue --create-if-missing --topic "solace/>"__
+stm receive --queue my-queue --create-if-missing --topic "solace/>"
 
 
 // execute a specific receive command from the named configuration
 
-__stm receive --config cloud-broker.json --name receive__
+stm receive --config cloud-broker --name receive
 
 // execute the default receive command with settings defined on the default
 // configuration 'stm-cli-config.json', but receive on topic specified in the
 // command-line (overriding the command settings)
 
-__stm receive --topic solace/try/me__
+stm receive --topic solace/try/me
 
 // execute the default receive command with settings defined on the default
 // configuration 'stm-cli-config.json', but receive from a queue
 
-__stm receive --queue stm-queue --topic solace/try/me__
+stm receive --queue stm-queue --topic solace/try/me
 
 NOTE: You can override any of the receive parameters
 that are applied only for this instance of execution!
 
-// If you want to run a receive purely command based on the command-line parameters
+// If you want to run a receive entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm receive --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me__
+stm receive --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -98,46 +109,53 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker.json --save__
+stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm receive  --name receive --config cloud-broker.json --save receive2__
+stm receive  --name receive --config cloud-broker --save receive2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm receive --topic "stm/logistics/*" --name receive2 --config cloud-broker.json --save receive4__
+stm receive --topic "stm/logistics/*" --name receive2 --config cloud-broker --save receive4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Send Request Events
+</details>
 
+<details>
+<summary>Send Request Events: <i><b>stm request -he</b></i> </summary>
 
+```
+ℹ  info: loading 'request' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default request command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm request__
+stm request
 
 HINT: You can view the default request command settings 'stm config list --name request'!
 
 // execute a specific request command from the named configuration
 
-__stm request --config cloud-broker.json --name request__
+stm request --config cloud-broker --name request
 
 // execute the default request command with settings defined on the default
 // configuration 'stm-cli-config.json', but request on topic specified in the
 // command-line (overriding the command settings)
 
-__stm request --topic solace/try/me/request__
+stm request --topic solace/try/me/request
 
 NOTE: You can override any of the request parameters
 that are applied only for this instance of execution!
 
-// If you want to run a request purely command based on the command-line parameters
+// If you want to run a request entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm request --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me/request__
+stm request --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me/request
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -145,45 +163,53 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm request --topic "stm/logistics/shipped" --name request --config cloud-broker.json --save__
+stm request --topic "stm/logistics/shipped" --name request --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm request  --name request --config cloud-broker.json --save request2__
+stm request  --name request --config cloud-broker --save request2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker.json --save request4__
+stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker --save request4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Receive Reply Events
+</details>
 
+<details>
+<summary>Receive Reply Events: <i><b>stm reply -he</b></i> </summary>
+
+```
+ℹ  info: loading 'reply' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default reply command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm reply__
+stm reply
 
 HINT: You can view the default reply command settings 'stm config list --name reply'!
 
 // execute a specific reply command from the named configuration
 
-__stm reply --config cloud-broker.json --name reply__
+stm reply --config cloud-broker --name reply
 
 // execute the default reply command with settings defined on the default
 // configuration 'stm-cli-config.json', but reply on topic specified in the
 // command-line (overriding the command settings)
 
-__stm reply --topic solace/try/me/request__
+stm reply --topic solace/try/me/request
 
 NOTE: You can override any of the reply parameters
 that are applied only for this instance of execution!
 
-// If you want to run a reply purely command based on the command-line parameters
+// If you want to run a reply entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm reply --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me/request__
+stm reply --url ws://localhost:8008 --vpn default --username default --password default --topic solace/try/me/request
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -191,29 +217,35 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker.json --save__
+stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm reply  --name reply --config cloud-broker.json --save reply2__
+stm reply  --name reply --config cloud-broker --save reply2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker.json --save reply4__
+stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker --save reply4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
+
+</details>
+
 
 # Manage Commands
 
-__Issue management commands (list, create, update and delete) to manage broker resources: queue, client-profile, acl-profile and client-userame.__
+<details>
+<summary>Manage Queue: <i><b>stm manage queue -he</b></i> </summary>
 
-## Manage Queue
+```
+ℹ  info: loading 'queue' command from configuration 'stm-cli-config.json'
 
-
+Examples:
 // execute the default queue command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm manage queue__
+stm manage queue
 
 HINT: You can view the default queue command settings 'stm config list --name queue'!
 
@@ -221,21 +253,21 @@ NOTE: The actual operation is determined by the operation parameter - create, up
 
 // execute a specific queue command from the named configuration
 
-__stm manage queue --config cloud-broker.json --name queue__
+stm manage queue --config cloud-broker --name queue
 
 // execute the default queue command with settings defined on the default
 // configuration 'stm-cli-config.json', but with command-line overrides
 
-__stm manage queue --update --add-subscriptions solace/try/me "stm/logistics/>"__
+stm manage queue --update --add-subscriptions solace/try/me "stm/logistics/>"
 
 NOTE: You can override any of the queue parameters
 that are applied only for this instance of execution!
 
-// If you want to run a queue purely command based on the command-line parameters
+// If you want to run a queue entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions__
+stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -243,25 +275,32 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker.json --save__
+stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm manage queue --name queue --config cloud-broker.json --save queue2__
+stm manage queue --name queue --config cloud-broker --save queue2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm manage queue --add-subscriptions "stm/logistics/sipped" --name queue2 --config cloud-broker.json --save queue4__
+stm manage queue --add-subscriptions "stm/logistics/sipped" --name queue2 --config cloud-broker --save queue4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Manage Client Profile
+</details>
 
+<details>
+<summary>Manage Client Profile: <i><b>stm manage client-profile -he</b></i> </summary>
 
+```
+ℹ  info: loading 'client-profile' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default client-profile command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm manage client-profile__
+stm manage client-profile
 
 HINT: You can view the default client-profile command settings 'stm config list --name client-profile'!
 
@@ -269,21 +308,21 @@ NOTE: The actual operation is determined by the operation parameter - create, up
 
 // execute a specific client-profile command from the named configuration
 
-__stm manage client-profile --config cloud-broker.json --name client-profile__
+stm manage client-profile --config cloud-broker --name client-profile
 
 // execute the default client-profile command with settings defined on the default
 // configuration 'stm-cli-config.json', with the command-line overrides
 
-__stm manage client-profile --update --allow-guaranteed-endpoint-create-durability all__
+stm manage client-profile --update --allow-guaranteed-endpoint-create-durability all
 
 NOTE: You can override any of the client-profile parameters
 that are applied only for this instance of execution!
 
-// If you want to run a client-profile purely command based on the command-line parameters
+// If you want to run a client-profile entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage client-profile --create my-client-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all__
+stm manage client-profile --create my-client-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --allow-guaranteed-endpoint-create-durability all
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -291,25 +330,32 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile --config cloud-broker.json --save__
+stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm manage client-profile  --name client-profile --config cloud-broker.json --save client-profile2__
+stm manage client-profile  --name client-profile --config cloud-broker --save client-profile2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile2 --config cloud-broker.json --save client-profile4__
+stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile2 --config cloud-broker --save client-profile4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Manage ACL Profile
+</details>
 
+<details>
+<summary>Manage ACL Profile: <i><b>stm manage acl-profile -he</b></i> </summary>
 
+```
+ℹ  info: loading 'acl-profile' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default acl-profile command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm manage acl-profile__
+stm manage acl-profile
 
 HINT: You can view the default acl-profile command settings 'stm config list --name acl-profile'!
 
@@ -317,21 +363,21 @@ NOTE: The actual operation is determined by the operation parameter - create, up
 
 // execute a specific acl-profile command from the named configuration
 
-__stm manage acl-profile --config cloud-broker.json --name acl-profile__
+stm manage acl-profile --config cloud-broker --name acl-profile
 
 // execute the default acl-profile command with settings defined on the default
 // configuration 'stm-cli-config.json', but with command-line overrides)
 
-__stm manage acl-profile --update --client-connect-default-action allow__
+stm manage acl-profile --update --client-connect-default-action allow
 
 NOTE: You can override any of the acl-profile parameters
 that are applied only for this instance of execution!
 
-// If you want to run a acl-profile purely command based on the command-line parameters
+// If you want to run a acl-profile entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow__
+stm manage acl-profile --create my-acl-profile --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --client-connect-default-action allow
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -339,25 +385,32 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm manage acl-profile --client-connect-default-action allow --name acl-profile --config cloud-broker.json --save__
+stm manage acl-profile --client-connect-default-action allow --name acl-profile --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm manage acl-profile --name acl-profile --config cloud-broker.json --save acl-profile2__
+stm manage acl-profile --name acl-profile --config cloud-broker --save acl-profile2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm manage acl-profile --client-connect-default-action allow --name acl-profile2 --config cloud-broker.json --save acl-profile4__
+stm manage acl-profile --client-connect-default-action allow --name acl-profile2 --config cloud-broker --save acl-profile4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
 
-## Manage Client Username
+</details>
 
+<details>
+<summary>Manage Client Username: <i><b>stm manage client-username -he</b></i> </summary>
 
+```
+ℹ  info: loading 'client-username' command from configuration 'stm-cli-config.json'
+
+Examples:
 // execute the default client-username command with settings defined on the
 // default configuration 'stm-cli-config.json'
 
-__stm manage client-username__
+stm manage client-username
 
 HINT: You can view the default client-username command settings 'stm config list --name client-username'!
 
@@ -365,21 +418,21 @@ NOTE: The actual operation is determined by the operation parameter - create, up
 
 // execute a specific client-username command from the named configuration
 
-__stm manage client-username --config cloud-broker.json --name client-username__
+stm manage client-username --config cloud-broker --name client-username
 
 // execute the default client-username command with settings defined on the default
 // configuration 'stm-cli-config.json', with the command-line overrides
 
-__stm manage client-username --update --enabled true__
+stm manage client-username --update --enabled true
 
 NOTE: You can override any of the client-username parameters
 that are applied only for this instance of execution!
 
-// If you want to run a client-username purely command based on the command-line parameters
+// If you want to run a client-username entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-__stm manage client-username --create my-client-username --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --enabled true__
+stm manage client-username --create my-client-username --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --enabled true
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
@@ -387,63 +440,86 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-__stm manage client-username --enabled true --name client-username --config cloud-broker.json --save__
+stm manage client-username --enabled true --name client-username --config cloud-broker --save
 
 // Duplicate the command setting
 
-__stm manage client-username  --name client-username --config cloud-broker.json --save client-username2__
+stm manage client-username  --name client-username --config cloud-broker --save client-username2
 
 // Duplicate the command setting with the specified command-line parameters
 
-__stm manage client-username --enabled true --name client-username2 --config cloud-broker.json --save client-username4__
+stm manage client-username --enabled true --name client-username2 --config cloud-broker --save client-username4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
+
+</details>
 
 # Configuration Commands
 
-__Commands to manage persistence of commands for reuse.__
 
-## Initialize commands with default settings
+<details>
+<summary>Initialize Configuration: <i><b>stm config init -he</b></i> </summary>
 
+```
+Examples:
 // create a default configuration  'stm-cli-config.json'
 // and initialize commands with default settings
 
-__stm config init__
+stm config init
 
 // create and initialize a named configuration
 // and initialize commands with default settings
 
-__stm config init --config cloud-broker.json__
+stm config init --config cloud-broker
+```
 
-## List commands from the configuration
+</details>
 
+<details>
+<summary>List commands from configuration: <i><b>stm config list -he</b></i> </summary>
 
+```
+Examples:
 // list commands from the default configuration 'stm-cli-config.json'
 
-__stm config list__
+stm config list
 
 // get details of a named command from the named configuration
 
-__stm config list --name publish__
+stm config list --name send
 
 // list commands from the named configuration
 
-__stm config list --config cloud-broker.json__
+stm config list --config cloud-broker
 
 // get details of a named command from the named configuration
 
-__stm config list --config cloud-broker.json --name receive__
+stm config list --config cloud-broker --name receive
 
-## Delete commands in the configuration
+// save as a new command
 
+stm send --config cloud-broker --save publish2
 
+```
+
+</details>
+
+<details>
+<summary>Delete commands from configuration: <i><b>stm config delete -he</b></i> </summary>
+
+```
+Examples:
 // delete a specific command from the default configuration 'stm-cli-config.json'
 
-__stm config delete --name publish2__
+stm config delete --name publish2
 
 // delete a specific command from the named configuration
 
-__stm config delete --config cloud-broker.json --name publish2__
+stm config delete --config cloud-broker --name publish2
 
 NOTE: The default commands created by the initialize operation such as publish, receive, request, reply,
 queue, client-profile, acl-profile, client-username, connection and semconnection cannot be deleted!!
+```
+
+</details>

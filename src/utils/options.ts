@@ -1,7 +1,7 @@
 import { Command, Option, program } from 'commander'
 import {
   parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
-  parseMessageProtocol, parseOutputMode, parseContentType, parseSingleTopic, parsePublishTopic,
+  parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
   parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
   parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKey, parsePartitionKeys
@@ -13,11 +13,25 @@ import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, get
         defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername, defaultMessageRequestConfig, defaultMessageReplyConfig } from './defaults';
 import chalk from 'chalk';
 
+export const addRootHelpOptions = (cmd: Command) => {
+  cmd
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli command examples')). preset({ helpExamples: true }))
+}
+
+export const addConfigHelpOptions = (cmd: Command) => {
+  cmd
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli config command examples')))
+}
+export const addManageHelpOptions = (cmd: Command) => {
+  cmd
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli manage command examples')))
+}
+
 export const addConfigDeleteOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // delete options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -29,7 +43,7 @@ export const addConfigViewOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // view options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -41,7 +55,7 @@ export const addConfigListOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // list options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -53,7 +67,7 @@ export const addConfigInitOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // init options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -66,16 +80,16 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced)) 
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parsePublishTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'})  .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .implies({contentType: 'application/json'}) .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parsePublishTopic) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
@@ -85,7 +99,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
@@ -119,12 +133,12 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
-    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
-    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY OR NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandSend))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
@@ -141,18 +155,18 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced))
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced))
-    .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced))
-    .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced))
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
 
     // receive from queue
     .addOption(new Option(`\n/* ${chalk.whiteBright('QUEUE SETTINGS')} */`))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default( [ getDefaultTopic('receive') ]) .argParser(parseReceiveTopic) .hideHelp(advanced))
-    .addOption(new Option('--queue <QUEUE>', chalk.whiteBright('the message queue')) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default( [ getDefaultTopic('receive') ]) .argParser(parseReceiveTopic) .hideHelp(advanced))
+    .addOption(new Option('-q, --queue <QUEUE>', chalk.whiteBright('the message queue')) .hideHelp(advanced))
     .addOption(new Option('--create-if-missing [BOOLEAN]', chalk.whiteBright('[advanced] create message queue if missing')) .argParser(parseBoolean) .hideHelp(!advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('recv'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('recv'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageReceiveConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <NUMBER>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
@@ -163,17 +177,17 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--receive-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a receive timestamp on received messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateReceiveTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', chalk.whiteBright('[advanced] reapply subscriptions upon calling on a disconnected session')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement mode - AUTO or CLIENT')) .argParser( parseReceiverAcknowledgeMode) .default(defaultMessageReceiveConfig.acknowledgeMode) .hideHelp(!advanced))
-    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
-    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY OR NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
     // consumer options
     .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandReceive))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
@@ -190,16 +204,16 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced)) 
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC>', chalk.whiteBright('the message topic')) .default( getDefaultTopic('request') ) .argParser(parseSingleTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'}) .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .implies({contentType: 'application/json'}) .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC>', chalk.whiteBright('the message topic')) .default( getDefaultTopic('request') ) .argParser(parseSingleTopic) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
     // .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
@@ -207,7 +221,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('req'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('req'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageRequestConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
@@ -241,12 +255,12 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
-    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
-    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY OR NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandRequest))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
@@ -263,22 +277,22 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced)) 
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parseRequestTopic) .hideHelp(advanced))
-    .addOption(new Option('--message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'}) .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .implies({contentType: 'application/json'}) .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('--file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parseRequestTopic) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('rep'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('rep'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageReplyConfig.description) .hideHelp(!advanced))
     .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
     .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
@@ -311,12 +325,12 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
-    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
-    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: COMPACT, PRETTY OR NONE')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
+    .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandReply))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
@@ -368,7 +382,7 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandQueue))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
 
@@ -396,14 +410,14 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delete [ACL_PROFILE]', chalk.whiteBright('delete an acl-profile')) .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.delete) .hideHelp(advanced))
 
     // semp ACL PROFILE
-    .addOption(new Option(`\n/* ${chalk.whiteBright('ACL PROFILE SETTINGS')} */`))
+    .addOption(new Option(`\n/* ${chalk.whiteBright('ACL PROFILE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--client-connect-default-action <ACCESS_TYPE>', chalk.whiteBright('the default action to take when a client using the ACL Profile connects to massage VPN (allow or disallow)')) .default( defaultManageAclProfileConfig.clientConnectDefaultAction) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
     .addOption(new Option('--publish-topic-default-action <ACCESS_TYPE>', chalk.whiteBright('the default action to take when a client using the ACL Profile publishes to a topic (allow or disallow)')) .default( defaultManageAclProfileConfig.publishTopicDefaultAction) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
     .addOption(new Option('--subscribe-topic-default-action <ACCESS_TYPE>', chalk.whiteBright('the default action to take when a client using the ACL Profile subscribes to a topic (allow or disallow)')) .default( defaultManageAclProfileConfig.subscribeTopicDefaultAction ) .argParser(parseSempAllowDefaultAction) .hideHelp(advanced))
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandAclProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
       
@@ -445,7 +459,7 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandClientProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
       
@@ -473,7 +487,7 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
     .addOption(new Option('--delete [CLIENT_USERNAME]', chalk.whiteBright('delete a client-username')) .argParser(parseSempOperation) .default(defaultManageAclProfileConfig.delete) .hideHelp(advanced))
 
     // semp CLIENT USERNAME
-    .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT USERNAME SETTINGS')} */`))
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CLIENT USERNAME SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--client-profile <CLIENT_PROFILE>', chalk.whiteBright('the name of the Client profile')) .default( defaultManageClientUsernameConfig.clientProfile ) .hideHelp(advanced))
     .addOption(new Option('--acl-profile <ACL_PROFILE>', chalk.whiteBright('the name of the ACL profile')) .default( defaultManageClientUsernameConfig.aclProfile ) .hideHelp(advanced))
     .addOption(new Option('--enabled <BOOLEAN>', chalk.whiteBright('enable or disable the Client Username')) .default( defaultManageClientUsernameConfig.enabled) .argParser(parseBoolean) .hideHelp(advanced))
@@ -481,7 +495,7 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced) .default(commandClientUsername))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(advanced) .default(false))
       
@@ -497,8 +511,8 @@ export const addManageConnectionOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced)) 
     .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced)) 
-    .addOption(new Option('--username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
-    .addOption(new Option('--password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultManageConnectionConfig.description) .hideHelp(!advanced))
@@ -514,7 +528,7 @@ export const addManageConnectionOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -533,7 +547,7 @@ export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -544,13 +558,13 @@ export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 
 export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
     .addOption(new Option('--visualization-port [PORT]',chalk.whiteBright('the port for the visualizer')) .argParser(parseNumber) .default(0))
-    .addOption(new Option('--config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 
