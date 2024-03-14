@@ -378,7 +378,7 @@ For more information try these resources:
 - The Solace Developer Portal website at: https://solace.dev
 
 ## Authors
-See the list of [contributors](https://github.com/solacecommunity/<github-repo>/graphs/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceLabs/solace-tryme-cli/graphs/contributors) who participated in this project.
 
 ## License
 See the [LICENSE](LICENSE.txt) file for details.
