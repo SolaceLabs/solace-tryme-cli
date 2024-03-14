@@ -16,6 +16,21 @@ Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), l
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | You will find an extracted binary `stm.exe` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `%PATH%` or the `%PATH%` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by stm will be stored in `%USERPROFILE%\.stm` folder. | You will find an extracted binary `stm` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder. | You will find an extracted binary `stm`.<br><br>MacOS would complain that the executable is from an unidentified developer, run the following command to fix this.<br> <br>`xattr -dr com.apple.quarantine stm`<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Please note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder. |
 
+#### Verify Installation
+Run the version command `stm -v` to ensure that you have downloaded the latest release.
+```
+$ stm -v
+█████╗ █████╗ ██╗    ████╗  ████╗████╗  ████████╗█████╗ ██╗   ██╗    ███╗  ███╗█████╗
+█╔═══╝██╔══██╗██║   ██╔═██╗██╔══╝██══╝  ╚══██╔══╝██╔═██╗╚██╗ ██╔╝    ████╗ ███║██╔══╝
+█████╗██║  ██║██║   ██████║██║   ███╗      ██║   █████╔╝ ╚████╔╝     ██╔███╔██║███╗
+╚══██║██║  ██║██║   ██╔═██║██║   ██╔╝      ██║   ██╔═██╗  ╚██╔╝ ███  ██║╚██╝██║██╔╝
+█████║╚█████╔╝█████╗██║ ██║╚████╗████╗     ██║   ██║ ██║   ██║       ██║ ╚╝ ██║█████╗
+╚════╝ ╚════╝ ╚════╝╚═╝ ╚═╝ ╚═══╝╚═══╝     ╚═╝   ╚═╝ ╚═╝   ╚═╝       ╚═╝    ╚═╝╚════╝
+
+0.0.32
+```
+NOTE: The version number should match the stm version you downloaded.
+
 ### Command Structure
 
 The following view captures the command hierarchy of the *stm* cli tool.
