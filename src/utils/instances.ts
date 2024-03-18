@@ -54,6 +54,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   deliveryMode?: string | undefined
   replyToTopic?: string | undefined
   userProperties?: Record<string, string | string[]> | undefined
+  contentType?: string | undefined
   outputMode?: string | undefined
   pretty?: boolean | undefined
   waitBeforeExit?: number | undefined;
@@ -118,6 +119,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.deliveryMode = 'DIRECT'
     this.replyToTopic = ""
     this.userProperties = { "key": "value" }
+    this.contentType = "text/plain"
     this.outputMode = "DEFAULT"
     this.pretty = false
     this.waitBeforeExit = 0;

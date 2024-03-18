@@ -133,6 +133,7 @@ Options:
                                          response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
                                          value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
                                          (default: "DEFAULT")
   --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
@@ -336,6 +337,7 @@ Options:
                                          response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
                                          value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
                                          (default: "DEFAULT")
   --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
@@ -450,6 +452,7 @@ Options:
                                          response message
   --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
                                          value2")
+  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
   --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
                                          (default: "DEFAULT")
   --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)

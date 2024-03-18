@@ -37,6 +37,7 @@ const publish = async (
     }, options.exitAfter * 1000);
   }
 
+  var contentType:any = options.contentType as string;
   var message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
 
@@ -67,7 +68,7 @@ const publish = async (
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
-      publisher.publish(options.topic[i], message, 0);
+      publisher.publish(options.topic[i], message, contentType, 0);
     } 
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
@@ -80,7 +81,7 @@ const publish = async (
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
-        publisher.publish(options.topic[i], message, n-1);
+        publisher.publish(options.topic[i], message, contentType, n-1);
       }
       if (interval) await delay(interval)
     }

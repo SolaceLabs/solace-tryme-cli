@@ -1,7 +1,7 @@
 import { Command, Option, program } from 'commander'
 import {
   parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
-  parseMessageProtocol, parseOutputMode, parseSingleTopic, parsePublishTopic,
+  parseMessageProtocol, parseOutputMode, parseContentType, parseSingleTopic, parsePublishTopic,
   parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
   parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKey, parsePartitionKeys
@@ -86,10 +86,12 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parsePublishTopic) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .implies({contentType: 'application/json'}) .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
@@ -133,6 +135,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
@@ -210,10 +213,12 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-t, --topic <TOPIC>', chalk.whiteBright('the message topic')) .default( getDefaultTopic('request') ) .argParser(parseSingleTopic) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+    
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .implies({contentType: 'application/json'}) .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+
     // .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
@@ -255,6 +260,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 
@@ -283,10 +289,12 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the message topic(s)')) .default([ getDefaultTopic('send')]) .argParser(parseRequestTopic) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .hideHelp(advanced))
-    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .conflicts('message') .conflicts('stdin') .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .conflicts('message') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .conflicts('message') .conflicts('defaultMessage') .conflicts('file').default(false) .hideHelp(advanced))
+    
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({contentType: 'text/plain'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('--default-message', chalk.whiteBright('use default message body')) .implies({contentType: 'application/json'}) .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({contentType: 'text/plain'}) .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+
     .addOption(new Option('--time-to-live <MILLISECONDS>', chalk.whiteBright('the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(advanced))
     .addOption(new Option('--dmq-eligible [BOOLEAN]', chalk.whiteBright('the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(advanced))
 
@@ -325,6 +333,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode 'DIRECT' or 'PERSISTENT'`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] payload content type')) .argParser(parseContentType) .default(defaultMessageConfig.contentType) .hideHelp(!advanced))
     .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, CONCISE OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(!advanced))
     .addOption(new Option('--pretty [BOOLEAN]', chalk.whiteBright('[advanced] prettify the payload')) .argParser(parseBoolean) .default(defaultMessageConfig.pretty) .hideHelp(!advanced))
 

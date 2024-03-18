@@ -155,7 +155,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer | undefined, iteration: number = 0) {
+  publish(topicName: string, payload: string | Buffer | undefined, contentType: string, iteration: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -167,16 +167,25 @@ export class SolaceClient extends VisualizeClient {
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       if (payload) {
-        if (typeof payload === 'object') {
-          const encoder = new TextEncoder(); 
-          const result = encoder.encode(JSON.stringify(payload)); 
-          message.setBinaryAttachment(result);
-        } else if (typeof payload === 'string') {
-          const encoder = new TextEncoder(); 
-          const result = encoder.encode(payload); 
-          message.setBinaryAttachment(result);
+        if (contentType === 'application/xml' || contentType === 'text/plain') {
+          if (typeof payload === 'string')
+            message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
+          else
+            message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        } else if (contentType === 'application/json') {
+          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
         } else {
-          message.setBinaryAttachment(payload);
+          if (typeof payload === 'object') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(JSON.stringify(payload)); 
+            message.setBinaryAttachment(result);
+          } else if (typeof payload === 'string') {
+            const encoder = new TextEncoder(); 
+            const result = encoder.encode(payload); 
+            message.setBinaryAttachment(result);
+          } else {
+            message.setBinaryAttachment(payload);
+          }
         }
       } else {
         message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));

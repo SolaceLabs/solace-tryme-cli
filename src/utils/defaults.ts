@@ -141,6 +141,7 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
+  contentType: "text/plain",
   outputMode: 'DEFAULT',
   pretty: false
 }
@@ -202,6 +203,7 @@ export const defaultMessageRequestConfig:any = {
   enabled: false, // guaranteed publisher
   windowSize: 50,
 
+  contentType: "text/plain",
   outputMode: 'DEFAULT',
   pretty: false,
 
@@ -228,6 +230,7 @@ export const defaultMessageReplyConfig:any = {
   exitAfter: 0,
   traceVisualization: false,
 
+  contentType: "text/plain",
   outputMode: 'DEFAULT',
   pretty: false,
   

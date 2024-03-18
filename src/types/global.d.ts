@@ -98,6 +98,7 @@ declare global {
     userProperties?: Record<string, string | string[]>
     waitBeforeExit?: number
     exitAfter?: number
+    contentType?: string
     outputMode?: string
     pretty?: boolean
     traceVisualization?: boolean
