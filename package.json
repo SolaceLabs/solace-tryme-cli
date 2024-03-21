@@ -1,6 +1,6 @@
 {
   "name": "stm",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "Solace Try-Me Command Line Tool",
   "keywords": [
     "solace",
@@ -40,6 +40,7 @@
     "readline": "^1.3.0",
     "signale": "^1.4.0",
     "solclientjs": "^10.15.0",
+    "sync-fetch": "^0.5.2",
     "ts-node": "^10.9.1",
     "uuidv4": "^6.2.13"
   },

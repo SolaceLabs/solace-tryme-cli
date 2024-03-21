@@ -26,7 +26,13 @@ const options = {
       badge: '…',
       color: 'cyanBright',
       label: 'waiting',
-      logLevel: 'waiting',
+      logLevel: 'info',
+    },
+    alert: {
+      badge: '📢',
+      color: 'whiteBright',
+      label: 'alert',
+      logLevel: 'info',
     },
   }
 };
@@ -69,6 +75,7 @@ const Logger = {
 
 
   await: (message: string) => Signal.await(chalk.cyanBright(message)),
+  alert: (message: string) => Signal.alert(chalk.bgMagenta(message)),
 
   prettyPrintMessage: (properties:any, userProperties:any, payload:any, outputMode:string, pretty: boolean) => {
     var outputStr = '';

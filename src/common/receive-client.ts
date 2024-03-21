@@ -1,7 +1,7 @@
 import solace, { LogLevel } from "solclientjs";
 import { Logger } from '../utils/logger'
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED, STM_EVENT_RECEIVED } from "../utils/controlevents";
-import { getDefaultClientName, getType } from "../utils/defaults";
+import { getDefaultClientName, getDefaultTopic, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 const { uuid } = require('uuidv4');
 
@@ -325,13 +325,15 @@ export class SolaceClient extends VisualizeClient {
 
           if (this.options.topic) {
             this.options.topic.forEach((topicName: string) => {  
-              this.receiver.topics.add(topicName);            
+              if (topicName === getDefaultTopic('receive') && !this.options.createIfMissing) return;
+                this.receiver.topics.add(topicName);
             })
           }
 
           // Define message receiver event listeners
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.UP, () => {
             this.options.topic.forEach((topicName: string) => {              
+              if (topicName === getDefaultTopic('receive') && !this.options.createIfMissing) return;
               try {
                 Logger.await('adding subscription to topic: ' + topicName);
                 this.receiver.messageReceiver.addSubscription(

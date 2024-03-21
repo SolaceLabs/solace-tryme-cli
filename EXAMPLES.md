@@ -14,14 +14,6 @@ stm send
 
 HINT: You can view the default publish command settings 'stm config list --name send'!
 
-// save an existing command setting to a new name in a configuration file
-
-stm send --config cloud-broker --save publish2
-
-// execute a specific publish command from the named configuration
-
-stm send --config cloud-broker --name publish2
-
 // execute the default publish command with settings defined on the default
 // configuration 'stm-cli-config.json', but publish on topic specified in the
 // command-line (overriding the command settings)
@@ -44,6 +36,14 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker --save
+
+// save an existing command setting to a new name in a configuration file
+
+stm send --config cloud-broker --save publish2
+
+// execute a specific publish command from the named configuration
+
+stm send --config cloud-broker --name publish2
 
 // Duplicate the command setting
 
@@ -78,11 +78,6 @@ HINT: You can view the default receive command settings 'stm config list --name 
 
 stm receive --queue my-queue --create-if-missing --topic "solace/>"
 
-
-// execute a specific receive command from the named configuration
-
-stm receive --config cloud-broker --name receive
-
 // execute the default receive command with settings defined on the default
 // configuration 'stm-cli-config.json', but receive on topic specified in the
 // command-line (overriding the command settings)
@@ -111,6 +106,10 @@ setting to a new name!
 
 stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker --save
 
+// execute a specific receive command from the named configuration
+
+stm receive --config cloud-broker --name receive
+
 // Duplicate the command setting
 
 stm receive  --name receive --config cloud-broker --save receive2
@@ -138,10 +137,6 @@ stm request
 
 HINT: You can view the default request command settings 'stm config list --name request'!
 
-// execute a specific request command from the named configuration
-
-stm request --config cloud-broker --name request
-
 // execute the default request command with settings defined on the default
 // configuration 'stm-cli-config.json', but request on topic specified in the
 // command-line (overriding the command settings)
@@ -164,6 +159,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm request --topic "stm/logistics/shipped" --name request --config cloud-broker --save
+
+// execute a specific request command from the named configuration
+
+stm request --config cloud-broker --name request
 
 // Duplicate the command setting
 
@@ -192,10 +191,6 @@ stm reply
 
 HINT: You can view the default reply command settings 'stm config list --name reply'!
 
-// execute a specific reply command from the named configuration
-
-stm reply --config cloud-broker --name reply
-
 // execute the default reply command with settings defined on the default
 // configuration 'stm-cli-config.json', but reply on topic specified in the
 // command-line (overriding the command settings)
@@ -218,6 +213,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker --save
+
+// execute a specific reply command from the named configuration
+
+stm reply --config cloud-broker --name reply
 
 // Duplicate the command setting
 
@@ -251,10 +250,6 @@ HINT: You can view the default queue command settings 'stm config list --name qu
 
 NOTE: The actual operation is determined by the operation parameter - create, update or delete!
 
-// execute a specific queue command from the named configuration
-
-stm manage queue --config cloud-broker --name queue
-
 // execute the default queue command with settings defined on the default
 // configuration 'stm-cli-config.json', but with command-line overrides
 
@@ -276,6 +271,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker --save
+
+// execute a specific queue command from the named configuration
+
+stm manage queue --config cloud-broker --name queue
 
 // Duplicate the command setting
 
@@ -306,10 +305,6 @@ HINT: You can view the default client-profile command settings 'stm config list 
 
 NOTE: The actual operation is determined by the operation parameter - create, update or delete!
 
-// execute a specific client-profile command from the named configuration
-
-stm manage client-profile --config cloud-broker --name client-profile
-
 // execute the default client-profile command with settings defined on the default
 // configuration 'stm-cli-config.json', with the command-line overrides
 
@@ -331,6 +326,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm manage client-profile --allow-guaranteed-endpoint-create-durability all --name client-profile --config cloud-broker --save
+
+// execute a specific client-profile command from the named configuration
+
+stm manage client-profile --config cloud-broker --name client-profile
 
 // Duplicate the command setting
 
@@ -361,10 +360,6 @@ HINT: You can view the default acl-profile command settings 'stm config list --n
 
 NOTE: The actual operation is determined by the operation parameter - create, update or delete!
 
-// execute a specific acl-profile command from the named configuration
-
-stm manage acl-profile --config cloud-broker --name acl-profile
-
 // execute the default acl-profile command with settings defined on the default
 // configuration 'stm-cli-config.json', but with command-line overrides)
 
@@ -386,6 +381,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm manage acl-profile --client-connect-default-action allow --name acl-profile --config cloud-broker --save
+
+// execute a specific acl-profile command from the named configuration
+
+stm manage acl-profile --config cloud-broker --name acl-profile
 
 // Duplicate the command setting
 
@@ -416,10 +415,6 @@ HINT: You can view the default client-username command settings 'stm config list
 
 NOTE: The actual operation is determined by the operation parameter - create, update or delete!
 
-// execute a specific client-username command from the named configuration
-
-stm manage client-username --config cloud-broker --name client-username
-
 // execute the default client-username command with settings defined on the default
 // configuration 'stm-cli-config.json', with the command-line overrides
 
@@ -441,6 +436,10 @@ setting to a new name!
 // Update the command setting with the specified command-line parameters (if specified)
 
 stm manage client-username --enabled true --name client-username --config cloud-broker --save
+
+// execute a specific client-username command from the named configuration
+
+stm manage client-username --config cloud-broker --name client-username
 
 // Duplicate the command setting
 

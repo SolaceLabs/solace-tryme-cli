@@ -26,6 +26,7 @@ import { loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
 import chalk from 'chalk';
 import { displayConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
+import { Logger } from './utils/logger';
 
 export class Commander {
   program: Command
@@ -36,6 +37,15 @@ export class Commander {
     this.program = new Command()
     this.help = help;
     this.advanced = advanced;
+    const fetch = require('sync-fetch')
+
+    const latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
+      headers: {
+        Accept: 'application/json'
+      }
+    }).json()
+    if (`${'v' + version}` !== latestVersion.name)
+      Logger.alert('A newer version of Solace Try-Me CLI is available: ' + latestVersion.html_url);
   }
 
   init(): void {
