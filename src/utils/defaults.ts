@@ -268,7 +268,7 @@ export const defaultManageQueueConfig:any = {
   maxMsgSpoolUsage: 5000,
   maxRedeliveryCount: 0,
   maxTtl: 0,
-  owner: "",
+  owner: "default",
   partitionCount: 0,
   partitionRebalanceDelay: 5,
   partitionRebalanceMaxHandoffTime: 3,

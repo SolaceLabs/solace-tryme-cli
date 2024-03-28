@@ -100,7 +100,7 @@ declare global {
     exitAfter?: number
     contentType?: string
     outputMode?: string
-    pretty?: boolean
+    pretty?: boolean // NOT USED
     traceVisualization?: boolean
 
     // Help Examples

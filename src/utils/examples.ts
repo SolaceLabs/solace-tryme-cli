@@ -234,10 +234,6 @@ ${chalk.greenBright('stm config list --config cloud-broker')}
 
 ${chalk.greenBright('stm config list --config cloud-broker --name receive')}
 
-// save as a new command
-
-${chalk.greenBright('stm send --config cloud-broker --save publish2')}
-
   `)
 }
 
@@ -274,8 +270,33 @@ ${chalk.magentaBright(`HINT: You can view the default publish command settings '
 
 ${chalk.greenBright('stm send --topic ' + getDefaultTopic('send'))}
 
-${chalk.yellowBright('NOTE: You can override any of the publish parameters \n' +
-'that are applied only for this instance of execution!')}
+// publish with payload via the command-line parameter
+
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' -m "Hello World!"')}
+
+// publish with a default payload 
+
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --default-message')}
+
+// publish with payload from a file
+
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' -f OrderCreated.json')}
+
+// publish with payload from stdin (console)
+
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --stdin')}
+
+// publish events to multiple events in a specified interval(ms)
+
+${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --count 100 --interval 5000')}
+
+// publish events to multiple topics
+
+${chalk.greenBright('stm send --topic "stm/logistics/shipped" "stm/inventory/check"')}
+
+
+${chalk.yellowBright('You can override any of the publish parameters \n' +
+'and they are applied only for this instance of execution!')}
 
 // If you want to run a publish entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
@@ -289,7 +310,7 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-${chalk.greenBright('stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker --save')}
+${chalk.greenBright('stm send --count 100 --interval 1000 --name publish2 --config cloud-broker --save')}
 
 // save an existing command setting to a new name in a configuration file
 
@@ -302,12 +323,6 @@ ${chalk.greenBright('stm send --config cloud-broker --name publish2')}
 // Duplicate the command setting
 
 ${chalk.greenBright('stm send  --name publish2 --config cloud-broker --save publish3')}
-
-// Duplicate the command setting with the specified command-line parameters
-
-${chalk.greenBright('stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker --save publish4')}
-
-${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)
 }
 
@@ -315,28 +330,33 @@ export const displayHelpExamplesForReceive = () => {
   console.log(`
 Examples:
 // execute the default receive command with settings defined on the 
-// default configuration 'stm-cli-config.json' 
+// default configuration 'stm-cli-config.json' which subscribes to 
+// a default topic ${getDefaultTopic('receive')}
 
 ${chalk.greenBright('stm receive')}
 
+// receive events from a topic
+
+${chalk.greenBright('stm receive -t "stm/logistics/shipped"')}
+
+// receive events from multiple topics 
+
+${chalk.greenBright('stm receive -t "stm/logistics/shipped" "stm/inventory/check"')}
+
 ${chalk.magentaBright(`HINT: You can view the default receive command settings 'stm config list --name receive'!`)}
 
-// execute the default receive command with settings defined on the 
-// default configuration 'stm-cli-config.json', but receive from a queue,
-// with optionally creating the queue if found missing, and add subscriptions to the queue
+// receive events from a queue, if queue is not found create a queue with the name
+// optionally you can also specify a subscription to be added to the queue
 
-${chalk.greenBright('stm receive --queue my-queue --create-if-missing --topic "solace/>"')}
+${chalk.greenBright('stm receive --queue new-queue --create-if-missing --topic "solace/>"')}
 
-// execute the default receive command with settings defined on the default 
-// configuration 'stm-cli-config.json', but receive on topic specified in the 
-// command-line (overriding the command settings)
+// receive events from a queue
 
-${chalk.greenBright('stm receive --topic ' + getDefaultTopic('receive'))}
+${chalk.greenBright('stm receive --queue my-queue')}
 
-// execute the default receive command with settings defined on the default 
-// configuration 'stm-cli-config.json', but receive from a queue
+// receive events from a queue and add a subscription 
 
-${chalk.greenBright('stm receive --queue stm-queue --topic ' + getDefaultTopic('receive'))}
+${chalk.greenBright('stm receive --queue my-queue -t "stm/logistics/shipped"')}
 
 ${chalk.yellowBright('NOTE: You can override any of the receive parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -382,10 +402,26 @@ ${chalk.greenBright('stm request')}
 ${chalk.magentaBright(`HINT: You can view the default request command settings 'stm config list --name request'!`)}
 
 // execute the default request command with settings defined on the default 
-// configuration 'stm-cli-config.json', but request on topic specified in the 
+// configuration 'stm-cli-config.json', but on the topic specified in the 
 // command-line (overriding the command settings)
 
 ${chalk.greenBright('stm request --topic ' + getDefaultTopic('request'))}
+
+// request with payload via the command-line parameter
+
+${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' -m "Hello World!"')}
+
+// request with a default payload 
+
+${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' --default-message')}
+
+// request with payload from a file
+
+${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' -f OrderCreated.json')}
+
+// request with payload from stdin (console)
+
+${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' --stdin')}
 
 ${chalk.yellowBright('NOTE: You can override any of the request parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -435,6 +471,22 @@ ${chalk.magentaBright(`HINT: You can view the default reply command settings 'st
 // command-line (overriding the command settings)
 
 ${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply'))}
+
+// reply with payload via the command-line parameter
+
+${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' -m "Hello World!"')}
+
+// reply with a default payload 
+
+${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' --default-message')}
+
+// reply with payload from a file
+
+${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' -f OrderCreated.json')}
+
+// reply with payload from stdin (console)
+
+${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' --stdin')}
 
 ${chalk.yellowBright('NOTE: You can override any of the reply parameters \n' +
 'that are applied only for this instance of execution!')}
@@ -493,7 +545,15 @@ ${chalk.yellowBright('NOTE: You can override any of the queue parameters \n' +
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-${chalk.greenBright('stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
+${chalk.greenBright('stm manage queue --create new-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions')}
+
+// update queue (settings & subscriptions)
+
+${chalk.greenBright('stm manage queue --update new-queue --access-type non-exclusive --partition-count 10 --remove-subscriptions stm/cli/topic --add-subscriptions "stm/logistics/>" --list-subscriptions')}
+
+// delete queue
+
+${chalk.greenBright('stm manage queue --delete new-queue')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +

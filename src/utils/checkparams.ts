@@ -108,23 +108,20 @@ export const checkSempConnectionParamsExists = (url: string | undefined, vpn :st
   }
 }
 
-export const checkSempQueueSubscriptionTopicExists = (options: ManageClientOptions) => {
+export const checkSempQueueSubscriptionTopicExists = (options: ManageClientOptions, optionsSource: any) => {
   if (!options.addSubscriptions.length && !options.removeSubscriptions.length) return;
-
+  
   if (options.addSubscriptions && typeof options.addSubscriptions !== 'object') {
     Logger.error("invalid add subscription topic specified, one or more topic name is expected")
     Logger.error('exiting...')
     process.exit(1)
   }
-  options.addSub = options.addSubscriptions.length ? true : false;
-
+  
   if (options.removeSubscriptions.length && typeof options.removeSubscriptions !== 'object') {
     Logger.error("invalid remove subscription topic specified, one or more topic name is expected")
     Logger.error('exiting...')
     process.exit(1)
   }
-
-  options.removeSub = options.removeSubscriptions.length ? true : false;
 
   if (options.removeSub && options.operation?.toUpperCase() === 'CREATE') {
     Logger.logWarn("remove subscription option is not applicable while creating a queue, ignoring...")
@@ -132,7 +129,58 @@ export const checkSempQueueSubscriptionTopicExists = (options: ManageClientOptio
     options.removeSubscriptions = []
   }
 
+  if (options.operation === 'DELETE' && (optionsSource.addSubscriptions === 'cli' && options.addSubscriptions.length)) {
+    Logger.logWarn("add subscription option is not applicable while deleting a queue, ignoring...")
+    options.addSub = false;
+    options.addSubscriptions = []
+  }
+
+  if (options.operation === 'DELETE' && (optionsSource.removeSubscriptions === 'cli' && options.removeSubscriptions.length)) {
+    Logger.logWarn("remove subscription option is not applicable while deleting a queue, ignoring...")
+    options.removeSub = false;
+    options.removeSubscriptions = []
+  }
+
+  if (options.operation === 'CREATE' && options.removeSubscriptions.length) {
+    Logger.logWarn("remove subscription option is not applicable while creating a queue, ignoring...")
+    options.removeSub = false;
+    options.removeSubscriptions = []
+  }
+
+  if (options.operation === 'CREATE') {
+    if (optionsSource.addSubscriptions === 'cli') {
+      options.addSub = true;
+    } else if (options.addSubscriptions.length) {
+      optionsSource.addSub = 'cli';
+      options.addSub = true;
+    } else {
+      optionsSource.addSub = 'cli';
+      options.addSub = false;
+    }
+  }
+
+  if (options.operation === 'UPDATE') {
+    if (optionsSource.addSubscriptions !== 'cli') {
+      optionsSource.addSub = 'cli';
+      options.addSub = false;
+      options.addSubscriptions = []
+    } else {
+      optionsSource.addSub = 'cli';
+      options.addSub = true;
+    }
+
+    if (optionsSource.removeSubscriptions !== 'cli') {
+      optionsSource.removeSub = 'cli';
+      options.removeSub = false;
+      options.removeSubscriptions = []
+    } else {
+      optionsSource.removeSub = 'cli';
+      options.removeSub = true;
+    }
+  }
+
   options.listSub = options?.listSubscriptions ? true : false
+  optionsSource.listSub = 'cli';
 }
 
 export const checkSempQueuePartitionSettings = (options: ManageClientOptions) => {

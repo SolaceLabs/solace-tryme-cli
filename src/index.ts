@@ -37,6 +37,9 @@ export class Commander {
     this.program = new Command()
     this.help = help;
     this.advanced = advanced;
+  }
+
+  getVersion(): string {
     const fetch = require('sync-fetch')
 
     const latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
@@ -44,8 +47,13 @@ export class Commander {
         Accept: 'application/json'
       }
     }).json()
-    if (`${'v' + version}` !== latestVersion.name)
+
+    if (`${'v' + version}` !== latestVersion.name) {
+      Logger.await('getting current version')
       Logger.alert('A newer version of Solace Try-Me CLI is available: ' + latestVersion.html_url);
+    }
+
+    return `${version}`
   }
 
   init(): void {
@@ -54,7 +62,7 @@ export class Commander {
       .description(chalk.whiteBright('A Solace Try-Me client for the command line'))
       .enablePositionalOptions()
       .allowUnknownOption(false)
-      .version(`${version}`, '-v, --version')
+      .version(version, '-v, --version')
     addRootHelpOptions(rootCmd);
     rootCmd.action((options) => {
       if (options.helpExamples) 

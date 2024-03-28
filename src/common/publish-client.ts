@@ -256,8 +256,6 @@ export class SolaceClient extends VisualizeClient {
         Logger.logDetailedError('session disconnect failed - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
-    } else {
-      Logger.logError('not connected to Solace PubSub+ Event Broker.');
     }
   };
   
@@ -269,6 +267,6 @@ export class SolaceClient extends VisualizeClient {
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 1500); // wait for 1 second to finish
+    }, 1000); // wait for 1 second to finish
   };
 }

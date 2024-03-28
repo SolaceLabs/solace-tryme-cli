@@ -236,7 +236,7 @@ Destination:                            [Topic solace/try/me]
 ℹ  info: Message Payload (bytes): 100
 ```
 
-**NOTE:** `stm` supports a default output mode that prints the destination and the message payload length (not the payload itself). However, if you want more details around message & user properties and payload - explore the other options i.e., `CONCISE` and `FULL` along with the `--pretty` option for a pretty-print of the payload.
+**NOTE:** `stm` supports a default output mode that prints the destination and the message payload length (not the payload itself). However, if you want more details around message & user properties and payload - explore the other options i.e., `PROPS` to print message properties + just payload length, and `FULL` to print message properties and a pretty-print of the payload.
 
 ### Working with Cloud Broker
 

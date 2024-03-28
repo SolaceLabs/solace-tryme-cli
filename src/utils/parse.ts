@@ -62,8 +62,8 @@ export const parseLogLevel = (value: string) => {
 }
 
 export const parseOutputMode = (value: string) => {
-  if (!['DEFAULT', 'CONCISE', 'FULL'].includes(value.toUpperCase())) {
-    Logger.logError(`only 'DEFAULT', 'CONCISE', 'FULL' are supported, and if not specified a DEFAULT mode is used.`)
+  if (!['DEFAULT', 'PROPS', 'FULL'].includes(value.toUpperCase())) {
+    Logger.logError(`only 'DEFAULT', 'PROPS', 'FULL' are supported, and if not specified a DEFAULT mode is used.`)
     Logger.logError('exiting...')
     process.exit(1)
   }
@@ -188,7 +188,7 @@ export const parsePublishTopic = (value: string, previous: string[] | undefined)
   
   }
 
-  previous ? previous.push(value.toString()) : [ value ];
+  previous ? previous.push(value.toString()) : previous = [ value ];
   
   return previous;
 }
@@ -206,7 +206,7 @@ export const parseReceiveTopic = (value: string, previous: string[] | undefined)
     process.exit(1)
   }
 
-  previous ? previous.push(value.toString()) : [ value ];
+  previous ? previous.push(value.toString()) : previous = [ value ];
   
   return previous;
 }
@@ -224,7 +224,7 @@ export const parseRequestTopic = (value: string, previous: string[] | undefined)
     process.exit(1)
   }
 
-  previous ? previous.push(value.toString()) : [ value ];
+  previous ? previous.push(value.toString()) : previous = [ value ];
   
   return previous;
 }
@@ -242,7 +242,7 @@ export const parseReplyTopic = (value: string, previous: string[] | undefined) =
     process.exit(1)
   }
 
-  previous ? previous.push(value.toString()) : [ value ];
+  previous ? previous.push(value.toString()) : previous = [ value ];
   
   return previous;
 }
@@ -270,7 +270,7 @@ export const parseSempQueueTopics = (value: string, previous: string[] | undefin
     process.exit(1)
   }
 
-  previous ? previous.push(value.toString()) : [ value ];
+  previous ? previous.push(value.toString()) : previous = [ value ];
   return previous;
 }
 

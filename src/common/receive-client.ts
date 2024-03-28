@@ -367,11 +367,11 @@ export class SolaceClient extends VisualizeClient {
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN, () => {
             this.receiver.consuming = false;
-            Logger.logError('the message receiver is now down');
+            // Logger.logError('the message receiver is now down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.DOWN_ERROR, () => {
             this.receiver.consuming = false;
-            Logger.logError('the message receiver is down');
+            // Logger.logError('the message receiver is down');
           });
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) =>  {
             Logger.logDetailedError(`cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
@@ -426,8 +426,6 @@ export class SolaceClient extends VisualizeClient {
         Logger.logDetailedError('session disconnect failed - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
       }
-    } else {
-      Logger.logError('not connected to Solace PubSub+ Event Broker.');
     }
   };
     
@@ -439,6 +437,6 @@ export class SolaceClient extends VisualizeClient {
     setTimeout(function () {
       Logger.logSuccess('exiting...')
       process.exit(0);
-    }, 1500); // wait for 1 second to finish
+    }, 1000); // wait for 1 second to finish
   };
 }

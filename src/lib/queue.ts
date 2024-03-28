@@ -41,10 +41,7 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
   checkSempQueuePartitionSettings(options);
 
   // check publish topic found
-  checkSempQueueSubscriptionTopicExists(options);
-
-  // if subscriptions are specified, remove the default subscription at pos-0
-  checkForCliTopics('addSubscriptions', options, optionsSource);
+  checkSempQueueSubscriptionTopicExists(options, optionsSource);
 
   if (save) {
     saveOrUpdateCommandSettings(options, optionsSource)

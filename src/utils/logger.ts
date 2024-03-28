@@ -34,6 +34,12 @@ const options = {
       label: 'alert',
       logLevel: 'info',
     },
+    message: {
+      badge: '✉️',
+      color: 'orange',
+      label: 'message',
+      logLevel: 'info'
+    }
   }
 };
 
@@ -65,6 +71,9 @@ const Logger = {
   info: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
   logInfo: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
 
+  message: (message: string) => Signal.info(chalk.keyword('orange')('message: ').concat(chalk.whiteBright(message))),
+  logMessage: (message: string) => Signal.info(chalk.keyword('orange')('message: ').concat(chalk.whiteBright(message))),
+
   warn: (message: string) => Signal.warn(chalk.yellowBright('warn: ').concat(chalk.whiteBright(message))),
   logWarn: (message: string) => Signal.warn(`${chalk.yellowBright('warn: ').concat(chalk.whiteBright(message))}`),
   logDetailedWarn: (message: string, detail: string) => Signal.warn(chalk.yellowBright('warn: ').concat(chalk.whiteBright(message)).concat(' - ').concat(chalk.yellowBright(detail))),
@@ -77,63 +86,49 @@ const Logger = {
   await: (message: string) => Signal.await(chalk.cyanBright(message)),
   alert: (message: string) => Signal.alert(chalk.bgMagenta(message)),
 
-  prettyPrintMessage: (properties:any, userProperties:any, payload:any, outputMode:string, pretty: boolean) => {
-    var outputStr = '';
+  prettyPrintMessage: (message: any, payload:any, outputMode:string, pretty: boolean) => {
+    var properties = message.dump(0);
+    var userProperties = message.getUserPropertyMap();
 
     if (outputMode?.toUpperCase() === 'FULL') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
-      Logger.logInfo(`Message Properties\r\n${properties}`)
+      let userProps = '';
       if  (userProperties) {
         let keys = userProperties.getKeys();
-        let userProps = '';
-        keys.forEach((key: any) => {
-          userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
+        keys.forEach((key: any, idx: number) => {
+          userProps += `\t${key}:\t\t\t\t${userProperties.getField(key).getValue()}`;
+          if (idx < keys.length-1) userProps += `\r\n`;
         });
-        Logger.logInfo(`Message User Properties${userProps}`)
       }
-      if (pretty) {
-        if (payload.startsWith('<?xml')) {
-          var prettyPayload = prettyXML(payload.trim(), 2);
-          payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
-        } else {
-          var prettyPayload = prettyJSON(payload.trim());
-          payload && Logger.logInfo(`Message Payload:\r\n${prettyPayload}`);
-        }
+      if (userProps) 
+        Logger.logMessage(`Properties\r\n${properties}\r\n${chalk.italic('User Properties:')}\r\n${userProps}`);
+      else 
+        Logger.logMessage(`Properties\r\n${properties}`)
+      if (payload.startsWith('<?xml')) {
+        var prettyPayload = prettyXML(payload.trim(), 2);
+        payload && Logger.logMessage(`Payload\r\n${prettyPayload}`);
       } else {
-        payload && Logger.logInfo(`Message Payload:\r\n${payload}`);
+        var prettyPayload = prettyJSON(payload.trim());
+        payload && Logger.logMessage(`Payload\r\n${prettyPayload}`);
       }
-    } else if (outputMode?.toUpperCase() === 'CONCISE') {
+    } else if (outputMode?.toUpperCase() === 'PROPS') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
-      Logger.logInfo(`Message Properties\r\n${properties}`)
+      let userProps = '';
       if  (userProperties) {
         let keys = userProperties.getKeys();
-        let userProps = '';
-        keys.forEach((key: any) => {
-          userProps += `\r\n${key}:\t\t\t\t\t${userProperties.getField(key).getValue()}`;
+        keys.forEach((key: any, idx: number) => {
+          userProps += `\t${key}:\t\t\t\t${userProperties.getField(key).getValue()}`;
+          if (idx < keys.length-1) userProps += `\r\n`;
         });
-        Logger.logInfo(`Message User Properties${userProps}`)
       }
-      Logger.logInfo(`Message Payload (bytes): ${payload ? payload.length : 0}`);
+      if (userProps) 
+        Logger.logMessage(`Properties\r\n${properties}\r\n${chalk.italic('User Properties:')}\r\n${userProps}`);
+      else 
+        Logger.logMessage(`Properties\r\n${properties}`)
+      Logger.logMessage(`Payload (bytes): ${payload ? payload.length : 0}`);
     } else {
-      if (properties) {
-        var arr = properties.split('\n');
-        var newProps = '';
-        arr.forEach((element:any) => {
-          if (!displayMessageProperties.filter(option => element.startsWith(option)).length) return;
-          
-          if (element.startsWith('TimeToLive'))
-            newProps += newProps ? '\n' + element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)') : 
-                        element.replace(/\((Sat|Sun|Mon|Tue|Thu|Fri).*Time\)\)/,'(ms)')
-          else if (!element.startsWith('Class Of Service') && 
-              !element.startsWith('Correlation Tag Pointer') &&
-              !element.startsWith('Binary Attachment'))
-            newProps += newProps ? '\n' + element : element;
-        })
-        properties = newProps;
-      }
-      
-      Logger.logInfo(`Message Properties\r\n${properties}`);
-      Logger.logInfo(`Message Payload (bytes): ${payload ? payload.length : 0}`);
+      Logger.logMessage(`Destination: ${message.getDestination()}`);
+      Logger.logMessage(`Payload (bytes): ${payload ? payload.length : 0}`);
     }
   },
 
@@ -145,7 +140,7 @@ const Logger = {
       payload = message.getSdtContainer().getValue();
     }
 
-    Logger.prettyPrintMessage(message.dump(0), message.getUserPropertyMap(), payload.trim(), outputMode, pretty)
+    Logger.prettyPrintMessage(message, payload.trim(), outputMode, pretty)
   },
 
 

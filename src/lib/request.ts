@@ -32,7 +32,7 @@ const request = async (
     'use strict';
     if (interrupted) return;
     interrupted = true;
-    Logger.logWarn('operation interrupted...')
+    Logger.logInfo('operation interrupted...')
     requestor.exit();
   });
 

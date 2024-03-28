@@ -45,19 +45,18 @@ Options:
   -u, --username <USERNAME>                the username (default: "default")
   -p, --password <PASSWORD>                the password (default: "default")
 
-  /* MESSAGE SETTINGS */
+  /* MESSAGE TOPIC SETTINGS */
   -t, --topic <TOPIC...>                   the message topic(s) (default: ["solace/try/me"])
+
+  /* MESSAGE BODY SETTINGS */
   -m, --message <MESSAGE>                  the message body
   --default-message                        use default message body
   -f, --file <FILENAME>                    filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
+
+  /* MULTI-MESSAGE SETTINGS */
   --count <COUNT>                          the number of events to publish (default: 1)
   --interval <MILLISECONDS>                the time to wait between publish (default: 1000)
-  --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
-  --dmq-eligible [BOOLEAN]                 the DMQ eligible flag (default: true)
-  --partition-key <KEY>                    the simulated partition key option (SECOND or MILLISECOND,
-                                           derives a value from publish time and set as partition key)
-  --partition-keys <KEY...>                the partition key(s) list
 
   /* CONFIGURATION SETTINGS */
   -c, --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
@@ -66,8 +65,7 @@ Options:
                                            (default: false)
 
   /* HELP OPTIONS */
-  -hm, --help-more                         display more help for command with options not shown in basic
-                                           help
+  -hm, --help-more                         display more help with options not shown in basic help
   -he, --help-examples                     show cli publish examples
   -h, --help                               display help for command
 ```
@@ -83,66 +81,77 @@ Execute a send command
 
 Options:
 
-  /* SESSION SETTINGS */
-  -cn, --client-name <CLIENT_NAME>       [advanced] the client name (default: an auto-generated
-                                         client name)
-  --description <DESCRIPTION>            [advanced] the application description (default: "Publish
-                                         application created via Solace Try-Me CLI")
-  --read-timeout <MILLISECONDS>          [advanced] the read timeout period for a connect operation
-                                         (default: 10000)
-  --connection-timeout <MILLISECONDS>    [advanced] the timeout period for a connect operation
-                                         (default: 3000)
-  --connection-retries <MILLISECONDS>    [advanced] the number of times to retry connecting during
-                                         initial connection setup (default: 3)
-  --reconnect-retries <NUMBER>           [advanced] the number of times to retry connecting after a
-                                         connected session goes down (default: 3)
-  --reconnect-retry-wait <MILLISECONDS>  [advanced] the amount of time between each attempt to connect
-                                         to a host (default: 3000)
-  --keepalive <MILLISECONDS>             [advanced] the amount of time to wait between sending out
-                                         keep-alive messages to the VPN (default: 3000)
-  --keepalive-interval-limit <NUMBER>    [advanced] the maximum number of consecutive Keep-Alive
-                                         messages that can be sent without receiving a response before the
-                                         session is declared down (default: 3)
-  --include-sender-id [BOOLEAN]          [advanced] include a sender ID on sent messages (default:
-                                         false)
-  --generate-sequence-number [BOOLEAN]   [advanced] include sequence number on messages sent
-                                         (default: false)
-  --log-level <LEVEL>                    [advanced] solace log level, one of values: FATAL, ERROR, WARN,
-                                         INFO, DEBUG, TRACE (default: "ERROR")
+  /* MESSAGE OUTPUT SETTINGS */
+  --output-mode <MODE>                        [advanced] message print mode: DEFAULT, PROPS OR
+                                              FULL (default: "DEFAULT")
+
+  /* PARTITION KEY SETTINGS */
+  --partition-key <KEY>                       [advanced] the simulated partition key option (SECOND or
+                                              MILLISECOND, derives a value from publish time and set as
+                                              partition key)
+  --partition-keys <KEY...>                   [advanced] the partition key(s) list
+
+  /* ADVANCED MESSAGE SETTINGS */
+  --content-type <CONTENT_TYPE>               [advanced] payload content type (default:
+                                              "text/plain")
+  --time-to-live <MILLISECONDS>               [advanced] the time before a message is discarded or moved
+                                              to a DMQ
+  --dmq-eligible [BOOLEAN]                    [advanced] the DMQ eligible flag (default: true)
+  --message-id <MESSAGE_ID>                   [advanced] the application-provided message ID
+  --message-type <MESSAGE_TYPE>               [advanced] the application-provided message type
+  --correlation-key <CORRELATION_KEY>         [advanced] the application-provided message correlation
+                                              key for acknowledgement management
+  --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode
+                                              'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
+  --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a
+                                              response message
+  --user-properties <PROPS...>                [advanced] the user properties (e.g., "name1: value1"
+                                              "name2: value2")
+
+  /* PUBLISH SESSION SETTINGS */
+  -cn, --client-name <CLIENT_NAME>            [advanced] the client name (default: an
+                                              auto-generated client name)
+  --description <DESCRIPTION>                 [advanced] the application description (default:
+                                              "Publish application created via Solace Try-Me CLI")
+  --read-timeout <MILLISECONDS>               [advanced] the read timeout period for a connect
+                                              operation (default: 10000)
+  --connection-timeout <MILLISECONDS>         [advanced] the timeout period for a connect operation
+                                              (default: 3000)
+  --connection-retries <MILLISECONDS>         [advanced] the number of times to retry connecting during
+                                              initial connection setup (default: 3)
+  --reconnect-retries <NUMBER>                [advanced] the number of times to retry connecting after a
+                                              connected session goes down (default: 3)
+  --reconnect-retry-wait <MILLISECONDS>       [advanced] the amount of time between each attempt to
+                                              connect to a host (default: 3000)
+  --keepalive <MILLISECONDS>                  [advanced] the amount of time to wait between sending out
+                                              keep-alive messages to the VPN (default: 3000)
+  --keepalive-interval-limit <NUMBER>         [advanced] the maximum number of consecutive Keep-Alive
+                                              messages that can be sent without receiving a response before
+                                              the session is declared down (default: 3)
+  --include-sender-id [BOOLEAN]               [advanced] include a sender ID on sent messages
+                                              (default: false)
+  --generate-sequence-number [BOOLEAN]        [advanced] include sequence number on messages sent
+                                              (default: false)
+  --log-level <LEVEL>                         [advanced] solace log level, one of values: FATAL, ERROR,
+                                              WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* PUBLISH SETTINGS */
-  --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-                                         (default: false)
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport
-                                         session. (default: 65536)
-  --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published
-                                         without acknowledgment (default: 50)
-  --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before
-                                         retransmitting unacknowledged messages (default: 2000)
-  --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or
-                                         WINDOWED (default: "WINDOWED")
-
-  /* MESSAGE SETTINGS */
-  --message-id <MESSAGE_ID>              [advanced] the application-provided message ID
-  --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
-  --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for
-                                         acknowledgement management
-  --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode
-                                         'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
-  --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a
-                                         response message
-  --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
-                                         value2")
-  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
-  --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
-                                         (default: "DEFAULT")
-  --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
+  --send-timestamps [BOOLEAN]                 [advanced] include a send timestamp on sent messages
+                                              (default: false)
+  --send-buffer-max-size <NUMBER>             [advanced] the maximum buffer size for the transport
+                                              session. (default: 65536)
+  --window-size <NUMBER>                      [advanced] the maximum number of messages that can be
+                                              published without acknowledgment (default: 50)
+  --acknowledge-timeout <MILLISECONDS>        [advanced] the time to wait for an acknowledgement, before
+                                              retransmitting unacknowledged messages (default: 2000)
+  --acknowledge-mode <MODE>                   [advanced] the acknowledgement receive mode - PER_MESSAGE
+                                              or WINDOWED (default: "WINDOWED")
 
   /* HELP OPTIONS */
-  -hm, --help-more                       display more help for command with options not shown in basic
-                                         help
-  -he, --help-examples                   show cli publish examples
-  -h, --help                             display help for command
+  -hm, --help-more                            display more help with options not shown in basic
+                                              help
+  -he, --help-examples                        show cli publish examples
+  -h, --help                                  display help for command
 ```
 </details>
 
@@ -163,9 +172,12 @@ Options:
   -u, --username <USERNAME>                the username (default: "default")
   -p, --password <PASSWORD>                the password (default: "default")
 
-  /* QUEUE SETTINGS */
+  /* MESSAGE TOPIC SETTINGS */
   -t, --topic <TOPIC...>                   the message topic(s) (default: ["solace/try/me"])
+
+  /* MESSAGE QUEUE SETTINGS */
   -q, --queue <QUEUE>                      the message queue
+  --create-if-missing [BOOLEAN]            create message queue if missing
 
   /* CONFIGURATION SETTINGS */
   -c, --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
@@ -174,11 +186,10 @@ Options:
                                            (default: false)
 
   /* HELP OPTIONS */
-  -hm, --help-more                         display more help for command with options not shown in basic
-                                           help
+  -hm, --help-more                         display more help with options not shown in basic help
   -he, --help-examples                     show cli receive examples
   -h, --help                               display help for command
-  ```
+```
 </details>
 
 <details>
@@ -191,44 +202,41 @@ Execute a receive command
 
 Options:
 
-  /* QUEUE SETTINGS */
-  --create-if-missing [BOOLEAN]          [advanced] create message queue if missing
+  /* MESSAGE OUTPUT SETTINGS */
+  --output-mode <MODE>                       [advanced] message print mode: DEFAULT, PROPS OR
+                                             FULL (default: "DEFAULT")
 
-  /* SESSION SETTINGS */
-  -cn, --client-name <CLIENT_NAME>       [advanced] the client name (default: an auto-generated
-                                         client name)
-  --description <DESCRIPTION>            [advanced] the application description (default: "Receive
-                                         application created via Solace Try-Me CLI")
-  --connection-timeout <NUMBER>          [advanced] the timeout period for a connect operation
-                                         (default: 3000)
-  --connection-retries <NUMBER>          [advanced] the number of times to retry connecting during
-                                         initial connection setup (default: 3)
-  --reconnect-retries <NUMBER>           [advanced] the number of times to retry connecting after a
-                                         connected session goes down (default: 3)
-  --reconnect-retry-wait <MILLISECONDS>  [advanced] the amount of time between each attempt to connect
-                                         to a host (default: 3000)
-  --keepalive <MILLISECONDS>             [advanced] the amount of time to wait between sending out
-                                         keep-alive messages to the VPN (default: 3000)
-  --keepalive-interval-limit <NUMBER>    [advanced] the maximum number of consecutive Keep-Alive
-                                         messages that can be sent without receiving a response before the
-                                         session is declared down (default: 3)
-  --receive-timestamps [BOOLEAN]         [advanced] include a receive timestamp on received
-                                         messages (default: false)
-  --reapply-subscriptions [BOOLEAN]      [advanced] reapply subscriptions upon calling on a disconnected
-                                         session (default: true)
-  --acknowledge-mode <MODE>              [advanced] the acknowledgement mode - AUTO or CLIENT
-                                         (default: "AUTO")
-  --log-level <LEVEL>                    [advanced] solace log level, one of values: FATAL, ERROR, WARN,
-                                         INFO, DEBUG, TRACE (default: "ERROR")
-  --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
-                                         (default: "DEFAULT")
-  --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
+  /* RECEIVE SESSION SETTINGS */
+  -cn, --client-name <CLIENT_NAME>           [advanced] the client name (default: an auto-generated
+                                             client name)
+  --description <DESCRIPTION>                [advanced] the application description (default:
+                                             "Receive application created via Solace Try-Me CLI")
+  --connection-timeout <NUMBER>              [advanced] the timeout period for a connect operation
+                                             (default: 3000)
+  --connection-retries <NUMBER>              [advanced] the number of times to retry connecting during
+                                             initial connection setup (default: 3)
+  --reconnect-retries <NUMBER>               [advanced] the number of times to retry connecting after a
+                                             connected session goes down (default: 3)
+  --reconnect-retry-wait <MILLISECONDS>      [advanced] the amount of time between each attempt to
+                                             connect to a host (default: 3000)
+  --keepalive <MILLISECONDS>                 [advanced] the amount of time to wait between sending out
+                                             keep-alive messages to the VPN (default: 3000)
+  --keepalive-interval-limit <NUMBER>        [advanced] the maximum number of consecutive Keep-Alive
+                                             messages that can be sent without receiving a response before
+                                             the session is declared down (default: 3)
+  --receive-timestamps [BOOLEAN]             [advanced] include a receive timestamp on received
+                                             messages (default: false)
+  --reapply-subscriptions [BOOLEAN]          [advanced] reapply subscriptions upon calling on a
+                                             disconnected session (default: true)
+  --acknowledge-mode <MODE>                  [advanced] the acknowledgement mode - AUTO or CLIENT
+                                             (default: "AUTO")
+  --log-level <LEVEL>                        [advanced] solace log level, one of values: FATAL, ERROR,
+                                             WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* HELP OPTIONS */
-  -hm, --help-more                       display more help for command with options not shown in basic
-                                         help
-  -he, --help-examples                   show cli receive examples
-  -h, --help                             display help for command
+  -hm, --help-more                           display more help with options not shown in basic help
+  -he, --help-examples                       show cli receive examples
+  -h, --help                                 display help for command
 ```
 
 </details>
@@ -251,15 +259,14 @@ Options:
   -u, --username <USERNAME>                the username (default: "default")
   -p, --password <PASSWORD>                the password (default: "default")
 
-  /* MESSAGE SETTINGS */
+  /* MESSAGE TOPIC SETTINGS */
   -t, --topic <TOPIC>                      the message topic (default: "solace/try/me/request")
+
+  /* MESSAGE BODY SETTINGS */
   -m, --message <MESSAGE>                  the message body
   --default-message                        use default message body
   -f, --file <FILENAME>                    filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
-  --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
-  --dmq-eligible [BOOLEAN]                 the DMQ eligible flag (default: true)
-  --timeout <MILLISECONDS>                 the timeout value (default: 5000)
 
   /* CONFIGURATION SETTINGS */
   -c, --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
@@ -268,8 +275,7 @@ Options:
                                            (default: false)
 
   /* HELP OPTIONS */
-  -hm, --help-more                         display more help for command with options not shown in basic
-                                           help
+  -hm, --help-more                         display more help with options not shown in basic help
   -he, --help-examples                     show cli request examples
   -h, --help                               display help for command
 ```
@@ -287,66 +293,72 @@ Execute a request command
 
 Options:
 
-  /* SESSION SETTINGS */
-  -cn, --client-name <CLIENT_NAME>       [advanced] the client name (default: an auto-generated
-                                         client name)
-  --description <DESCRIPTION>            [advanced] the application description (default: "Request
-                                         application created via Solace Try-Me CLI")
-  --read-timeout <MILLISECONDS>          [advanced] the read timeout period for a connect operation
-                                         (default: 10000)
-  --connection-timeout <MILLISECONDS>    [advanced] the timeout period for a connect operation
-                                         (default: 3000)
-  --connection-retries <MILLISECONDS>    [advanced] the number of times to retry connecting during
-                                         initial connection setup (default: 3)
-  --reconnect-retries <NUMBER>           [advanced] the number of times to retry connecting after a
-                                         connected session goes down (default: 3)
-  --reconnect-retry-wait <MILLISECONDS>  [advanced] the amount of time between each attempt to connect
-                                         to a host (default: 3000)
-  --keepalive <MILLISECONDS>             [advanced] the amount of time to wait between sending out
-                                         keep-alive messages to the VPN (default: 3000)
-  --keepalive-interval-limit <NUMBER>    [advanced] the maximum number of consecutive Keep-Alive
-                                         messages that can be sent without receiving a response before the
-                                         session is declared down (default: 3)
-  --include-sender-id [BOOLEAN]          [advanced] include a sender ID on sent messages (default:
-                                         false)
-  --generate-sequence-number [BOOLEAN]   [advanced] include sequence number on messages sent
-                                         (default: false)
-  --log-level <LEVEL>                    [advanced] solace log level, one of values: FATAL, ERROR, WARN,
-                                         INFO, DEBUG, TRACE (default: "ERROR")
+  /* MESSAGE OUTPUT SETTINGS */
+  --output-mode <MODE>                        [advanced] message print mode: DEFAULT, PROPS OR
+                                              FULL (default: "DEFAULT")
+
+  /* ADVANCED MESSAGE SETTINGS */
+  --content-type <CONTENT_TYPE>               [advanced] payload content type (default:
+                                              "text/plain")
+  --time-to-live <MILLISECONDS>               [advanced] the time before a message is discarded or moved
+                                              to a DMQ
+  --dmq-eligible [BOOLEAN]                    [advanced] the DMQ eligible flag (default: true)
+  --timeout <MILLISECONDS>                    [advanced] the timeout value (default: 5000)
+  --message-id <MESSAGE_ID>                   [advanced] the application-provided message ID
+  --message-type <MESSAGE_TYPE>               [advanced] the application-provided message type
+  --correlation-key <CORRELATION_KEY>         [advanced] the application-provided message correlation
+                                              key for acknowledgement management
+  --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode
+                                              'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
+  --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a
+                                              response message
+  --user-properties <PROPS...>                [advanced] the user properties (e.g., "name1: value1"
+                                              "name2: value2")
+
+  /* REQUEST SESSION SETTINGS */
+  -cn, --client-name <CLIENT_NAME>            [advanced] the client name (default: an
+                                              auto-generated client name)
+  --description <DESCRIPTION>                 [advanced] the application description (default:
+                                              "Request application created via Solace Try-Me CLI")
+  --read-timeout <MILLISECONDS>               [advanced] the read timeout period for a connect
+                                              operation (default: 10000)
+  --connection-timeout <MILLISECONDS>         [advanced] the timeout period for a connect operation
+                                              (default: 3000)
+  --connection-retries <MILLISECONDS>         [advanced] the number of times to retry connecting during
+                                              initial connection setup (default: 3)
+  --reconnect-retries <NUMBER>                [advanced] the number of times to retry connecting after a
+                                              connected session goes down (default: 3)
+  --reconnect-retry-wait <MILLISECONDS>       [advanced] the amount of time between each attempt to
+                                              connect to a host (default: 3000)
+  --keepalive <MILLISECONDS>                  [advanced] the amount of time to wait between sending out
+                                              keep-alive messages to the VPN (default: 3000)
+  --keepalive-interval-limit <NUMBER>         [advanced] the maximum number of consecutive Keep-Alive
+                                              messages that can be sent without receiving a response before
+                                              the session is declared down (default: 3)
+  --include-sender-id [BOOLEAN]               [advanced] include a sender ID on sent messages
+                                              (default: false)
+  --generate-sequence-number [BOOLEAN]        [advanced] include sequence number on messages sent
+                                              (default: false)
+  --log-level <LEVEL>                         [advanced] solace log level, one of values: FATAL, ERROR,
+                                              WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* REQUEST SETTINGS */
-  --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-                                         (default: false)
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport
-                                         session. (default: 65536)
-  --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published
-                                         without acknowledgment (default: 50)
-  --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before
-                                         retransmitting unacknowledged messages (default: 2000)
-  --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or
-                                         WINDOWED (default: "PER_MESSAGE")
-
-  /* MESSAGE SETTINGS */
-  --message-id <MESSAGE_ID>              [advanced] the application-provided message ID
-  --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
-  --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for
-                                         acknowledgement management
-  --delivery-mode <MODE>                 [advanced] the application-requested message delivery mode
-                                         'DIRECT' or 'PERSISTENT' (default: "PERSISTENT")
-  --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a
-                                         response message
-  --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
-                                         value2")
-  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
-  --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
-                                         (default: "DEFAULT")
-  --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
+  --send-timestamps [BOOLEAN]                 [advanced] include a send timestamp on sent messages
+                                              (default: false)
+  --send-buffer-max-size <NUMBER>             [advanced] the maximum buffer size for the transport
+                                              session. (default: 65536)
+  --window-size <NUMBER>                      [advanced] the maximum number of messages that can be
+                                              published without acknowledgment (default: 50)
+  --acknowledge-timeout <MILLISECONDS>        [advanced] the time to wait for an acknowledgement, before
+                                              retransmitting unacknowledged messages (default: 2000)
+  --acknowledge-mode <MODE>                   [advanced] the acknowledgement receive mode - PER_MESSAGE
+                                              or WINDOWED (default: "PER_MESSAGE")
 
   /* HELP OPTIONS */
-  -hm, --help-more                       display more help for command with options not shown in basic
-                                         help
-  -he, --help-examples                   show cli request examples
-  -h, --help                             display help for command
+  -hm, --help-more                            display more help with options not shown in basic
+                                              help
+  -he, --help-examples                        show cli request examples
+  -h, --help                                  display help for command
 ```
 
 </details>
@@ -369,14 +381,14 @@ Options:
   -u, --username <USERNAME>                the username (default: "default")
   -p, --password <PASSWORD>                the password (default: "default")
 
-  /* MESSAGE SETTINGS */
+  /* MESSAGE TOPIC SETTINGS */
   -t, --topic <TOPIC...>                   the message topic(s) (default: ["solace/try/me"])
+
+  /* MESSAGE BODY SETTINGS */
   -m, --message <MESSAGE>                  the message body
   --default-message                        use default message body
   -f, --file <FILENAME>                    filename containing the message content
   --stdin                                  read the message body from stdin (default: false)
-  --time-to-live <MILLISECONDS>            the time before a message is discarded or moved to a DMQ
-  --dmq-eligible [BOOLEAN]                 the DMQ eligible flag (default: true)
 
   /* CONFIGURATION SETTINGS */
   -c, --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
@@ -385,8 +397,7 @@ Options:
                                            (default: false)
 
   /* HELP OPTIONS */
-  -hm, --help-more                         display more help for command with options not shown in basic
-                                           help
+  -hm, --help-more                         display more help with options not shown in basic help
   -he, --help-examples                     show cli reply examples
   -h, --help                               display help for command
 ```
@@ -404,64 +415,69 @@ Execute a reply command
 
 Options:
 
-  /* SESSION SETTINGS */
-  -cn, --client-name <CLIENT_NAME>       [advanced] the client name (default: an auto-generated
-                                         client name)
-  --description <DESCRIPTION>            [advanced] the application description (default: "Reply
-                                         application created via Solace Try-Me CLI")
-  --read-timeout <MILLISECONDS>          [advanced] the read timeout period for a connect operation
-                                         (default: 10000)
-  --connection-timeout <MILLISECONDS>    [advanced] the timeout period for a connect operation
-                                         (default: 3000)
-  --connection-retries <MILLISECONDS>    [advanced] the number of times to retry connecting during
-                                         initial connection setup (default: 3)
-  --reconnect-retries <NUMBER>           [advanced] the number of times to retry connecting after a
-                                         connected session goes down (default: 3)
-  --reconnect-retry-wait <MILLISECONDS>  [advanced] the amount of time between each attempt to connect
-                                         to a host (default: 3000)
-  --keepalive <MILLISECONDS>             [advanced] the amount of time to wait between sending out
-                                         keep-alive messages to the VPN (default: 3000)
-  --keepalive-interval-limit <NUMBER>    [advanced] the maximum number of consecutive Keep-Alive
-                                         messages that can be sent without receiving a response before the
-                                         session is declared down (default: 3)
-  --include-sender-id [BOOLEAN]          [advanced] include a sender ID on sent messages (default:
-                                         false)
-  --generate-sequence-number [BOOLEAN]   [advanced] include sequence number on messages sent
-                                         (default: false)
-  --log-level <LEVEL>                    [advanced] solace log level, one of values: FATAL, ERROR, WARN,
-                                         INFO, DEBUG, TRACE (default: "ERROR")
+  /* MESSAGE OUTPUT SETTINGS */
+  --output-mode <MODE>                        [advanced] message print mode: DEFAULT, PROPS OR
+                                              FULL (default: "DEFAULT")
+
+  /* REPLY SESSION SETTINGS */
+  -cn, --client-name <CLIENT_NAME>            [advanced] the client name (default: an
+                                              auto-generated client name)
+  --description <DESCRIPTION>                 [advanced] the application description (default:
+                                              "Reply application created via Solace Try-Me CLI")
+  --read-timeout <MILLISECONDS>               [advanced] the read timeout period for a connect
+                                              operation (default: 10000)
+  --connection-timeout <MILLISECONDS>         [advanced] the timeout period for a connect operation
+                                              (default: 3000)
+  --connection-retries <MILLISECONDS>         [advanced] the number of times to retry connecting during
+                                              initial connection setup (default: 3)
+  --reconnect-retries <NUMBER>                [advanced] the number of times to retry connecting after a
+                                              connected session goes down (default: 3)
+  --reconnect-retry-wait <MILLISECONDS>       [advanced] the amount of time between each attempt to
+                                              connect to a host (default: 3000)
+  --keepalive <MILLISECONDS>                  [advanced] the amount of time to wait between sending out
+                                              keep-alive messages to the VPN (default: 3000)
+  --keepalive-interval-limit <NUMBER>         [advanced] the maximum number of consecutive Keep-Alive
+                                              messages that can be sent without receiving a response before
+                                              the session is declared down (default: 3)
+  --include-sender-id [BOOLEAN]               [advanced] include a sender ID on sent messages
+                                              (default: false)
+  --generate-sequence-number [BOOLEAN]        [advanced] include sequence number on messages sent
+                                              (default: false)
+  --log-level <LEVEL>                         [advanced] solace log level, one of values: FATAL, ERROR,
+                                              WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* REPLY SETTINGS */
-  --send-timestamps [BOOLEAN]            [advanced] include a send timestamp on sent messages
-                                         (default: false)
-  --send-buffer-max-size <NUMBER>        [advanced] the maximum buffer size for the transport
-                                         session. (default: 65536)
-  --window-size <NUMBER>                 [advanced] the maximum number of messages that can be published
-                                         without acknowledgment (default: 50)
-  --acknowledge-timeout <MILLISECONDS>   [advanced] the time to wait for an acknowledgement, before
-                                         retransmitting unacknowledged messages (default: 2000)
-  --acknowledge-mode <MODE>              [advanced] the acknowledgement receive mode - PER_MESSAGE or
-                                         WINDOWED (default: "PER_MESSAGE")
+  --send-timestamps [BOOLEAN]                 [advanced] include a send timestamp on sent messages
+                                              (default: false)
+  --send-buffer-max-size <NUMBER>             [advanced] the maximum buffer size for the transport
+                                              session. (default: 65536)
+  --window-size <NUMBER>                      [advanced] the maximum number of messages that can be
+                                              published without acknowledgment (default: 50)
+  --acknowledge-timeout <MILLISECONDS>        [advanced] the time to wait for an acknowledgement, before
+                                              retransmitting unacknowledged messages (default: 2000)
+  --acknowledge-mode <MODE>                   [advanced] the acknowledgement receive mode - PER_MESSAGE
+                                              or WINDOWED (default: "PER_MESSAGE")
 
-  /* MESSAGE SETTINGS */
-  --message-id <MESSAGE_ID>              [advanced] the application-provided message ID
-  --message-type <MESSAGE_TYPE>          [advanced] the application-provided message type
-  --correlation-key <CORRELATION_KEY>    [advanced] the application-provided message correlation key for
-                                         acknowledgement management
-  --reply-to-topic <TOPIC>               [advanced] string which is used as the topic name for a
-                                         response message
-  --user-properties <PROPS...>           [advanced] the user properties (e.g., "name1: value1" "name2:
-                                         value2")
-  --content-type <CONTENT_TYPE>          [advanced] payload content type (default: "text/plain")
-  --output-mode <MODE>                   [advanced] message print mode: DEFAULT, CONCISE OR FULL
-                                         (default: "DEFAULT")
-  --pretty [BOOLEAN]                     [advanced] prettify the payload (default: false)
+  /* ADVANCED MESSAGE SETTINGS */
+  --content-type <CONTENT_TYPE>               [advanced] payload content type (default:
+                                              "text/plain")
+  --time-to-live <MILLISECONDS>               [advanced] the time before a message is discarded or moved
+                                              to a DMQ
+  --dmq-eligible [BOOLEAN]                    [advanced] the DMQ eligible flag (default: true)
+  --message-id <MESSAGE_ID>                   [advanced] the application-provided message ID
+  --message-type <MESSAGE_TYPE>               [advanced] the application-provided message type
+  --correlation-key <CORRELATION_KEY>         [advanced] the application-provided message correlation
+                                              key for acknowledgement management
+  --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a
+                                              response message
+  --user-properties <PROPS...>                [advanced] the user properties (e.g., "name1: value1"
+                                              "name2: value2")
 
   /* HELP OPTIONS */
-  -hm, --help-more                       display more help for command with options not shown in basic
-                                         help
-  -he, --help-examples                   show cli reply examples
-  -h, --help                             display help for command
+  -hm, --help-more                            display more help with options not shown in basic
+                                              help
+  -he, --help-examples                        show cli reply examples
+  -h, --help                                  display help for command
 ```
 
 

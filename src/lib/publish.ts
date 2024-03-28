@@ -25,7 +25,7 @@ const publish = async (
     'use strict';
     if (interrupted) return;
     interrupted = true;
-    Logger.logWarn('operation interrupted...')
+    Logger.logInfo('operation interrupted...')
     publisher.setExited(true);
     publisher.exit();
   });
@@ -72,7 +72,7 @@ const publish = async (
     } 
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
-        Logger.logWarn(`exiting session (waited-before-exit set for ${options.waitBeforeExit})...`);
+        Logger.logWarn(`exiting session (wait-before-exit set for ${options.waitBeforeExit})...`);
         publisher.exit();
       }, options.waitBeforeExit * 1000);
     } else {
@@ -81,13 +81,14 @@ const publish = async (
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
+        message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
         publisher.publish(options.topic[i], message, contentType, n-1);
       }
       if (interval) await delay(interval)
     }
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
-        Logger.logWarn(`exiting session (waited-before-exit set for ${options.waitBeforeExit})...`);
+        Logger.logWarn(`exiting session (wait-before-exit set for ${options.waitBeforeExit})...`);
         publisher.exit();
       }, options.waitBeforeExit * 1000);
     } else {

@@ -234,7 +234,7 @@ export class SempClient {
         let result = data.data;
         var subs = "";
         result.forEach((sub:any) => subs += `\n${sub.subscriptionTopic}`)
-        Logger.logDetailedSuccess(`${result.length} subscription(s) found on queue ${this.options.queue}`, subs)
+        result.length && Logger.logDetailedSuccess(`${result.length} subscription(s) found on queue ${this.options.queue}`, subs)
       }
     })
     .catch((error) => {

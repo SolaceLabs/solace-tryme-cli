@@ -20,8 +20,33 @@ HINT: You can view the default publish command settings 'stm config list --name 
 
 stm send --topic solace/try/me
 
-NOTE: You can override any of the publish parameters
-that are applied only for this instance of execution!
+// publish with payload via the command-line parameter
+
+stm send --topic solace/try/me -m "Hello World!"
+
+// publish with a default payload
+
+stm send --topic solace/try/me --default-message
+
+// publish with payload from a file
+
+stm send --topic solace/try/me -f OrderCreated.json
+
+// publish with payload from stdin (console)
+
+stm send --topic solace/try/me --stdin
+
+// publish events to multiple events in a specified interval(ms)
+
+stm send --topic solace/try/me --count 100 --interval 5000
+
+// publish events to multiple topics
+
+stm send --topic "stm/logistics/shipped" "stm/inventory/check"
+
+
+You can override any of the publish parameters
+and they are applied only for this instance of execution!
 
 // If you want to run a publish entirely based on the command-line parameters
 // without any reference to recorded command settings, you can do so by specifying
@@ -35,7 +60,7 @@ setting to a new name!
 
 // Update the command setting with the specified command-line parameters (if specified)
 
-stm send  --count 2 --interval 1000 --name publish2 --config cloud-broker --save
+stm send --count 100 --interval 1000 --name publish2 --config cloud-broker --save
 
 // save an existing command setting to a new name in a configuration file
 
@@ -48,12 +73,6 @@ stm send --config cloud-broker --name publish2
 // Duplicate the command setting
 
 stm send  --name publish2 --config cloud-broker --save publish3
-
-// Duplicate the command setting with the specified command-line parameters
-
-stm send  --count 5 --interval 1000 --name publish2 --config cloud-broker --save publish4
-
-HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
 ```
 
 </details>
@@ -66,28 +85,33 @@ HINT: You can verify the outcome by executing a config list command 'stm config 
 
 Examples:
 // execute the default receive command with settings defined on the
-// default configuration 'stm-cli-config.json'
+// default configuration 'stm-cli-config.json' which subscribes to
+// a default topic solace/try/me
 
 stm receive
 
+// receive events from a topic
+
+stm receive -t "stm/logistics/shipped"
+
+// receive events from multiple topics
+
+stm receive -t "stm/logistics/shipped" "stm/inventory/check"
+
 HINT: You can view the default receive command settings 'stm config list --name receive'!
 
-// execute the default receive command with settings defined on the
-// default configuration 'stm-cli-config.json', but receive from a queue,
-// with optionally creating the queue if found missing, and add subscriptions to the queue
+// receive events from a queue, if queue is not found create a queue with the name
+// optionally you can also specify a subscription to be added to the queue
 
-stm receive --queue my-queue --create-if-missing --topic "solace/>"
+stm receive --queue new-queue --create-if-missing --topic "solace/>"
 
-// execute the default receive command with settings defined on the default
-// configuration 'stm-cli-config.json', but receive on topic specified in the
-// command-line (overriding the command settings)
+// receive events from a queue
 
-stm receive --topic solace/try/me
+stm receive --queue my-queue
 
-// execute the default receive command with settings defined on the default
-// configuration 'stm-cli-config.json', but receive from a queue
+// receive events from a queue and add a subscription
 
-stm receive --queue stm-queue --topic solace/try/me
+stm receive --queue my-queue -t "stm/logistics/shipped"
 
 NOTE: You can override any of the receive parameters
 that are applied only for this instance of execution!
@@ -102,13 +126,13 @@ NOTE: The following examples demonstrate how to update an existing command setti
 in a configuration, as well as how to duplicate (copy) a command
 setting to a new name!
 
-// Update the command setting with the specified command-line parameters (if specified)
-
-stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker --save
-
 // execute a specific receive command from the named configuration
 
 stm receive --config cloud-broker --name receive
+
+// Update the command setting with the specified command-line parameters (if specified)
+
+stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker --save
 
 // Duplicate the command setting
 
@@ -127,6 +151,7 @@ HINT: You can verify the outcome by executing a config list command 'stm config 
 <summary>Send Request Events: <i><b>stm request -he</b></i> </summary>
 
 ```
+
 ℹ  info: loading 'request' command from configuration 'stm-cli-config.json'
 
 Examples:
@@ -138,10 +163,26 @@ stm request
 HINT: You can view the default request command settings 'stm config list --name request'!
 
 // execute the default request command with settings defined on the default
-// configuration 'stm-cli-config.json', but request on topic specified in the
+// configuration 'stm-cli-config.json', but on the topic specified in the
 // command-line (overriding the command settings)
 
 stm request --topic solace/try/me/request
+
+// request with payload via the command-line parameter
+
+stm request --topic solace/try/me/request -m "Hello World!"
+
+// request with a default payload
+
+stm request --topic solace/try/me/request --default-message
+
+// request with payload from a file
+
+stm request --topic solace/try/me/request -f OrderCreated.json
+
+// request with payload from stdin (console)
+
+stm request --topic solace/try/me/request --stdin
 
 NOTE: You can override any of the request parameters
 that are applied only for this instance of execution!
@@ -181,6 +222,7 @@ HINT: You can verify the outcome by executing a config list command 'stm config 
 <summary>Receive Reply Events: <i><b>stm reply -he</b></i> </summary>
 
 ```
+
 ℹ  info: loading 'reply' command from configuration 'stm-cli-config.json'
 
 Examples:
@@ -197,6 +239,22 @@ HINT: You can view the default reply command settings 'stm config list --name re
 
 stm reply --topic solace/try/me/request
 
+// reply with payload via the command-line parameter
+
+stm reply --topic solace/try/me/request -m "Hello World!"
+
+// reply with a default payload
+
+stm reply --topic solace/try/me/request --default-message
+
+// reply with payload from a file
+
+stm reply --topic solace/try/me/request -f OrderCreated.json
+
+// reply with payload from stdin (console)
+
+stm reply --topic solace/try/me/request --stdin
+
 NOTE: You can override any of the reply parameters
 that are applied only for this instance of execution!
 
@@ -210,13 +268,13 @@ NOTE: The following examples demonstrate how to update an existing command setti
 in a configuration, as well as how to duplicate (copy) a command
 setting to a new name!
 
-// Update the command setting with the specified command-line parameters (if specified)
-
-stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker --save
-
 // execute a specific reply command from the named configuration
 
 stm reply --config cloud-broker --name reply
+
+// Update the command setting with the specified command-line parameters (if specified)
+
+stm reply --topic "stm/logistics/shipped" --name reply --config cloud-broker --save
 
 // Duplicate the command setting
 
@@ -262,19 +320,27 @@ that are applied only for this instance of execution!
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions
+stm manage queue --create new-queue --semp-url http://localhost:8080/SEMP/v2/config --semp-vpn default --semp-username admin --semp-password admin --add-subscriptions  stm/cli/topic --list-subscriptions
+
+// update queue (settings & subscriptions)
+
+stm manage queue --update new-queue --access-type non-exclusive --partition-count 10 --remove-subscriptions stm/cli/topic --add-subscriptions "stm/logistics/>" --list-subscriptions
+
+// delete queue
+
+stm manage queue --delete new-queue
 
 NOTE: The following examples demonstrate how to update an existing command settings
 in a configuration, as well as how to duplicate (copy) a command
 setting to a new name!
 
-// Update the command setting with the specified command-line parameters (if specified)
-
-stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker --save
-
 // execute a specific queue command from the named configuration
 
 stm manage queue --config cloud-broker --name queue
+
+// Update the command setting with the specified command-line parameters (if specified)
+
+stm manage queue --update --add-subscriptions "stm/logistics/shipped" --remove-subscriptions "stm/logistics/>" --name queue --config cloud-broker --save
 
 // Duplicate the command setting
 
