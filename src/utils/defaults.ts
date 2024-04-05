@@ -51,6 +51,7 @@ export const getDefaultTopic = (commandType: CommandType) => {
 export const getDefaultClientName = (type: string) => {
   return `stm_${type}_${Math.random().toString(16).substring(2, 10)}`
 }
+export const defaultLastVersionCheck = 'stm-cli-last-version-check'
 export const defaultConfigFile = 'stm-cli-config.json'
 
 export const commandConnection = 'connection'

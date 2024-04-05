@@ -2,8 +2,9 @@ import * as fs from 'fs'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
 import { buildMessageConfig } from './init'
+import { parseNumber } from './parse'
 
 const defaultPath = `${require('os').homedir()}/`
 
@@ -132,6 +133,17 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.logError('exiting...')
     process.exit(1)
+  }
+}
+
+export const execLastVersionCheck = (ts:number|undefined = undefined) => {
+  try {
+    const homedir = require('os').homedir();
+    const filePath = `${homedir}/.stm/${defaultLastVersionCheck}`;
+    var now = ts ? ts : Date.now();
+    if (!fileExists(filePath) || ts) fs.writeFileSync(filePath, `${now}`);
+    return parseNumber(fs.readFileSync(filePath).toString());
+  } catch (error: any) {
   }
 }
 

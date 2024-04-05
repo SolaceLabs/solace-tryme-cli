@@ -22,7 +22,7 @@ import clientUsername from './lib/client-username';
 import connection from './lib/connection';
 import visualize from './utils/visualize';
 import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
-import { loadCommandFromConfig } from './utils/config';
+import { execLastVersionCheck, loadCommandFromConfig } from './utils/config';
 import sempConnection from './lib/semp-connection';
 import chalk from 'chalk';
 import { displayConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
@@ -39,21 +39,35 @@ export class Commander {
     this.advanced = advanced;
   }
 
-  getVersion(): string {
-    const fetch = require('sync-fetch')
+  getVersion() {
+    this.newVersionCheck();
+    return `v${version}`;
+  }
 
-    const latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
-      headers: {
-        Accept: 'application/json'
+  newVersionCheck(): string {
+    var now = Date.now();
+    var lastChecked = execLastVersionCheck();
+    const oneDay = 24 * 60 * 60 * 1000; // 1 day
+    // const oneDay = 10 * 1000; // 10 secs
+
+    if (lastChecked && (now - lastChecked) > oneDay) {
+      const fetch = require('sync-fetch')
+
+      const latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
+        headers: {
+          Accept: 'application/json'
+        }
+      }).json()
+
+      if (`${'v' + version}` !== latestVersion.name) {
+        Logger.info(`new version available: ${latestVersion.name}, current version: ${version}`)
+        Logger.alert(`Download URL: ' + ${latestVersion.html_url}\n`);
       }
-    }).json()
 
-    if (`${'v' + version}` !== latestVersion.name) {
-      Logger.await('getting current version')
-      Logger.alert('A newer version of Solace Try-Me CLI is available: ' + latestVersion.html_url);
+      execLastVersionCheck(now)
     }
 
-    return `${version}`
+    return '';
   }
 
   init(): void {
@@ -62,9 +76,11 @@ export class Commander {
       .description(chalk.whiteBright('A Solace Try-Me client for the command line'))
       .enablePositionalOptions()
       .allowUnknownOption(false)
-      .version(version, '-v, --version')
+      .addHelpText('after', this.newVersionCheck())
+      .version(this.getVersion(), '-v, --version')
     addRootHelpOptions(rootCmd);
     rootCmd.action((options) => {
+      this.newVersionCheck();
       if (options.helpExamples) 
         displayRootHelpExamples();
     });
@@ -74,8 +90,10 @@ export class Commander {
       .command('send')
       .description(chalk.whiteBright('Execute a send command'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addSendOptions(sendCmd, this.advanced);
     sendCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('send'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -101,8 +119,11 @@ export class Commander {
       .command('receive')
       .description(chalk.whiteBright('Execute a receive command'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
+
     addReceiveOptions(receiveCmd, this.advanced);
     receiveCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('receive'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -125,6 +146,7 @@ export class Commander {
       .allowUnknownOption(false)
     addRequestOptions(requestCmd, this.advanced);
     requestCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('request'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -144,8 +166,10 @@ export class Commander {
       .command('reply')
       .description(chalk.whiteBright('Execute a reply command'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addReplyOptions(replyCmd, this.advanced);
     replyCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('reply'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -167,6 +191,7 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('visualize')
       .description(chalk.whiteBright('Visualize event flow'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
 
     // stm visualize on
     const visualizeOnCmd = visualizeCmd
@@ -175,6 +200,7 @@ if (process.env.SHOW_VISUALIZATION) {
       .allowUnknownOption(false)          
     addVisualizeOptions(visualizeOnCmd, this.advanced);
     visualizeOnCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -198,8 +224,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('off')
       .description(chalk.whiteBright('Turn off visualization'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addVisualizeOptions(visualizeOffCmd, this.advanced);
     visualizeOffCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -223,8 +251,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('launch')
       .description(chalk.whiteBright('Launch visualization'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addVisualizeLaunchOptions(visualizeLaunchCmd, this.advanced)
     visualizeLaunchCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       visualize(options);
     })  
 }
@@ -234,7 +264,9 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('config')
       .description(chalk.whiteBright('Manage command configurations'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     configCmd.action((options) => {
+      this.newVersionCheck();
       if (options.helpExamples) 
         displayConfigHelpExamples();
       else 
@@ -247,9 +279,11 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('init')
       .description(chalk.whiteBright('Initialize command samples'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addConfigInitOptions(configInitCmd, this.advanced)
     
     configInitCmd.action((options: MessageInitOptions) => {
+      this.newVersionCheck();
       const optionsSource:any = {};
       const defaultMessageKeys = Object.keys(defaultMessageConnectionConfig);
       for (var i=0; i<defaultMessageKeys.length; i++) {
@@ -269,9 +303,11 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('list')
       .description(chalk.whiteBright('List command samples'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addConfigListOptions(configListCmd, this.advanced)
 
     configListCmd.action((options: MessageInitOptions) => {
+      this.newVersionCheck();
       const optionsSource:any = {};
       const defaultKeys = Object.keys(defaultMessageConnectionConfig);
       for (var i=0; i<defaultKeys.length; i++) {
@@ -286,8 +322,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('delete')
       .description(chalk.whiteBright('Delete command sample'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addConfigDeleteOptions(configDeleteCmd, this.advanced)
     configDeleteCmd.action((options: MessageInitOptions) => {
+      this.newVersionCheck();
       const optionsSource:any = {};
       const defaultKeys = Object.keys(defaultMessageConnectionConfig);
       for (var i=0; i<defaultKeys.length; i++) {
@@ -302,7 +340,9 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('manage')
       .description(chalk.whiteBright('Manage broker connection and resources'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     manageCmd.action((options) => {
+      this.newVersionCheck();
       if (options.helpExamples) 
         displayManageHelpExamples();
       else 
@@ -315,8 +355,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('connection')
       .description(chalk.whiteBright('Manage message VPN connection'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageConnectionOptions(manageConnectionCmd, this.advanced);
     manageConnectionCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new MessageClientOptionsEmpty('connection'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -337,8 +379,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('semp-connection')
       .description(chalk.whiteBright('Manage SEMP connection'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageSempConnectionOptions(manageSempConnectionCmd, this.advanced);
     manageSempConnectionCmd.action((options: ManageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('sempconnection'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -359,8 +403,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('queue')
       .description(chalk.whiteBright('Manage a queue'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageQueueOptions(manageQueueCmd, this.advanced);
     manageQueueCmd.action((options: ManageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('queue'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -381,8 +427,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('client-profile')
       .description(chalk.whiteBright('Manage a client-profile'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageClientProfileOptions(manageClientProfileCmd, this.advanced);
     manageClientProfileCmd.action((options: ManageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-profile'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -403,8 +451,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('acl-profile')
       .description(chalk.whiteBright('Manage a acl-profile'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageAclProfileOptions(manageAclProfileCmd, this.advanced);
     manageAclProfileCmd.action((options: ManageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('acl-profile'));
       for (var i=0; i<defaultKeys.length; i++) {
@@ -425,8 +475,10 @@ if (process.env.SHOW_VISUALIZATION) {
       .command('client-username')
       .description(chalk.whiteBright('Manage a client username'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addManageClientUsernameOptions(manageClientUsernameCmd, this.advanced);
     manageClientUsernameCmd.action((options: ManageClientOptions) => {
+      this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('client-username'));
       for (var i=0; i<defaultKeys.length; i++) {
