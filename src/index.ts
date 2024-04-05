@@ -32,11 +32,15 @@ export class Commander {
   program: Command
   help: boolean
   advanced: boolean
+  online: boolean
+  newVersionFound: boolean
 
   constructor(help: boolean, advanced: boolean) {
     this.program = new Command()
     this.help = help;
     this.advanced = advanced;
+    this.online = true;
+    this.newVersionFound = false;
   }
 
   getVersion() {
@@ -45,26 +49,37 @@ export class Commander {
   }
 
   newVersionCheck(): string {
+    if (!this.online) 
+      return '';
+
     var now = Date.now();
     var lastChecked = execLastVersionCheck();
     const oneDay = 24 * 60 * 60 * 1000; // 1 day
     // const oneDay = 10 * 1000; // 10 secs
 
-    if (lastChecked && (now - lastChecked) > oneDay) {
+    if (!this.newVersionFound && lastChecked && (now - lastChecked) > oneDay) {
       const fetch = require('sync-fetch')
+      var latestVersion = undefined;
 
-      const latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
-        headers: {
-          Accept: 'application/json'
-        }
-      }).json()
-
-      if (`${'v' + version}` !== latestVersion.name) {
-        Logger.info(`new version available: ${latestVersion.name}, current version: ${version}`)
-        Logger.alert(`Download URL: ' + ${latestVersion.html_url}\n`);
+      try {
+        latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
+          headers: {
+            Accept: 'application/json'
+          }
+        }).json()
+      } catch (error) {
+        this.online = false;
       }
 
-      execLastVersionCheck(now)
+      if (latestVersion && this.online) {
+        if (`${'v' + version}` !== latestVersion.name) {
+          Logger.info(`new version available: ${latestVersion.name}, current version: ${version}`)
+          Logger.alert(`Download URL: ' + ${latestVersion.html_url}\n`);
+        }
+
+        execLastVersionCheck(now)
+        this.newVersionFound = true;
+      }
     }
 
     return '';
