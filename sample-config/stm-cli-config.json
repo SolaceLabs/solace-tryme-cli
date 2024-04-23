@@ -6,6 +6,8 @@
       "vpn": "default",
       "username": "default",
       "password": "default",
+      "visualization": "off",
+      "visualizationPort": 0,
       "compressionLevel": 0,
       "connectionTimeout": 3000,
       "connectionRetries": 3,
@@ -25,46 +27,51 @@
       "sendBufferMaxSize": 65536,
       "logLevel": "ERROR"
     },
-    "publish": {
-      "command": "publish",
-      "acknowledgeImmediately": false,
+    "send": {
+      "command": "send",
       "asReplyMessage": false,
-      "deliveryMode": 0,
+      "deliveryMode": "PERSISTENT",
       "dmqEligible": true,
+      "partitionKeys": [],
       "elidingEligible": false,
+      "timeout": 5000,
+      "contentType": "text/plain",
+      "outputMode": "DEFAULT",
+      "pretty": false,
       "count": 1,
-      "interval": 3000,
+      "interval": 1000,
       "description": "Publish application created via Solace Try-Me CLI",
       "stdin": false,
       "topic": [
         "solace/try/me"
       ],
-      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
-      "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeMode": "WINDOWED",
       "acknowledgeTimeout": 2000,
-      "enabled": false,
-      "windowSize": 50,
-      "outputMode": "COMPACT"
+      "enabled": true,
+      "guaranteedPublisher": true,
+      "windowSize": 50
     },
     "receive": {
       "command": "receive",
-      "acknowledgeImmediately": false,
       "asReplyMessage": false,
-      "deliveryMode": 0,
+      "deliveryMode": "PERSISTENT",
       "dmqEligible": true,
+      "partitionKeys": [],
       "elidingEligible": false,
+      "timeout": 5000,
+      "contentType": "text/plain",
+      "outputMode": "DEFAULT",
+      "pretty": false,
       "count": 1,
       "interval": 3000,
       "description": "Receive application created via Solace Try-Me CLI",
       "topic": [
         "solace/try/me"
       ],
-      "message": "{\"osType\":\"OS_TYPE\",\"freeMem\":\"FREE_MEM\",\"totalMem\":\"TOTAL_MEM\",\"timeZone\":\"TIME_ZONE\"}",
       "acknowledgeMode": "AUTO",
       "acknowledgeTimeout": 2000,
       "enabled": false,
-      "windowSize": 50,
-      "outputMode": "COMPACT"
+      "windowSize": 50
     },
     "request": {
       "command": "request",
@@ -72,12 +79,13 @@
       "topic": [
         "solace/try/me/request"
       ],
-      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
       "acknowledgeMode": "PER_MESSAGE",
       "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
-      "outputMode": "COMPACT"
+      "contentType": "text/plain",
+      "outputMode": "DEFAULT",
+      "pretty": false
     },
     "reply": {
       "command": "reply",
@@ -85,21 +93,26 @@
       "topic": [
         "solace/try/me/request"
       ],
-      "message": "{\"osType\":\"boolean\",\"freeMem\":\"boolean\",\"totalMem\":\"boolean\",\"timeZone\":\"boolean\"}",
       "acknowledgeMode": "PER_MESSAGE",
       "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
-      "outputMode": "COMPACT"
+      "waitBeforeExit": 0,
+      "exitAfter": 0,
+      "traceVisualization": false,
+      "contentType": "text/plain",
+      "outputMode": "DEFAULT",
+      "pretty": false
     }
   },
   "manage": {
     "sempconnection": {
       "command": "sempconnection",
-      "sempUrl": "http://localhost:8080",
+      "sempUrl": "http://localhost:8080/SEMP/v2/config",
       "sempVpn": "default",
       "sempUsername": "admin",
-      "sempPassword": "admin"
+      "sempPassword": "admin",
+      "description": "SEMP manage application created via Solace Try-Me CLI"
     },
     "queue": {
       "command": "queue",
@@ -116,7 +129,7 @@
       "maxMsgSpoolUsage": 5000,
       "maxRedeliveryCount": 0,
       "maxTtl": 0,
-      "owner": "",
+      "owner": "default",
       "partitionCount": 0,
       "partitionRebalanceDelay": 5,
       "partitionRebalanceMaxHandoffTime": 3,

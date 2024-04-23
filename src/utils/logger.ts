@@ -104,12 +104,14 @@ const Logger = {
         Logger.logMessage(`Properties\r\n${properties}\r\n${chalk.italic('User Properties:')}\r\n${userProps}`);
       else 
         Logger.logMessage(`Properties\r\n${properties}`)
-      if (payload.startsWith('<?xml')) {
-        var prettyPayload = prettyXML(payload.trim(), 2);
-        payload && Logger.logMessage(`Payload\r\n${prettyPayload}`);
-      } else {
-        var prettyPayload = prettyJSON(payload.trim());
-        payload && Logger.logMessage(`Payload\r\n${prettyPayload}`);
+      if (payload) {
+        if (payload.startsWith('<?xml')) {
+          var prettyPayload = prettyXML(payload.trim(), 2);
+          Logger.logMessage(`Payload\r\n${prettyPayload}`);
+        } else {
+          var prettyPayload = prettyJSON(payload.trim());
+          Logger.logMessage(`Payload\r\n${prettyPayload}`);
+        }
       }
     } else if (outputMode?.toUpperCase() === 'PROPS') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
@@ -140,7 +142,7 @@ const Logger = {
       payload = message.getSdtContainer().getValue();
     }
 
-    Logger.prettyPrintMessage(message, payload.trim(), outputMode, pretty)
+    Logger.prettyPrintMessage(message, payload ? payload.trim() : payload, outputMode, pretty)
   },
 
 
