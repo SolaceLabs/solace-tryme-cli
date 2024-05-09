@@ -37,9 +37,8 @@ const publish = async (
     }, options.exitAfter * 1000);
   }
 
-  var contentType:any = options.contentType as string;
+  var payloadType:any = options.payloadType as string;
   var message:any = options.message as string;
-  message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
 
   var file:any = options.file as string;
   if (file) {
@@ -68,7 +67,10 @@ const publish = async (
 
   if (count === 1) {
     for (var i=0; i<options.topic.length; i++) {
-      publisher.publish(options.topic[i], message, contentType, 0);
+      if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+        message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+    
+      publisher.publish(options.topic[i], message, payloadType, 0);
     } 
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
@@ -76,13 +78,16 @@ const publish = async (
         publisher.exit();
       }, options.waitBeforeExit * 1000);
     } else {
-      publisher.exit();
+      setTimeout(function exit() {
+        publisher.exit();
+      }, 1500);
     }
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       for (var i=0; i<options.topic.length; i++) {
-        message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
-        publisher.publish(options.topic[i], message, contentType, n-1);
+        if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+          message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+        publisher.publish(options.topic[i], message, payloadType, n-1);
       }
       if (interval) await delay(interval)
     }
@@ -92,7 +97,9 @@ const publish = async (
         publisher.exit();
       }, options.waitBeforeExit * 1000);
     } else {
-      publisher.exit();
+      setTimeout(function exit() {
+        publisher.exit();
+      }, 1500);
     }
   }
 }

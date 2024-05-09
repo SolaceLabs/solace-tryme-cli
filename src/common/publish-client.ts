@@ -1,10 +1,11 @@
-import solace, { Message } from "solclientjs";
+import solace from 'solclientjs';
 import { Logger } from '../utils/logger'
 import { LogLevel, MessageDeliveryModeType } from "solclientjs";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } from "../utils/controlevents";
 import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
+import { create } from 'domain';
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -57,7 +58,7 @@ export class SolaceClient extends VisualizeClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.logWarn("already connected and ready to subscribe.");
+        Logger.logWarn("already connected and ready to subscribe");
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
@@ -125,15 +126,15 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess("delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+            Logger.logSuccess("delivery of message with correlation key '" + sessionEvent.correlationKey + "' confirmed");
           else
-            Logger.logSuccess("delivery of message confirmed.");
+            Logger.logSuccess("delivery of message confirmed");
         });
 
         //REJECTED_MESSAGE implies that the vpn has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logWarn("delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+            Logger.logWarn("delivery of message with correlation key '" + sessionEvent.correlationKey + "' rejected, info: " + sessionEvent.infoStr);
           else
             Logger.logWarn("delivery of message rejected: " + sessionEvent.infoStr);
         });
@@ -155,7 +156,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer | undefined, contentType: string, iteration: number = 0) {
+  publish(topicName: string, payload: string | Buffer | undefined, payloadType: string, iteration: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -163,17 +164,22 @@ export class SolaceClient extends VisualizeClient {
       return;
     }
     try {
-      if (!topicName.startsWith('@STM')) Logger.await('publishing...');
+      if (!topicName.startsWith('@STM')) Logger.await(`publishing ${this.options.deliveryMode} message...`);
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       if (payload) {
-        if (contentType === 'application/xml' || contentType === 'text/plain') {
-          if (typeof payload === 'string')
+        if (payloadType === 'text') {
+          payload = payload === "{}" ? "" : payload;
+          try {
+            if (typeof payload === 'object') {
+              message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+            } else {
+              var jsonPayload = JSON.parse(payload.toString());
+              message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
+            }
+          } catch (error) {
             message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
-          else
-            message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
-        } else if (contentType === 'application/json') {
-          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+          }
         } else {
           if (typeof payload === 'object') {
             const encoder = new TextEncoder(); 
@@ -187,17 +193,27 @@ export class SolaceClient extends VisualizeClient {
             message.setBinaryAttachment(payload);
           }
         }
-      } else {
-        message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
+      } 
+      else {
+        if (payloadType === 'text')
+          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
+        else {
+          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
+          // message.setBinaryAttachment("");
+        //   const encoder = new TextEncoder(); 
+        //   const result = encoder.encode(""); 
+        //   message.setBinaryAttachment(Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00]));
+        }
       }
 
-      message.setCorrelationKey(this.options.correlationKey ? this.options.correlationKey : randomUUID());
+      this.options.acknowledgeImmediately && message.setAcknowledgeImmediately(true);
+      this.options.correlationKey  && message.setCorrelationKey(this.options.correlationKey);
       this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
       this.options.dmqEligible && message.setDMQEligible(true);
-      this.options.messageId && message.setApplicationMessageId(this.options.messageId);
-      if (this.options.visualization === 'on' && !this.options.messageId) message.setApplicationMessageId(randomUUID());
-      this.options.messageType && message.setApplicationMessageType(this.options.messageType);
+      this.options.appMessageId && message.setApplicationMessageId(this.options.appMessageId);
+      if (this.options.visualization === 'on' && !this.options.appMessageId) message.setApplicationMessageId(randomUUID());
+      this.options.appMessageType && message.setApplicationMessageType(this.options.appMessageType);
       this.options.replyToTopic && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
       if (this.options.userProperties) {
         let propertyMap = new solace.SDTMapContainer();
@@ -215,18 +231,11 @@ export class SolaceClient extends VisualizeClient {
         var pKey1 = this.options.partitionKeys[iteration % this.options.partitionKeys.length];
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
         message.setUserPropertyMap(propertyMap);    
-      } else if (this.options.partitionKey) {
+      } else if (this.options.partitionKeysCount) {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey2 = 'partition-key-' + Date.now() % 5;
-        const now = new Date();
-        switch (this.options.partitionKey) {
-          case 'SECOND': pKey2 = 'partition-key-' + now.getSeconds() % 5; break;
-          case 'MILLISECOND': pKey2 = 'partition-key-' + Date.now() % 5; break;
-          default:  break;
-        }
-
+        var pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);    
       }

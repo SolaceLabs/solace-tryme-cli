@@ -31,6 +31,21 @@ export const parseNumber = (value: string) => {
   return parsedValue
 }
 
+export const parsePartitionKeysCount = (value: string) => {
+  const parsedValue = Number(value)
+  if (isNaN(parsedValue)) {
+    Logger.logError(`${value} is not a number.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  if (parsedValue < 2) {
+    Logger.logError(`${value} invalid partition key count (min: 2).`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  return parsedValue
+}
+
 export const parseMessageProtocol = (value: string) => {
   var protocol = value.substring(0, value.indexOf( ":" )); 
   if (!['ws', 'wss', 'http', 'https', 'tcp', 'tcps'].includes(protocol.toLowerCase())) {
@@ -71,31 +86,18 @@ export const parseOutputMode = (value: string) => {
   return value.toUpperCase();
 }
 
-export const parseContentType = (value: string) => {
-  var contentType = 'text/plain';
-  if (value.toLowerCase().match(/application\/[^+]*[+]json/))
-    contentType = 'application/json';
-  else if (value.toLowerCase().match(/application\/[^+]*[+]xml/))
-    contentType = 'application/xml';
-  else if (value.toLowerCase().match(/application\/[^+]*[+]binary/) || value.toLowerCase().match(/application\/octet-stream/))
-    contentType = 'application/binary';
-  
+export const parsePayloadType = (value: string) => {
+  if (!['TEXT', 'BYTES'].includes(value.toUpperCase())) {
+    Logger.logError(`only 'TEXT', 'BYTES' are supported, and if not specified a TEXT mode is used.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
   return value.toLowerCase();
 }
 
 export const parseDeliveryMode = (value: any) => {
   if (!['DIRECT', 'PERSISTENT'].includes(value.toUpperCase())) {
     Logger.logError(`only 'DIRECT' or 'PERSISTENT' are supported.`)
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-  
-  return value.toUpperCase();
-}
-
-export const parsePartitionKey = (value: any) => {
-  if (!['SECOND', 'MILLISECOND' ].includes(value.toUpperCase())) {
-    Logger.logError(`only 'SECOND' or 'MILLISECOND' supported.`)
     Logger.logError('exiting...')
     process.exit(1)
   }

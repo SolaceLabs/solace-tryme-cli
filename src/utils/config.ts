@@ -246,7 +246,7 @@ export const createDefaultConfig = () => {
   }
 
   // save default configuration
-  saveConfig(buildMessageConfig(options, optionsSource, []))     
+  saveConfig(buildMessageConfig({}, options, optionsSource, []))     
 }
 
 export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions) => {
@@ -371,7 +371,7 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
     var current:any = loadConfig(options.config)
 
     // build configuration from the command line parameters
-    var updated = buildMessageConfig(options, optionsSource, [ group === 'manage' ? 'sempconnection' : 'connection', options.command]);
+    var updated = buildMessageConfig(current, options, optionsSource, [ group === 'manage' ? 'sempconnection' : 'connection', options.command]);
     
     // absorb unchanged params from the current -> updated
     Object.keys(optionsSource).forEach(key => {

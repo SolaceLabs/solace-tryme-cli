@@ -46,7 +46,7 @@ export class SolaceClient extends VisualizeClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.logWarn("already connected and ready to subscribe.");
+        Logger.logWarn("already connected and ready to subscribe");
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
@@ -105,9 +105,9 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the broker has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess("delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed.");
+            Logger.logSuccess("delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed");
           else
-            Logger.logSuccess("delivery of message confirmed.");
+            Logger.logSuccess("delivery of message confirmed");
         });
 
         //REJECTED_MESSAGE implies that the broker has rejected the message
@@ -147,7 +147,6 @@ export class SolaceClient extends VisualizeClient {
         //Message callback function
         this.session.on(solace.SessionEventCode.MESSAGE, (message:any) => {
           Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
-
           //Get the topic name from the message's destination
           let topicName: string = message.getDestination().getName();
           if (!this.receiver.topics.has(topicName)) {

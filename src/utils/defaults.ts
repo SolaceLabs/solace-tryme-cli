@@ -121,15 +121,15 @@ export const defaultMessageConnectionConfig:any = {
 
 export const defaultMessageConfig:any = {
   // acknowledgeImmediately: false,
-  applicationMessageId: undefined,
-  applicationMessageType: undefined,
+  appMessageId: undefined,
+  appMessageType: undefined,
   asReplyMessage: false,
   correlationId: undefined,
   correlationKey: undefined,
   deliveryMode: 'PERSISTENT',
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
   dmqEligible: true,
-  partitionKey: undefined,
+  partitionKeysCount: undefined,
   partitionKeys: [],
   elidingEligible: false,
   priority: undefined,
@@ -142,7 +142,7 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
-  contentType: "text/plain",
+  payloadType: "text",
   outputMode: 'DEFAULT',
   pretty: false
 }
@@ -160,6 +160,7 @@ export const defaultMessagePublishConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'WINDOWED',
+  acknowledgeImmediately: false,
   acknowledgeTimeout: 2000,
   enabled: true, // guaranteed publisher
   guaranteedPublisher: true,
@@ -191,6 +192,9 @@ export const defaultMessageReceiveConfig:any = {
 }
 
 export const defaultMessageRequestConfig:any = {
+  count: 1,
+  interval: 1000,
+
   clientName: undefined,
   description: 'Request application created via Solace Try-Me CLI',
 
@@ -200,11 +204,12 @@ export const defaultMessageRequestConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'PER_MESSAGE',
+  acknowledgeImmediately: false,
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
 
-  contentType: "text/plain",
+  payloadType: "text",
   outputMode: 'DEFAULT',
   pretty: false,
 
@@ -223,6 +228,7 @@ export const defaultMessageReplyConfig:any = {
   createIfMissing: undefined,
 
   acknowledgeMode: 'PER_MESSAGE',
+  acknowledgeImmediately: false,
   acknowledgeTimeout: 2000,
   enabled: false, // guaranteed publisher
   windowSize: 50,
@@ -231,7 +237,7 @@ export const defaultMessageReplyConfig:any = {
   exitAfter: 0,
   traceVisualization: false,
 
-  contentType: "text/plain",
+  payloadType: "text",
   outputMode: 'DEFAULT',
   pretty: false,
   

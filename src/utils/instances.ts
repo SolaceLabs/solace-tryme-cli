@@ -30,6 +30,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   reapplySubscriptions?: boolean | undefined
   acknowledgeTimeout?: number | undefined
   acknowledgeMode?: PublisherAcknowledgeMode | MessageConsumerAcknowledgeMode | undefined
+  acknowledgeImmediately?: boolean | undefined
   logLevel?: string | undefined
   command: CommandType
   operation: OperationType
@@ -42,19 +43,21 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   createIfMissing: boolean | undefined
   message?: string | Buffer | undefined
   defaultMessage?: boolean | undefined;
+  emptyMessage?: boolean | undefined;
   file?: string | undefined
   stdin?: boolean | undefined
   timeToLive?: number | undefined
   dmqEligible?: boolean | undefined
-  partitionKey?: string | undefined
+  partitionKeysCount?: number | undefined
   partitionKeys?: any
-  messageId?: string | undefined
-  messageType?: string | undefined
+  appMessageId?: string | undefined
+  appMessageType?: string | undefined
+  correlationId?: string | undefined
   correlationKey?: string | undefined
   deliveryMode?: string | undefined
   replyToTopic?: string | undefined
   userProperties?: Record<string, string | string[]> | undefined
-  contentType?: string | undefined
+  payloadType?: string | undefined
   outputMode?: string | undefined
   pretty?: boolean | undefined
   waitBeforeExit?: number | undefined;
@@ -95,6 +98,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.acknowledgeMode = (commandType === 'send') ? 
                               solace.MessagePublisherAcknowledgeMode.PER_MESSAGE :
                               solace.MessageConsumerAcknowledgeMode.AUTO
+    this.acknowledgeImmediately = false;
     this.logLevel = ""
     this.command = commandType
     this.operation = "CREATE"
@@ -107,19 +111,21 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.createIfMissing = false
     this.message = ""
     this.defaultMessage = false;
+    this.emptyMessage = false;
     this.file = ""
     this.stdin = false
     this.timeToLive = 1
     this.dmqEligible = false
-    this.partitionKey = 'SECOND'
+    this.partitionKeysCount = 2;
     this.partitionKeys = []
-    this.messageId = ""
-    this.messageType = ""
+    this.appMessageId = ""
+    this.appMessageType = ""
     this.correlationKey = ""
+    this.correlationId = ""
     this.deliveryMode = 'DIRECT'
     this.replyToTopic = ""
     this.userProperties = { "key": "value" }
-    this.contentType = "text/plain"
+    this.payloadType = "text/plain"
     this.outputMode = "DEFAULT"
     this.pretty = false
     this.waitBeforeExit = 0;

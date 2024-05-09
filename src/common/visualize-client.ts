@@ -18,8 +18,8 @@ export class VisualizeClient {
       message.setBinaryAttachment(JSON.stringify(payload));
       message.setDeliveryMode(MessageDeliveryModeType.DIRECT);
       options.dmqEligible && message.setDMQEligible(false);
-      options.messageId && message.setApplicationMessageId(options.messageId);
-      options.messageType && message.setApplicationMessageType('VISUALIZATION_EVENT');
+      options.appMessageId && message.setApplicationMessageId(options.appMessageId);
+      options.appMessageType && message.setApplicationMessageType('VISUALIZATION_EVENT');
       if (options.traceVisualization) Logger.logSuccess(`visualize message published to topic ${topicName}`)
       session.send(message);
     } catch (error:any) {

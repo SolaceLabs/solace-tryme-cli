@@ -112,6 +112,8 @@ const Logger = {
           var prettyPayload = prettyJSON(payload.trim());
           Logger.logMessage(`Payload\r\n${prettyPayload}`);
         }
+      } else {
+        Logger.logMessage(`Payload\r\n${chalk.italic('Empty')}`);
       }
     } else if (outputMode?.toUpperCase() === 'PROPS') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')

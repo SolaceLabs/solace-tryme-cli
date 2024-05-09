@@ -47,7 +47,7 @@ export class SolaceClient extends VisualizeClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.logWarn("already connected and ready to send requests.");
+        Logger.logWarn("already connected and ready to send requests");
         return;
       }
 
@@ -113,7 +113,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // sends one request
-  request = (topicName: string, payload: string | Buffer | undefined, contentType: string) => {
+  request = (topicName: string, payload: string | Buffer | undefined, payloadType: string) => {
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
       return;
@@ -123,13 +123,17 @@ export class SolaceClient extends VisualizeClient {
     var request = solace.SolclientFactory.createMessage();
     request.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
     if (payload) {
-      if (contentType === 'application/xml' || contentType === 'text/plain') {
-        if (typeof payload === 'string')
+      if (payloadType === 'text') {
+        try {
+          if (typeof payload === 'object') {
+            request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+          } else {
+            var jsonPayload = JSON.parse(payload.toString());
+            request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
+          }
+        } catch (error) {
           request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
-        else
-          request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
-      } else if (contentType === 'application/json') {
-        request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+        }
       } else {
         if (typeof payload === 'object') {
           const encoder = new TextEncoder(); 
@@ -147,12 +151,13 @@ export class SolaceClient extends VisualizeClient {
       request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
     }
 
+    this.options.correlationId ? request.setCorrelationId(this.options.correlationId) : request.setCorrelationId( `REQ-${Date.now().toString()}` );
     this.options.deliveryMode && request.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
     this.options.timeToLive && request.setTimeToLive(this.options.timeToLive);
     this.options.dmqEligible && request.setDMQEligible(true);
-    this.options.messageId && request.setApplicationMessageId(this.options.messageId);
-    if (this.options.visualization === 'on' && !this.options.messageId) request.setApplicationMessageId(randomUUID());
-    this.options.messageType && request.setApplicationMessageType(this.options.messageType);
+    this.options.appMessageId && request.setApplicationMessageId(this.options.appMessageId);
+    if (this.options.visualization === 'on' && !this.options.appMessageId) request.setApplicationMessageId(randomUUID());
+    this.options.appMessageType && request.setApplicationMessageType(this.options.appMessageType);
     this.options.replyToTopic && request.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
     if (this.options.userProperties) {
       let propertyMap = new solace.SDTMapContainer();
@@ -163,7 +168,7 @@ export class SolaceClient extends VisualizeClient {
       request.setUserPropertyMap(propertyMap);    
     } 
 
-    Logger.logSuccess(`request sent on topic ${topicName}`)
+    Logger.logSuccess(`request sent on topic ${topicName}, type - ${getType(request)}`)
     Logger.dumpMessage(request, this.options.outputMode, this.options.pretty);
     try {
       if (this.options.replyToTopic) {
@@ -180,7 +185,7 @@ export class SolaceClient extends VisualizeClient {
         request,
         this.options.timeout, // 5 seconds timeout for this operation
         (session:any, message:any) => {
-          Logger.logSuccess(`reply Received - ${request.getDestination()}, type - ${getType(request)}`)
+          Logger.logSuccess(`reply received, type - ${getType(message)}`)
           Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLY_RECEIVED, { 
             type: 'requestor', topicName: topicName + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()

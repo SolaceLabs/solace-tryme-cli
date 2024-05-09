@@ -253,8 +253,10 @@ ${chalk.yellowBright('NOTE: The default commands created by the initialize opera
   `)
 }
 
-
 export const displayHelpExamplesForPublish = () => {
+}
+
+export const displayHelpExamplesForPublish1 = () => {
   console.log(`
 Examples:
 // execute the default publish command with settings defined on the 

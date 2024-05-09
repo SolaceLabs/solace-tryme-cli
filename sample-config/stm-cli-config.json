@@ -35,7 +35,7 @@
       "partitionKeys": [],
       "elidingEligible": false,
       "timeout": 5000,
-      "contentType": "text/plain",
+      "payloadType": "text",
       "outputMode": "DEFAULT",
       "pretty": false,
       "count": 1,
@@ -46,6 +46,7 @@
         "solace/try/me"
       ],
       "acknowledgeMode": "WINDOWED",
+      "acknowledgeImmediately": false,
       "acknowledgeTimeout": 2000,
       "enabled": true,
       "guaranteedPublisher": true,
@@ -59,7 +60,7 @@
       "partitionKeys": [],
       "elidingEligible": false,
       "timeout": 5000,
-      "contentType": "text/plain",
+      "payloadType": "text",
       "outputMode": "DEFAULT",
       "pretty": false,
       "count": 1,
@@ -75,15 +76,18 @@
     },
     "request": {
       "command": "request",
+      "count": 1,
+      "interval": 1000,
       "description": "Request application created via Solace Try-Me CLI",
       "topic": [
         "solace/try/me/request"
       ],
       "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeImmediately": false,
       "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
-      "contentType": "text/plain",
+      "payloadType": "text",
       "outputMode": "DEFAULT",
       "pretty": false
     },
@@ -94,13 +98,14 @@
         "solace/try/me/request"
       ],
       "acknowledgeMode": "PER_MESSAGE",
+      "acknowledgeImmediately": false,
       "acknowledgeTimeout": 2000,
       "enabled": false,
       "windowSize": 50,
       "waitBeforeExit": 0,
       "exitAfter": 0,
       "traceVisualization": false,
-      "contentType": "text/plain",
+      "payloadType": "text",
       "outputMode": "DEFAULT",
       "pretty": false
     }

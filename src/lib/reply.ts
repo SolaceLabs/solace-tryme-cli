@@ -36,7 +36,7 @@ const reply = async (
     replier.exit();
   });
 
-  var contentType:any = options.contentType as string;
+  var payloadType:any = options.payloadType as string;
   var message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
 
@@ -66,7 +66,7 @@ const reply = async (
   }
 
   try {
-    replier.subscribe(options.topic, message, contentType);
+    replier.subscribe(options.topic, message, payloadType);
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

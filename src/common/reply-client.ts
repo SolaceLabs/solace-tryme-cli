@@ -26,7 +26,7 @@ export class SolaceClient extends VisualizeClient {
   session:any = null;
   clientName:string = "";
   payload:any = null;
-  contentType:string = "";
+  payloadType:string = "";
 
   constructor(options:any) {
     super();
@@ -115,7 +115,7 @@ export class SolaceClient extends VisualizeClient {
               type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
             })    
 
-            this.reply(request, this.payload, this.contentType);
+            this.reply(request, this.payload, this.payloadType);
           } catch (error:any) {
             Logger.logDetailedError('send reply failed - ', error.toString())
             if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -139,7 +139,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Subscribes to request topic on Solace PubSub+ Event Broker
-  subscribe = (topicNames: any, payload: string | Buffer | undefined, contentType: string) => {
+  subscribe = (topicNames: any, payload: string | Buffer | undefined, payloadType: string) => {
     //Check if the session has been established
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
@@ -148,7 +148,7 @@ export class SolaceClient extends VisualizeClient {
 
     try {
       this.payload = payload;
-      this.contentType = contentType;
+      this.payloadType = payloadType;
       topicNames.forEach((topicName:any) => {
         Logger.logInfo(`subscribing to ${topicName}`);
   
@@ -187,20 +187,23 @@ export class SolaceClient extends VisualizeClient {
     }
   };
 
-  reply = (message:any, payload: string | Buffer | undefined, contentType: string) => {
+  reply = (message:any, payload: string | Buffer | undefined, payloadType: string) => {
     Logger.logSuccess(`request Received - ${message.getDestination()}, type - ${getType(message)}`)
     Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
-    Logger.await(`replying to request on topic '${message.getDestination().getName()}'...`);
     if (this.session !== null) {
       var reply = solace.SolclientFactory.createMessage();
       if (payload) {
-        if (contentType === 'application/xml' || contentType === 'text/plain') {
-          if (typeof payload === 'string')
+        if (payloadType === 'text') {
+          try {
+            if (typeof payload === 'object') {
+              reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+            } else {
+              var jsonPayload = JSON.parse(payload.toString());
+              reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
+            }
+          } catch (error) {
             reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
-          else
-            reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
-        } else if (contentType === 'application/json') {
-          reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
+          }
         } else {
           if (typeof payload === 'object') {
             const encoder = new TextEncoder(); 
@@ -214,10 +217,12 @@ export class SolaceClient extends VisualizeClient {
             reply.setBinaryAttachment(payload);
           }
         }
+        Logger.await(`replying to request on topic '${message.getDestination().getName()}', type - ${getType(reply)}`);
       } else {
         reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
       }
   
+      // reply.setAcknowledgeImmediately(true);
       reply.setApplicationMessageId(message.getApplicationMessageId());
       if (this.options.replyToTopic) 
         reply.setDestination(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic));

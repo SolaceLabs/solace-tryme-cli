@@ -60,6 +60,7 @@ declare global {
     
     acknowledgeTimeout?: number
     acknowledgeMode?: PublisherAcknowledgeMode | MessageConsumerAcknowledgeMode
+    acknowledgeImmediately?: boolean
 
     logLevel?: string
     visualization?: string | boolean
@@ -85,20 +86,22 @@ declare global {
     file?: string | undefined
     message?: string | Buffer | undefined
     defaultMessage?: boolean
+    emptyMessage?: boolean
     stdin?: boolean
     timeToLive?: number
     dmqEligible?: boolean
-    partitionKey?: string
+    partitionKeysCount?: number
     partitionKeys?: string[] | any
-    messageId?: string
-    messageType?: string
+    appMessageId?: string
+    appMessageType?: string
     correlationKey?: string
+    correlationId?: string
     deliveryMode?: string
     replyToTopic?: string
     userProperties?: Record<string, string | string[]>
     waitBeforeExit?: number
     exitAfter?: number
-    contentType?: string
+    payloadType?: string
     outputMode?: string
     pretty?: boolean // NOT USED
     traceVisualization?: boolean

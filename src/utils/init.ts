@@ -54,7 +54,7 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
     }
   }
   
-  const config = buildMessageConfig(options, optionsSource, []);
+  const config = buildMessageConfig({}, options, optionsSource, []);
   saveConfig(config)
 }
 
@@ -133,19 +133,19 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
 
   var count = 0;
   var table = new AsciiTable('Connection Settings')
-  table.setHeading('Operation', 'Name', 'Broker URL', 'Message VPN', 'Username', 'Password' )
+  table.setHeading('Command', 'Name', 'Broker URL', 'Message VPN', 'Username', 'Password' )
   count++
-  table.addRow(config.connection.command, config.connection.command.toUpperCase(), 
+  table.addRow(config.connection.command.toUpperCase(), config.connection.command, 
                 config.connection.url, config.connection.vpn, config.connection.username, 
                 "******")
-  table.addRow(config.sempconnection.command, config.sempconnection.command.toUpperCase(), 
+  table.addRow(config.sempconnection.command.toUpperCase(), config.sempconnection.command, 
                 config.sempconnection.sempUrl, config.sempconnection.sempVpn, config.sempconnection.sempUsername, 
                 "******")
   table.setJustify(false);
   console.log(table.toString());
 
   var table = new AsciiTable('Messaging Commands')
-  table.setHeading('Operation', 'Name', 'Topic(s)', 'Broker URL', 'Message VPN', 'Credentials' )
+  table.setHeading('Command', 'Name', 'Topic(s)', 'Broker URL', 'Message VPN', 'Credentials' )
   
   let commands:any = {};
   messagingCommands.forEach(c => commands[c] = []);
@@ -180,7 +180,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   console.log(table.toString());
 
   table = new AsciiTable('Management Commands')
-  table.setHeading('Resource', 'Operation', 'Name', 'Broker SEMP URL', 'Message VPN', 'Credentials' )
+  table.setHeading('Resource', 'Command', 'Name', 'Broker SEMP URL', 'Message VPN', 'Credentials' )
   
   commands = {};
   manageCommands.forEach(c => commands[c] = []);
@@ -266,7 +266,7 @@ export const buildConfig = (options:any, optionsSource: any, commandType: Comman
   return result;
 }
 
-export const buildMessageConfig = (options:any, optionsSource: any, commands: any) => {
+export const buildMessageConfig = (current: any, options:any, optionsSource: any, commands: any) => {
   const result:any = {
     config: optionsSource.config === 'cli' && typeof options.config === 'string' ? options.config : defaultConfigFile,
     message: {
@@ -287,10 +287,12 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
 
   // initialize messaging settings
   result.message.connection && Object.keys(defaultMessageConnectionConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.connection[key] = defaultMessageConnectionConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.message.connection[key] = options[key];
+    } else {
+      current ? 
+        result.message.connection[key] = current.message.connection[key] :
+        result.message.connection[key] = defaultMessageConnectionConfig[key];
     }
   })
   
@@ -299,43 +301,53 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
   }
 
   result.message.send && Object.keys(defaultMessagePublishConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.send[key] = defaultMessagePublishConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.message.send[key] = options[key];
+    } else {
+      current ? 
+        result.message.send[key] = current.message.send[key] :
+        result.message.send[key] = defaultMessagePublishConfig[key];
     }
   })
 
   result.message.receive && Object.keys(defaultMessageReceiveConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.receive[key] = defaultMessageReceiveConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.message.receive[key] = options[key];
+    } else {
+      current ? 
+        result.message.receive[key] = current.message.receive[key] :
+        result.message.receive[key] = defaultMessageReceiveConfig[key];
     }
   })
 
   result.message.request && Object.keys(defaultMessageRequestConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.request[key] = defaultMessageRequestConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.message.request[key] = options[key];
+    } else {
+      current ? 
+        result.message.request[key] = current.message.request[key] :
+        result.message.request[key] = defaultMessageRequestConfig[key];
     }
   })
 
   result.message.reply && Object.keys(defaultMessageReplyConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.message.reply[key] = defaultMessageReplyConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.message.reply[key] = options[key];
+    } else {
+      current ? 
+        result.message.reply[key] = current.message.reply[key] :
+        result.message.reply[key] = defaultMessageReplyConfig[key];
     }
   })
 
   // initialize manage settings
   result.manage.sempconnection && result.manage.sempconnection && Object.keys(defaultManageConnectionConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.manage.sempconnection[key] = defaultManageConnectionConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.manage.sempconnection[key] = options[key];
+    } else {
+      current ? 
+        result.manage.sempconnection[key] = current.manage.sempconnection[key] :
+        result.manage.sempconnection[key] = defaultManageConnectionConfig[key];
     }
   })
   
@@ -344,34 +356,42 @@ export const buildMessageConfig = (options:any, optionsSource: any, commands: an
   }
 
   result.manage.queue && Object.keys(defaultManageQueueConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.manage.queue[key] = defaultManageQueueConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.manage.queue[key] = options[key];
+    } else {
+      current ? 
+        result.manage.queue[key] = current.manage.queue[key] :
+        result.manage.queue[key] = defaultManageQueueConfig[key];
     }
   })
 
   result.manage['client-profile'] && Object.keys(defaultManageClientProfileConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.manage['client-profile'][key] = defaultManageClientProfileConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.manage['client-profile'][key] = options[key];
+    } else {
+      current ? 
+        result.manage['client-profile'][key] = current.manage['client-profile'][key] :
+        result.manage['client-profile'][key] = defaultManageClientProfileConfig[key];
     }
   })
 
   result.manage['acl-profile'] && Object.keys(defaultManageAclProfileConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.manage['acl-profile'][key] = defaultManageAclProfileConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.manage['acl-profile'][key] = options[key];
+    } else {
+      current ? 
+        result.manage['acl-profile'][key] = current.manage['acl-profile'][key] :
+        result.manage['acl-profile'][key] = defaultManageAclProfileConfig[key];
     }
   })
 
   result.manage['client-username'] && Object.keys(defaultManageClientUsernameConfig).forEach((key:string) => {
-    if (!optionsSource[key] || optionsSource[key] === 'default') {
-      result.manage['client-username'][key] = defaultManageClientUsernameConfig[key];
-    } else {
+    if (optionsSource[key] === 'cli') {
       result.manage['client-username'][key] = options[key];
+    } else {
+      current ? 
+        result.manage['client-username'][key] = current.manage['client-username'][key] :
+        result.manage['client-username'][key] = defaultManageClientUsernameConfig[key];
     }
   })
 

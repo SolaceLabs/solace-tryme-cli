@@ -3,7 +3,7 @@ import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
 import { SolaceClient } from '../common/request-client'
 import { displayHelpExamplesForRequest } from '../utils/examples';
-import { defaultRequestMessage, delay, getDefaultMessage } from '../utils/defaults';
+import { getDefaultMessage } from '../utils/defaults';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 import { StdinRead } from '../utils/stdinread'
 
@@ -11,6 +11,7 @@ const request = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
+  const { count } = options;
   const requestor = new SolaceClient(options);
   var interrupted = false;
 
@@ -36,7 +37,7 @@ const request = async (
     requestor.exit();
   });
 
-  var contentType:any = options.contentType as string;
+  var payloadType:any = options.payloadType as string;
   var message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
   
@@ -69,7 +70,13 @@ const request = async (
     // if (options.replyToTopic)
     //   requestor.subscribe(options.replyToTopic)
     var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
-    requestor.request(topicName, message, contentType);
+    if (count === 1) {
+      requestor.request(topicName, message, payloadType);
+    } else {
+      for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
+        requestor.request(topicName, message, payloadType);
+      }
+    }
   } catch (error:any) {
     Logger.logError('exiting...')
     process.exit(1)

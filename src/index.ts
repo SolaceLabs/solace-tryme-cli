@@ -74,7 +74,7 @@ export class Commander {
       if (latestVersion && this.online) {
         if (`${'v' + version}` !== latestVersion.name) {
           Logger.info(`new version available: ${latestVersion.name}, current version: ${version}`)
-          Logger.alert(`Download URL: ' + ${latestVersion.html_url}\n`);
+          Logger.alert(`Download URL: ${latestVersion.html_url}\n`);
         }
 
         execLastVersionCheck(now)
