@@ -136,13 +136,24 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
   }
 }
 
-export const execLastVersionCheck = (ts:number|undefined = undefined) => {
+export const getLastVersionCheck = () : number|undefined => {
   try {
     const homedir = require('os').homedir();
     const filePath = `${homedir}/.stm/${defaultLastVersionCheck}`;
-    var now = ts ? ts : Date.now();
-    if (!fileExists(filePath) || ts) fs.writeFileSync(filePath, `${now}`);
+    if (!fileExists(filePath)) {
+      fs.writeFileSync(filePath, `${Date.now() - 25 * 60 * 60 * 1000}`);
+    }
     return parseNumber(fs.readFileSync(filePath).toString());
+  } catch (error: any) {
+    return undefined;
+  }
+}
+
+export const updateLastVersionCheck = (ts:number|undefined = undefined) => {
+  try {
+    const homedir = require('os').homedir();
+    const filePath = `${homedir}/.stm/${defaultLastVersionCheck}`;
+    if (!fileExists(filePath) || ts) fs.writeFileSync(filePath, `${ts}`);
   } catch (error: any) {
   }
 }
@@ -246,7 +257,7 @@ export const createDefaultConfig = () => {
   }
 
   // save default configuration
-  saveConfig(buildMessageConfig({}, options, optionsSource, []))     
+  saveConfig(buildMessageConfig(null, options, optionsSource, []))
 }
 
 export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions) => {

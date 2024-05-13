@@ -22,7 +22,7 @@ import clientUsername from './lib/client-username';
 import connection from './lib/connection';
 import visualize from './utils/visualize';
 import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
-import { execLastVersionCheck, loadCommandFromConfig } from './utils/config';
+import { getLastVersionCheck, loadCommandFromConfig, updateLastVersionCheck } from './utils/config';
 import sempConnection from './lib/semp-connection';
 import chalk from 'chalk';
 import { displayConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
@@ -34,18 +34,22 @@ export class Commander {
   advanced: boolean
   online: boolean
   newVersionFound: boolean
+  lastChecked: number|undefined
+  version: string
 
   constructor(help: boolean, advanced: boolean) {
     this.program = new Command()
     this.help = help;
     this.advanced = advanced;
     this.online = true;
+    this.version = version
     this.newVersionFound = false;
+    this.lastChecked = getLastVersionCheck();
   }
 
   getVersion() {
     this.newVersionCheck();
-    return `v${version}`;
+    return `v${this.version}`;
   }
 
   newVersionCheck(): string {
@@ -53,11 +57,10 @@ export class Commander {
       return '';
 
     var now = Date.now();
-    var lastChecked = execLastVersionCheck();
     const oneDay = 24 * 60 * 60 * 1000; // 1 day
     // const oneDay = 10 * 1000; // 10 secs
 
-    if (!this.newVersionFound && lastChecked && (now - lastChecked) > oneDay) {
+    if (!this.newVersionFound && this.lastChecked && (now - this.lastChecked) > oneDay) {
       const fetch = require('sync-fetch')
       var latestVersion = undefined;
 
@@ -72,12 +75,12 @@ export class Commander {
       }
 
       if (latestVersion && this.online) {
-        if (`${'v' + version}` !== latestVersion.name) {
-          Logger.info(`new version available: ${latestVersion.name}, current version: ${version}`)
+        if (`${'v' + this.version}` !== latestVersion.name) {
+          Logger.info(`new version available: ${latestVersion.name}, current version: ${this.version}`)
           Logger.alert(`Download URL: ${latestVersion.html_url}\n`);
         }
 
-        execLastVersionCheck(now)
+        updateLastVersionCheck(now)
         this.newVersionFound = true;
       }
     }
@@ -159,6 +162,7 @@ export class Commander {
       .command('request')
       .description(chalk.whiteBright('Execute a request command'))
       .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
     addRequestOptions(requestCmd, this.advanced);
     requestCmd.action((options: MessageClientOptions) => {
       this.newVersionCheck();

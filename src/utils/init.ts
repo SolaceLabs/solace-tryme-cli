@@ -54,7 +54,7 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
     }
   }
   
-  const config = buildMessageConfig({}, options, optionsSource, []);
+  const config = buildMessageConfig(null, options, optionsSource, []);
   saveConfig(config)
 }
 
