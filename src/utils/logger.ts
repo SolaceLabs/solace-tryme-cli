@@ -85,8 +85,16 @@ const Logger = {
 
   await: (message: string) => Signal.await(chalk.cyanBright(message)),
   alert: (message: string) => Signal.alert(chalk.bgMagenta(message)),
-
-  prettyPrintMessage: (message: any, payload:any, outputMode:string, pretty: boolean) => {
+  dumpMap: (map: any) => {
+    var keys = map.getKeys();
+    var str = '';
+    keys.forEach((key: any, idx: number) => {
+      str += `${key.padEnd(24, ' ')} ${map.getField(key).getValue()}`;
+      if (idx < keys.length-1) str += `\r\n`;
+    });
+    return str;
+  },
+  prettyPrintMessage: (message: any, payload:any, messageType: number, outputMode:string, pretty: boolean) => {
     var properties = message.dump(0);
     var userProperties = message.getUserPropertyMap();
 
@@ -104,13 +112,20 @@ const Logger = {
         Logger.logMessage(`Properties\r\n${properties}\r\n${chalk.italic('User Properties:')}\r\n${userProps}`);
       else 
         Logger.logMessage(`Properties\r\n${properties}`)
+
       if (payload) {
-        if (payload.startsWith('<?xml')) {
-          var prettyPayload = prettyXML(payload.trim(), 2);
-          Logger.logMessage(`Payload\r\n${prettyPayload}`);
+        if (messageType === 0 || messageType === 3) {
+          if (payload.startsWith('<?xml')) {
+            var prettyPayload = prettyXML(payload.trim(), 2);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          } else {
+            var prettyPayload = prettyJSON(payload.trim());
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          }
+        } else if (messageType === 1) {
+          Logger.logMessage(`Payload\r\n${Logger.dumpMap(payload)}`);
         } else {
-          var prettyPayload = prettyJSON(payload.trim());
-          Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          Logger.logMessage(`Payload [Unsupported type: ${messageType}] \r\n${payload}`);
         }
       } else {
         Logger.logMessage(`Payload\r\n${chalk.italic('Empty')}`);
@@ -138,13 +153,20 @@ const Logger = {
 
   dumpMessage: (message: any, outputMode: string, pretty: boolean) => {
     var payload = undefined;
-    if (message.getType() === 0) { // binary
+    var messageType = message.getType();
+    if (messageType === 0) { // binary
       payload = message.getBinaryAttachment();
-    } else {
+      if (!payload)
+        payload = message.getXmlContent();
+    } else if (messageType === 1) { // map
+      payload = message.getSdtContainer().getValue();
+    } else if (messageType === 2) { // stream
+      // console.log('Got a stream message');
+    } else {  // text
       payload = message.getSdtContainer().getValue();
     }
 
-    Logger.prettyPrintMessage(message, payload ? payload.trim() : payload, outputMode, pretty)
+    Logger.prettyPrintMessage(message, payload, messageType, outputMode, pretty)
   },
 
 
