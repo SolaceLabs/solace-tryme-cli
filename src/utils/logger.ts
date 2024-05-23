@@ -94,8 +94,30 @@ const Logger = {
     });
     return str;
   },
+  printStream: (stream: any, out: any) => {
+    stream.getFields().forEach((field: any) => {
+      if (field.getType() === 15)
+        out += `${field.getName()}=${Logger.printStream(field.getValue(), '')}\r\n`;
+      else
+        out += `${field.getName()}=${field.getValue()}\r\n`;
+    });
+  },
   prettyPrintMessage: (message: any, payload:any, messageType: number, outputMode:string, pretty: boolean) => {
     var properties = message.dump(0);
+    if (messageType === 1) { // MAP MESSAGE
+      var map = message.getSdtContainer();
+      var keys = map.getKeys();
+      properties = '';
+      keys.forEach((key: any, idx: number) => {
+        var field = map.getField(key);
+        if (field.getType() === 15)
+          properties += `${key.padEnd(24, ' ')} ${Logger.printStream(field.getValue(), '')}`;
+        else
+        properties += `${key.padEnd(24, ' ')} ${map.getField(key).getValue()}`;
+        if (idx < keys.length-1) properties += `\r\n`;
+      });
+    }
+
     var userProperties = message.getUserPropertyMap();
 
     if (outputMode?.toUpperCase() === 'FULL') {
