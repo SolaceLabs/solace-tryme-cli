@@ -1,9 +1,8 @@
-import * as readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
+import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { ManageFeedClientOptionsEmpty } from '../utils/instances';
-import { fileExists, loadFeedInfo, processPlainPath, writeJsonFile } from '../utils/config';
-import { communityRepoUrl, defaultFeedInfoFile, defaultStmFeedsHome, defaultStmHome } from '../utils/defaults';
+import { fileExists, loadFeedInfo, processPlainPath, readFile, writeJsonFile } from '../utils/config';
+import { communityRepoUrl, defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
+        defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkItalic } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 
@@ -83,7 +82,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1)
     }
 
-    if (!fileExists(`${repoPath}/EVENT_FEEDS.json`)) {
+    if (!fileExists(`${repoPath}/${defaultEventFeedsFile}`)) {
       Logger.error('Specified local repo is not a valid EVENT-FEEDS repository, clone the event feeds repo locally and try again');
       process.exit(1)
     }
@@ -92,12 +91,6 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     process.exit(1)
   }
-
-  const prompt3 = new Input({
-    message: 'Feed icon (an URL or a base64 image data):',
-    hint: 'Leave blank to use default feed icon',
-    initial: info.img
-  });
 
   const prompt4 = new Input({
     message: 'Feed description:',
@@ -114,10 +107,16 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-  await prompt3.run()
+    const prompt3 = new Input({
+      message: 'Feed icon (an URL or a base64 image data):',
+      hint: 'Leave blank to use default feed icon',
+      initial: info.img
+    });
+  
+    await prompt3.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.img !== answer;
-      info.img = answer
+      info.img = answer ? answer : 'assets/img/defaultfeed.png'
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
@@ -204,17 +203,40 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       });
   }
 
-  // console.log('Updated Info', info);
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
 
-  console.log(`\n\n${chalkBoldLabel('Please follow the steps to contribute your event feed to EVENT-FEEDS repo for public access')}:`)
-  console.log(`
+  const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+
+  try {
+    fs.mkdirSync(`${repoPath}/${feedName}`, { recursive: true })
+    fs.copyFileSync(`${feedPath}/${defaultFeedAnalysisFile}`, `${repoPath}/${feedName}/${defaultFeedAnalysisFile}`)
+    fs.copyFileSync(`${feedPath}/${defaultFeedInfoFile}`, `${repoPath}/${feedName}/${defaultFeedInfoFile}`)
+    fs.copyFileSync(`${feedPath}/${defaultFeedRulesFile}`, `${repoPath}/${feedName}/${defaultFeedRulesFile}`)
+    fs.copyFileSync(`${feedPath}/${defaultFakerRulesFile}`, `${repoPath}/${feedName}/${defaultFakerRulesFile}`)
+    fs.copyFileSync(`${feedPath}/${defaultFeedSchemasFile}`, `${repoPath}/${feedName}/${defaultFeedSchemasFile}`)
+    fs.copyFileSync(`${feedPath}/${analysis.fileName}`, `${repoPath}/${feedName}/${analysis.fileName}`)
+
+    var feeds = readFile(`${repoPath}/${defaultEventFeedsFile}`);
+    feeds.push(info);
+
+    writeJsonFile(`${repoPath}/${defaultEventFeedsFile}`, feeds, true);
+
+    console.log(`
+${chalkBoldWhite(`Change directory to ${localRepo} and commit the changes, and create a PR.`)}
+${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
+`);
+  } catch (error: any) {
+    Logger.logDetailedError('feed copy failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    
+    console.log(`\n\n${chalkBoldLabel('However, you can follow the steps to contribute your event feed to EVENT-FEEDS repo for public access')}:`)
+    console.log(`
 ${chalkBoldWhite('1. Copy the feed directory to the local repo')}
 
 ${chalkItalic('$')} ${chalkBoldWhite(`cp -r "${defaultStmFeedsHome}/${feedName}" ${localRepo}`)}
 
-${chalkBoldWhite(`2. Open the ${localRepo}/EVENT_FEEDS.json file and add the following feed info as last element in the array.`)}
+${chalkBoldWhite(`2. Open the ${localRepo}/${defaultEventFeedsFile} file and add the following feed info as last element in the array.`)}
 
 ${chalkBoldWhite(JSON.stringify(info, null, 2))}
 
@@ -224,6 +246,9 @@ ${chalkBoldWhite('4. Create a PR on the GitHub for review.')}
 
 ${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
   `)
+
+    return false;
+  }
 
   Logger.success('Goodbye 👋')
 }

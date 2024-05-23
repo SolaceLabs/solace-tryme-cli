@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { loadLocalFeedFile, loadGitFeedFile, processPlainPath } from './config';
-import { defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from './defaults';
+import { defaultEventFeedsFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from './defaults';
 
 export const getLocalEventFeeds = () => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
@@ -57,7 +57,7 @@ export const getGitFeedEvents = async (feedName:any) => {
 export const getGitEventFeeds = async () => {
   var gitFeeds: any[] = [];
   try {
-    await fetch(`${defaultGitRepo}/EVENT_FEEDS.json`)
+    await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
       .then(async (response) => {
         const data = await response.json();
         data.forEach((d: any) => gitFeeds.push(d));

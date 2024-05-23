@@ -413,6 +413,7 @@ export const defaultFakerRulesFile = 'fakerrules.json'
 export const defaultFeedInfoFile = 'feedinfo.json'
 export const defaultFeedRulesFile = 'feedrules.json'
 export const defaultFeedSchemasFile = 'feedschemas.json'
+export const defaultEventFeedsFile = 'EVENT_FEEDS.json'
 export const defaultGitRepo = 'https://raw.githubusercontent.com/gvensan/test-feeds/main';
 export const defaultGitFeedRepo = 'https://github.com/gvensan/test-feeds/tree/main';
 export const defaultProjectName = 'merge-tryme-cli'
