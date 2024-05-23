@@ -5,18 +5,25 @@ import {
   parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
   parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKeys,
-  parsePartitionKeysCount
+  parsePartitionKeysCount,
+  parseFeedType
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
         commandSend, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, 
         defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, 
-        defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername, defaultMessageRequestConfig, defaultMessageReplyConfig } from './defaults';
+        defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername, defaultMessageRequestConfig, defaultMessageReplyConfig, 
+        defaultFeedConfig} from './defaults';
 import chalk from 'chalk';
 
 export const addRootHelpOptions = (cmd: Command) => {
   cmd
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli command examples')). preset({ helpExamples: true }))
+}
+
+export const addFeedHelpOptions = (cmd: Command) => {
+  cmd
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli feed command examples')))
 }
 
 export const addConfigHelpOptions = (cmd: Command) => {
@@ -32,7 +39,7 @@ export const addConfigDeleteOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // delete options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -44,7 +51,7 @@ export const addConfigViewOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // view options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -56,7 +63,7 @@ export const addConfigListOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // list options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
@@ -68,7 +75,7 @@ export const addConfigInitOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // init options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -152,7 +159,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandSend))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -205,7 +212,7 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandReceive))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -288,7 +295,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandRequest))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -364,7 +371,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandReply))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -416,7 +423,7 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandQueue))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -451,7 +458,7 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandAclProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
@@ -493,7 +500,7 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandClientProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
@@ -529,7 +536,7 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandClientUsername))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
@@ -562,7 +569,7 @@ export const addManageConnectionOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -581,7 +588,7 @@ export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -592,13 +599,135 @@ export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 
 export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
-    .addOption(new Option('--visualization-port [PORT]',chalk.whiteBright('the port for the visualizer')) .argParser(parseNumber) .default(0))
-    .addOption(new Option('-c, --config <CONFIG_FILE>',chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-port, --visualization-port [PORT]', chalk.whiteBright('the port for the visualizer')) .argParser(parseNumber) .default(0))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 
+export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    // feed options
+    .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed URL')) .default(false))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed summarize command examples')))
+}
+
+export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')) )
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
+    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type: stm, api or custom')) .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed generate command examples')))
+}
+
+export const addFeedConfigureOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
+    .addOption(new Option('-port, --manage-port [PORT]', chalk.whiteBright('the port for the manager')) .argParser(parseNumber) .default(0))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed configure command examples')))
+}
+
+export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) .hideHelp(advanced))
+    .addOption(new Option('-events, --event-names <EVENT_NAME...>', chalk.whiteBright('the event name(s) as space-separated values if listing more than one (e.g., "Loan_Applied" "Loan_Approved" )'))  .hideHelp(advanced))
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed URL')) .default(false)  .hideHelp(advanced))
+    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
+
+    // message options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
+    .addOption(new Option('--interval <SECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(3) .hideHelp(advanced))
+    .addOption(new Option('--initial-delay <SECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
+    
+    // message print options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, PROPS OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(advanced))
+    
+    // partition key settings
+    .addOption(new Option(`\n/* ${chalk.whiteBright('PARTITION KEY SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--partition-keys-count <NUMBER>', chalk.whiteBright('[advanced] the partition keys count for generating simulated keys (min: 2)')) .argParser(parsePartitionKeysCount) .conflicts('partitionKeys') .hideHelp(!advanced))
+    .addOption(new Option('--partition-keys <KEY...>', chalk.whiteBright('[advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)')) .argParser(parsePartitionKeys) .conflicts('partitionKeysCount') .hideHelp(!advanced))
+
+    // advanced message options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--payload-type <PAYLOAD_TYPE>', chalk.whiteBright('[advanced] payload type: TEXT or BYTES')) .argParser(parsePayloadType) .default(defaultMessageConfig.payloadType) .hideHelp(!advanced))
+    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
+    .addOption(new Option('-dmq, --dmq-eligible [BOOLEAN]', chalk.whiteBright('[advanced] the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the user-defined application message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the user-defined application message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
+    .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
+    .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
+    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+
+    // session options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SESSION SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
+    .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
+    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
+
+    // publish options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help for command with options not shown in basic help')))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed run command examples')))
+}
+
+
+export const addFeedContributeOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed contribute command examples')))
+}
+
+export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-local, --local-only [BOOLEAN]', chalk.whiteBright('list local event feeds')) .argParser(parseBoolean) .default(true))
+    .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(true))
+    .addOption(new Option('-v, --verbose [BOOLEAN]', chalk.whiteBright('list feed details')) .argParser(parseBoolean) .default(false))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed list command examples')))
+}
+
+export const addFeedCopyOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
+}

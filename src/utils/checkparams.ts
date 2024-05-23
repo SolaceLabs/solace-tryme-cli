@@ -1,4 +1,5 @@
-import { getDefaultTopic } from "./defaults"
+import { loadLocalFeedFile } from "./config"
+import { defaultFeedAnalysisFile, getDefaultTopic } from "./defaults"
 import { Logger } from "./logger"
 
 export const checkPubTopicExists = (topic: string) => {
@@ -394,3 +395,37 @@ export const checkSempClientUsernameParamsExists = (options: ManageClientOptions
   }
 }
 
+export const checkForFeedSettings = (eventNames:string[], feedName:string) => {
+  if (!feedName) {
+    Logger.logError("required option '--feed-name <FEED_NAME>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (!eventNames) {
+    Logger.logError("required option '--event-name <EVENT_NAME>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  var data = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+  if (!data.messages || !Object.keys(data.messages).length) {
+    Logger.logError(`No event publish events found in the feed '${feedName}'`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  eventNames.forEach(eventName => {
+    if (!data.messages[eventName]) {
+      Logger.logError(`No event by name '${eventName}' found in the feed '${feedName}'`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    if (!data.messages[eventName].send || !data.messages[eventName].send.length) {
+      Logger.logError(`No publishable topics found for the event '${eventName}' in the feed '${feedName}'`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+  });
+}

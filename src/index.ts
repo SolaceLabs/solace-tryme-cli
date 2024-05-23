@@ -1,7 +1,7 @@
 import 'core-js'
 import { Command } from 'commander'
 import { version } from '../package.json'
-import { defaultMessageConnectionConfig, defaultManageConnectionConfig } from './utils/defaults';
+import { defaultMessageConnectionConfig, defaultManageConnectionConfig, defaultFeedConfig } from './utils/defaults';
 import { deleteConfig, initializeConfig, listConfig } from './utils/init'
 
 
@@ -9,7 +9,11 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addConfigInitOptions, addConfigListOptions, addConfigDeleteOptions,
         addReceiveOptions, addRequestOptions,  addReplyOptions, 
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
-        addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, addManageHelpOptions, 
+        addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, 
+        addManageHelpOptions, addFeedHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
+        addFeedRunOptions, addFeedListOptions,
+        addFeedContributeOptions,
+        addFeedCopyOptions,
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -21,12 +25,20 @@ import aclProfile from './lib/acl-profile';
 import clientUsername from './lib/client-username';
 import connection from './lib/connection';
 import visualize from './utils/visualize';
-import { ManageClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
+import { ManageClientOptionsEmpty, ManageFeedClientOptionsEmpty, MessageClientOptionsEmpty } from './utils/instances';
 import { getLastVersionCheck, loadCommandFromConfig, updateLastVersionCheck } from './utils/config';
 import sempConnection from './lib/semp-connection';
 import chalk from 'chalk';
-import { displayConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
+import { displayConfigHelpExamples, displayFeedConfigHelpExamples, displayManageHelpExamples, displayRootHelpExamples } from './utils/examples';
+import feedPreview from './lib/feed-preview';
+import feedGenerate from './lib/feed-generate';
+import feedConfigure from './lib/feed-configure';
+import feedRun from './lib/feed-run'
+import feedContribute from './lib/feed-contribute';
+import feedList from './lib/feed-list';
+import feedCopy from './lib/feed-copy';
 import { Logger } from './utils/logger';
+import { chalkBoldWhite } from './utils/chalkUtils';
 
 export class Commander {
   program: Command
@@ -101,6 +113,12 @@ export class Commander {
       this.newVersionCheck();
       if (options.helpExamples) 
         displayRootHelpExamples();
+      else {
+        if (rootCmd.args.length)
+          Logger.error(`Unknown command ${chalkBoldWhite(rootCmd.args.join(' '))}`);
+
+        rootCmd.help();
+      }
     });
       
     // stm send
@@ -126,11 +144,11 @@ export class Commander {
 
       if (options.deliveryMode === 'PERSISTENT') {
         cliOptions.guaranteedPublisher = 'implied';
-        options.guaranteedPublisher = true;        
+        options.guaranteedPublisher = true;
       }
 
       publisher(options, cliOptions);
-    })  
+    })
   
     // stm receive
     const receiveCmd = this.program
@@ -155,7 +173,7 @@ export class Commander {
       }
 
       receiver(options, cliOptions);
-    })  
+    })
 
     // stm request
     const requestCmd = this.program
@@ -178,7 +196,7 @@ export class Commander {
         }
       }
       requestor(options, cliOptions);
-    })  
+    })
 
     // stm reply
     const replyCmd = this.program
@@ -202,7 +220,7 @@ export class Commander {
       }
   
       replier(options, cliOptions);
-    })  
+    })
 
 if (process.env.SHOW_VISUALIZATION) {
     // stm visualize
@@ -236,7 +254,7 @@ if (process.env.SHOW_VISUALIZATION) {
       cliOptions['visualization'] = 'cli';
   
       connection(options, cliOptions);
-    })  
+    })
 
     // stm visualization off
     const visualizeOffCmd = visualizeCmd
@@ -263,7 +281,7 @@ if (process.env.SHOW_VISUALIZATION) {
       cliOptions['visualization'] = 'cli';
   
       connection(options, cliOptions);
-    })  
+    })
 
     // stm visualization launch
     const visualizeLaunchCmd = visualizeCmd
@@ -275,7 +293,7 @@ if (process.env.SHOW_VISUALIZATION) {
     visualizeLaunchCmd.action((options: MessageClientOptions) => {
       this.newVersionCheck();
       visualize(options);
-    })  
+    })
 }
 
     // stm config
@@ -315,7 +333,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
 
       initializeConfig(options, optionsSource);
-    })  
+    })
 
     // stm config list
     const configListCmd = configCmd
@@ -391,7 +409,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       connection(options, cliOptions);
-    })  
+    })
 
     // stm manage semp connection
     const manageSempConnectionCmd = manageCmd
@@ -415,7 +433,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       sempConnection(options, cliOptions);
-    })  
+    })
 
     // stm manage queue
     const manageQueueCmd = manageCmd
@@ -439,7 +457,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       queue(options, cliOptions);
-    })  
+    })
 
     // stm manage client-profile
     const manageClientProfileCmd = manageCmd
@@ -463,7 +481,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       clientProfile(options, cliOptions);
-    })  
+    })
 
     // stm manage acl profile
     const manageAclProfileCmd = manageCmd
@@ -487,7 +505,7 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       aclProfile(options, cliOptions);
-    })  
+    })
 
     // stm manage client username
     const manageClientUsernameCmd = manageCmd
@@ -511,7 +529,149 @@ if (process.env.SHOW_VISUALIZATION) {
       }
   
       clientUsername(options, cliOptions);
-    })  
+    })
+
+    // stm feed
+    const feedCmd = this.program
+      .command('feed')
+      .description(chalk.whiteBright('Manage event feeds'))
+      .allowUnknownOption(false)
+      feedCmd.action((options) => {
+      if (options.helpExamples)
+        displayFeedConfigHelpExamples();
+      else
+        feedCmd.help();
+    });
+    addFeedHelpOptions(feedCmd);
+
+    // stm feed preview
+    const feedPreviewCmd = feedCmd
+      .command('preview')
+      .description(chalk.whiteBright('Validate and preview an AsyncAPI document'))
+      .allowUnknownOption(false)
+    addFeedPreviewOptions(feedPreviewCmd, this.advanced)
+
+    feedPreviewCmd.action((options: ManageFeedClientOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedPreviewCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedPreview(options, optionsSource);
+    })
+
+    // stm feed generate
+    const generateCmd = feedCmd
+      .command('generate')
+      .description(chalk.whiteBright('Generate event feed from an AsyncAPI document'))
+      .allowUnknownOption(false)
+    addFeedGenerateOptions(generateCmd, this.advanced);
+    generateCmd.action((options: ManageFeedClientOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = generateCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedGenerate(options, optionsSource);
+    })
+
+    // stm feed configure
+    const configureCmd = feedCmd
+      .command('configure')
+      .description(chalk.whiteBright('Configure event feed rules'))
+      .allowUnknownOption(false)
+    addFeedConfigureOptions(configureCmd, this.advanced);
+    configureCmd.action((options: ManageFeedClientOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = configureCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedConfigure(options, optionsSource);
+    })
+
+    // stm feed run
+    const feedRunCmd = feedCmd
+      .command('run')
+      .description(chalk.whiteBright('Run event feed'))
+      .allowUnknownOption(false)
+    addFeedRunOptions(feedRunCmd, this.advanced);
+    feedRunCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedRunCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('send'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        optionsSource[defaultKeys[i]] = feedRunCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('send', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(optionsSource[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+
+      if (options.deliveryMode === 'PERSISTENT') {
+        optionsSource.guaranteedPublisher = 'implied';
+        options.guaranteedPublisher = true;
+      }
+
+      feedRun(options, optionsSource);
+    })
+
+    // stm feed list
+    const feedListCmd = feedCmd
+      .command('list')
+      .description(chalk.whiteBright('List event feeds'))
+      .allowUnknownOption(false)
+    addFeedListOptions(feedListCmd, this.advanced);
+    feedListCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedListCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedList(options, optionsSource);
+    })
+
+    // stm feed copy
+    const feedCopyCmd = feedCmd
+      .command('copy')
+      .description(chalk.whiteBright('Duplicate a community event feed locally'))
+      .allowUnknownOption(false)
+    addFeedCopyOptions(feedCopyCmd, this.advanced);
+    feedCopyCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedCopyCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedCopy(options, optionsSource);
+    })
+
+    // stm feed contribute
+    const feedContributeCmd = feedCmd
+      .command('contribute')
+      .description(chalk.whiteBright('Contribute to community event feeds'))
+      .allowUnknownOption(false)
+    addFeedContributeOptions(feedContributeCmd, this.advanced);
+    feedContributeCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedContributeCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedContribute(options, optionsSource);
+    })
 
   }
 }

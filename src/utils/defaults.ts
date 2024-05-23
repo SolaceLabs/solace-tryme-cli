@@ -128,7 +128,7 @@ export const defaultMessageConfig:any = {
   correlationKey: undefined,
   deliveryMode: 'PERSISTENT',
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
-  dmqEligible: true,
+  dmqEligible: false,
   partitionKeysCount: undefined,
   partitionKeys: [],
   elidingEligible: false,
@@ -151,6 +151,7 @@ export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
   count: 1,
   interval: 1000,
+  initialDelay: 0,
   clientName: undefined,
   description: 'Publish application created via Solace Try-Me CLI',
   stdin: false,
@@ -350,6 +351,18 @@ export const defaultManageClientUsernameConfig:any = {
   name: 'client-username',
 }
 
+export const defaultFeedConfig:any = {
+  feedName: "stm-event-feed",
+  feedType: "stm",
+  communityFeed: false,
+  fileName: "",
+  eventNames: [],
+  communityOnly: true,
+  localOnly: true,
+  verbose: false,
+  managePort: 0
+}
+
 export const getDefaultConfig = (commandType:any) => {
   switch (commandType) {
     case 'send': return defaultMessagePublishConfig
@@ -390,3 +403,17 @@ export const getType = (message:solace.Message) => {
     default: return 'UNKNOWN';
   }
 }
+
+export const homedir = require('os').homedir();
+export const defaultStmHome = `${homedir}/.stm`
+export const defaultStmFeedsHome = `${defaultStmHome}/feeds`
+export const defaultStmTempFeedsHome = `${defaultStmHome}/feeds/tmp`
+export const defaultFeedAnalysisFile = 'analysis.json'
+export const defaultFakerRulesFile = 'fakerrules.json'
+export const defaultFeedInfoFile = 'feedinfo.json'
+export const defaultFeedRulesFile = 'feedrules.json'
+export const defaultFeedSchemasFile = 'feedschemas.json'
+export const defaultGitRepo = 'https://raw.githubusercontent.com/gvensan/test-feeds/main';
+export const defaultGitFeedRepo = 'https://github.com/gvensan/test-feeds/tree/main';
+export const defaultProjectName = 'merge-tryme-cli'
+export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';

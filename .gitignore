@@ -34,3 +34,5 @@ dist
 *.sh
 config
 yarn.lock
+samples
+newsamples

@@ -16,7 +16,8 @@ import {
   messagingCommands,
   commandConnection,
   commandSempConnection,
-  manageCommands
+  manageCommands,
+  defaultStmHome
 } from './defaults'
 import { saveConfig, loadConfig, decoratePath, processPath, fileExists, writeConfig } from './config'
 import chalk from 'chalk'
@@ -40,8 +41,7 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
   }
 
   const configFile = options.config ? options.config : defaultConfigFile;
-  const homedir = require('os').homedir();
-  const filePath = processPath(`${homedir}/.stm/${configFile}`)
+  const filePath = processPath(`${defaultStmHome}/${configFile}`)
   if (!filePath.endsWith('.json')) filePath.concat('.json')
   if (fileExists(filePath)) {
     var prompt = require('prompt-sync')();
@@ -73,8 +73,7 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
   if (!options.config) options.config = defaultConfigFile
-  const homedir = require('os').homedir();
-  const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
+  const filePath = processPath(`${defaultStmHome}/${options.config as string}`)
   if (!fileExists(filePath)) {
     Logger.error(`no configuration ${options.config} found`)
     Logger.error('exiting...');

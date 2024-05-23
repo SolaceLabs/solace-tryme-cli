@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "ES5",
+    "target": "es2021",
     "module": "commonjs",
     "outDir": "./dist",
     // "lib": ["ESNext", "ScriptHost"],
     "lib": ["ESNext", "ScriptHost", "ES2021", "esnext.asynciterable", "DOM"],
     "strict": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "types": ["@types/signale"],

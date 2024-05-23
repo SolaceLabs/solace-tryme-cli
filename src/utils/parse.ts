@@ -336,5 +336,15 @@ export const parseSempEndpointCreateDurability = (value: string) => {
   return value.toLowerCase();
 }
 
+export const parseFeedType = (value: string) => {
+  if (!['STM', 'API', 'CUSTOM'].includes(value.toUpperCase())) {
+    Logger.logError(`only 'STM', 'API', 'CUSTOM' are supported, and if not specified a STM mode is used.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  return `${value.toLowerCase()}feed`;
+}
+
 
 

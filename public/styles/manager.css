@@ -1,0 +1,143 @@
+.card-header-title {
+  min-width: 75%;
+}
+
+.card-header-button {
+  min-width: 25%;
+}
+
+.card-tile-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-body-title {
+  font-style: italic;
+  color: #212529;
+}
+
+.card-tile {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.card-title {
+  color: #00c895;
+  padding: 5px;
+}
+
+.card-text {
+  padding: 5px;
+}
+
+/* JSON */
+pre {
+  background-color: ghostwhite;
+  border: 1px solid silver;
+  padding: 10px 20px;
+  margin: 20px; 
+}
+.json-key {
+  color: brown;
+}
+.json-value {
+  color: navy;
+}
+.json-string {
+  color: olive;
+}
+
+.main_div {
+  text-align:center;
+  position: relative;
+}
+.sub_div {
+  position: absolute;
+  bottom: 0px;
+}
+p {
+  margin-left:110px;
+}
+
+/* CHILDREN of ROOT MENU ELEMENTS */
+.nav-item-child {
+  padding-left: 10px;
+}
+
+/* HIERARCHICAL */
+.hierarchy-select.dropdown .hs-searchbox {
+    padding: 0 5px 4px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='2'] {
+    padding-left: 40px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='3'] {
+    padding-left: 60px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='4'] {
+    padding-left: 80px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='5'] {
+    padding-left: 100px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='6'] {
+    padding-left: 120px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='7'] {
+    padding-left: 140px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='8'] {
+    padding-left: 160px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='9'] {
+    padding-left: 180px;
+}
+.hierarchy-select.dropdown .dropdown-menu a[data-level='10'] {
+    padding-left: 200px;
+}
+
+/* GLYPH */
+.glyphicon {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: "Glyphicons Halflings";
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.glyphicon-plus:before {
+  content: "\002b";
+}
+.glyphicon-minus:before {
+  content: "\2212";
+}
+
+.rules-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0;
+  margin-bottom: 1em;
+}
+
+.btn-gradient-primary {
+  background-color: #00c895;
+  color: #fff;
+}
+
+.btn-gradient-primary:hover {
+  background-color: #343a40;
+  border-color: #4b545c;
+  color: #fff;
+}
+
+.jsonviewer {
+  height:calc(100vh - 140px);
+  overflow-y: auto;
+}

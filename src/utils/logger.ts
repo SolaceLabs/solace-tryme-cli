@@ -147,7 +147,24 @@ const Logger = {
       Logger.logMessage(`Payload (bytes): ${payload ? payload.length : 0}`);
     } else {
       Logger.logMessage(`Destination: ${message.getDestination()}`);
-      Logger.logMessage(`Payload (bytes): ${payload ? payload.length : 0}`);
+      if (payload) {
+        if (messageType === 0 || messageType === 3) {
+          if (payload.startsWith('<?xml')) {
+            var prettyPayload = prettyXML(payload.trim(), 2);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          } else {
+            var prettyPayload = prettyJSON(payload.trim());
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          }
+        } else if (messageType === 1) {
+          Logger.logMessage(`Payload\r\n${Logger.dumpMap(payload)}`);
+        } else {
+          Logger.logMessage(`Payload [Unsupported type: ${messageType}] \r\n${payload}`);
+        }
+      } else {
+        Logger.logMessage(`Payload\r\n${chalk.italic('Empty')}`);
+      }
+
     }
   },
 

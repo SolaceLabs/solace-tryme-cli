@@ -74,6 +74,7 @@ declare global {
     // misc.
     count?: number
     interval?: number
+    initialDelay?: number
     clientName?: string
     description?: string
 
@@ -193,6 +194,33 @@ declare global {
     [key: string]: any | undefined
   }
 
+  interface StmFeedConfigOptions {
+    // asyncapi base
+    fileName: string
+
+    // event feed options
+    feedName: string
+    feedType: string
+    communityFeed: boolean
+
+    // list of events
+    eventNames: string[]
+
+    // list options
+    localOnly: boolean
+    communityOnly: boolean
+    verbose: boolean
+
+    // manager port
+    managePort: number | undefined
+  }
+
+  interface ManageFeedClientOptions extends StmFeedConfigOptions {
+    [key: string]: any | undefined
+  }
+  interface ManageFeedPublishOptions extends StmFeedConfigOptions, MessageConnectionOptions, MessageOperationOptions {
+    [key: string]: any | undefined
+  }
 }
 
 export { }

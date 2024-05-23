@@ -1,11 +1,12 @@
 import * as fs from 'fs'
+import http from 'http'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome } from './defaults'
 import { buildMessageConfig } from './init'
 import { parseNumber } from './parse'
-
+import { fakerRulesJson } from './fakerrules';
 const defaultPath = `${require('os').homedir()}/`
 
 export const fileExists = (filePath: string) => fs.existsSync(filePath)
@@ -33,19 +34,47 @@ export const processPath = (savePath: boolean | string) => {
   return filePath
 }
 
+export const processPlainPath = (savePath: boolean | string) => {
+  let filePath = ''
+  if (savePath === true) {
+    filePath = defaultPath
+  } else if (typeof savePath === 'string') {
+    filePath = path.normalize(savePath)
+    if (!path.isAbsolute(filePath)) {
+      filePath = path.resolve(filePath)
+    }
+  }
+  return filePath
+}
+
+export const writeJsonFile = (filePath: string, data: object, jsonify: boolean = true) => {
+  try {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
+    if (jsonify)
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+    else
+      fs.writeFileSync(filePath, data.toString());
+  } catch (error: any) {
+    Logger.logDetailedError('file write failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
 export const writeFile = (filePath: string, data: MessageClientOptions) => {
   try {
     Object.keys(data).forEach(key => {
       Object.keys(data[key]).forEach(subKey => {
         Object.keys(data[key][subKey]).forEach(subSubKey => {
-          if (defaultMetaKeys.includes(subSubKey)) 
+          if (defaultMetaKeys.includes(subSubKey))
             delete data[key][subKey][subSubKey]
         })
-        if (defaultMetaKeys.includes(subKey)) 
+        if (defaultMetaKeys.includes(subKey))
           delete data[key][subKey]
       })
     })
-    
+
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
   } catch (error: any) {
@@ -122,8 +151,7 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
     const configFile = data.config;
     delete data.config;
 
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${configFile}`)  
+    const filePath = processPath(`${defaultStmHome}/${configFile}`)
     if (!filePath.endsWith('.json')) filePath.concat('.json')
     writeFile(filePath, data)
     if (!fileExists(filePath)) Logger.logSuccess(`saved configuration to '${decoratePath(configFile)}' successfully`)
@@ -138,8 +166,7 @@ export const writeConfig = (data: any, newOrUpdate: string, name: string) => {
 
 export const getLastVersionCheck = () : number|undefined => {
   try {
-    const homedir = require('os').homedir();
-    const filePath = `${homedir}/.stm/${defaultLastVersionCheck}`;
+    const filePath = `${defaultStmHome}/${defaultLastVersionCheck}`;
     if (!fileExists(filePath)) {
       fs.writeFileSync(filePath, `${Date.now() - 25 * 60 * 60 * 1000}`);
     }
@@ -151,8 +178,7 @@ export const getLastVersionCheck = () : number|undefined => {
 
 export const updateLastVersionCheck = (ts:number|undefined = undefined) => {
   try {
-    const homedir = require('os').homedir();
-    const filePath = `${homedir}/.stm/${defaultLastVersionCheck}`;
+    const filePath = `${defaultStmHome}/${defaultLastVersionCheck}`;
     if (!fileExists(filePath) || ts) fs.writeFileSync(filePath, `${ts}`);
   } catch (error: any) {
   }
@@ -161,8 +187,7 @@ export const updateLastVersionCheck = (ts:number|undefined = undefined) => {
 export const updateVisualizeConfig = (configFile: string, visualize:string) => {
   try {
     console.log('In updateVisualizeConfig')
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${configFile}`)
+    const filePath = processPath(`${defaultStmHome}/${configFile}`)
     if (!filePath.endsWith('.json')) filePath.concat('.json')
     if (fileExists(filePath)) {
       const config:any = readFile(filePath)
@@ -187,8 +212,7 @@ export const saveConfig = (data: any) => {
     delete data.config;
 
     var updated = false;
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${configFile}`)
+    const filePath = processPath(`${defaultStmHome}/${configFile}`)
       if (!filePath.endsWith('.json')) filePath.concat('.json')
     if (fileExists(filePath)) {
       const config:any = readFile(filePath)
@@ -219,8 +243,7 @@ export const saveConfig = (data: any) => {
 
 export const loadConfig = (configFile: string) => {
   try {
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${configFile}`)  
+    const filePath = processPath(`${defaultStmHome}/${configFile}`)
     if (fileExists(filePath)) {
       Logger.info(`loading configuration '${configFile}'`)
       const config = readFile(filePath)
@@ -260,7 +283,7 @@ export const createDefaultConfig = () => {
   saveConfig(buildMessageConfig(null, options, optionsSource, []))
 }
 
-export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions) => {
+export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions | ManageFeedPublishOptions) => {
   try {
     var group = getCommandGroup(cmd)
     if (!options.config) {
@@ -273,8 +296,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     }
 
     var commandName = options.name ? options.name : cmd
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
+    const filePath = processPath(`${defaultStmHome}/${options.config as string}`)
     if (fileExists(filePath)) {
       const config = readFile(filePath)
       Logger.info(`loading '${commandName}' command from configuration '${options.config}'`)
@@ -307,13 +329,12 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
       if (options.config === defaultConfigFile) {
         Logger.aid(`Hoho! No default configuration found, creating one for you...`)
         createDefaultConfig()
-  
+
         // load configuration
         Logger.info(`loading configuration '${defaultConfigFile}'`)
-        const homedir = require('os').homedir();
-        const filePath = processPath(`${homedir}/.stm/${defaultConfigFile}`)
+        const filePath = processPath(`${defaultStmHome}/${defaultConfigFile}`)
         if (!filePath.endsWith('.json')) filePath.concat('.json')
-      
+
         const config = readFile(filePath)
         const configOptions:any = {}
         const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
@@ -327,7 +348,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
         }
         return configOptions
       }
-  
+
       Logger.logDetailedError(`configuration not found`, `${decoratePath(filePath)}`)
       Logger.logError('exiting...')
       process.exit(1)
@@ -368,10 +389,9 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
       process.exit(1)
     }
 
-    
+
     if (!options.config) options.config = defaultConfigFile
-    const homedir = require('os').homedir();
-    const filePath = processPath(`${homedir}/.stm/${options.config as string}`)  
+    const filePath = processPath(`${defaultStmHome}/${options.config as string}`)
     if (!fileExists(filePath)) {
       newConfigCreated = true;
       Logger.aid(`Hoho! No default configuration found, creating one for you...`)
@@ -383,13 +403,13 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
 
     // build configuration from the command line parameters
     var updated = buildMessageConfig(current, options, optionsSource, [ group === 'manage' ? 'sempconnection' : 'connection', options.command]);
-    
+
     // absorb unchanged params from the current -> updated
     Object.keys(optionsSource).forEach(key => {
       if (optionsSource[key] !== 'cli' && optionsSource[key] !== 'implied')
         updated[group][commandName][key] = current[group][commandName] ? current[group][commandName][key] : current[group][options.command][key]
     })
-    
+
     // clear meta fields
     cleanseMetaFields(updated)
 
@@ -406,7 +426,7 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
         process.exit(1)
       }
     }
-    
+
     var newOrUpdate = (options.save && typeof options.save === 'string' && current[group][options.save] === undefined) ? 'new' : 'update'
     if (newOrUpdate === 'new') {
       if (group === 'message') {
@@ -439,7 +459,7 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
           updated[group][options.save] = updated[group][commandName]
           commandName = options.save
         }
-      
+
         // compare and save
         var count = compareConfiguration(updated, current, [ group === 'manage' ? 'sempconnection' : 'connection', commandName ]);
         if (count > 0) {
@@ -472,4 +492,254 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
     Logger.logError('exiting...')
     process.exit(1)
   }  
+}
+
+export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) => {
+  try {
+    const filePath = processPath(`${configFile}`)
+    if (fileExists(filePath)) {
+      Logger.info(`loading file '${configFile}'`)
+      return readFile(filePath);
+    } else {
+      Logger.logDetailedError(`file not found`, `${decoratePath(configFile)}`)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+  } catch (error: any) {
+    Logger.logDetailedError('file read failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (fileExists(feedPath)) {
+      Logger.warn(`Feed '${feedName}' already exists, `)
+      var prompt = require('prompt-sync')();
+      var confirmation = prompt(`${chalk.whiteBright('Feed already exists, do you want to overwrite (') + 
+                                  chalk.greenBright('y') + chalk.whiteBright('/') + 
+                                  chalk.redBright('n') + chalk.whiteBright('): ')}`);
+      if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+        Logger.logWarn('abort create feed...')
+        Logger.logError('exiting...')
+        process.exit(0);
+      } else {
+        fs.rmSync(feedPath, { recursive: true, force: true });
+      }
+    }
+
+    fs.mkdirSync(feedPath, { recursive: true })
+    fs.copyFileSync(fileName, `${feedPath}/${path.parse(fileName).base}`);
+    writeJsonFile(`${feedPath}/${defaultFeedAnalysisFile}`, apiJson)
+    writeJsonFile(`${feedPath}/${defaultFeedRulesFile}`, rulesJson)
+    writeJsonFile(`${feedPath}/${defaultFeedSchemasFile}`, schemaJson)
+    writeJsonFile(`${feedPath}/${defaultFakerRulesFile}`, fakerRulesJson)
+  } catch (error: any) {
+    Logger.logDetailedError('create feed failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const validateFeed = (feedName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath))
+      return `error: feed ${feedName} not found!`;
+
+    if (!fileExists(`${feedPath}/${defaultFeedAnalysisFile}`))
+      return `error: invalid or missing feed analysis, try regenerating feed!`;
+
+    if (!fileExists(`${feedPath}/${defaultFeedRulesFile}`))
+      return `error: invalid or missing feed ruleset, try regenerating feed!`;
+
+    return false;
+  } catch (error: any) {
+    Logger.logDetailedError('load feed analysis failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const loadFeedInfo = async (feedName: string, feedType = 'stmfeed') => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    var data = await loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+
+    if (!fileExists(`${feedPath}/${defaultFeedInfoFile}`)) {
+      Logger.logWarn(`feed info not, found creating a new one`)
+      var defaultInfo = {
+        "name": feedName,
+        "description": data.info['description'] ? data.info['description'].trim() : '',
+        "img": "",
+        "type": feedType,
+        "contributor": "",
+        "github": "",
+        "domain": "",
+        "tags": ""
+      }
+
+      writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, defaultInfo, true);
+    }
+
+    var info = readFile(`${feedPath}/${defaultFeedInfoFile}`);
+    return info;
+  } catch (error: any) {
+    Logger.logDetailedError('load feed info failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const loadLocalFeedFile = (feedName: string, fileName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logError(`feed ${feedName} not found!`)
+      Logger.logError('exiting...')
+      process.exit(1);
+    }
+
+    var analysis = readFile(`${feedPath}/${fileName}`);
+    return analysis;
+  } catch (error: any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const getAllFeeds = () => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
+  const directories:any = fs.readdirSync(feedPath);
+  const feeds: any[] = [];
+  directories.forEach((feedName: string) => {
+    feeds.push({
+      name: feedName,
+      invalid: validateFeed(feedName),
+      config: loadLocalFeedFile(feedName, defaultFeedAnalysisFile)
+    })
+  })
+
+  return feeds;
+}
+
+export const getFeed = (feedName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  const configPath = processPlainPath(`${defaultStmHome}`);
+  const files:any = fs.readdirSync(`${configPath}`);
+  const brokers: any[] = [];
+  files.forEach((fileName: string) => {
+    var filePath = `${configPath}/${fileName}`
+    var stat = fs.lstatSync(filePath);
+    if (!stat.isDirectory() && fileName.endsWith('.json')) {
+      var broker = readFile(`${configPath}/${fileName}`);
+      if (broker?.message?.connection)
+        brokers.push({broker: fileName, config: broker?.message?.connection});
+    }
+  })
+
+  const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+
+  const feed: any = {
+    name: feedName,
+    fileName: analysis.fileName,
+    config: loadLocalFeedFile(feedName, defaultFeedAnalysisFile),
+    rules: loadLocalFeedFile(feedName, defaultFeedRulesFile),
+    schemas: loadLocalFeedFile(feedName, defaultFeedSchemasFile),
+    brokers: brokers
+  };
+
+  return feed;
+}
+
+export const updateRules = (feedName: string, rulesJson: any) => {
+  const feedPath = `${defaultStmFeedsHome}/${feedName}`;
+  const rulesFile = processPath(`${defaultStmFeedsHome}/${feedName}/${defaultFeedRulesFile}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logWarn(`feed ${feedName} not found!`)
+      return false;
+    }
+
+    writeFile(`${rulesFile}`, rulesJson)
+    return true;
+  } catch (error: any) {
+    Logger.logDetailedError('update feed rules failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    return false;
+  }
+}
+
+export const urlExists = async (url:any) => {
+	if (typeof url !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof url}`)
+	}
+
+	const valid_url = validURL(url)
+	if (!valid_url) return false
+
+	const { host, pathname } = valid_url
+	const opt = { method: 'HEAD', host, path: pathname }
+
+	return new Promise((resolve) => {
+		const req = http.request(opt, (r) =>
+			resolve(/4\d\d/.test(`${r.statusCode}`) === false),
+		)
+
+		req.on('error', (error:any) => {
+      if (error.code === 'ENOTFOUND') {
+        Logger.error('Are you connected to internet, please check and try again!')
+        Logger.error('exiting...');
+        process.exit(1);
+      }
+
+      resolve(false)
+    })
+
+		req.end()
+	})
+}
+
+export const validURL = (url:any) => {
+	try {
+		return new URL(url.trim()) // eslint-disable-line no-new
+	} catch (_e) {
+		return null
+	}
+}
+
+export const loadGitFeedFile = async (feedName: string, fileName: string) => {
+  try {
+    var feedUrl = `${defaultGitRepo}/${feedName}`;
+    var validFeedUrl = await urlExists(encodeURI(`${feedUrl}/${fileName}`));
+    if (!validFeedUrl) {
+      Logger.logDetailedError('invalid or non-existing feed URL', feedUrl)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    return await fetch(`${feedUrl}/${fileName}`)
+      .then(async (response) => {
+        const data = await response.json();
+        return data;
+      })
+      .catch((error:any) => {
+        Logger.logError('invalid feed, check whether the feed exists!');
+        Logger.logError('exiting...')
+        process.exit(1)
+      })
+  } catch (error:any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
 }

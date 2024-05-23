@@ -200,6 +200,12 @@ ${chalk.greenBright('stm manage client-username --list my-client-username')}
   `)
 }
 
+export const displayFeedConfigHelpExamples = () => {
+  console.log(`
+  ${chalk.underline.bold.italic.cyanBright(`Sample ${chalk.greenBright('stm feed')} commands:`)}
+  `);
+}
+
 export const displayHelpExamplesForConfigInit = () => {
   console.log(`
 Examples:

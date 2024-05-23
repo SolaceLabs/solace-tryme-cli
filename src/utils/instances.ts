@@ -36,6 +36,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   operation: OperationType
   count?: number | undefined
   interval?: number | undefined
+  initialDelay?: number | undefined
   clientName?: string | undefined
   description?: string | undefined
   topic: any
@@ -104,6 +105,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.operation = "CREATE"
     this.count = 1
     this.interval = 1
+    this.initialDelay = 0
     this.clientName = ""
     this.description = ""
     this.topic = []
@@ -126,7 +128,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.replyToTopic = ""
     this.userProperties = { "key": "value" }
     this.payloadType = "text/plain"
-    this.outputMode = "DEFAULT"
+    this.outputMode = "FULL"
     this.pretty = false
     this.waitBeforeExit = 0;
     this.exitAfter = 0
@@ -253,5 +255,30 @@ export class ManageClientOptionsEmpty implements StmConfigOptions, ManageConnect
     this.clientPassword = ""
 
     this.helpMore =  false
+  }
+}
+
+export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
+  fileName: string
+  feedType: string
+  feedName: string
+  communityFeed: boolean
+  eventNames: string[];
+  communityOnly: boolean
+  localOnly: boolean
+  verbose: boolean
+
+  managePort: number | undefined
+
+  constructor() {
+    this.fileName = "";
+    this.feedName = "";
+    this.feedType = "";
+    this.communityFeed = false;
+    this.eventNames = [];
+    this.communityOnly = true;
+    this.localOnly = true;
+    this.verbose = false;
+    this.managePort = 0;
   }
 }
