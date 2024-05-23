@@ -204,8 +204,6 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   }
 
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
-  writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
-
   const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
 
   try {
@@ -221,6 +219,13 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     feeds.push(info);
 
     writeJsonFile(`${repoPath}/${defaultEventFeedsFile}`, feeds, true);
+
+    // update local feedinfo 
+    info.contributed = true;
+    info.lastUpdated = new Date().toISOString();
+    
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
+
 
     console.log(`
 ${chalkBoldWhite(`Change directory to ${localRepo} and commit the changes, and create a PR.`)}

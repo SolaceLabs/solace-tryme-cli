@@ -416,5 +416,5 @@ export const defaultFeedSchemasFile = 'feedschemas.json'
 export const defaultEventFeedsFile = 'EVENT_FEEDS.json'
 export const defaultGitRepo = 'https://raw.githubusercontent.com/gvensan/test-feeds/main';
 export const defaultGitFeedRepo = 'https://github.com/gvensan/test-feeds/tree/main';
-export const defaultProjectName = 'merge-tryme-cli'
+export const defaultProjectName = 'solace-tryme-cli'
 export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
