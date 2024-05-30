@@ -3,6 +3,8 @@ import { Command } from 'commander'
 import { version } from '../package.json'
 import { defaultMessageConnectionConfig, defaultManageConnectionConfig, defaultFeedConfig } from './utils/defaults';
 import { deleteConfig, initializeConfig, listConfig } from './utils/init'
+// @ts-ignore
+import * as semver from "semver";
 
 
 import { addManageConnectionOptions, addManageSempConnectionOptions, 
@@ -87,7 +89,7 @@ export class Commander {
       }
 
       if (latestVersion && this.online) {
-        if (`${'v' + this.version}` !== latestVersion.name) {
+        if (semver.lt(this.version, latestVersion.name)) {
           Logger.info(`new version available: ${latestVersion.name}, current version: ${this.version}`)
           Logger.alert(`Download URL: ${latestVersion.html_url}\n`);
         }
