@@ -39,6 +39,7 @@ import feedList from './lib/feed-list';
 import feedCopy from './lib/feed-copy';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
+import feedPortal from './lib/feed-portal';
 
 export class Commander {
   program: Command
@@ -622,7 +623,11 @@ if (process.env.SHOW_VISUALIZATION) {
         options.guaranteedPublisher = true;
       }
 
-      feedRun(options, optionsSource);
+      if (options.uiPortal) {
+        feedPortal(options, optionsSource);
+      } else {
+        feedRun(options, optionsSource);
+      }
     })
 
     // stm feed list

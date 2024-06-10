@@ -29,7 +29,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   Logger.info('Let us first update the feed information\n')
 
-  var info:any = await loadFeedInfo(feedName);
+  var info:any = loadFeedInfo(feedName);
   console.log('Current', info);
 
   info.name = feedName
@@ -176,8 +176,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   
   await prompt8.run()
     .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.tags !== (answer ? answer.join(', ') : '');
-      info.tags = answer ? answer.join(', ') : ''
+      if (!infoUpdated) infoUpdated = info.tags !== (answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : '');
+      info.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
@@ -222,8 +222,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
     // update local feedinfo 
     info.contributed = true;
-    info.lastUpdated = new Date().toISOString();
-    
+    info.lastUpdated = new Date().toISOString();    
     writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
 
 

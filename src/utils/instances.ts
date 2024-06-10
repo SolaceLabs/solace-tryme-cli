@@ -266,6 +266,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
   eventNames: string[];
   communityOnly: boolean
   localOnly: boolean
+  uiPortal: boolean
   verbose: boolean
 
   managePort: number | undefined
@@ -279,6 +280,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
     this.communityOnly = true;
     this.localOnly = true;
     this.verbose = false;
+    this.uiPortal = false;
     this.managePort = 0;
   }
 }

@@ -7,6 +7,7 @@ import { baseCommands, commandConnection, commandSempConnection, defaultConfigFi
 import { buildMessageConfig } from './init'
 import { parseNumber } from './parse'
 import { fakerRulesJson } from './fakerrules';
+import { da } from '@faker-js/faker'
 const defaultPath = `${require('os').homedir()}/`
 
 export const fileExists = (filePath: string) => fs.existsSync(filePath)
@@ -566,26 +567,10 @@ export const validateFeed = (feedName: string) => {
   }
 }
 
-export const loadFeedInfo = async (feedName: string, feedType = 'stmfeed') => {
-  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+export const loadFeedInfo = (feed: any) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feed.name}`);
   try {
-    var data = await loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
-
-    if (!fileExists(`${feedPath}/${defaultFeedInfoFile}`)) {
-      Logger.logWarn(`feed info not, found creating a new one`)
-      var defaultInfo = {
-        "name": feedName,
-        "description": data.info['description'] ? data.info['description'].trim() : '',
-        "img": "",
-        "type": feedType,
-        "contributor": "",
-        "github": "",
-        "domain": "",
-        "tags": ""
-      }
-
-      writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, defaultInfo, true);
-    }
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, feed, true);
 
     var info = readFile(`${feedPath}/${defaultFeedInfoFile}`);
     return info;
@@ -660,7 +645,7 @@ export const getFeed = (feedName: string) => {
   return feed;
 }
 
-export const updateRules = (feedName: string, rulesJson: any) => {
+export const updateRules = async (feedName: string, rulesJson: any) => {
   const feedPath = `${defaultStmFeedsHome}/${feedName}`;
   const rulesFile = processPath(`${defaultStmFeedsHome}/${feedName}/${defaultFeedRulesFile}`);
   try {
@@ -670,6 +655,10 @@ export const updateRules = (feedName: string, rulesJson: any) => {
     }
 
     writeFile(`${rulesFile}`, rulesJson)
+
+    var info = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    info.lastUpdated = new Date().toISOString();
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
     return true;
   } catch (error: any) {
     Logger.logDetailedError('update feed rules failed', error.toString())

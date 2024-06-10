@@ -52,12 +52,17 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
           process.exit(1);
         });
     } else if (choice === 'Local Event Feeds') {
+      var feeds = getLocalEventFeeds();
+      if (!feeds || !feeds.length) {
+        Logger.logError('no local feeds found...')
+        process.exit(1);
+      }
       const prompt = new Select({
         name: 'localFeed',
         message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
         `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
         `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-        choices: getLocalEventFeeds()
+        choices: feeds
       });
   
       await prompt.run()
@@ -85,6 +90,8 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
           Logger.logDetailedError('interrupted...', error)
           process.exit(1);
         });        
+
+      gitFeed = true;
     }
   }
 

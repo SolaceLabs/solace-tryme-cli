@@ -3,8 +3,11 @@ import { loadLocalFeedFile, loadGitFeedFile, processPlainPath } from './config';
 import { defaultEventFeedsFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from './defaults';
 
 export const getLocalEventFeeds = () => {
-  const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
   var localFeeds: any[] = [];
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
+  if (!fs.existsSync(`${feedPath}`)) 
+    return localFeeds;
+  
   const files:any = fs.readdirSync(`${feedPath}`);
   files.forEach((fileName: string) => {
     var filePath = `${feedPath}/${fileName}`

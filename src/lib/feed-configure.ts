@@ -55,7 +55,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   app.use(express.static(publicDir + '/public'));
   app.use(express.json()); 
   app.use(function(req:any, res:any, next:any) {
-    // console.log('Request on ', req.path);
+    console.log('Request: ', req.method, ' on ', req.path);
     if (req.path.startsWith('/index.html')) {
       res.redirect(302, '/feeds.html');
       res.end();
@@ -84,9 +84,9 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     res.json(rules);    
   })
 
-  app.post('/feedrules', (req:any, res:any) => {
+  app.post('/feedrules', async (req:any, res:any) => {
     var feed = req.body;
-    var result = updateRules(feed.name, feed.rules);
+    var result = await updateRules(feed.name, feed.rules);
     if (result) 
       res.status(200).json({success: 'updated feed rules successfully'});
     else
@@ -135,7 +135,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
 
   app.post('/exit', (req:any, res:any) => {
     console.log('exiting...')
-    process.exit(0);
+    setTimeout(process.exit(0), 2000)
   })
 
   let http = require('http');

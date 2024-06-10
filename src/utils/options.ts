@@ -644,6 +644,7 @@ export const addFeedConfigureOptions = (cmd: Command, advanced: boolean) => {
 
 export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
   cmd
+    .addOption(new Option('-ui, --ui-portal [BOOLEAN]', chalk.whiteBright('launch feeds portal')) .default(false)  .hideHelp(advanced))
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) .hideHelp(advanced))
     .addOption(new Option('-events, --event-names <EVENT_NAME...>', chalk.whiteBright('the event name(s) as space-separated values if listing more than one (e.g., "Loan_Applied" "Loan_Approved" )'))  .hideHelp(advanced))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed URL')) .default(false)  .hideHelp(advanced))

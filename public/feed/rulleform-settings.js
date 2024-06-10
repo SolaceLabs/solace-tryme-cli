@@ -41,9 +41,10 @@ function fixStringRulesParameters(rule, value, changed) {
         </div>
       </div>`
 
-    panel.append(p_casing); 
-    // $("#p_casing select").val(value.casing !== undefined ? value.casing : 'mixed');
-    $("#p_casing").selectpicker('val', (value.casing !== undefined ? value.casing : 'mixed'));
+    if (rule !== 'nanoid') {
+      panel.append(p_casing); 
+      $("#p_casing").selectpicker('val', (value.casing !== undefined ? value.casing : 'mixed'));
+    }
 
     panel.append(p_min_max); 
   } else if (rule === 'words') {

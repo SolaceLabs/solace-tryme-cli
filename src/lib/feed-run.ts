@@ -26,12 +26,50 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
 
   var cmdLine = false;
   if (optionsSource.feedName === 'cli' && optionsSource.eventNames === 'cli') {
+    cmdLine = true;
     feedName = options.feedName;
     eventNames = options.eventNames;
     if (feedName && options.communityFeed)
       gitFeed = true;
     checkForFeedSettings(eventNames, feedName);
+  } else if (optionsSource.feedName === 'cli' && optionsSource.eventNames === undefined) {
     cmdLine = true;
+    feedName = options.feedName;
+    eventNames = options.eventNames;
+    if (feedName && options.communityFeed)
+      gitFeed = true;
+
+    var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
+    var eventsList:any = events.map((event:any) => {
+      return {
+        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
+        name: event.name,
+      }
+    })
+
+    const { MultiSelect } = require('enquirer');
+    const prompt2 = new MultiSelect({
+      name: 'localEvent',
+      message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+      `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
+      `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
+      `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
+      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+      choices: eventsList,
+      initial: eventsList.map((e:any, index:number) => index)
+    });
+
+    var eventChoices: string | any[] = []
+    await prompt2.run()
+      .then((answer:any) => eventChoices = answer)
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+    
+    options.eventNames = eventChoices;
+    optionsSource.eventNames = 'cli';
   }
   
   // check for event in the feed

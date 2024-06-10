@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Solace Event Feeds</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="feeds/css/feedstyle.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Updated: Apr 7 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="index.html" class="d-flex align-items-center">
+        <img src="feeds/img/solace.png" alt="">
+      </a>
+      <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+
+    <span class="header-nav ms-auto pe-3">
+      <!-- <span class="header-text">Event Feeds</span> -->
+      <div class="d-flex align-items-center">
+        <span class="d-flex nav-item pe-3 align-items-center">
+          <div class="d-md-block ps-2 feed-title text-color-white header-text">Event Feeds</div>
+          <a href="#" onclick="exitTool()">
+            <button type="button" class="btn sort-feed" id="sort-alpha-up" data-mode="alphaup" style="color: white"><i data-mode="alphaup" class="bx bx-exit"></i></button>
+          </a>
+        </span>
+      </div>
+
+    </span><!-- End Search Bar -->
+
+  </header><!-- End Header -->
+
+  <main id="feeds-main">
+    <section class="section dashboard">
+      <div id="banner" class="row feeds">
+        <div class="col-lg-3 solly-icon-container">    
+          <img src="assets/img/solly.png" alt="Profile" class="solly-icon">        
+        </div>
+        <div class="col-lg-9">
+          <header>
+            <div class="site-header-width">
+              <h2 class="banner-title">Welcome to Solace Event Feeds!</h2>
+            <div class="banner-description">
+            <p class="banner-info">
+              This site provides published event feeds that can be used to generate events. This will give you a 
+              guided, hands-on experience with the <a href="https://solace.com/products/platform/">Solace PubSub+ Platform</a>. 
+              Each feed exposes events relevant to specific industry domains or business contexts 
+              as exposed by the AsyncAPI document of application in the Event Portal.              
+            <br>
+            <br>
+            Discuss your Event Feed experience in the <a href="https://solace.community/">Developer Community</a>
+          </header>
+        </div>
+      </div>
+
+      <main class="main-body">
+
+        <div class="container">
+          <div class="row">
+          </div>
+          <div class="row">
+            <div class="col-12@sm filters-group-wrap align-center">
+              <div class="col-3@md">
+                <div class="filters-group">
+                  <label for="filters-search-input" class="filter-label">Search</label>
+                  <input class="js-shuffle-search" type="search" id="filters-search-input" />
+                </div>
+              </div>
+        
+              <div class="col-3@md">
+                <label for="filters-sort-input" class="filter-label">Sort</label>
+                <div class="btn-group" role="group" aria-label="Basic outlined example" id="filters-sort-input">
+                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-alpha-down" data-mode="alphadown"><i data-mode="alphadown" class="bx bxs-down-arrow"></i></button>
+                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-recent" data-mode="recent">Recent</button>
+                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-alpha-up" data-mode="alphaup"><i data-mode="alphaup" class="bx bxs-up-arrow"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="container">
+          <div id="feeds-grid" class="row my-shuffle-container"></div>
+        </div>
+      </main>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer site-width">
+    <div class="copyright">
+      <img width=24 src="assets/img/solly.png" alt="Profile" class="rounded-circle card-icon">
+      Join <strong><span><a href="https://solace.community" target="_blank">Solace Community</a></span></strong>.
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery-3.7.1/jquery-3.7.1.min.js"></script>
+  <script src="assets/vendor/lunr-2.3.9/lunr-2.3.9.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <!-- Event Feeds  -->
+  <script src="feedrunner/js/feed.js"></script> 
+  <script src="feeds/js/feeds-home.js"></script>
+  <script src="feeds/js/shorthash.js"></script>
+</body>
+
+</html>

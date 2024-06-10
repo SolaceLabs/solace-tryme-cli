@@ -17,7 +17,7 @@ const visualize = async (options: MessageClientOptions) => {
   const app = express();
   app.use(express.static(publicDir + '/public'));
   app.use(function(req:any, res:any, next:any) {
-    console.log('Request on ', req.path);
+    console.log('Request: ', req.method, ' on ', req.path);
     next();
   });
   

@@ -181,7 +181,8 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
-
+    
+  info.lastUpdated = new Date().toISOString();
   writeJsonFile(`${localFeedPath}/${defaultFeedInfoFile}`, info);
   Logger.success(`Feed ${localFeedName} copied successfully!`);
   Logger.success('exiting...');
