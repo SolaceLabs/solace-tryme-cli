@@ -1,6 +1,5 @@
-import { on } from 'events';
 import { getAllFeeds, getFeed, loadLocalFeedFile, updateRules } from '../utils/config';
-import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultGitRepo, defaultProjectName } from '../utils/defaults';
+import { defaultFakerRulesFile, defaultFeedInfoFile, defaultProjectName } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator, fakeEventGenerator } from './feed-datahelper';
@@ -8,13 +7,13 @@ import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
 
 const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
-  var feedConfig: any = undefined;
   var feedName: string | undefined = options.feedName;
   var publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
-
+  var feedInfo: any = undefined;
+  
   if (feedName) {
-    Logger.success(`loading broker feed config ${feedName}`)
-    feedConfig = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    Logger.success(`loading broker feed info ${feedName}`)
+    feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);
   } 
   else {
     const { Select } = require('enquirer');

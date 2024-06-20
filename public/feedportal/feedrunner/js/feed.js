@@ -96,6 +96,8 @@ class Feed extends IFeed {
       this.setFeedParam("schemas", schemas);
       var analysis = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/analysis.json`);
       this.setFeedParam("analysis", analysis);
+      var api = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedapi.json`);
+      this.setFeedParam("api", api);
     } else {
       var info = await getLocalFeed(feedName, 'feedinfo.json');
       this.setFeedParam("info", info);
@@ -105,6 +107,8 @@ class Feed extends IFeed {
       this.setFeedParam("schemas", schemas);
       var analysis = await getLocalFeed(feedName, 'analysis.json');
       this.setFeedParam("analysis", analysis);
+      var api = await getLocalFeed(feedName, 'feedapi.json');
+      this.setFeedParam("api", api);
     }
   }
 
@@ -115,7 +119,7 @@ class Feed extends IFeed {
     console.log(info);
     
     var analysis = this.getFeedParam("analysis");
-    if (!analysis) {
+    if (info.type === 'stmfeed' && !analysis) {
       return ({
         status: false,
         message: "Feed not initialized!"
@@ -123,6 +127,7 @@ class Feed extends IFeed {
     }
 
     info = {
+      type: info.type,
       version: analysis.info.version,
       asyncApiFile: analysis.fileName,
       asyncApiVersion: analysis.version,
@@ -135,34 +140,52 @@ class Feed extends IFeed {
     return info;
   }
 
-  getReceiveMessages() {
+  getSendMessages() {
     var messages = [];
-    let rules = this.getFeedParam('rules');
-    let analysis = this.getFeedParam('analysis');
-    if (analysis && analysis.messages) {
-      var msgNames = Object.keys(analysis.messages);
-      msgNames.forEach(msg => {
-        if (analysis.messages[msg].send?.length) {
-          for (var i=0; i<analysis.messages[msg].send.length; i++) {
-            var data = {
-              messageName: msg,
-              description: analysis.messages[msg].send[i].message.description,
-              topicName: analysis.messages[msg].send[i].topicName,
-              hasPayload: analysis.messages[msg].hasPayload,
-              schema: analysis.messages[msg].schema,
-            };
+    var info = this.getFeedParam('info');
+    if (info.type === 'stmfeed') {
+      let rules = this.getFeedParam('rules');
+      let analysis = this.getFeedParam('analysis');
+      if (analysis && analysis.messages) {
+        var msgNames = Object.keys(analysis.messages);
+        msgNames.forEach(msg => {
+          if (analysis.messages[msg].send?.length) {
+            for (var i=0; i<analysis.messages[msg].send.length; i++) {
+              var data = {
+                messageName: msg,
+                description: analysis.messages[msg].send[i].message.description,
+                topicName: analysis.messages[msg].send[i].topicName,
+                hasPayload: analysis.messages[msg].hasPayload,
+                schema: analysis.messages[msg].schema,
+              };
 
-            if (rules) {
-              var rule = rules.find(el => el.messageName === msg);
-              data.count = rule ? rule.publishSettings.count : 20;
-              data.interval = rule ? rule.publishSettings.interval : 1;
-              data.delay = rule ? rule.publishSettings.delay : 0;
+              if (rules) {
+                var rule = rules.find(el => el.messageName === msg);
+                data.count = rule ? rule.publishSettings.count : 20;
+                data.interval = rule ? rule.publishSettings.interval : 1;
+                data.delay = rule ? rule.publishSettings.delay : 0;
+              }
+              
+              messages.push(data);
             }
-            
-            messages.push(data);
           }
-        }
-      })      
+        })
+      }  
+    } else if (info.type === 'apifeed') {
+      var api = this.getFeedParam('api');
+      var data = {
+        messageName: info.name,
+        description: info.description,
+        topicName: api.topic,
+        apiUrl: api.apiUrl,
+      };
+
+      let rules = this.getFeedParam('rules');
+      data.count = rules ? rules.publishSettings.count : 20;
+      data.interval = rules ? rules.publishSettings.interval : 1;
+      data.delay = rules ? rules.publishSettings.delay : 0;
+      
+      messages.push(data);
     }
 
     return messages;

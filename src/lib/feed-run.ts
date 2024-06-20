@@ -1,13 +1,13 @@
 import { checkConnectionParamsExists, checkForFeedSettings } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultFeedRulesFile, defaultGitRepo, delay } from '../utils/defaults';
+import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
 import { fakeEventGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkEventCounterValue, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
 import { getLocalEventFeeds, getGitEventFeeds, getFeedEvents, getGitFeedEvents } from '../utils/listfeeds';
 import sleep from 'sleep-promise';
-import { tr } from '@faker-js/faker';
+import feedRunApi from './feed-run-api';
 
 const selectedMessages: any[] = [];
 const eventFeedTimers: any[] = [];
@@ -31,6 +31,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     eventNames = options.eventNames;
     if (feedName && options.communityFeed)
       gitFeed = true;
+
     checkForFeedSettings(eventNames, feedName);
   } else if (optionsSource.feedName === 'cli' && optionsSource.eventNames === undefined) {
     cmdLine = true;
@@ -38,6 +39,10 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     eventNames = options.eventNames;
     if (feedName && options.communityFeed)
       gitFeed = true;
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+
+    if (feedInfo.type === 'apifeed')
+      return feedRunApi(options, optionsSource);
 
     var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
     var eventsList:any = events.map((event:any) => {
@@ -194,6 +199,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
+
   options.readyForExit = options.eventNames.length;
   options.eventNames.forEach((eventName:any) => {
     var feedRule:any = undefined;

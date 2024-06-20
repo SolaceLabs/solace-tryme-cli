@@ -63,3 +63,48 @@ async function generateRuleBasedPayload(payload, count) {
   // console.log(result);
   return result;
 }
+
+async function generateApiEvents(feed, count) {
+  var events = [];
+  var apiUrl = feed.config.apiUrl;
+  var apiKey = feed.config.apiKey;
+  if (feed.config.apiKeyUrlEmbedded) 
+    apiUrl = apiUrl.replaceAll(`$${feed.config.apiKeyUrlParam}`, apiKey);
+
+  var rules = feed.rules.rules;
+  var params = Object.keys(rules);
+  var ruleData = {};
+  if (params.length > 0) {
+    for (var i=0; i<params.length; i++) {
+      ruleData[params[i]] = await generateRuleBasedValue(rules[params[i]].rule, count);
+    }
+  }
+
+  for (var i=0; i<count; i++) {
+    var topic = feed.config.topic;
+    var payload = {};
+
+    var headers = { Accept: 'application/json' };
+    if (!feed.config.apiKeyUrlEmbedded && apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    try {
+      var url = apiUrl;
+      for (var j=0; j<params.length; j++) {
+        url = url.replaceAll(`$${params[j]}`, ruleData[params[j]][i]);
+        topic = topic.replaceAll(`{${params[j]}}`, ruleData[params[j]][i]);
+      }
+      payload = await (await fetch(`${url}`, {
+        headers: headers
+      })).json();
+      console.log(payload);
+    } catch (error) {
+      payload = { error: `fetch from api endpoint list failed with error - ${error.toString()}` };
+    }
+
+    events.push({ topic, payload });
+  }
+
+  return events;
+}

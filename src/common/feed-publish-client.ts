@@ -83,9 +83,9 @@ export class SolaceClient extends VisualizeClient {
 
           publisherProperties: {
             enabled: this.options.guaranteedPublisher ? true : false,
-            windowSize: this.options.guaranteedPublisher ? this.options.windowSize : undefined,
-            acknowledgeTimeoutInMsecs: this.options.guaranteedPublisher? this.options.acknowledgeTimeout : undefined,
-            acknowledgeMode: this.options.guaranteedPublisher && this.options.acknowledgeMode ? this.options.acknowledgeMode : undefined,
+            windowSize: this.options.guaranteedPublisher  && !this.options.acknowledgeImmediately ? this.options.windowSize : undefined,
+            acknowledgeTimeoutInMsecs: this.options.guaranteedPublisher && !this.options.acknowledgeImmediately ? this.options.acknowledgeTimeout : undefined,
+            acknowledgeMode: this.options.guaranteedPublisher && this.options.acknowledgeMode  && !this.options.acknowledgeImmediately ? this.options.acknowledgeMode : undefined,
           }
         });
 

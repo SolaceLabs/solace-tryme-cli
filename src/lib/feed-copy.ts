@@ -63,7 +63,7 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
     const { Confirm } = require('enquirer');
 
     const prompt = new Confirm({
-      message: `${chalkBoldWhite('A feed by name ${localFeedName} already exists, do you want to overwrite it?')}`
+      message: chalkBoldWhite(`A feed by name ${localFeedName} already exists, do you want to overwrite it?`)
     });
     
     await prompt.run()

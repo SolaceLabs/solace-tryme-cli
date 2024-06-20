@@ -23,3 +23,32 @@ async function showSampleData() {
   $('#sample_data_view').modal('toggle');
   console.log(fakeData);
 }
+
+async function showSampleApiData() {
+  $("body").css("cursor", "progress");
+
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var rules = feed.rules;
+  if (!rules) return;
+
+  var events = await generateApiEvents(feed, 10);
+  var fakeData = [];
+  for (var i=0; i<10; i++) {
+    fakeData.push({
+      topic: events[i].topic,
+      payload: events[i].payload
+    })
+  }
+
+
+  $('#copyToClipboard').click(async function writeDataToClipboard () {
+    await navigator.clipboard.writeText(JSON.stringify(fakeData, null, 2));
+    toastr.success('Copied to clipboard.')
+  });
+  $('#json-renderer').jsonViewer(fakeData);
+  $('#sample_data_view').modal('toggle');
+  console.log(fakeData);
+
+  $("body").css("cursor", "default");
+
+}

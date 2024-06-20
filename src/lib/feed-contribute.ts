@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { fileExists, loadFeedInfo, processPlainPath, readFile, writeJsonFile } from '../utils/config';
+import { fileExists, updateAndLoadFeedInfo, processPlainPath, readFile, writeJsonFile, loadLoadFeedInfo } from '../utils/config';
 import { communityRepoUrl, defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
         defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkItalic } from '../utils/chalkUtils';
@@ -29,7 +29,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   Logger.info('Let us first update the feed information\n')
 
-  var info:any = loadFeedInfo(feedName);
+  var info:any = loadLoadFeedInfo(feedName);
   console.log('Current', info);
 
   info.name = feedName

@@ -415,6 +415,7 @@ export const defaultFeedInfoFile = 'feedinfo.json'
 export const defaultFeedRulesFile = 'feedrules.json'
 export const defaultFeedSchemasFile = 'feedschemas.json'
 export const defaultEventFeedsFile = 'EVENT_FEEDS.json'
+export const defaultFeedApiEndpointFile = 'feedapi.json'
 export const defaultGitRepo = 'https://raw.githubusercontent.com/solacecommunity/solace-event-feeds/main';
 export const defaultGitFeedRepo = 'https://github.com/solacecommunity/solace-event-feeds/tree/main';
 export const defaultProjectName = 'solace-tryme-cli'
