@@ -307,24 +307,13 @@ function delayedStart(msg) {
 async function startFeed() {
   for (var i=0; i<selectedMessages.length; i++) {
     delayedStart(selectedMessages[i]);
-    // sleep(selectedMessages[i].delay * 1000).then(() => { 
-    //   console.log(msg);
-    //   eventFeedTimers.push({
-    //     name: selectedMessages[i].message,
-    //     message: selectedMessages[i],
-    //     timer: setInterval(publishEvent, selectedMessages[i].interval * 1000, selectedMessages[i])
-    //   });
-    // });
-    // eventFeedTimers.push({
-    //   name: selectedMessages[i].message,
-    //   message: selectedMessages[i],
-    //   timer: setInterval(publishEvent, selectedMessages[i].interval * 1000, selectedMessages[i], selectedMessages[i].delay * 1000)
-    // });
   }
 
+  $('#collapseZero').collapse('hide');
+  $('#collapseOne').collapse('hide');
+  $('#collapseTwo ').collapse('hide');
   document.getElementById('start-feed').classList.add('disabled');
   document.getElementById('stop-feed').classList.remove('disabled');
-  // statusCallback('Feed started.')
 }
 
 async function publishEvent(msg) {
@@ -353,7 +342,6 @@ async function publishEvent(msg) {
         if (!eventFeedTimers.length) {
           document.getElementById('start-feed').classList.remove('disabled');
           document.getElementById('stop-feed').classList.add('disabled');
-          // statusCallback(`Event feed completed successfully.`);
         }
       }
     });
@@ -361,8 +349,13 @@ async function publishEvent(msg) {
     var events = [];
     var api = feed.getFeedParam('api');
     var apiUrl = api.apiUrl;
+    var apiAuthType = api.apiAuthType;
     var apiKey = api.apiKey;
-    if (api.apiKeyUrlEmbedded) 
+    var apiKeyUrlEmbedded = api.apiKeyUrlEmbedded;
+    var apiToken = api.apiToken;
+    var xapiPairs = api.xapiPairs;
+
+    if (apiAuthType === 'API Key' && api.apiKeyUrlEmbedded) 
       apiUrl = apiUrl.replaceAll(`$${api.apiKeyUrlParam}`, apiKey);
   
     var apiRules = feed.getFeedParam('rules');
@@ -378,10 +371,19 @@ async function publishEvent(msg) {
     var payload = {};
 
     var headers = { Accept: 'application/json' };
-    if (!api.apiKeyUrlEmbedded && apiKey) {
+    if (apiAuthType === 'Basic Authentication') {
+      headers['Authorization'] = `Basic ${apiToken}`;
+    } else if (apiAuthType === 'Token Authentication') {
+      headers['Authorization'] = `Bearer ${apiToken}`;
+    } else if (apiAuthType === 'API Key' && !apiKeyUrlEmbedded) {
       headers['Authorization'] = `Bearer ${apiKey}`;
+    } else if (apiAuthType === 'X-API Authentication') {
+      for (var i=0; i<xapiPairs.length; i++) {
+        var xPair = xapiPairs[i];
+        headers[xPair.key] = xPair.value;
+      }
     }
-
+  
     try {
       var url = apiUrl;
       for (var j=0; j<params.length; j++) {
@@ -396,10 +398,10 @@ async function publishEvent(msg) {
       payload = { error: `fetch from api endpoint list failed with error - ${error.toString()}` };
     }
 
-    publish(topic, payload, null, api.topic, `${info.name}-${api.topic}`);
-    console.log(Date.now() + ': Publishing...', info.name, topic)
-    if (publishStats[`${info.name}-${api.topic}`] >= msg.count) {
-      var index = eventFeedTimers.findIndex((t) => t.name === info.name);
+    publish(topic, payload, null, api.topic, `${msg.message}-${api.topic}`);
+    console.log(Date.now() + ': Publishing...', msg.message, topic)
+    if (publishStats[`${msg.message}-${api.topic}`] >= msg.count) {
+      var index = eventFeedTimers.findIndex((t) => t.name === msg.message);
       if (index < 0) {
         errorCallback('Hmm... could not find the timer');
         return;
@@ -407,11 +409,10 @@ async function publishEvent(msg) {
       clearInterval(eventFeedTimers[index].timer);
       statusCallback(`Event feed <b>${info.name}</b> completed - Published ${msg.count} events`);
       eventFeedTimers.splice(index, 1);
-      publishStats[`${info.name}-${api.topic}`] = 0;
+      publishStats[`${msg.message}-${api.topic}`] = 0;
       if (!eventFeedTimers.length) {
         document.getElementById('start-feed').classList.remove('disabled');
         document.getElementById('stop-feed').classList.add('disabled');
-        // statusCallback(`Event feed completed successfully.`);
       }
     }
   }
@@ -519,14 +520,14 @@ async function showFeedInfo() {
               <div class="d-flex w-100 justify-content-between">
                 <div class="d-flex w-100">
                   <input class="form-check-input selection-border me-1" type="checkbox" name="eventCheckboxes" id="eventCheckbox${index}" 
-                    data-message="${msg.messageName}" data-topic="${msg.topicName}" data-count="${msg.count}" 
+                    data-message="${msg.simplifiedName}" data-topic="${msg.topicName}" data-count="${msg.count}" 
                     data-interval="${msg.interval}" data-delay="${msg.delay}" 
                     value="option1" aria-label="..." onchange="onEventSelection()">
                   <h5 class="mb-1">${msg.messageName}</h5>
                 </div>
                 <div>
                   <a href="#" class="show-advanced-settings d-flex align-items-center justify-content-center"
-                    data-message="${msg.messageName}" onclick="toggleMessageSettings('#settings-${msg.messageName}')">
+                    data-message="${msg.simplifiedName}" onclick="toggleMessageSettings('#settings-${msg.simplifiedName}')">
                     <i class="bi bi-gear"></i>
                   </a>        
                 </div>
@@ -534,25 +535,24 @@ async function showFeedInfo() {
               ${msg.description ? `<small>${msg.description}</small>` : `<span/>`}   
               ${msg.apiUrl ? `<p class="mb-1 small"><strong>API Endpoint: </strong>${msg.apiUrl}</p>` : `<span/>`}
               <p class="mt-3 mb-1 small"><strong>Topic: </strong>${msg.topicName}</p>
-              ${msg.schema ? `<p class="mb-1 small"><strong>Schema: </strong>${msg.schema}</p>` : `<span/>`}
-              <div id="settings-${msg.messageName}" style="display:none;">
+              <div id="settings-${msg.simplifiedName}" style="display:none;">
                 <hr class="trans--fit hr1">
                 <div class="d-flex flex-row flex-start">
                   <div class="me-3">
-                    <label for="count-${msg.messageName}" class="small">No. of Events</label>
-                    <input id="count-${msg.messageName}" data-message=${msg.messageName} data-topic=${msg.topicName}
+                    <label for="count-${msg.simplifiedName}" class="small">No. of Events</label>
+                    <input id="count-${msg.simplifiedName}" data-message=${msg.simplifiedName} data-topic=${msg.topicName}
                         type="number" class="form-control" value="${msg.count}" min="1" max="1000" onchange="countChange()" disabled>
                     <span style="font-size: 0.75rem;">Range: 1 to 1000</span>
                   </div>
                   <div class="me-3">
-                    <label for="interval-${msg.messageName}" class="small">Interval (secs)</label>
-                    <input id="interval-${msg.messageName}" data-message=${msg.messageName} data-topic=${msg.topicName}
+                    <label for="interval-${msg.simplifiedName}" class="small">Interval (secs)</label>
+                    <input id="interval-${msg.simplifiedName}" data-message=${msg.simplifiedName} data-topic=${msg.topicName}
                       type="number" class="form-control" value="${msg.interval}" min="1" max="30" onchange="intervalChange()" disabled>
                     <span style="font-size: 0.75rem;">Range: 1 to 30 secs</span>
                   </div>
                   <div class="me-3">
-                    <label for="delay-${msg.messageName}" class="small">Initial Delay (secs)</label>
-                    <input id="delay-${msg.messageName}" data-message=${msg.messageName} data-topic=${msg.topicName}
+                    <label for="delay-${msg.simplifiedName}" class="small">Initial Delay (secs)</label>
+                    <input id="delay-${msg.simplifiedName}" data-message=${msg.simplifiedName} data-topic=${msg.topicName}
                         type="number" class="form-control" value="${msg.delay}" min="0" max="30" onchange="delayChange()" disabled>
                     <span style="font-size: 0.75rem;">Range: 0 to 30</span>
                   </div>

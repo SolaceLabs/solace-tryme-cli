@@ -11,7 +11,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   var { feedName } = options;
 
   if (!feedName) {
-    const prompt0 = new Select({
+    const pPickFeed = new Select({
       name: 'localFeed',
       message: `Pick a local event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -19,7 +19,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       choices: getLocalEventFeeds()
     });
 
-    await prompt0.run()
+    await pPickFeed.run()
       .then((answer:any) => feedName = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -34,11 +34,11 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   info.name = feedName
 
-  const prompt = new Confirm({
+  const pCloned = new Confirm({
     message: `${chalkBoldWhite('Have you cloned the EVENT-FEEDS repo')} ${communityRepoUrl}?`,
   });
   
-  await prompt.run()
+  await pCloned.run()
     .then((answer:any) => {
       if (!answer) {
         Logger.error('Please clone the event feeds repo locally and try again');
@@ -50,15 +50,16 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-  const prompt2 = new Input({
+  const pRepoPath = new Input({
     message: 'Enter the cloned EVENT-FEEDS repo path:',
-    initial: ''
+    initial: '',
+    validate: (value: string) => {  return !!value; }
   });
   
   var localRepo = '';
   var infoUpdated = false;
 
-  await prompt2.run()
+  await pRepoPath.run()
     .then((answer:any) => localRepo = answer)
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
@@ -92,12 +93,13 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     process.exit(1)
   }
 
-  const prompt4 = new Input({
+  const pFeedDesc = new Input({
     message: 'Feed description:',
-    initial: info.description
+    initial: info.description,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt4.run()
+  await pFeedDesc.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.description !== answer;
       info.description = answer
@@ -107,13 +109,13 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-    const prompt3 = new Input({
+    const pFeedIcon = new Input({
       message: 'Feed icon (an URL or a base64 image data):',
       hint: 'Leave blank to use default feed icon',
       initial: info.img
     });
   
-    await prompt3.run()
+    await pFeedIcon.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.img !== answer;
       info.img = answer ? answer : 'assets/img/defaultfeed.png'
@@ -123,12 +125,12 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-  const prompt5 = new Input({
+  const pFeedContributor = new Input({
     message: 'Contributor name or organization name:',
     initial: info.contributor
   });
 
-  await prompt5.run()
+  await pFeedContributor.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.contributor !== answer;
       info.contributor = answer
@@ -138,12 +140,12 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-  const prompt6 = new Input({
+  const pGitUser = new Input({
     message: 'GitHub username:',
     initial: info.github
   });
 
-  await prompt6.run()
+  await pGitUser.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.github !== answer;
       info.github = answer
@@ -153,12 +155,13 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-  const prompt7 = new Input({
+  const pFeedDomain = new Input({
     message: 'Feed domain:',
-    initial: info.domain
+    initial: info.domain,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt7.run()
+  await pFeedDomain.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.domain !== answer;
       info.domain = answer
@@ -168,13 +171,14 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     }); 
 
-  const prompt8 = new List({
+  const pFeedTags = new List({
     name: 'tags',
     message: 'Feed keywords (as a comma-separated values):',
-    initial: info.tags
+    initial: info.tags,
+    validate: (value: string) => {  return !!value; }
   });
   
-  await prompt8.run()
+  await pFeedTags.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.tags !== (answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : '');
       info.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
@@ -186,11 +190,11 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   console.log('Updated', info);
   if (infoUpdated) {
-    const prompt9 = new Confirm({
+    const pFeedChanged = new Confirm({
       message: `${chalkBoldWhite('Feed info has changed and the feed will be updated, do you want to proceed?')}`,
     });
     
-    await prompt9.run()
+    await pFeedChanged.run()
       .then((answer:any) => {
         if (!answer) {
           Logger.success('exiting...');

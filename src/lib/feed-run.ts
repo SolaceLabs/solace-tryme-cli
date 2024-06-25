@@ -53,7 +53,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     })
 
     const { MultiSelect } = require('enquirer');
-    const prompt2 = new MultiSelect({
+    const pPickEvent = new MultiSelect({
       name: 'localEvent',
       message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -66,7 +66,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     });
 
     var eventChoices: string | any[] = []
-    await prompt2.run()
+    await pPickEvent.run()
       .then((answer:any) => eventChoices = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -80,7 +80,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   // check for event in the feed
   if (!cmdLine) {
     const { Select, MultiSelect } = require('enquirer');
-    const prompt = new Select({
+    const pFeedSource = new Select({
       name: 'source',
       message: `Pick the event feed source \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -92,7 +92,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     });
 
     var choice = undefined;
-    await prompt.run()
+    await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -100,7 +100,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       });
     
     if (choice === 'Local Event Feeds') {
-      const prompt = new Select({
+      const pPickEvent = new Select({
         name: 'localFeed',
         message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
         `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -108,7 +108,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         choices: getLocalEventFeeds()
       });
   
-      await prompt.run()
+      await pPickEvent.run()
         .then((answer:any) => feedName = answer)
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
@@ -146,7 +146,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         name: event.name,
       }
     })
-    const prompt2 = new MultiSelect({
+    const pPickEvent = new MultiSelect({
       name: 'localEvent',
       message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -159,7 +159,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     });
 
     var eventChoices: string | any[] = []
-    await prompt2.run()
+    await pPickEvent.run()
       .then((answer:any) => eventChoices = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)

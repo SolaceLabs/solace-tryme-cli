@@ -54,7 +54,7 @@ const Logger = {
 
   success: (message: string) => Signal.success(`${chalk.greenBright('success: ').concat(chalk.greenBright(message))}`),
   logSuccess: (message: string) => Signal.success(`${chalk.greenBright('success: ').concat(chalk.whiteBright(message))}`),
-  logDetailedSuccess: (message: string, detail: string) => Signal.success(chalk.greenBright('success: ').concat(chalk.whiteBright(message)).concat(' - ').concat(chalk.greenBright(detail))),
+  logDetailedSuccess: (message: string, detail: string, hyphenate: boolean = true) => Signal.success(chalk.greenBright('success: ').concat(chalk.whiteBright(message)).concat(hyphenate ? ' - ' : '').concat(chalk.greenBright(detail))),
 
   aid: (aid: string) => Signal.aid(chalk.magentaBright(aid)),
 

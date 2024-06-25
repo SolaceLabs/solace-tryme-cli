@@ -25,7 +25,7 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
     localOnly = optionsSource.localOnly === 'cli' ? options.localOnly : localOnly;
   } else {
     const { MultiSelect } = require('enquirer');
-    const prompt = new MultiSelect({
+    const pFeedSource = new MultiSelect({
       name: 'feedSources',
       message: `Pick event feed sources \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -40,7 +40,7 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
       initial: [0, 1],
     });
 
-    await prompt.run()
+    await pFeedSource.run()
       .then((answer: any) => {
         communityOnly = answer.includes('Community Event Feeds') ? true : false;
         localOnly = answer.includes('Local Event Feeds') ? true : false;

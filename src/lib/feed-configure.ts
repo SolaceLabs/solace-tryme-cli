@@ -19,7 +19,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     const { Select } = require('enquirer');
     var localFeeds:any[] = getLocalEventFeeds();
     localFeeds = [ 'All Event Feeds', ...localFeeds];
-    const prompt = new Select({
+    const pPickFeed = new Select({
       name: 'localFeed',
       message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -27,13 +27,12 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
       choices: localFeeds
     });
 
-    await prompt.run()
+    await pPickFeed.run()
       .then((answer:any) => feedName = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
-    await prompt.close();
 
     if (feedName === 'All Event Feeds') {
       feedName = undefined;

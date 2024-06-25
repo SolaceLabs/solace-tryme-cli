@@ -4,10 +4,11 @@ import { createApiFeed, createFeed, fileExists, updateAndLoadFeedInfo, loadGitFe
 import analyze from './feed-analyze';
 import { formulateRules, formulateSchemas } from './feed-ruleset';
 import { prettyJSON } from '../utils/prettify';
-import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultStmFeedsHome } from '../utils/defaults';
-import { chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
+import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultStmFeedsHome, supportedFeedTypes } from '../utils/defaults';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { fa } from '@faker-js/faker';
 import { fakerRulesJson } from '../utils/fakerrules';
+import { validate } from '@asyncapi/parser/esm/validate';
 
 const getPotentialFeedName = (fileName: string) => {
   var feedName = fileName.split('/').pop();
@@ -23,22 +24,36 @@ const getPotentialTopicFromFeedName = (name: string) => {
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType } = options;
   var feed:any = {};
-  const { Input } = require('enquirer');
+  const { Input, Select } = require('enquirer');
 
-  if (optionsSource.feedType === 'cli' || options.feedType === 'api') {
-    return generateAPIFeed(options, optionsSource);
-  }
-
-  if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
-    feedName = options.feedName;
-    fileName = options.fileName;
-  } else {
-    const prompt = new Input({
-      message: 'Enter AsyncAPI file',
-      initial: 'asyncapi.json'
+  if (optionsSource.feedType === 'default') {
+    const pFeedType = new Select({
+      message: `Pick a feed type \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+      choices: supportedFeedTypes
     });
 
-    await prompt.run()
+    await pFeedType.run()
+      .then((answer:any) => {
+        feed.type = answer;
+        optionsSource.feedType = 'cli';
+        options.feedType = feed.type;
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  }
+
+  if (feed.type === 'stmfeed' && !fileName) {
+    const pFilename = new Input({
+      message: 'Enter AsyncAPI file',
+      initial: 'asyncapi.json',
+      validate: (value: string) => {  return !!value; }
+    });
+
+    await pFilename.run()
       .then((answer: string) => {
         fileName = answer.trim();
         options.fileName = fileName;
@@ -47,46 +62,48 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
+  }
 
-    const prompt2 = new Input({
+  if (!feedName) {
+    const pFeedName = new Input({
       message: 'Enter feed name',
-      initial: getPotentialFeedName(fileName)
+      initial: feed.type === 'stmfeed' ? getPotentialFeedName(fileName) : '',
+      validate: (value: string) => {  return !!value; }
     });
 
-    await prompt2.run()
+    await pFeedName.run()
       .then((answer: string) => {
         feed.name = answer.trim();
         feedName = answer.trim();
         options.feedName = feedName;
+        optionsSource.feedName = 'cli';
       })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
+  } 
+
+  if (optionsSource.feedType === 'cli' && options.feedType === 'apifeed') {
+    return generateAPIFeed(options, optionsSource);
   }
 
-  if (!fileName) {
-    Logger.logError("required option '--file-name <ASYNCAPI_FILE>' not specified")
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-
-  if (!feedName) {
-    Logger.logError("required option '--feed-name <FEED_NAME>' not specified")
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-
+  if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
+    feedName = options.feedName;
+    fileName = options.fileName;
+  } 
+  
   const data = await analyze(options, optionsSource);
   const rules = await formulateRules(JSON.parse(JSON.stringify(data)));
   const schemas = await formulateSchemas(JSON.parse(JSON.stringify(data)));
 
-  const prompt3 = new Input({
+  const pFeedDesc = new Input({
     message: 'Feed description',
-    initial: data.info.description
+    initial: data.info.description,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt3.run()
+  await pFeedDesc.run()
     .then((answer: string) => {
       feed.description = answer.trim();
     })
@@ -95,13 +112,13 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const prompt4 = new Input({
+  const pFeedIcon = new Input({
     message: 'Feed icon (an URL or a base64 image data):',
     hint: 'Leave blank to use default feed icon',
     initial: ''
   });
 
-  await prompt4.run()
+  await pFeedIcon.run()
     .then((answer: string) => {
       feed.img = answer.trim();
     })
@@ -110,27 +127,12 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const prompt5 = new Input({
-    message: 'Feed type',
-    initial: feedType ? feedType : 'stmfeed'
-  });
-
-  await prompt5.run()
-    .then((answer: string) => {
-      feed.type = answer.trim();
-      options.feedType = feedType;
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
-
-  const prompt6 = new Input({
+  const pFeedContributor = new Input({
     message: 'Contributor name or organization name',
     initial: ''
   });
 
-  await prompt6.run()
+  await pFeedContributor.run()
     .then((answer: string) => {
       feed.contributor = answer.trim();
     })
@@ -139,12 +141,12 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const prompt7 = new Input({
+  const pGitUser = new Input({
     message: 'GitHub username',
     initial: ''
   });
 
-  await prompt7.run()
+  await pGitUser.run()
     .then((answer: string) => {
       feed.github = answer.trim();
     })
@@ -153,12 +155,13 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const prompt8 = new Input({
+  const pFeedDomain = new Input({
     message: 'Feed domain',
-    initial: ''
+    initial: '',
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt8.run()
+  await pFeedDomain.run()
     .then((answer: string) => {
       feed.domain = answer.trim();
     })
@@ -167,12 +170,13 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const prompt9 = new Input({
+  const pFeedTags = new Input({
     message: 'Feed keywords (as a comma-separated values):',
-    initial: ''
+    initial: '',
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt9.run()
+  await pFeedTags.run()
     .then((answer: string) => {
       feed.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
     })
@@ -204,64 +208,48 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   var apiEndpoint:any = {};
   var localFeedPath = '';
   
-  const { Input, Confirm } = require('enquirer');
-  if (optionsSource.feedName === 'cli') {
-    const feedsPath = processPlainPath(`${defaultStmFeedsHome}`);
-    if (!fileExists(feedsPath)) {
-      Logger.error('Local repo path does not exist, something wrong!');
-      process.exit(1)
-    }
+  const { Input, Select, Confirm } = require('enquirer');
 
-    localFeedPath = processPlainPath(`${feedsPath}/${feedName}`);
-    if (fileExists(localFeedPath)) {
-      const prompt = new Confirm({
-        message: chalkBoldWhite(`A feed by name ${feedName} already exists, do you want to overwrite it?`)
-      });
-      
-      await prompt.run()
-        .then((answer:any) => {
-          if (!answer) {
-            Logger.success('exiting...');
-            process.exit(1)
-          }
-        })
-        .catch((error:any) => {
-          Logger.logDetailedError('interrupted...', error)
-          process.exit(1);
-        });
+  const feedsPath = processPlainPath(`${defaultStmFeedsHome}`);
+  if (!fileExists(feedsPath)) {
+    Logger.error('Local repo path does not exist, something wrong!');
+    process.exit(1)
+  }
 
-        feed = await loadLocalFeedFile(feedName, defaultFeedInfoFile);
-        if (feed && feed.type !== 'apifeed') {
-          Logger.logError(`the existing feed is not of 'apifeed' type, try creating a new feed`);
-          process.exit(1);
-        }
-        apiEndpoint = await loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
-        apiRules = await loadLocalFeedFile(feedName, defaultFeedRulesFile);
-    }
-  } else {
-    const pFeedNme = new Input({
-      message: 'Feed Name:',
-      initial: ''
+  localFeedPath = processPlainPath(`${feedsPath}/${feedName}`);
+  if (fileExists(localFeedPath)) {
+    const pFeedOverwrite = new Confirm({
+      message: chalkBoldWhite(`A feed by name ${feedName} already exists, do you want to overwrite it?`)
     });
-  
-    await pFeedNme.run()
-      .then((answer: string) => {
-        feed.name = answer.trim();
-        feedName = answer.trim();
-        options.feedName = feedName;
+    
+    await pFeedOverwrite.run()
+      .then((answer:any) => {
+        if (!answer) {
+          Logger.success('exiting...');
+          process.exit(1)
+        }
       })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
+
+      feed = await loadLocalFeedFile(feedName, defaultFeedInfoFile);
+      if (feed && feed.type !== 'apifeed') {
+        Logger.logError(`the existing feed is not of 'apifeed' type, try creating a new feed`);
+        process.exit(1);
+      }
+      apiEndpoint = await loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
+      apiRules = await loadLocalFeedFile(feedName, defaultFeedRulesFile);
   }
 
   const pApiUrl = new Input({
     message: chalkBoldWhite('API Endpoint URL: ') +
              'Prefix the path and query parameters with ' + chalkBoldVariable('$') +  
-             ', e.g. http://api.com/' + chalkBoldVariable('$') + 'type?limit=' + 
+             ', if present. e.g. http://api.com/' + chalkBoldVariable('$') + 'type?limit=' + 
              chalkBoldVariable('$') + 'limit):\n',
-    initial: apiEndpoint?.apiUrl ? apiEndpoint?.apiUrl : ''
+    initial: apiEndpoint?.apiUrl ? apiEndpoint?.apiUrl : '',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pApiUrl.  run()
@@ -273,82 +261,190 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       process.exit(1);
     });
 
-  const pApiKey = new Input({
-    message: 'API Key (if required):',
-    initial: apiEndpoint?.apiKey ? apiEndpoint?.apiKey : ''
+  const pApiAuthType = new Select({
+    name: 'Authentication Type',
+    message: `Pick the expected authentication type \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+              `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+              `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+    choices: [
+      'None',
+      'API Key',
+      'Basic Authentication',
+      'Token Authentication',
+      'X-API Authentication'
+    ]
   });
 
-  await pApiKey.run()
-    .then((answer: string) => {
-      apiEndpoint.apiKey = answer.trim();
-    })
+  await pApiAuthType.run()
+    .then((answer: any) => { apiEndpoint.apiAuthType = answer; })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
-
-  if (apiEndpoint.apiKey) {
-    const pApiKeyUrl = new Input({
-      message: 'URL to generate personal API Key:',
-      initial: apiEndpoint?.apiKeyUrl ? apiEndpoint?.apiKeyUrl : ''
-    });
   
-    await pApiKeyUrl.run()
-      .then((answer: string) => {
-        apiEndpoint.apiKeyUrl = answer.trim();
-      })
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
-      });
-
-    const pApiKeyEmbedded = new Confirm({
-      message: 'Is the API Key embedded in the URL?',
+  if (apiEndpoint.apiAuthType === 'API Key') {
+    const pApiKey = new Input({
+      message: 'API Key:',
+      initial: apiEndpoint?.apiKey ? apiEndpoint?.apiKey : '',
+      validate: (value: string) => {  return !!value; }
     });
-    
-    await pApiKeyEmbedded.run()
-      .then((answer:any) => {
-        apiEndpoint.apiKeyUrlEmbedded = answer;
+
+    await pApiKey.run()
+      .then((answer: string) => {
+        apiEndpoint.apiKey = answer.trim();
       })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
 
-    if (apiEndpoint.apiKeyUrlEmbedded) {
-      const pApiKeyUrlParam = new Input({
-        message: 'URL parameter of the API Key (without the ' + chalkBoldVariable('$') + '):',
-        initial: apiEndpoint?.apiKeyUrlParam ? apiEndpoint?.apiKeyUrlParam : ''
+    if (apiEndpoint.apiKey) {
+      const pApiKeyUrl = new Input({
+        message: 'URL to generate personal API Key:',
+        initial: apiEndpoint?.apiKeyUrl ? apiEndpoint?.apiKeyUrl : '',
+        validate: (value: string) => {  return !!value; }
       });
     
-      await pApiKeyUrlParam.run()
+      await pApiKeyUrl.run()
         .then((answer: string) => {
-          apiEndpoint.apiKeyUrlParam = answer.trim();
-          if (!apiEndpoint.apiKeyUrlParam) {
-            Logger.logError('API Key URL parameter cannot be empty')
-            process.exit(1);
-          }
-
-          if (apiEndpoint.apiUrl.indexOf('$' + apiEndpoint.apiKeyUrlParam) < 0) {
-            Logger.logError('Specified API Key URL parameter not found in the API endpoint URL')
-            process.exit(1);
-          }
+          apiEndpoint.apiKeyUrl = answer.trim();
         })
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
           process.exit(1);
         });
     }
-  }
 
+    apiEndpoint.apiKeyUrlEmbedded = true;
+
+    const pApiKeyUrlParam = new Input({
+      message: 'URL parameter of the API Key (without the ' + chalkBoldVariable('$') + '):',
+      initial: apiEndpoint?.apiKeyUrlParam ? apiEndpoint?.apiKeyUrlParam : '',
+      validate: (value: string) => {  return !!value; }
+    });
+  
+    await pApiKeyUrlParam.run()
+      .then((answer: string) => {
+        apiEndpoint.apiKeyUrlParam = answer.trim();
+        if (!apiEndpoint.apiKeyUrlParam) {
+          apiEndpoint.apiKeyUrlEmbedded = false;
+        } else if (apiEndpoint.apiUrl.indexOf('$' + apiEndpoint.apiKeyUrlParam) < 0) {
+          Logger.logError('Specified API Key URL parameter not found in the API endpoint URL')
+          process.exit(1);
+        }
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  } else if (apiEndpoint.apiAuthType === 'Basic Authentication') {
+    const pApiToken = new Input({
+      message: 'Credential (Base64 encoded string):',
+      hint: 'A Base64 encoded credential derived from user/password or user/secret pairs',
+      initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
+      validate: (value: string) => {  return !!value; }
+    });
+
+    await pApiToken.run()
+      .then((answer: string) => {
+        apiEndpoint.apiToken = answer.trim();
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  } else if (apiEndpoint.apiAuthType === 'Token Authentication') {
+    const pApiToken = new Input({
+      message: 'Credential (Base64 encoded string):',
+      hint: 'API security/access token',
+      initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
+      validate: (value: string) => {  return !!value; }
+    });
+
+    await pApiToken.run()
+      .then((answer: string) => {
+        apiEndpoint.apiToken = answer.trim();
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  } else if (apiEndpoint.apiAuthType === 'X-API Authentication') {
+    var newPairs = [];
+    var xapiPairs = apiEndpoint?.xapiPairs ? apiEndpoint?.xapiPairs : [];
+    var pair = 0;
+    var done = false;
+    var restart = false;
+    do {
+      restart = false;
+      var xApiPair = { 
+        key: xapiPairs.length && xapiPairs[pair] ? xapiPairs[pair].key : '', 
+        value: xapiPairs.length && xapiPairs[pair] ? xapiPairs[pair].value : ''
+      };
+
+      const pxApiKey = new Input({
+        message: 'X-API Key:',
+        hint: 'X-API Key (Enter to skip marking the end of the key-value pairs)',
+        initial: xApiPair.key
+      });
+
+      await pxApiKey.run()
+        .then((answer: string) => {
+          xApiPair.key = answer.trim();
+          if (xApiPair.key === '') {
+            if (!newPairs.length) {
+              Logger.logError('At least one key-value pair is required');
+              restart = true;
+            } else {
+              restart = false;
+              done = true;
+            }
+          }
+        })
+        .catch((error:any) => {
+          Logger.logDetailedError('interrupted...', error)
+          process.exit(1);
+        });
+
+      if (!done && !restart) {
+        const pxApiValue = new Input({
+          message: 'X-API Value:',
+          initial: xApiPair.value,
+          validate: (value: string) => {  return !!value; }
+        });
+
+        await pxApiValue.run()
+          .then((answer: string) => {
+            xApiPair.value = answer.trim();
+          })
+          .catch((error:any) => {
+            Logger.logDetailedError('interrupted...', error)
+            process.exit(1);
+          });
+
+        newPairs.push(xApiPair);
+        pair++;   
+      }
+    } while (!done);
+
+    apiEndpoint.xapiPairs = newPairs;
+  }
+  
   if (apiEndpoint.apiUrl.includes('$')) {
     Logger.logWarn('API endpoint URL contains placeholders, cannot test the endpoint validity now - don\'t forget to configure parameter rules')
   } else {
     // check if the API endpoint is valid
     try {
       var headers:any = { Accept: 'application/json' };
-      if (apiEndpoint.apiKey) {
-        headers['Authorization'] = `Bearer ${feed.apiKey}`;
+      if (apiEndpoint.apiAuthType === 'Basic Authentication') {
+        headers['Authorization'] = `Basic ${apiEndpoint.apiToken}`;
+      } else if (apiEndpoint.apiAuthType === 'Token Authentication') {
+        headers['Authorization'] = `Bearer ${apiEndpoint.apiToken}`;
+      } else if (apiEndpoint.apiAuthType === 'X-API Authentication') {
+        for (var i=0; i<apiEndpoint.xapiPairs.length; i++) {
+          var xPair = apiEndpoint.xapiPairs[i];
+          headers[xPair.key] = xPair.value;
+        }
       }
 
       var result = await (await fetch(`${apiEndpoint.apiUrl}`, {
@@ -368,7 +464,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     message: chalkBoldWhite('Topic Destination: ') +
              'Surround the topic parameters with curly braces matching API endpoint URL\'s path _or_ query parameters, if used!' +  
              ' e.g. order/created/' + chalkBoldVariable('{orderId}') + '):\n',
-    initial: apiEndpoint?.topic ? apiEndpoint?.topic : 'solace/feed/' + getPotentialTopicFromFeedName(feed.name)
+    initial: apiEndpoint?.topic ? apiEndpoint?.topic : 'solace/feed/' + getPotentialTopicFromFeedName(feed.name),
+    validate: (value: string) => {  return !!value; }
   });
 
   await pTopic.run()
@@ -399,7 +496,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pCount = new Input({
     message: 'Number of events:',
-    initial: apiRules.publishSettings ? apiRules.publishSettings.count : '20'
+    initial: apiRules.publishSettings ? apiRules.publishSettings.count : '20',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pCount.run()
@@ -413,7 +511,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     
     const pInterval = new Input({
       message: 'Interval (in secs):',
-      initial: apiRules.publishSettings ? apiRules.publishSettings.interval : '3'
+      initial: apiRules.publishSettings ? apiRules.publishSettings.interval : '3',
+      validate: (value: string) => {  return !!value; }
     });
   
     await pInterval.run()
@@ -427,7 +526,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   
   const pDelay = new Input({
     message: 'Initial Delay (in secs):',
-    initial: apiRules.publishSettings ? apiRules.publishSettings.delay : '0'
+    initial: apiRules.publishSettings ? apiRules.publishSettings.delay : '0',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pDelay.run()
@@ -441,7 +541,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pDescription = new Input({
     message: 'Feed description',
-    initial: feed?.description ? feed?.description : ''
+    initial: feed?.description ? feed?.description : '',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pDescription.run()
@@ -498,7 +599,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pDomain = new Input({
     message: 'Feed domain',
-    initial: feed?.domain ? feed?.domain : ''
+    initial: feed?.domain ? feed?.domain : '',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pDomain.run()
@@ -512,7 +614,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pTags = new Input({
     message: 'Feed keywords (as a comma-separated values):',
-    initial: feed?.tags ? feed?.tags : ''
+    initial: feed?.tags ? feed?.tags : '',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pTags.run()

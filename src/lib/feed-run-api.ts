@@ -110,12 +110,23 @@ async function publishFeed(publisher:any, feed:any) {
 
     var apiUrl = feed.api.apiUrl;
     var apiKey = feed.api.apiKey;
+    var apiToken = feed.api.apiToken;
+    var xapiPairs = feed.api.xapiPairs;
     var apiRules = feed.rule.rules;
-    if (feed.api.apiKeyUrlEmbedded) 
-      apiUrl = apiUrl.replaceAll(`$${feed.api.apiKeyUrlParam}`, apiKey);
-  
-    if (!feed.api.apiKeyUrlEmbedded && apiKey) {
+
+    if (feed.api.apiAuthType === 'Basic Authentication') {
+      headers['Authorization'] = `Basic ${apiToken}`;
+    } else if (feed.api.apiAuthType === 'Token Authentication') {
+      headers['Authorization'] = `Bearer ${apiToken}`;
+    } else if (feed.api.apiAuthType === 'X-API Authentication') {
+      for (var i=0; i<xapiPairs.length; i++) {
+        var xPair = xapiPairs[i];
+        headers[xPair.key] = xPair.value;
+      }
+    } else if (feed.api.apiAuthType === 'API Key' && !feed.api.apiKeyUrlEmbedded) {
       headers['Authorization'] = `Bearer ${apiKey}`;
+    } else if (feed.api.apiAuthType === 'API Key' && feed.api.apiKeyUrlEmbedded) {
+      apiUrl = apiUrl.replaceAll(`$${feed.api.apiKeyUrlParam}`, apiKey);
     }
 
     var params = Object.keys(apiRules);

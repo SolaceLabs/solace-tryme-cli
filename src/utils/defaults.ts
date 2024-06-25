@@ -420,3 +420,4 @@ export const defaultGitRepo = 'https://raw.githubusercontent.com/solacecommunity
 export const defaultGitFeedRepo = 'https://github.com/solacecommunity/solace-event-feeds/tree/main';
 export const defaultProjectName = 'solace-tryme-cli'
 export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
+export const supportedFeedTypes = [ 'stmfeed', 'apifeed' ]; //, 'customfeed'

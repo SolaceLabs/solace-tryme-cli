@@ -5,7 +5,7 @@ import { chalkBoldWhite, chalkBoldLabel, chalkBoldVariable, chalkBoldTopicSepara
 import { ManageFeedClientOptionsEmpty } from '../utils/instances';
 import analyze from './feed-analyze';
 import { loadLocalFeedFile, loadGitFeedFile, processPlainPath, readFile } from '../utils/config';
-import { defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
+import { defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 
 const preview = async (options: ManageFeedClientOptions, optionsSource: any) => {
@@ -18,7 +18,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
       gitFeed = true;
   } else {    
     const { Select } = require('enquirer');
-    const prompt = new Select({
+    const pFeedSource = new Select({
       name: 'source',
       message: `Pick the preview source \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -31,7 +31,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     });
 
     var choice = undefined;
-    await prompt.run()
+    await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -40,12 +40,13 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     
     const { Input } = require('enquirer');
     if (choice === 'AsyncAPI File') {
-      const prompt = new Input({
+      const pFilename = new Input({
         message: 'Enter AsyncAPI file',
-        initial: 'asyncapi.json'
+        initial: 'asyncapi.json',
+        validate: (value: string) => {  return !!value; }
       });
       
-      await prompt.run()
+      await pFilename.run()
         .then((answer:any) => fileName = answer)
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
@@ -57,7 +58,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         Logger.logError('no local feeds found...')
         process.exit(1);
       }
-      const prompt = new Select({
+      const pPickFeed = new Select({
         name: 'localFeed',
         message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
         `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -65,7 +66,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         choices: feeds
       });
   
-      await prompt.run()
+      await pPickFeed.run()
         .then((answer:any) => feedName = answer, gitFeed = false)
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
@@ -78,13 +79,13 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         process.exit(1);
       }
 
-      const promptFeed = new Select({
+      const pPickFeed = new Select({
         name: 'gitFeed',
         message: `Pick the event feed (↑↓ keys to ${chalkBoldVariable('move')} and ↵ to ${chalkBoldVariable('submit')})`,
         choices: gitFeeds
       });
   
-      await promptFeed.run()
+      await pPickFeed.run()
         .then((answer:any) => feedName = answer)
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
@@ -96,12 +97,20 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   }
 
   var data:any = undefined;
+  var info:any = undefined;
+  var type:any = undefined;
   if (fileName) {
     options.fileName = fileName;
     data = await analyze(options, optionsSource);
+    type = "file";
   } else if (feedName) {
     options.feedName = feedName;
-    data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    info = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    if (info.type === 'stmfeed') 
+      data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    else if (info.type === 'apifeed')
+      data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedApiEndpointFile) : loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
+    type = info.type;
   }
     
   if (!data) {
@@ -110,121 +119,141 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   }
 
   var result:any = [];
-  data.info['x-ep-application-domain-name'] && result.push(chalkBoldLabel('├──Application Domain: ') + chalkBoldWhite(data.info['x-ep-application-domain-name']))
-  data.info['title'] && result.push(chalkBoldLabel('├──Application: ') + chalkBoldWhite(data.info['title']))
-  data.info['description'] && result.push(chalkBoldLabel('│   │           ') + chalkWhite(wrapContent(chalkBoldLabel('│   │           '), data.info['description'])));
-  data.info['version'] && result.push(chalkBoldLabel('│   ├──Version: ') + chalkBoldWhite(data.info['version']));
-  data.info['x-ep-state-name'] && result.push(chalkBoldLabel('│   ├──State: ') + chalkBoldWhite(data.info['x-ep-state-name']));
-  result.push(chalkBoldLabel('├──Events'));
+  if (type === 'file' || type === 'stmfeed') {
+    data.info['x-ep-application-domain-name'] && result.push(chalkBoldLabel('├──Application Domain: ') + chalkBoldWhite(data.info['x-ep-application-domain-name']))
+    data.info['title'] && result.push(chalkBoldLabel('├──Application: ') + chalkBoldWhite(data.info['title']))
+    data.info['description'] && result.push(chalkBoldLabel('│   │           ') + chalkWhite(wrapContent(chalkBoldLabel('│   │           '), data.info['description'])));
+    data.info['version'] && result.push(chalkBoldLabel('│   ├──Version: ') + chalkBoldWhite(data.info['version']));
+    data.info['x-ep-state-name'] && result.push(chalkBoldLabel('│   ├──State: ') + chalkBoldWhite(data.info['x-ep-state-name']));
+    result.push(chalkBoldLabel('├──Events'));
 
-  let sendAdded = false;
-  Object.keys(data.messages).forEach((messageName) => {
-    var sendEvents = data.messages[messageName].send;
-    if (sendEvents.length) {
-      if (!sendAdded) {
-        result.push(chalkBoldLabel('│   ├──Send Events'));
-        sendAdded = true;
+    let sendAdded = false;
+    Object.keys(data.messages).forEach((messageName) => {
+      var sendEvents = data.messages[messageName].send;
+      if (sendEvents.length) {
+        if (!sendAdded) {
+          result.push(chalkBoldLabel('│   ├──Send Events'));
+          sendAdded = true;
+        }
+
+        sendEvents.forEach((_event:any) => {
+          result.push(chalkBoldLabel('│   │   ├──Event: ') + chalkBoldWhite(messageName))
+          _event?.message.description &&
+            result.push(chalkBoldLabel('│   │   │   │     ') + 
+                          chalkWhite(wrapContent(chalkBoldLabel('│   │   │   │     '), _event?.message.description)));
+
+          _event?.message['x-ep-event-version'] && result.push(chalkBoldLabel('│   │   │   ├──Version: ') + chalkBoldWhite(_event?.message['x-ep-event-version']));
+          _event?.message['x-ep-event-state-name'] && result.push(chalkBoldLabel('│   │   │   ├──State: ') + chalkBoldWhite(_event?.message['x-ep-event-state-name']));
+          _event.topicName && result.push(chalkBoldLabel('│   │   │   ├──Topic: ') + colorizeTopic(_event.topicName))
+          _event.topicDescription && 
+            result.push(chalkBoldLabel('│   │   │   │                    ') + 
+                  chalkWhite(wrapContent(chalkBoldLabel('│   │   │   ├──                  '), _event.topicDescription)));
+
+          if (_event.message && _event.message.payload) {
+            _event.message.payload['x-ep-schema-name'] &&
+              result.push(chalkBoldLabel('│   │   │   ├──Schema: ') + 
+                chalkBoldWhite(_event.message.payload['x-ep-schema-name']) +
+                (_event.message.contentType ? chalkBoldWhite(' [' + _event.message.contentType + ']') : ''))  
+            _event.message.payload['x-ep-schema-version'] && 
+              result.push(chalkBoldLabel('│   │   │   │   ├──Version: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-version']));
+            _event.message.payload['x-ep-schema-state-name'] && 
+              result.push(chalkBoldLabel('│   │   │   │   ├──State: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-state-name']));
+          }
+        })
+      }
+    });
+    
+    let receiveAdded = false;
+    Object.keys(data.messages).forEach((messageName) => {
+      var receiveEvents = data.messages[messageName].receive;
+      if (receiveEvents.length) {
+        if (!receiveAdded) {
+          result.push(chalkBoldLabel('│   ├──Receive Events'));
+          receiveAdded = true;
+        }
+
+        receiveEvents.forEach((_event:any) => {
+          result.push(chalkBoldLabel('│   │   ├──Event: ') + chalkBoldWhite(messageName))
+          _event?.message.description &&
+            result.push(chalkBoldLabel('│   │   │   │     ') + 
+                          chalkWhite(wrapContent(chalkBoldLabel('│   │   │   │     '), _event?.message.description)));
+
+          _event?.message['x-ep-event-version'] && result.push(chalkBoldLabel('│   │   │   ├──Version: ') + chalkBoldWhite(_event?.message['x-ep-event-version']));
+          _event?.message['x-ep-event-state-name'] && result.push(chalkBoldLabel('│   │   │   ├──State: ') + chalkBoldWhite(_event?.message['x-ep-event-state-name']));
+          _event.topicName && result.push(chalkBoldLabel('│   │   │   ├──Topic: ') + colorizeTopic(_event.topicName))
+          _event.topicDescription && 
+            result.push(chalkBoldLabel('│   │   │   │                    ') + 
+                  chalkWhite(wrapContent(chalkBoldLabel('│   │   │   ├──                  '), _event.topicDescription)));
+
+          if (_event.message && _event.message.payload) {
+            _event.message.payload['x-ep-schema-name'] &&
+              result.push(chalkBoldLabel('│   │   │   ├──Schema: ') + 
+                chalkBoldWhite(_event.message.payload['x-ep-schema-name']) +
+                (_event.message.contentType ? chalkBoldWhite(' [' + _event.message.contentType + ']') : ''))  
+            _event.message.payload['x-ep-schema-version'] && 
+              result.push(chalkBoldLabel('│   │   │   │   ├──Version: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-version']));
+            _event.message.payload['x-ep-schema-state-name'] && 
+              result.push(chalkBoldLabel('│   │   │   │   ├──State: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-state-name']));
+          }
+
+          if (_event.consumers) {
+            Object.keys(_event.consumers).forEach((consumerName: string) => {
+              const consumer = _event.consumers[consumerName];
+              result.push(chalkBoldLabel('│   │   │   ├──Consumers '))
+              result.push(chalkBoldLabel('│   │   │   │   ├──Consumer: ') + chalkBoldWhite(consumer.name));
+              const subscriptions = consumer.topicSubscriptions;
+              if (subscriptions) {
+                result.push(chalkBoldLabel('│   │   │   │   │   ├──Subscriptions '));
+                subscriptions.forEach((sub:any) => {
+                  result.push(chalkBoldLabel('│   │   │   │   │   │    ') + chalkBoldWhite(sub));
+                })
+              }
+            })
+          }
+
+        })
+      }
+    });
+
+    let schemaAdded = false;
+    Object.keys(data.schemas).forEach((schemaName) => {
+      if (!schemaAdded) {
+        result.push(chalkBoldLabel('├──Schemas'));
+        schemaAdded = true;
       }
 
-      sendEvents.forEach((_event:any) => {
-        result.push(chalkBoldLabel('│   │   ├──Event: ') + chalkBoldWhite(messageName))
-        _event?.message.description &&
-          result.push(chalkBoldLabel('│   │   │   │     ') + 
-                        chalkWhite(wrapContent(chalkBoldLabel('│   │   │   │     '), _event?.message.description)));
-
-        _event?.message['x-ep-event-version'] && result.push(chalkBoldLabel('│   │   │   ├──Version: ') + chalkBoldWhite(_event?.message['x-ep-event-version']));
-        _event?.message['x-ep-event-state-name'] && result.push(chalkBoldLabel('│   │   │   ├──State: ') + chalkBoldWhite(_event?.message['x-ep-event-state-name']));
-        _event.topicName && result.push(chalkBoldLabel('│   │   │   ├──Topic: ') + colorizeTopic(_event.topicName))
-        _event.topicDescription && 
-          result.push(chalkBoldLabel('│   │   │   │                    ') + 
-                chalkWhite(wrapContent(chalkBoldLabel('│   │   │   ├──                  '), _event.topicDescription)));
-
-        if (_event.message && _event.message.payload) {
-          _event.message.payload['x-ep-schema-name'] &&
-            result.push(chalkBoldLabel('│   │   │   ├──Schema: ') + 
-              chalkBoldWhite(_event.message.payload['x-ep-schema-name']) +
-              (_event.message.contentType ? chalkBoldWhite(' [' + _event.message.contentType + ']') : ''))  
-          _event.message.payload['x-ep-schema-version'] && 
-            result.push(chalkBoldLabel('│   │   │   │   ├──Version: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-version']));
-          _event.message.payload['x-ep-schema-state-name'] && 
-            result.push(chalkBoldLabel('│   │   │   │   ├──State: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-state-name']));
-        }
+      let _schema = data.schemas[schemaName]
+      result.push(chalkBoldLabel('│   ├──Schema: ') + chalkBoldWhite(schemaName))
+      _schema.description &&
+        result.push(chalkBoldLabel('│   │   │      ') + 
+                      chalkWhite(wrapContent(chalkBoldLabel('│   │   ├──        '), _schema.description)));
+      _schema['x-ep-schema-version'] && result.push(chalkBoldLabel('│   │   ├──Version: ') + chalkBoldWhite(_schema['x-ep-schema-version']));
+      _schema['x-ep-schema-state-name'] && result.push(chalkBoldLabel('│   │   ├──State: ') + chalkBoldWhite(_schema['x-ep-schema-state-name']));
+      _schema.title && result.push(chalkBoldLabel('│   │   ├──Title: ') + colorizeTopic(_schema.title) +
+                (_schema.type ? chalkBoldWhite(' [' + _schema.type + ']') : ''));
+      !_schema.title && _schema.type && result.push(chalkBoldLabel('│   │   ├──Type: ') + chalkBoldWhite(_schema.type));
+    });
+  } else if (type === 'apifeed') {
+    info['name'] && result.push(chalkBoldLabel('├──Feed: ') + chalkBoldWhite(info['name']))
+    info['description'] && result.push(chalkBoldLabel('│   │           ') + chalkWhite(wrapContent(chalkBoldLabel('│   │           '), info['description'])));
+    info['domain'] && result.push(chalkBoldLabel('│   ├──Domain: ') + chalkBoldWhite(info['domain']));
+    info['tags'] && result.push(chalkBoldLabel('│   ├──Tags: ') + chalkBoldWhite(info['tags']));
+    result.push(chalkBoldLabel('├──Endpoint'));
+    result.push(chalkBoldLabel('│   ├──URL: ') + chalkBoldWhite(data['apiUrl']));
+    result.push(chalkBoldLabel('│   ├──Auth Type: ') + chalkBoldWhite(data['apiAuthType']));
+    data['apiKeyUrlParam'] && result.push(chalkBoldLabel('│   ├──Key Param: ') + chalkBoldWhite(data['apiKeyUrlParam']));
+    data['apiKey'] && result.push(chalkBoldLabel('│   ├──Key: ') + chalkBoldWhite("*******"));
+    data['apiToken'] && result.push(chalkBoldLabel('│   ├──Token: ') + chalkBoldWhite("*******"));
+    data['xapiPairs'] && result.push(chalkBoldLabel('│   ├──X-API Pairs '));
+    if (data['xapiPairs']) {
+      data['xapiPairs'].forEach((pair:any) => {
+        result.push(chalkBoldLabel('│   │   ├──Header Key: ') + chalkBoldWhite(pair.key));
       })
     }
-  });
-  
-  let receiveAdded = false;
-  Object.keys(data.messages).forEach((messageName) => {
-    var receiveEvents = data.messages[messageName].receive;
-    if (receiveEvents.length) {
-      if (!receiveAdded) {
-        result.push(chalkBoldLabel('│   ├──Receive Events'));
-        receiveAdded = true;
-      }
+    result.push(chalkBoldLabel('│   ├──Topic: ') + chalkBoldWhite(data['topic']));
+  }
 
-      receiveEvents.forEach((_event:any) => {
-        result.push(chalkBoldLabel('│   │   ├──Event: ') + chalkBoldWhite(messageName))
-        _event?.message.description &&
-          result.push(chalkBoldLabel('│   │   │   │     ') + 
-                        chalkWhite(wrapContent(chalkBoldLabel('│   │   │   │     '), _event?.message.description)));
-
-        _event?.message['x-ep-event-version'] && result.push(chalkBoldLabel('│   │   │   ├──Version: ') + chalkBoldWhite(_event?.message['x-ep-event-version']));
-        _event?.message['x-ep-event-state-name'] && result.push(chalkBoldLabel('│   │   │   ├──State: ') + chalkBoldWhite(_event?.message['x-ep-event-state-name']));
-        _event.topicName && result.push(chalkBoldLabel('│   │   │   ├──Topic: ') + colorizeTopic(_event.topicName))
-        _event.topicDescription && 
-          result.push(chalkBoldLabel('│   │   │   │                    ') + 
-                chalkWhite(wrapContent(chalkBoldLabel('│   │   │   ├──                  '), _event.topicDescription)));
-
-        if (_event.message && _event.message.payload) {
-          _event.message.payload['x-ep-schema-name'] &&
-            result.push(chalkBoldLabel('│   │   │   ├──Schema: ') + 
-              chalkBoldWhite(_event.message.payload['x-ep-schema-name']) +
-              (_event.message.contentType ? chalkBoldWhite(' [' + _event.message.contentType + ']') : ''))  
-          _event.message.payload['x-ep-schema-version'] && 
-            result.push(chalkBoldLabel('│   │   │   │   ├──Version: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-version']));
-          _event.message.payload['x-ep-schema-state-name'] && 
-            result.push(chalkBoldLabel('│   │   │   │   ├──State: ') + chalkBoldWhite(_event.message.payload['x-ep-schema-state-name']));
-        }
-
-        if (_event.consumers) {
-          Object.keys(_event.consumers).forEach((consumerName: string) => {
-            const consumer = _event.consumers[consumerName];
-            result.push(chalkBoldLabel('│   │   │   ├──Consumers '))
-            result.push(chalkBoldLabel('│   │   │   │   ├──Consumer: ') + chalkBoldWhite(consumer.name));
-            const subscriptions = consumer.topicSubscriptions;
-            if (subscriptions) {
-              result.push(chalkBoldLabel('│   │   │   │   │   ├──Subscriptions '));
-              subscriptions.forEach((sub:any) => {
-                result.push(chalkBoldLabel('│   │   │   │   │   │    ') + chalkBoldWhite(sub));
-              })
-            }
-          })
-        }
-
-      })
-    }
-  });
-
-  let schemaAdded = false;
-  Object.keys(data.schemas).forEach((schemaName) => {
-    if (!schemaAdded) {
-      result.push(chalkBoldLabel('├──Schemas'));
-      schemaAdded = true;
-    }
-
-    let _schema = data.schemas[schemaName]
-    result.push(chalkBoldLabel('│   ├──Schema: ') + chalkBoldWhite(schemaName))
-    _schema.description &&
-      result.push(chalkBoldLabel('│   │   │      ') + 
-                    chalkWhite(wrapContent(chalkBoldLabel('│   │   ├──        '), _schema.description)));
-    _schema['x-ep-schema-version'] && result.push(chalkBoldLabel('│   │   ├──Version: ') + chalkBoldWhite(_schema['x-ep-schema-version']));
-    _schema['x-ep-schema-state-name'] && result.push(chalkBoldLabel('│   │   ├──State: ') + chalkBoldWhite(_schema['x-ep-schema-state-name']));
-    _schema.title && result.push(chalkBoldLabel('│   │   ├──Title: ') + colorizeTopic(_schema.title) +
-              (_schema.type ? chalkBoldWhite(' [' + _schema.type + ']') : ''));
-    !_schema.title && _schema.type && result.push(chalkBoldLabel('│   │   ├──Type: ') + chalkBoldWhite(_schema.type));
-  });
-
-  Logger.logDetailedSuccess('Summary: \n', result.join('\n'));
+  Logger.logDetailedSuccess('Summary: \n', result.join('\n'), false);
 
 }
 

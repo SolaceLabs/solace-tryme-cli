@@ -42,7 +42,8 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   
   const promptLocal = new Input({
     message: 'Enter local feed name',
-    initial: feedName
+    initial: feedName,
+    validate: (value: string) => {  return !!value; }
   });
   
   await promptLocal.run()
@@ -62,11 +63,11 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   if (fileExists(localFeedPath)) {
     const { Confirm } = require('enquirer');
 
-    const prompt = new Confirm({
+    const pFeedOverwrite = new Confirm({
       message: chalkBoldWhite(`A feed by name ${localFeedName} already exists, do you want to overwrite it?`)
     });
     
-    await prompt.run()
+    await pFeedOverwrite.run()
       .then((answer:any) => {
         if (!answer) {
           Logger.success('exiting...');
@@ -97,12 +98,12 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   data = await loadGitFeedFile(feedName, defaultFeedSchemasFile);
   writeJsonFile(`${localFeedPath}/${defaultFeedSchemasFile}`, data);
 
-  const prompt3 = new Input({
+  const pImageOverwrite = new Input({
     message: 'Do you want to update the image url that represents the feed:',
     initial: info.img
   });
 
-  await prompt3.run()
+  await pImageOverwrite.run()
     .then((answer:any) => {
       info.img = answer
     })
@@ -111,26 +112,13 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt4 = new Input({
+  const pFeedName = new Input({
     message: 'Do you want to update the title of the feed:',
-    initial: feedName
+    initial: feedName,
+    validate: (value: string) => {  return !!value; }
   });
 
-  // await prompt4.run()
-  //   .then((answer:any) => {
-  //     info.title = answer
-  //   })
-  //   .catch((error:any) => {
-  //     Logger.logDetailedError('interrupted...', error)
-  //     process.exit(1);
-  //   });
-
-  const prompt5 = new Input({
-    message: 'Do you want to update the description of the feed',
-    initial: info.description
-  });
-
-  await prompt5.run()
+  await pFeedName.run()
     .then((answer:any) => {
       info.description = answer
     })
@@ -139,12 +127,27 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt6 = new Input({
+  const pFeedDesc = new Input({
+    message: 'Do you want to update the description of the feed',
+    initial: info.description,
+    validate: (value: string) => {  return !!value; }
+  });
+
+  await pFeedDesc.run()
+    .then((answer:any) => {
+      info.description = answer
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  const pFeedContributor = new Input({
     message: 'Do you want to update your contributor:',
     initial: info.contributor
   });
 
-  await prompt6.run()
+  await pFeedContributor.run()
     .then((answer:any) => {
       info.contributor = answer
     })
@@ -153,12 +156,13 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt7 = new Input({
+  const pFeedDomain = new Input({
     message: 'Do you want to update the domain of the feed:',
-    initial: info.domain
+    initial: info.domain,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt7.run()
+  await pFeedDomain.run()
     .then((answer:any) => {
       info.domain = answer
     })
@@ -167,13 +171,14 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     }); 
 
-  const prompt8 = new List({
+  const pFeedTags = new List({
     name: 'tags',
     message: 'Do you want to update tags that identifies the feed context better (as a comma-separated values):',
-    initial: info.tags
+    initial: info.tags,
+    validate: (value: string) => {  return !!value; }
   });
   
-  await prompt8.run()
+  await pFeedTags.run()
     .then((answer:any) => {
       info.tags = answer ? answer.join(', ') : ''
     })

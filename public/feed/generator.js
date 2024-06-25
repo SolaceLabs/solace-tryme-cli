@@ -67,8 +67,12 @@ async function generateRuleBasedPayload(payload, count) {
 async function generateApiEvents(feed, count) {
   var events = [];
   var apiUrl = feed.config.apiUrl;
+  var apiAuthType = feed.config.apiAuthType;
   var apiKey = feed.config.apiKey;
-  if (feed.config.apiKeyUrlEmbedded) 
+  var apiToken = feed.config.apiToken
+  var xapiPairs = feed.config.xapiPairs;
+
+  if (apiAuthType === 'API Key' && feed.config.apiKeyUrlEmbedded) 
     apiUrl = apiUrl.replaceAll(`$${feed.config.apiKeyUrlParam}`, apiKey);
 
   var rules = feed.rules.rules;
@@ -80,14 +84,24 @@ async function generateApiEvents(feed, count) {
     }
   }
 
+  var headers = { Accept: 'application/json' };
+  if (apiAuthType === 'Basic Authentication') {
+    headers['Authorization'] = `Basic ${apiToken}`;
+  } else if (apiAuthType === 'Token Authentication') {
+    headers['Authorization'] = `Bearer ${apiToken}`;
+  } else if (apiAuthType === 'API Key' && !feed.config.apiKeyUrlEmbedded) {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  } else if (apiAuthType === 'X-API Authentication') {
+    for (var i=0; i<xapiPairs.length; i++) {
+      var xPair = xapiPairs[i];
+      headers[xPair.key] = xPair.value;
+    }
+  }
+
+
   for (var i=0; i<count; i++) {
     var topic = feed.config.topic;
     var payload = {};
-
-    var headers = { Accept: 'application/json' };
-    if (!feed.config.apiKeyUrlEmbedded && apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
 
     try {
       var url = apiUrl;

@@ -175,6 +175,7 @@ class Feed extends IFeed {
       var api = this.getFeedParam('api');
       var data = {
         messageName: info.name,
+        simplifiedName: info.name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase(),
         description: info.description,
         topicName: api.topic,
         apiUrl: api.apiUrl,

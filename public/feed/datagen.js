@@ -5,9 +5,9 @@ async function showSampleData() {
   var rule = feed.rules.find((r) => r.messageName === messageName);
   if (!rule) return;
 
-  var events = await generateEvents(rule, 10);
+  var events = await generateEvents(rule, 5);
   var fakeData = [];
-  for (var i=0; i<10; i++) {
+  for (var i=0; i<5; i++) {
     fakeData.push({
       topic: events[i].topic,
       payload: events[i].payload
@@ -31,9 +31,9 @@ async function showSampleApiData() {
   var rules = feed.rules;
   if (!rules) return;
 
-  var events = await generateApiEvents(feed, 10);
+  var events = await generateApiEvents(feed, 5);
   var fakeData = [];
-  for (var i=0; i<10; i++) {
+  for (var i=0; i<5; i++) {
     fakeData.push({
       topic: events[i].topic,
       payload: events[i].payload
