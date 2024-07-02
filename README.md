@@ -4,7 +4,7 @@
 
 ---
 
-Solace Try-Me CLI is a CLI Client on the command line to publish and receive messages from Solace PubSub+ Broker. Designed to help develop, test and debug Solace PubSub+ services and applications faster without the need to use a graphical interface.
+The Solace Try-Me CLI is a command line tool used to publish and receive messages from the Solace PubSub+ Broker. Designed to help develop, test and debug Solace PubSub+ services and applications faster without the need to use a graphical interface.
 
 ## Documentation
 
@@ -27,7 +27,7 @@ $ stm -v
 █████║╚█████╔╝█████╗██║ ██║╚████╗████╗     ██║   ██║ ██║   ██║       ██║ ╚╝ ██║█████╗
 ╚════╝ ╚════╝ ╚════╝╚═╝ ╚═╝ ╚═══╝╚═══╝     ╚═╝   ╚═╝ ╚═╝   ╚═╝       ╚═╝    ╚═╝╚════╝
 
-0.0.32
+<version_goes_here>
 ```
 NOTE: The version number should match the stm version you downloaded.
 
@@ -368,7 +368,7 @@ Commands:
 - [Node.js](https://nodejs.org/en/)
 - [PubSub+ JavaScript API](https://docs.solace.com/API-Developer-Online-Ref-Documentation/nodejs/index.html)
 - [PubSub+ SEMPv2 API](https://docs.solace.com/API-Developer-Online-Ref-Documentation/swagger-ui/software-broker/config/index.html)
-- [Commande.js](https://github.com/tj/commander.js)
+- [Commander.js](https://github.com/tj/commander.js)
 
 ## Resources
 This is not an officially supported Solace product.
