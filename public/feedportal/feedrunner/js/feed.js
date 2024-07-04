@@ -92,23 +92,29 @@ class Feed extends IFeed {
       this.setFeedParam("info", info);
       var rules = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedrules.json`);
       this.setFeedParam("rules", rules);
-      var schemas = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedschemas.json`);
-      this.setFeedParam("schemas", schemas);
-      var analysis = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/analysis.json`);
-      this.setFeedParam("analysis", analysis);
-      var api = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedapi.json`);
-      this.setFeedParam("api", api);
+      if (info.type === 'asyncapi_feed') {
+        var schemas = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedschemas.json`);
+        this.setFeedParam("schemas", schemas);
+        var analysis = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/analysis.json`);
+        this.setFeedParam("analysis", analysis);
+      } else if (info.type === 'restapi_feed') {
+        var api = await getCommunityFeed(communityUserName, communityRepoName, `${feedName}/feedapi.json`);
+        this.setFeedParam("api", api);
+      }
     } else {
       var info = await getLocalFeed(feedName, 'feedinfo.json');
       this.setFeedParam("info", info);
       var rules = await getLocalFeed(feedName, 'feedrules.json');
       this.setFeedParam("rules", rules);
-      var schemas = await getLocalFeed(feedName, 'feedschemas.json');
-      this.setFeedParam("schemas", schemas);
-      var analysis = await getLocalFeed(feedName, 'analysis.json');
-      this.setFeedParam("analysis", analysis);
-      var api = await getLocalFeed(feedName, 'feedapi.json');
-      this.setFeedParam("api", api);
+      if (info.type === 'asyncapi_feed') {
+        var schemas = await getLocalFeed(feedName, 'feedschemas.json');
+        this.setFeedParam("schemas", schemas);
+        var analysis = await getLocalFeed(feedName, 'analysis.json');
+        this.setFeedParam("analysis", analysis);
+      } else if (info.type === 'restapi_feed') {
+        var api = await getLocalFeed(feedName, 'feedapi.json');
+        this.setFeedParam("api", api);
+      }
     }
   }
 
@@ -119,7 +125,7 @@ class Feed extends IFeed {
     console.log(info);
     
     var analysis = this.getFeedParam("analysis");
-    if (info.type === 'stmfeed' && !analysis) {
+    if (info.type === 'asyncapi_feed' && !analysis) {
       return ({
         status: false,
         message: "Feed not initialized!"
@@ -143,7 +149,7 @@ class Feed extends IFeed {
   getSendMessages() {
     var messages = [];
     var info = this.getFeedParam('info');
-    if (info.type === 'stmfeed') {
+    if (info.type === 'asyncapi_feed') {
       let rules = this.getFeedParam('rules');
       let analysis = this.getFeedParam('analysis');
       if (analysis && analysis.messages) {
@@ -171,11 +177,11 @@ class Feed extends IFeed {
           }
         })
       }  
-    } else if (info.type === 'apifeed') {
+    } else if (info.type === 'restapi_feed') {
       var api = this.getFeedParam('api');
       var data = {
         messageName: info.name,
-        simplifiedName: info.name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase(),
+        simplifiedName: info.name.replaceAll(' ', '').toLowerCase(),
         description: info.description,
         topicName: api.topic,
         apiUrl: api.apiUrl,
@@ -217,8 +223,15 @@ async function readFile (path) {
     }
   }
 }
-
 async function getCommunityFeed (owner, repo, path) { 
+  let data = await fetch (
+    `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`
+  )
+  .then (d => d.json ())
+  return data;
+}
+
+async function getCommunityFeedUsingAPI (owner, repo, path) { 
   let data = await fetch (
     `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
   )

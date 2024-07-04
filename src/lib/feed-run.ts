@@ -41,7 +41,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       gitFeed = true;
     var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
 
-    if (feedInfo.type === 'apifeed')
+    if (feedInfo.type === 'restapi_feed')
       return feedRunApi(options, optionsSource);
 
     var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
@@ -139,10 +139,15 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     }
 
     options.feedName = feedName;
+
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    if (feedInfo.type === 'restapi_feed')
+      return feedRunApi(options, optionsSource);
+
     var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
     var eventsList:any = events.map((event:any) => {
       return {
-        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
+        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic, '$')),
         name: event.name,
       }
     })

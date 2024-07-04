@@ -32,14 +32,14 @@
 .site-width {
   margin: 0 auto;
   max-width: 1024px;
-  width: 80vw
+  /* width: 80vw */
 }
 
 .site-header-width {
   margin: 0 auto;
   margin-left: 0px;
   max-width: 1024px;
-  width: 80vw
+  /* width: 80vw */
 }
 
 .header-text {
@@ -339,9 +339,11 @@ Tiles - Event Feeds
 }
 
 .container {
-  padding-left: 3.5%;
-  padding-right: 3.5%;
+  /* padding-left: 3.5%; */
+  /* padding-right: 3.5%; */
   padding-top: 1em;
+  max-width: unset !important;
+  width: 90% !important;
 }
 
 .container:after,
@@ -694,7 +696,87 @@ div.scroll {
   color: darkgray;
 }
 
-.sort-selected {
-  background-color: #0d6efd;
+.sort-selected,
+.copy-to-clipboard {
+  background-color: green;
   color: white;
+  cursor: pointer;
+}
+
+.feed-msg-name {
+  background-color: #00c895;
+  color: white;
+}
+
+.feed-msg-counter {
+  background-color: #ed3c0d;
+  color: white;
+}
+
+.mr-3,
+.mx-3 {
+  margin-right: 1rem !important;
+}
+
+.empty-clipboard {
+  margin-left: 44px;
+}
+
+.page-link {
+  color: green !important;
+  border-color: green !important;
+}
+
+.active>.page-link, .page-link.active {
+  color: white !important;
+  background-color: green !important;
+}
+
+.btn-feeds-primary {
+  --bs-btn-color: green;
+  --bs-btn-border-color: green;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: green;
+  --bs-btn-hover-border-color: green;
+  --bs-btn-focus-shadow-rgb: 13, 110, 253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: green;
+  --bs-btn-active-border-color: green;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: green;
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: green;
+  --bs-gradient: none;
+}
+
+input[type=checkbox]{
+  width: 20px;
+  height: 20px;
+}
+
+input[type='checkbox'] {
+  accent-color: green;
+}
+
+input[type=checkbox]:checked{
+  width: 20px;
+  height: 20px;
+}
+
+input[type=radio]{
+  width: 20px;
+  height: 20px;
+}
+
+input[type='radio'] {
+  accent-color: green;
+}
+
+input[type=radio]:checked{
+  width: 20px;
+  height: 20px;
+}
+
+.anon-contributor {
+  color: green !important;
 }

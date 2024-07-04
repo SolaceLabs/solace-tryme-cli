@@ -5,7 +5,7 @@ import analyze from './feed-analyze';
 import { formulateRules, formulateSchemas } from './feed-ruleset';
 import { prettyJSON } from '../utils/prettify';
 import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultStmFeedsHome, supportedFeedTypes } from '../utils/defaults';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedRestAPIValue } from '../utils/chalkUtils';
 import { fa } from '@faker-js/faker';
 import { fakerRulesJson } from '../utils/fakerrules';
 import { validate } from '@asyncapi/parser/esm/validate';
@@ -28,7 +28,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
 
   if (optionsSource.feedType === 'default') {
     const pFeedType = new Select({
-      message: `Pick a feed type \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      message: `${chalkBoldWhite('Pick a feed type')} \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
       `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
       choices: supportedFeedTypes
@@ -46,9 +46,9 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
-  if (feed.type === 'stmfeed' && !fileName) {
+  if (feed.type === 'asyncapi_feed' && !fileName) {
     const pFilename = new Input({
-      message: 'Enter AsyncAPI file',
+      message: chalkBoldWhite('Enter AsyncAPI file'),
       initial: 'asyncapi.json',
       validate: (value: string) => {  return !!value; }
     });
@@ -66,8 +66,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
 
   if (!feedName) {
     const pFeedName = new Input({
-      message: 'Enter feed name',
-      initial: feed.type === 'stmfeed' ? getPotentialFeedName(fileName) : '',
+      message: chalkBoldWhite('Enter feed name'),
+      initial: feed.type === 'asyncapi_feed' ? getPotentialFeedName(fileName) : '',
       validate: (value: string) => {  return !!value; }
     });
 
@@ -84,7 +84,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   } 
 
-  if (optionsSource.feedType === 'cli' && options.feedType === 'apifeed') {
+  if (optionsSource.feedType === 'cli' && options.feedType === 'restapi_feed') {
     return generateAPIFeed(options, optionsSource);
   }
 
@@ -98,7 +98,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   const schemas = await formulateSchemas(JSON.parse(JSON.stringify(data)));
 
   const pFeedDesc = new Input({
-    message: 'Feed description',
+    message: chalkBoldWhite('Feed description'),
     initial: data.info.description,
     validate: (value: string) => {  return !!value; }
   });
@@ -113,7 +113,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedIcon = new Input({
-    message: 'Feed icon (an URL or a base64 image data):',
+    message: chalkBoldWhite('Feed icon (an URL or a base64 image data):'),
     hint: 'Leave blank to use default feed icon',
     initial: ''
   });
@@ -128,7 +128,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedContributor = new Input({
-    message: 'Contributor name or organization name',
+    message: chalkBoldWhite('Contributor name or organization name'),
     initial: ''
   });
 
@@ -142,7 +142,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pGitUser = new Input({
-    message: 'GitHub username',
+    message: chalkBoldWhite('GitHub username'),
     initial: ''
   });
 
@@ -156,7 +156,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedDomain = new Input({
-    message: 'Feed domain',
+    message: chalkBoldWhite('Feed domain'),
     initial: '',
     validate: (value: string) => {  return !!value; }
   });
@@ -171,7 +171,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedTags = new Input({
-    message: 'Feed keywords (as a comma-separated values):',
+    message: chalkBoldWhite('Feed keywords (as a comma-separated values):'),
     initial: '',
     validate: (value: string) => {  return !!value; }
   });
@@ -196,7 +196,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
 
 const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { feedName } = options;
-  var feed:any = { type: 'apifeed', name: feedName };
+  var feed:any = { type: 'restapi_feed', name: feedName };
   var apiRules:any = {
     publishSettings: {
       "count": 20,
@@ -235,8 +235,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
 
       feed = await loadLocalFeedFile(feedName, defaultFeedInfoFile);
-      if (feed && feed.type !== 'apifeed') {
-        Logger.logError(`the existing feed is not of 'apifeed' type, try creating a new feed`);
+      if (feed && feed.type !== 'restapi_feed') {
+        Logger.logError(`the existing feed is not of 'restapi_feed' type, try creating a new feed`);
         process.exit(1);
       }
       apiEndpoint = await loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
@@ -245,9 +245,9 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pApiUrl = new Input({
     message: chalkBoldWhite('API Endpoint URL: ') +
-             'Prefix the path and query parameters with ' + chalkBoldVariable('$') +  
-             ', if present. e.g. http://api.com/' + chalkBoldVariable('$') + 'type?limit=' + 
-             chalkBoldVariable('$') + 'limit):\n',
+            `\n${chalkBoldLabel('Hint')}: ` + 'Prefix the path and query parameters with ' + chalkBoldVariable('$') + ', if present\n' +
+            `    e.g. http://api.com/` + chalkBoldVariable('$path') + '?limit=' + `${chalkBoldVariable('$limit')}:\n`,
+
     initial: apiEndpoint?.apiUrl ? apiEndpoint?.apiUrl : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -263,7 +263,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pApiAuthType = new Select({
     name: 'Authentication Type',
-    message: `Pick the expected authentication type \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+    message: chalkBoldWhite(`Pick the expected authentication type \n`) + 
+              `${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
               `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
               `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
     choices: [
@@ -284,7 +285,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   
   if (apiEndpoint.apiAuthType === 'API Key') {
     const pApiKey = new Input({
-      message: 'API Key:',
+      message: chalkBoldWhite('API Key:'),
       initial: apiEndpoint?.apiKey ? apiEndpoint?.apiKey : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -300,7 +301,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
     if (apiEndpoint.apiKey) {
       const pApiKeyUrl = new Input({
-        message: 'URL to generate personal API Key:',
+        message: chalkBoldWhite('URL to generate personal API Key:'),
         initial: apiEndpoint?.apiKeyUrl ? apiEndpoint?.apiKeyUrl : '',
         validate: (value: string) => {  return !!value; }
       });
@@ -318,7 +319,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     apiEndpoint.apiKeyUrlEmbedded = true;
 
     const pApiKeyUrlParam = new Input({
-      message: 'URL parameter of the API Key (without the ' + chalkBoldVariable('$') + '):',
+      message: chalkBoldWhite('URL parameter of the API Key (matching case, sans the ') + chalkBoldVariable('$') + chalkBoldWhite('):'),
       initial: apiEndpoint?.apiKeyUrlParam ? apiEndpoint?.apiKeyUrlParam : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -329,7 +330,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
         if (!apiEndpoint.apiKeyUrlParam) {
           apiEndpoint.apiKeyUrlEmbedded = false;
         } else if (apiEndpoint.apiUrl.indexOf('$' + apiEndpoint.apiKeyUrlParam) < 0) {
-          Logger.logError('Specified API Key URL parameter not found in the API endpoint URL')
+          Logger.logError(`Specified API Key '${chalkBoldVariable(apiEndpoint.apiKeyUrlParam)}' URL parameter not found in the API endpoint URL`)
           process.exit(1);
         }
       })
@@ -339,7 +340,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   } else if (apiEndpoint.apiAuthType === 'Basic Authentication') {
     const pApiToken = new Input({
-      message: 'Credential (Base64 encoded string):',
+      message: chalkBoldWhite('Credential (Base64 encoded string):'),
       hint: 'A Base64 encoded credential derived from user/password or user/secret pairs',
       initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
       validate: (value: string) => {  return !!value; }
@@ -355,7 +356,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   } else if (apiEndpoint.apiAuthType === 'Token Authentication') {
     const pApiToken = new Input({
-      message: 'Credential (Base64 encoded string):',
+      message: chalkBoldWhite('Credential (Base64 encoded string):'),
       hint: 'API security/access token',
       initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
       validate: (value: string) => {  return !!value; }
@@ -383,7 +384,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       };
 
       const pxApiKey = new Input({
-        message: 'X-API Key:',
+        message: chalkBoldWhite('X-API Key:'),
         hint: 'X-API Key (Enter to skip marking the end of the key-value pairs)',
         initial: xApiPair.key
       });
@@ -408,7 +409,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
       if (!done && !restart) {
         const pxApiValue = new Input({
-          message: 'X-API Value:',
+          message: chalkBoldWhite('X-API Value:'),
           initial: xApiPair.value,
           validate: (value: string) => {  return !!value; }
         });
@@ -461,9 +462,10 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   }
 
   const pTopic = new Input({
-    message: chalkBoldWhite('Topic Destination: ') +
-             'Surround the topic parameters with curly braces matching API endpoint URL\'s path _or_ query parameters, if used!' +  
-             ' e.g. order/created/' + chalkBoldVariable('{orderId}') + '):\n',
+    message: chalkBoldWhite('API Endpoint URL: \n') +
+            `${chalkBoldLabel('Hint')}: ` + 'Prefix the topic parameters with ' + chalkBoldVariable('$') + ', matching the API URL\'s\n' +
+            `    ${chalkBoldVariable('path')} or ${chalkBoldVariable('query')} parameters, if used!\n` +
+            '    e.g. order/created/' + chalkBoldVariable('$orderId') + '\n',
     initial: apiEndpoint?.topic ? apiEndpoint?.topic : 'solace/feed/' + getPotentialTopicFromFeedName(feed.name),
     validate: (value: string) => {  return !!value; }
   });
@@ -471,17 +473,17 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   await pTopic.run()
     .then((answer: string) => {
       var topic = answer.trim();      
-      apiEndpoint.topic = topic.split('/').map((t:any) => t.startsWith('{') ? t : t.toLowerCase()).join('/');
-      if (apiEndpoint.topic.includes('{')) {
-        var params = apiEndpoint.topic.split('/').filter((t:any) => t.startsWith('{')).map((t:any) => t.substring(1, t.length-1));
+      apiEndpoint.topic = topic.split('/').join('/');
+      if (apiEndpoint.topic.includes('$')) {
+        var topicParams = apiEndpoint.topic.split('/').filter((t:any) => t.startsWith('$'));
         var apiUrl = new URL(apiEndpoint.apiUrl);
         var apiParams = apiUrl.pathname.split('/').filter((t:any) => t.startsWith('$'));
         for (const [key, value] of apiUrl.searchParams)
           apiParams.push(value);
 
-        for (var i=0; i<params.length; i++) {
-          var p:string = params[i];
-          if (!apiParams.includes('$' + p)) {
+        for (var i=0; i<topicParams.length; i++) {
+          var p:string = topicParams[i];
+          if (!apiParams.includes(p)) {
             Logger.logDetailedError('Specified topic parameter not found in the URL parameters', chalkBoldVariable(p));
             Logger.success('exiting...');
             process.exit(1);          
@@ -495,7 +497,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pCount = new Input({
-    message: 'Number of events:',
+    message: chalkBoldWhite('Number of events:'),
     initial: apiRules.publishSettings ? apiRules.publishSettings.count : '20',
     validate: (value: string) => {  return !!value; }
   });
@@ -510,7 +512,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
     
     const pInterval = new Input({
-      message: 'Interval (in secs):',
+      message: chalkBoldWhite('Interval (in secs):'),
       initial: apiRules.publishSettings ? apiRules.publishSettings.interval : '3',
       validate: (value: string) => {  return !!value; }
     });
@@ -525,7 +527,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   
   const pDelay = new Input({
-    message: 'Initial Delay (in secs):',
+    message: chalkBoldWhite('Initial Delay (in secs):'),
     initial: apiRules.publishSettings ? apiRules.publishSettings.delay : '0',
     validate: (value: string) => {  return !!value; }
   });
@@ -540,7 +542,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pDescription = new Input({
-    message: 'Feed description',
+    message: chalkBoldWhite('Feed description'),
     initial: feed?.description ? feed?.description : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -555,7 +557,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const feedImg = new Input({
-    message: 'Feed icon (an URL or a base64 image data):',
+    message: chalkBoldWhite('Feed icon (an URL or a base64 image data):'),
     hint: 'Leave blank to use default feed icon',
     initial: feed?.img ? feed?.img : ''
   });
@@ -570,8 +572,9 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pContributor = new Input({
-    message: 'Contributor name or organization name',
-    initial: feed?.contributor ? feed?.contributor : ''
+    message: chalkBoldWhite('Contributor name or organization name'),
+    initial: feed?.contributor ? feed?.contributor : '',
+    validate: (value: string) => {  return !!value; }
   });
 
   await pContributor.run()
@@ -584,7 +587,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pGitUser = new Input({
-    message: 'GitHub username',
+    message: chalkBoldWhite('GitHub username'),
     initial: feed?.github ? feed?.github : ''
   });
 
@@ -598,7 +601,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pDomain = new Input({
-    message: 'Feed domain',
+    message: chalkBoldWhite('Feed domain'),
     initial: feed?.domain ? feed?.domain : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -613,7 +616,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pTags = new Input({
-    message: 'Feed keywords (as a comma-separated values):',
+    message: chalkBoldWhite('Feed keywords (as a comma-separated values):'),
     initial: feed?.tags ? feed?.tags : '',
     validate: (value: string) => {  return !!value; }
   });

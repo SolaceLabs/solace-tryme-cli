@@ -3,7 +3,7 @@ import { Logger } from '../utils/logger'
 import { ManageFeedClientOptionsEmpty } from '../utils/instances';
 import { processPlainPath, readFile } from '../utils/config';
 import { defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedTypeHint } from '../utils/chalkUtils';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedAsyncAPIValue, chalkFeedOpenAPIValue, chalkFeedRestAPIValue, chalkFeedTypeHint } from '../utils/chalkUtils';
 import { getGitEventFeeds } from '../utils/listfeeds';
 
 const wordwrap = (str:any, width:any, brk:any, cut:any ) => {
@@ -81,7 +81,14 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
     Logger.logSuccess(`Local Event Feeds: ${localFeeds.length}`);
     localFeeds.forEach((feed: any) => {
       options.verbose && result.push(chalkBoldLabel(`──────────────────────────────────────────────────────────────────────`));
-      result.push(chalkFeedTypeHint(`${('[' + feed.type + ']').padEnd(13, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      if (feed.type === 'asyncapi_feed')
+        result.push(chalkFeedAsyncAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else if (feed.type === 'openapi-feed')
+        result.push(chalkFeedOpenAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else if (feed.type === 'restapi_feed')
+        result.push(chalkFeedRestAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else
+        result.push(chalkFeedTypeHint(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
       options.verbose && feed.description && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Description')}: ${chalkBoldWhite(feed.description)}`));
       options.verbose && feed.contributor && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Contributor')}: ${chalkBoldWhite(feed.contributor)}`));
       options.verbose && feed.img && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Icon Image')}: ${chalkBoldWhite(feed.img)}`));
@@ -98,7 +105,14 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
     Logger.logSuccess(`Community Event Feeds: ${gitFeeds.length}`);
     gitFeeds.forEach((feed: any) => {
       options.verbose && result.push(chalkBoldLabel(`──────────────────────────────────────────────────────────────────────`));
-      result.push(chalkFeedTypeHint(`${('[' + feed.type + ']').padEnd(13, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      if (feed.type === 'asyncapi_feed')
+        result.push(chalkFeedAsyncAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else if (feed.type === 'openapi-feed')
+        result.push(chalkFeedOpenAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else if (feed.type === 'restapi_feed')
+        result.push(chalkFeedRestAPIValue(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
+      else
+        result.push(chalkFeedTypeHint(`${('[' + feed.type + ']').padEnd(18, ' ')}`) + chalkBoldLabel(`${feed.name}`));
       options.verbose && feed.description && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Description')}: ${chalkBoldWhite(feed.description)}`));
       options.verbose && feed.contributor && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Contributor')}: ${chalkBoldWhite(feed.contributor)}`));
       options.verbose && feed.img && result.push(chalkBoldLabel(`    ${chalkBoldVariable('Icon Image')}: ${chalkBoldWhite(feed.img)}`));

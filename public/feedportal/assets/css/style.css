@@ -77,7 +77,7 @@ h6 {
   right: 15px;
   bottom: 15px;
   z-index: 99999;
-  background: #4154f1;
+  background: green;
   width: 40px;
   height: 40px;
   border-radius: 4px;
@@ -91,7 +91,7 @@ h6 {
 }
 
 .back-to-top:hover {
-  background: #6776f4;
+  background: #5b9b5b;
   color: #fff;
 }
 
@@ -112,6 +112,8 @@ h6 {
   animation-fill-mode: both;
   border: 0;
   box-shadow: 0 5px 30px 0 rgba(82, 63, 105, 0.2);
+  background-color: green;
+  display: block;
 }
 
 .dropdown-menu .dropdown-header,
@@ -131,7 +133,7 @@ h6 {
 }
 
 .dropdown-menu .dropdown-divider {
-  color: #a5c5fe;
+  color: rgb(2, 68, 2);
   margin: 0;
 }
 
@@ -148,7 +150,17 @@ h6 {
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background-color: #f6f9ff;
+  background-color: rgb(123, 203, 123);
+}
+
+.dropdown-menu>.dropdown-item.buttons-columnVisibility:is(.active) {
+  background-color: green;
+  color: white;
+}
+
+.dropdown-menu>.dropdown-item.buttons-columnVisibility:not(.active) {
+  background-color: rgb(123, 203, 123);
+  color: white;
 }
 
 @media (min-width: 768px) {
@@ -1233,4 +1245,26 @@ h6 {
   text-align: center;
   font-size: 13px;
   color: #012970;
+}
+
+#feedsTable {
+  margin-top: 20px;
+}
+
+div.dataTables_wrapper div.dataTables_filter {
+  text-align: right;
+}
+
+div.dataTables_wrapper div.dataTables_filter input {
+  margin-left: .5em;
+  display: inline-block;
+  width: auto;
+}
+
+.feed-card-body {
+  padding: 20px 20px 20px 20px;
+}
+
+.only-for-grid {
+  padding-right: 10px;
 }

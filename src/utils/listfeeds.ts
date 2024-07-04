@@ -38,6 +38,21 @@ export const getFeedEvents = (feedName:any) => {
   return events;
 }
 
+export const getGitEventFeeds = async () => {
+  var gitFeeds: any[] = [];
+  try {
+    await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
+      .then(async (response) => {
+        const data = await response.json();
+        data.forEach((d: any) => gitFeeds.push(d));
+      })
+  } catch (error:any) {
+    ;
+  }
+  
+  return gitFeeds;
+}
+
 export const getGitFeedEvents = async (feedName:any) => {
   var events: any[] = [];
   var data = await loadGitFeedFile(feedName, defaultFeedAnalysisFile)
@@ -54,20 +69,4 @@ export const getGitFeedEvents = async (feedName:any) => {
   });
 
   return events;
-}
-
-
-export const getGitEventFeeds = async () => {
-  var gitFeeds: any[] = [];
-  try {
-    await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
-      .then(async (response) => {
-        const data = await response.json();
-        data.forEach((d: any) => gitFeeds.push(d));
-      })
-  } catch (error:any) {
-    ;
-  }
-  
-  return gitFeeds;
 }

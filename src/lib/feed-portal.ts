@@ -20,18 +20,21 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   });
   
   app.post('/feeds', async (req:any, res:any) => {
+    const isLocal = req.query?.isLocal === true || req.query?.isLocal === 'true';
     var localFeeds: any[] = [];
-    const files:any = fs.readdirSync(`${defaultStmFeedsHome}`);
-    const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
-    files.forEach((fileName: string) => {
-      var filePath = `${feedPath}/${fileName}`
-      var stat = fs.lstatSync(filePath);
-      if (stat.isDirectory() && fs.existsSync(`${filePath}/${defaultFeedInfoFile}`)) {
-        var info = readFile(`${filePath}/${defaultFeedInfoFile}`);
-        localFeeds.push(info);
-      }
-    })
-  
+    if (isLocal) {
+      const files:any = fs.readdirSync(`${defaultStmFeedsHome}`);
+      const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
+      files.forEach((fileName: string) => {
+        var filePath = `${feedPath}/${fileName}`
+        var stat = fs.lstatSync(filePath);
+        if (stat.isDirectory() && fs.existsSync(`${filePath}/${defaultFeedInfoFile}`)) {
+          var info = readFile(`${filePath}/${defaultFeedInfoFile}`);
+          localFeeds.push(info);
+        }
+      })
+    }
+
     var communityFeeds = await getGitEventFeeds();
 
     res.send({localFeeds, communityFeeds});

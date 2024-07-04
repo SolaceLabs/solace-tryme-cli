@@ -106,9 +106,9 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   } else if (feedName) {
     options.feedName = feedName;
     info = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
-    if (info.type === 'stmfeed') 
+    if (info.type === 'asyncapi_feed') 
       data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
-    else if (info.type === 'apifeed')
+    else if (info.type === 'restapi_feed')
       data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedApiEndpointFile) : loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
     type = info.type;
   }
@@ -119,7 +119,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   }
 
   var result:any = [];
-  if (type === 'file' || type === 'stmfeed') {
+  if (type === 'file' || type === 'asyncapi_feed') {
     data.info['x-ep-application-domain-name'] && result.push(chalkBoldLabel('├──Application Domain: ') + chalkBoldWhite(data.info['x-ep-application-domain-name']))
     data.info['title'] && result.push(chalkBoldLabel('├──Application: ') + chalkBoldWhite(data.info['title']))
     data.info['description'] && result.push(chalkBoldLabel('│   │           ') + chalkWhite(wrapContent(chalkBoldLabel('│   │           '), data.info['description'])));
@@ -233,7 +233,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
                 (_schema.type ? chalkBoldWhite(' [' + _schema.type + ']') : ''));
       !_schema.title && _schema.type && result.push(chalkBoldLabel('│   │   ├──Type: ') + chalkBoldWhite(_schema.type));
     });
-  } else if (type === 'apifeed') {
+  } else if (type === 'restapi_feed') {
     info['name'] && result.push(chalkBoldLabel('├──Feed: ') + chalkBoldWhite(info['name']))
     info['description'] && result.push(chalkBoldLabel('│   │           ') + chalkWhite(wrapContent(chalkBoldLabel('│   │           '), info['description'])));
     info['domain'] && result.push(chalkBoldLabel('│   ├──Domain: ') + chalkBoldWhite(info['domain']));
@@ -250,7 +250,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         result.push(chalkBoldLabel('│   │   ├──Header Key: ') + chalkBoldWhite(pair.key));
       })
     }
-    result.push(chalkBoldLabel('│   ├──Topic: ') + chalkBoldWhite(data['topic']));
+    result.push(chalkBoldLabel('│   ├──Topic: ') + colorizeTopic(data['topic'], '$'));
   }
 
   Logger.logDetailedSuccess('Summary: \n', result.join('\n'), false);

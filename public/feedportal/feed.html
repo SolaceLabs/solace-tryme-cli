@@ -17,6 +17,7 @@
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/toastr/toastr.min.css" rel="stylesheet">
   
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
@@ -61,15 +62,15 @@
           <!-- Default Accordion -->
           <div class="accordion" id="accordionFeedSettings">
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingZero">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseZero" aria-expanded="true" aria-controls="collapseZero">
+              <h2 class="accordion-header" id="headingInfo">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="true" aria-controls="collapseInfo">
                   <div class="d-flex align-center nav-item">
                     <i id="info-icon" class="bx bxs-message-square-check color-green"></i> <!-- bi-circle -->
                     <span class="item-text text-muted pt-2 ps-1 fw-bold">Feed Info</span>
                   </div>                          
                 </button>
               </h2>
-              <div id="collapseZero" class="accordion-collapse collapse show" aria-labelledby="headingZero" data-bs-parent="#accordionFeedSettings">
+              <div id="collapseInfo" class="accordion-collapse collapse show" aria-labelledby="headingInfo" data-bs-parent="#accordionFeedSettings">
                 <div class="accordion-body">
                   <div class="d-flex align-items-center">
                     <h2 class="feed-title"></h2>
@@ -81,15 +82,15 @@
               </div>
             </div>
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              <h2 class="accordion-header" id="headingBroker">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBroker" aria-expanded="false" aria-controls="collapseBroker">
                   <div class="d-flex align-center nav-item">
                     <i id="broker-icon" class="bx bxs-message-square-dots"></i> <!-- bi-circle -->
                     <span class="item-text text-muted pt-2 ps-1 fw-bold">Choose Broker</span>
                   </div>                          
                 </button>
               </h2>
-              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionFeedSettings">
+              <div id="collapseBroker" class="accordion-collapse collapse" aria-labelledby="headingBroker" data-bs-parent="#accordionFeedSettings">
                 <div class="accordion-body">
                   <div>
                     <p>
@@ -113,7 +114,7 @@
                         size="6" value="8008" />
                         <span class="connected-icon-holder d-flex">
                           <i id="connected-icon" class="bx bx-wifi-off"></i>
-                          <button id="connect-broker" type="button" class="btn btn-feed btn-outline-primary" onclick="connectToBroker()">Connect</button>
+                          <button id="connect-broker" type="button" class="btn btn-feed btn-feeds-primary" onclick="connectToBroker()">Connect</button>
                         </span>
                       </p>
                     <p>
@@ -145,9 +146,9 @@
                       </div>
                       <div class="btn-group connect-btn-group" role="group" aria-label="Basic example">
                         <label for="connecton-load" id="connecton-load-label">Load</label>
-                        <input type="file" id="connecton-load" class="btn btn-feed btn-outline-primary" accept="application/json" />
+                        <input type="file" id="connecton-load" class="btn btn-feed btn-feeds-primary" accept="application/json" />
                       
-                        <button id="connecton-save" type="button" class="btn btn-feed btn-outline-primary">Save</button>
+                        <button id="connecton-save" type="button" class="btn btn-feed btn-feeds-primary">Save</button>
                       </div>
                     </div>                  
                   </div>
@@ -155,20 +156,20 @@
               </div>
             </div>
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              <h2 class="accordion-header" id="headingEvents">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvents" aria-expanded="false" aria-controls="collapseEvents">
                   <div class="d-flex align-center nav-item">
                     <i id="event-icon" class="bx bxs-message-square-dots"></i> <!-- bi-circle -->
                     <span class="item-text text-muted pt-2 ps-1 fw-bold">Choose Event(s)</span>
                   </div>                          
                 </button>
               </h2>
-              <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionFeedSettings">
+              <div id="collapseEvents" class="accordion-collapse collapse" aria-labelledby="headingEvents" data-bs-parent="#accordionFeedSettings">
                 <div class="accordion-body">
                   <div class="d-flex align-items-center justify-content-end">
                     <div class="btn-group" role="group" aria-label="Basic outlined example">
-                      <button type="button" class="btn btn-outline-primary" id="select-none"><i class="bi bi-square"></i></button>
-                      <button type="button" class="btn btn-outline-primary mx-sm-1" id="select-all"><i class="bi bi-check-square-fill"></i></button>
+                      <div class="btn btn-feeds-primary" id="select-none"><i class="bi bi-square"></i>&nbsp;Select None</div>
+                      <div class="btn btn-feeds-primary" id="select-all"><i class="bi bi-check-square-fill"></i>&nbsp;Select All</div>
                     </div>
                   </div>
                   <div id="feed-events"></div>
@@ -180,13 +181,13 @@
           <div class="d-flex runner-nav ms-auto mt-3">
             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
               <div class="icon">
-                <button id="start-feed" type="button" class="btn btn-feed btn-outline-primary btn-lg d-flex disabled"
+                <button id="start-feed" type="button" class="btn btn-feed btn-feeds-primary btn-lg d-flex disabled"
                   onclick="startFeed()">
                   <i id="action-icon" class="bx bx-play-circle me-1 color-green"></i><span class="item-text"> Start</span> 
                 </button>
               </div>
               <div class="icon">
-                <button id="stop-feed" type="button" class="btn btn-feed btn-outline-primary btn-lg d-flex disabled"
+                <button id="stop-feed" type="button" class="btn btn-feed btn-feeds-primary btn-lg d-flex disabled"
                     onclick="stopFeed()">
                   <i id="action-icon" class="bx bx-stop-circle me-1 color-red"></i><span class="item-text"> Stop</span> 
                 </button>
@@ -196,6 +197,10 @@
           </div>
         </div>
       </div>
+      <div class="d-flex mr-3 justify-content-end">
+        <span class="head">Pretty Print</span>&nbsp;<input type="checkbox" name="prettyPrint" id="prettyPrint" checked onselect="console.log(this);"/>                      
+      </div>
+
       <hr class="trans--grow hr1">
       <div id="feed-logs-div" class="mt-3">
         <a id="empty-log-content" href="#" class="d-flex align-items-center justify-content-center"><i class="bx bxs-trash"></i></a>
@@ -211,6 +216,7 @@
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/jquery-3.7.1/jquery-3.7.1.min.js"></script>
   <script src="assets/vendor/d3-7.9.0/d3-7.9.0.js"></script>
+  <script src="assets/vendor/toastr/toastr.min.js"></script>
   <script src="assets/js/mqtt.5.1.2.min.js"></script>
   <script src="assets/js/solclient.10.15.0.js"></script>
 

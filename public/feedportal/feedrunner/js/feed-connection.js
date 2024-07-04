@@ -8,7 +8,8 @@ var currentConnSettings = {
   password: "default",
   // do these two belong here?  Maybe outside of connection params
   qos: 'direct',    // SMF, REST: 0 == direct, 1 == persistent/guaranteed
-  msgType: 'text'    // SMF only: either 'text' or 'bytes'
+  msgType: 'text',    // SMF only: either 'text' or 'bytes'
+  prettyPrint: true
 }
 
 var defaultPorts = {};
@@ -283,6 +284,9 @@ function guiChangeDetected() {
     case 'radioFormat':
       currentConnSettings.msgType = this.id == 'radioTextMsg' ? 'text' : 'bytes';
       break;
+    case 'prettyPrint':
+      currentConnSettings.prettyPrint = this.checked;
+      break
     }
 }
 

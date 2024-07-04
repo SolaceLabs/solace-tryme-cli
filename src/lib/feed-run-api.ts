@@ -138,13 +138,14 @@ async function publishFeed(publisher:any, feed:any) {
     }
   
     var topic = feed.api.topic;
+    var url = apiUrl;
     for (var j=0; j<params.length; j++) {
-      apiUrl = apiUrl.replaceAll(`$${params[j]}`, ruleData[params[j]]);
-      topic = topic.replaceAll(`{${params[j]}}`, ruleData[params[j]]);
+      url = url.replaceAll(`$${params[j]}`, ruleData[params[j]]);
+      topic = topic.replaceAll(`$${params[j]}`, ruleData[params[j]]);
     }
 
     (async () => {
-      var payload = await (await fetch(`${apiUrl}`, {
+      var payload = await (await fetch(`${url}`, {
         headers: headers
       })).json();
 

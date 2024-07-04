@@ -107,7 +107,7 @@ async function generateApiEvents(feed, count) {
       var url = apiUrl;
       for (var j=0; j<params.length; j++) {
         url = url.replaceAll(`$${params[j]}`, ruleData[params[j]][i]);
-        topic = topic.replaceAll(`{${params[j]}}`, ruleData[params[j]][i]);
+        topic = topic.replaceAll(`$${params[j]}`, ruleData[params[j]][i]);
       }
       payload = await (await fetch(`${url}`, {
         headers: headers

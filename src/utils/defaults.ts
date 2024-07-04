@@ -352,8 +352,8 @@ export const defaultManageClientUsernameConfig:any = {
 }
 
 export const defaultFeedConfig:any = {
-  feedName: "stm-event-feed",
-  feedType: "stmfeed",
+  feedName: "stm-asyncapi_feed",
+  feedType: "asyncapi",
   communityFeed: false,
   fileName: "",
   eventNames: [],
@@ -420,4 +420,4 @@ export const defaultGitRepo = 'https://raw.githubusercontent.com/solacecommunity
 export const defaultGitFeedRepo = 'https://github.com/solacecommunity/solace-event-feeds/tree/main';
 export const defaultProjectName = 'solace-tryme-cli'
 export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
-export const supportedFeedTypes = [ 'stmfeed', 'apifeed' ]; //, 'customfeed'
+export const supportedFeedTypes = [ 'asyncapi_feed', 'restapi_feed' ]; //, 'custom_feed'

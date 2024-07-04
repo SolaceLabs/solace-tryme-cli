@@ -551,7 +551,7 @@ export const validateFeed = (feedName: string, type: string) => {
     if (!fileExists(feedPath))
       return `error: feed ${feedName} not found!`;
 
-    if (type === 'stmfeed') {
+    if (type === 'asyncapi_feed') {
       if (!fileExists(`${feedPath}/${defaultFeedAnalysisFile}`))
         return `error: invalid or missing feed analysis, try regenerating feed!`;
 
@@ -559,7 +559,7 @@ export const validateFeed = (feedName: string, type: string) => {
         return `error: invalid or missing feed ruleset, try regenerating feed!`;
 
       return false;
-    } else if (type === 'apifeed') {
+    } else if (type === 'restapi_feed') {
       if (!fileExists(`${feedPath}/${defaultFeedApiEndpointFile}`))
         return `error: invalid or missing feed api endpoint, try regenerating feed!`;
 
@@ -659,8 +659,8 @@ export const getAllFeeds = () => {
         name: feedName,
         info: info,
         invalid: validateFeed(feedName, info.type),
-        config: info.type === 'apifeed' ? loadLocalFeedFile(feedName, defaultFeedApiEndpointFile) :
-                  info.type === 'stmfeed' ? loadLocalFeedFile(feedName, defaultFeedAnalysisFile) : null,
+        config: info.type === 'restapi_feed' ? loadLocalFeedFile(feedName, defaultFeedApiEndpointFile) :
+                  info.type === 'asyncapi_feed' ? loadLocalFeedFile(feedName, defaultFeedAnalysisFile) : null,
       })
     }
   })
@@ -686,19 +686,19 @@ export const getFeed = (feedName: string, info: any = null) => {
   })
 
   const feed: any = { type: info.type };
-  if (info.type === 'apifeed') {
+  if (info.type === 'restapi_feed') {
     feed.name = feedName;
     feed.info = info
     feed.config = loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
     feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
     feed.brokers = brokers
-  } else if (info.type === 'stmfeed') { 
+  } else if (info.type === 'asyncapi_feed') { 
     feed.name = feedName;
     feed.config = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
     feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
     feed.schemas = fileExists(`${feedPath}/${defaultFeedSchemasFile}`) ? loadLocalFeedFile(feedName, defaultFeedSchemasFile) : null;
     feed.brokers = brokers
-  } else if (info.type === 'customfeed') {
+  } else if (info.type === 'custom_feed') {
     Logger.logError(`${info.type} is not supported yet, please try again later!`)
     Logger.error('exiting...');
     process.exit(1);
@@ -708,7 +708,7 @@ export const getFeed = (feedName: string, info: any = null) => {
     process.exit(1);
   }
 
-  if (info.type === 'stmfeed') {
+  if (info.type === 'asyncapi_feed') {
     const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
     feed.fileName = analysis.fileName;
   }

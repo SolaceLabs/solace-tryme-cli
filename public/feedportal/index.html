@@ -17,6 +17,10 @@
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <!-- DataTables -->
+  <link href="assets/vendor/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link href="assets/vendor/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <link href="assets/vendor/datatables-buttons/css/buttons.bootstrap4.min.css">
   
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
@@ -49,7 +53,7 @@
         <span class="d-flex nav-item pe-3 align-items-center">
           <div class="d-md-block ps-2 feed-title text-color-white header-text">Event Feeds</div>
           <a href="#" onclick="exitTool()">
-            <button type="button" class="btn sort-feed" id="sort-alpha-up" data-mode="alphaup" style="color: white"><i data-mode="alphaup" class="bx bx-exit"></i></button>
+            <button type="button" class="btn sort-feed" style="color: white"><i data-mode="alphaup" class="bx bx-exit"></i></button>
           </a>
         </span>
       </div>
@@ -82,38 +86,71 @@
       </div>
 
       <main class="main-body">
-
-        <div class="container">
-          <div class="row">
-          </div>
-          <div class="row">
+        <div id="grid-button-panel">
+          <div class="container">
             <div class="col-12@sm filters-group-wrap align-center">
               <div class="col-3@md">
-                <div class="filters-group">
-                  <label for="filters-search-input" class="filter-label">Search</label>
-                  <input class="js-shuffle-search" type="search" id="filters-search-input" />
+                <div class="filters-group only-for-grid">
+                  <input class="js-shuffle-search" type="search" placeholder="search..." id="filters-search-input" />
                 </div>
               </div>
         
-              <div class="col-3@md">
-                <label for="filters-sort-input" class="filter-label">Sort</label>
-                <div class="btn-group" role="group" aria-label="Basic outlined example" id="filters-sort-input">
-                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-alpha-down" data-mode="alphadown"><i data-mode="alphadown" class="bx bxs-down-arrow"></i></button>
-                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-recent" data-mode="recent">Recent</button>
-                  <button type="button" class="btn btn-outline-primary sort-feed" id="sort-alpha-up" data-mode="alphaup"><i data-mode="alphaup" class="bx bxs-up-arrow"></i></button>
+              <div class="col-3@md" style="display: inline-flex;">
+                <div class="btn-group feeds-btn-group only-for-grid" role="group" aria-label="Basic outlined example">
+                  <button type="button" class="btn btn-feeds-primary sort-feed" id="sort-alpha-down" data-mode="alphadown"><i data-mode="alphadown" class="bx bxs-down-arrow"></i></button>
+                  <button type="button" class="btn btn-feeds-primary sort-feed" id="sort-recent" data-mode="recent">Recent</button>
+                  <button type="button" class="btn btn-feeds-primary sort-feed" id="sort-alpha-up" data-mode="alphaup"><i data-mode="alphaup" class="bx bxs-up-arrow"></i></button>
+                </div>
+
+                <div class="btn-group feeds-btn-group" role="group" aria-label="Basic outlined example">
+                  <button type="button" class="btn btn-feeds-primary view-feed" id="grid-view" data-mode="grid"><i data-mode="grid" class="bx bxs-grid"></i></button>
+                  <button type="button" class="btn btn-feeds-primary view-feed" id="table-view" data-mode="table"><i data-mode="table" class="bx bx-list-ul"></i></button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
         <div class="container">
           <div id="feeds-grid" class="row my-shuffle-container"></div>
+          <div id="feeds-table" class="row" style="display: none;">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body feed-card-body">
+                  <table id="feedsTable" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Type</th> 
+                        <th>Feed</th>
+                        <th>Domain</th>
+                        <th>Tag(s)</th>
+                        <th>Contributor</th>
+                        <th> </th>
+                      </tr>
+                    </thead>
+                    <tbody id="feeds-table-body">
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th></th>
+                        <th>Type</th> 
+                        <th>Feed</th>
+                        <th>Domain</th>
+                        <th>Tag(s)</th>
+                        <th>Contributor</th>
+                        <th></th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+  
       </main>
     </section>
-
-  </main><!-- End #main -->
+  </main>
 
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer site-width">
@@ -129,6 +166,18 @@
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/jquery-3.7.1/jquery-3.7.1.min.js"></script>
   <script src="assets/vendor/lunr-2.3.9/lunr-2.3.9.js"></script>
+  <script src="assets/vendor/datatables/jquery.dataTables.js"></script>
+  <script src="assets/vendor/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="assets/vendor/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="assets/vendor/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <script src="assets/vendor/datatables-buttons/js/dataTables.buttons.min.js"></script>
+  <script src="assets/vendor/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+  <script src="assets/vendor/datatables-buttons/js/buttons.html5.min.js"></script>
+  <script src="assets/vendor/datatables-buttons/js/buttons.print.min.js"></script>
+  <script src="assets/vendor/datatables-buttons/js/buttons.colvis.js"></script>
+  <script src="assets/vendor/jszip/jszip.min.js"></script>
+  <script src="assets/vendor/pdfmake/pdfmake.min.js"></script>
+  <script src="assets/vendor/pdfmake/vfs_fonts.js"></script>
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
@@ -137,6 +186,12 @@
   <script src="feedrunner/js/feed.js"></script> 
   <script src="feeds/js/feeds-home.js"></script>
   <script src="feeds/js/shorthash.js"></script>
+  <script>
+    const hostname = window.location.hostname;
+    var isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '' || hostname.startsWith('192.168.') || hostname.startsWith('10.');
+    localStorage.setItem('isLocal', isLocal);
+    console.log('isLocal: ', localStorage.getItem('isLocal'), typeof localStorage.getItem('isLocal'));
+  </script>
 </body>
 
 </html>

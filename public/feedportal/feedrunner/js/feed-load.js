@@ -1,5 +1,5 @@
 const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
-const communityRepoRawUrl = 'https://raw.githubusercontent.com/solacecommunity';
+const communityRepoRawUrl = 'https://raw.githubusercontent.com';
 const communityUserName = 'solacecommunity';
 const communityRepoName = 'solace-event-feeds';
 const communityFeedsJson = 'EVENT_FEEDS.json';
@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
           var json = JSON.parse(text);
           var jsonKeys = Object.keys(json);
+          if (!jsonKeys.includes('prettyPrint')) jsonKeys.push('prettyPrint');
+
           Object.keys(currentConnSettings).forEach(key => {
             if (!jsonKeys.includes(key)) {
               throw new Error("Invalid");
@@ -125,14 +127,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     var els = document.getElementsByName('eventCheckboxes');  
     // els.forEach(el => el.checked = true)
     els.forEach(el => { el.checked = true; onEventSelection(el) });
-    setTimeout(() => { $('#collapseOne').collapse('toggle') }, 1500);
+    setTimeout(() => { $('#collapseEvents').collapse('toggle') }, 1000);
+    $('#select-all').html('<i class="bi bi-check-square-fill"></i>&nbsp;Select All');
+    $('#select-none').html('<i class="bi bi-square"></i>&nbsp;Select None');
   })
 
   $('#select-none').on('click', () => {
     var els = document.getElementsByName('eventCheckboxes');  
     els.forEach(el => { el.checked = false; onEventSelection(el) });
+    $('#select-none').html('<i class="bi bi-check-square-fill"></i>&nbsp;Select None');
+    $('#select-all').html('<i class="bi bi-square"></i>&nbsp;Select All');
   })
+
 });
+
+async function copyMessageToClipboard(msgId) {
+  if (!msgId) return;
+  var content = $(`#${msgId}`).text();
+  console.log(content);
+  var parts = content.split('::');
+  if (parts.length < 2) return;
+
+  var payload = parts[1].trim();
+  var copyContent = '';
+  try {
+    var json = JSON.parse(payload);
+    copyContent = JSON.stringify(json, null, 2);
+  } catch (error) {
+    copyContent = payload;
+  }
+
+  await navigator.clipboard.writeText(copyContent);
+  toastr.success('Copied to clipboard.')
+}
 
 function countChange() {
   var index = selectedMessages.findIndex(m => m.message === this.event.target.dataset.message && m.topic === this.event.target.dataset.topic);
@@ -205,6 +232,10 @@ function onEventSelection(el = null) {
 function connectToBroker() {
   init();
   connectButtonClicked(connectionStatusCallback);
+  setTimeout(() => { 
+    $('#collapseBroker').collapse('toggle');
+    $('#collapseEvents').collapse('toggle');
+   }, 1000);
 }
 
 function errorCallback(errorMessage) {
@@ -289,6 +320,8 @@ async function loadFeed() {
 }
 
 function delayedStart(msg) {
+  $('#show-hide-settings').click();
+
   sleep(msg.delay * 1000).then(() => { 
     console.log(msg);
     if (msg.delay)
@@ -309,9 +342,9 @@ async function startFeed() {
     delayedStart(selectedMessages[i]);
   }
 
-  $('#collapseZero').collapse('hide');
-  $('#collapseOne').collapse('hide');
-  $('#collapseTwo ').collapse('hide');
+  $('#collapseInfo').collapse('hide');
+  $('#collapseEvents').collapse('hide');
+  $('#collapseBroker ').collapse('hide');
   document.getElementById('start-feed').classList.add('disabled');
   document.getElementById('stop-feed').classList.remove('disabled');
 }
@@ -320,7 +353,7 @@ async function publishEvent(msg) {
   var feed = await loadFeed();
   var info = feed.getInfo();
 
-  if (info.type === 'stmfeed') {
+  if (info.type === 'asyncapi_feed') {
     var rules = feed.getFeedParam("rules");
     var rule = rules.find((r) => r.messageName === msg.message && r.topic === msg.topic);
     if (!rule) return;
@@ -345,7 +378,7 @@ async function publishEvent(msg) {
         }
       }
     });
-  } else if (info.type === 'apifeed') {
+  } else if (info.type === 'restapi_feed') {
     var events = [];
     var api = feed.getFeedParam('api');
     var apiUrl = api.apiUrl;
@@ -388,7 +421,7 @@ async function publishEvent(msg) {
       var url = apiUrl;
       for (var j=0; j<params.length; j++) {
         url = url.replaceAll(`$${params[j]}`, ruleData[params[j]]);
-        topic = topic.replaceAll(`{${params[j]}}`, ruleData[params[j]]);
+        topic = topic.replaceAll(`$${params[j]}`, ruleData[params[j]]);
       }
       payload = await (await fetch(`${url}`, {
         headers: headers
@@ -458,7 +491,7 @@ async function showFeedInfo() {
 
     var messages = feed.getSendMessages();
 
-    if (info.type === 'stmfeed') {
+    if (info.type === 'asyncapi_feed') {
       messages.forEach((msg, index) => {
         var item = `
         <div class="list-group-item list-group-item-action feed-event-item mb-3 mt-3" aria-current="true">
@@ -466,11 +499,11 @@ async function showFeedInfo() {
             <div>
               <div class="d-flex w-100 justify-content-between">
                 <div class="d-flex w-100">
-                  <input class="form-check-input selection-border me-1" type="checkbox" name="eventCheckboxes" id="eventCheckbox${index}" 
+                  <input selection-border me-1" type="checkbox" checked name="eventCheckboxes" id="eventCheckbox${index}" 
                     data-message="${msg.messageName}" data-topic="${msg.topicName}" data-count="${msg.count}" 
                     data-interval="${msg.interval}" data-delay="${msg.delay}" 
                     value="option1" aria-label="..." onchange="onEventSelection()">
-                  <h5 class="mb-1">${msg.messageName}</h5>
+                  <h5 class="mb-1">&nbsp;${msg.messageName}</h5>
                 </div>
                 <div>
                   <a href="#" class="show-advanced-settings d-flex align-items-center justify-content-center"
@@ -511,7 +544,7 @@ async function showFeedInfo() {
         `
         parent.append(item);
       })
-    } else if (info.type === 'apifeed') {
+    } else if (info.type === 'restapi_feed') {
       messages.forEach((msg, index) => {
       var item = `
         <div class="list-group-item list-group-item-action feed-event-item mb-3 mt-3" aria-current="true">
@@ -519,11 +552,11 @@ async function showFeedInfo() {
             <div>
               <div class="d-flex w-100 justify-content-between">
                 <div class="d-flex w-100">
-                  <input class="form-check-input selection-border me-1" type="checkbox" name="eventCheckboxes" id="eventCheckbox${index}" 
+                  <input selection-border me-1" type="checkbox" name="eventCheckboxes" id="eventCheckbox${index}" 
                     data-message="${msg.simplifiedName}" data-topic="${msg.topicName}" data-count="${msg.count}" 
                     data-interval="${msg.interval}" data-delay="${msg.delay}" 
                     value="option1" aria-label="..." onchange="onEventSelection()">
-                  <h5 class="mb-1">${msg.messageName}</h5>
+                  <h5 class="mb-1">&nbsp;${msg.messageName}</h5>
                 </div>
                 <div>
                   <a href="#" class="show-advanced-settings d-flex align-items-center justify-content-center"
@@ -580,19 +613,38 @@ async function showFeedInfo() {
     }
     
     console.log(info);
+    var els = document.getElementsByName('eventCheckboxes');  
+    els.forEach(el => { el.checked = true; onEventSelection(el) });
+    $('#select-all').html('<i class="bi bi-check-square-fill"></i>&nbsp;Select All');
+    $('#select-none').html('<i class="bi bi-square"></i>&nbsp;Select None');
+
   } catch (error) {
     console.log(`'load feed info failed: ${error.toString()} (${error.cause?.message} ? [${error.cause?.message}] : ''`);
   }
 }
-
 function addToConsole(topic, payload, publishKey, msgName) {
+  var msgId = msgName.replaceAll('$', '').replaceAll('/', '-').toLowerCase();
   publishStats[publishKey] = publishStats[publishKey] ? publishStats[publishKey] + 1 : 1;
   // consoleLines.push(str);
   var div = document.getElementById('scrollbox');
-  var newMsg = `<p><span class="badge rounded-pill bg-warning me-2">${publishStats[publishKey]}</span>
-                    <span class="badge rounded-pill bg-success me-2">${msgName}</span>                  
-                    ${topic + (payload ? ' : ' + ((typeof payload === 'object') ? JSON.stringify(payload) : payload) : '')}
-                </p>\n`;
+  var msgPrint = currentConnSettings.prettyPrint ?
+                    topic + (payload ? ' :: ' + ((typeof payload === 'object') ? JSON.stringify(payload, null, 2) : payload) : '') :
+                    topic + (payload ? ' :: ' + ((typeof payload === 'object') ? JSON.stringify(payload).trim() : payload) : '');
+  var newMsg = `<p>` +
+                  (payload ?
+                    `<span id="copy-message-to-clipboard" onclick="copyMessageToClipboard('${msgId + '-' + publishStats[publishKey]}')">
+                      <span class="badge rounded-pill copy-to-clipboard me-2">
+                        <i class="bx bxs-copy-alt" aria-hidden="true"></i>
+                      </span>
+                    </span>` : '') +                    
+                  (payload ?
+                    `<span class="badge rounded-pill feed-msg-counter me-2">${publishStats[publishKey]}</span>` :
+                    `<span class="badge rounded-pill feed-msg-counter me-2 empty-clipboard">${publishStats[publishKey]}</span>`) +
+                  `<span class="badge rounded-pill feed-msg-name me-2">${msgName}</span>` +
+                  (currentConnSettings.prettyPrint ?
+                    `<pre id="${msgId + '-' + publishStats[publishKey]}">${msgPrint}</pre>` :
+                    `<span id="${msgId + '-' + publishStats[publishKey]}">${msgPrint}</span>`) +
+                `</p>\n`;
   div.innerHTML += newMsg;  // new message at bottom
   // div.innerHTML = newMsg + div.innerHTML;  // new message at top
   if (div.children.length > 25) {

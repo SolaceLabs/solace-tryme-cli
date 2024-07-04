@@ -15,7 +15,7 @@ function addFeed(feed) {
 
   var config = feed.config;
   var feedTpl = ``;
-  if (feed.type === 'stmfeed') {
+  if (feed.type === 'asyncapi_feed') {
     feedTpl = `
       <div  class='card card-primary card-outline card-tile'>
         <div class='card-tile-header card-header'>
@@ -32,7 +32,7 @@ function addFeed(feed) {
         </div>
       </div>
     `;
-  } else if (feed.type === 'apifeed') {
+  } else if (feed.type === 'restapi_feed') {
     feedTpl = `
       <div  class='card card-primary card-outline card-tile'>
         <div class='card-tile-header card-header'>
@@ -50,7 +50,7 @@ function addFeed(feed) {
           </div>
       </div>
     `;
-  } else if (feed.type === 'customfeed') {
+  } else if (feed.type === 'custom_feed') {
 
   }
 
@@ -790,7 +790,7 @@ async function pushUpMappingRule(el) {
 async function configureApiPlaceHolderRules(rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -857,7 +857,7 @@ async function configureApiPlaceHolderRules(rules, refresh = false) {
 async function configureAPIVariables(rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -890,7 +890,7 @@ async function configureAPIVariables(rules, refresh = false) {
 async function configureMessageSendTopics(messageName, rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -1060,7 +1060,7 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
 async function configureMessageReceiveTopics(messageName, rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("recv_rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -1359,8 +1359,8 @@ function addBrokers(brokers, type) {
   for (var i=0; i<brokers.length; i++) {
     var brokerType = brokers[i].config.url.indexOf('localhost') > 0 ? 'swbroker' : 'clbroker';
     var brokerName = brokers[i].broker.substring(0, brokers[i].broker.lastIndexOf('.'));
-    var brokerHtml = type === 'stmfeed' ? 'broker.html' : 
-                        type === 'apifeed' ? 'apibroker.html' : 'custombroker.html'
+    var brokerHtml = type === 'asyncapi_feed' ? 'broker.html' : 
+                        type === 'restapi_feed' ? 'apibroker.html' : 'custombroker.html'
     var brokerTpl = `
       <a id="m_${decodeURIComponent(brokerName)}" href="${brokerHtml}#${brokerName}" class="nav-link" style="display: flex; align-items: center;"
         onclick="window.location.href='${brokerHtml}#${brokerName}'; window.location.reload();">
@@ -1388,13 +1388,13 @@ const explore = async (btn) => {
   console.log('Feed', feed);
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-  var rules = feed.type === 'stmfeed' ? await getFakerRules(feedName) :
-                  feed.type === 'apifeed' ? await getFakerRules(feedName) : null;
+  var rules = feed.type === 'asyncapi_feed' ? await getFakerRules(feedName) :
+                  feed.type === 'restapi_feed' ? await getFakerRules(feedName) : null;
   console.log('Rules', rules);
   localStorage.setItem('defaultRules', JSON.stringify(rules));
 
-  window.location.href = feedType === 'stmfeed' ? 'feed.html' : 
-                            feedType === 'apifeed' ? 'apifeed.html' : 'customfeed.html';
+  window.location.href = feedType === 'asyncapi_feed' ? 'feed.html' : 
+                            feedType === 'restapi_feed' ? 'apifeed.html' : 'custom_feed.html';
 }
 // HOME PAGE
 
@@ -1535,6 +1535,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         
       document.getElementById('topic_name').innerHTML = feed.config.topic;
       document.getElementById('api-feed-url').innerHTML = feed.config.apiUrl;
+      document.getElementById('api-feed-auth-type').innerHTML = feed.config.apiAuthType;
+      document.getElementById('api-feed-key').innerHTML = feed.config.apiKey;
+      if (feed.config.apiKeyUrlEmbedded) {
+        document.getElementById('api-feed-key-embedded').innerHTML = feed.config.apiKeyUrlEmbedded;
+        document.getElementById('api-feed-key-param').innerHTML = feed.config.apiKeyUrlParam;
+      } else {
+        $('#api-feed-key-embedded-pane').remove();
+        $('#api-feed-key-param-pane').remove();
+      }
+
+      document.getElementById('api-feed-key-gen-url').innerHTML = feed.config.apiKeyUrl;
+      document.getElementById('api-feed-topic').innerHTML = feed.config.topic;
       updateInfo(feed)
     }
   }
@@ -1561,7 +1573,7 @@ function loadPage() {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   if (feed) {
     addBrokers(feed.brokers, feed.type)
-    if (feed.type === 'stmfeed') {
+    if (feed.type === 'asyncapi_feed') {
       addMessages(feed.config);
       addSchemas(feed.config);
       addServers(feed.config);

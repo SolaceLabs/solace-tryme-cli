@@ -2,8 +2,9 @@ import * as fs from 'fs'
 import { Logger } from '../utils/logger'
 import { fileExists, updateAndLoadFeedInfo, processPlainPath, readFile, writeJsonFile, loadLoadFeedInfo } from '../utils/config';
 import { communityRepoUrl, defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
+        defaultFeedApiEndpointFile, 
         defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome } from '../utils/defaults';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkItalic } from '../utils/chalkUtils';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWarning, chalkBoldWhite, chalkItalic } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
@@ -31,6 +32,25 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   var info:any = loadLoadFeedInfo(feedName);
   console.log('Current', info);
+
+  if (info.contributed) {
+    const pContributed = new Confirm({
+      message: `${chalkBoldWhite('It appears that the feed has been contributed already, do you want to update?')}`,
+    });
+    
+    await pContributed.run()
+      .then((answer:any) => {
+        if (!answer) {
+          Logger.success('Goodbye 👋');
+          process.exit(0)
+        }
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        Logger.error('Goodbye 👋');
+        process.exit(1);
+      });
+  }
 
   info.name = feedName
 
@@ -180,8 +200,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   
   await pFeedTags.run()
     .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.tags !== (answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : '');
-      info.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
+      if (!infoUpdated) infoUpdated = info.tags !== answer.join(', ');
+      info.tags = answer.join(', ');
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
@@ -208,19 +228,29 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   }
 
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
-  const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+  var origFeeds = readFile(`${repoPath}/${defaultEventFeedsFile}`);
+  var feeds = readFile(`${repoPath}/${defaultEventFeedsFile}`);
+  feeds = feeds.filter((feed:any) => feed.name !== feedName);
 
   try {
     fs.mkdirSync(`${repoPath}/${feedName}`, { recursive: true })
-    fs.copyFileSync(`${feedPath}/${defaultFeedAnalysisFile}`, `${repoPath}/${feedName}/${defaultFeedAnalysisFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedInfoFile}`, `${repoPath}/${feedName}/${defaultFeedInfoFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedRulesFile}`, `${repoPath}/${feedName}/${defaultFeedRulesFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFakerRulesFile}`, `${repoPath}/${feedName}/${defaultFakerRulesFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedSchemasFile}`, `${repoPath}/${feedName}/${defaultFeedSchemasFile}`)
-    fs.copyFileSync(`${feedPath}/${analysis.fileName}`, `${repoPath}/${feedName}/${analysis.fileName}`)
+    if (info.type === 'asyncapi_feed') {
+      const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+      fs.copyFileSync(`${feedPath}/${defaultFeedAnalysisFile}`, `${repoPath}/${feedName}/${defaultFeedAnalysisFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFeedSchemasFile}`, `${repoPath}/${feedName}/${defaultFeedSchemasFile}`)
+      fs.copyFileSync(`${feedPath}/${analysis.fileName}`, `${repoPath}/${feedName}/${analysis.fileName}`)
+      fs.copyFileSync(`${feedPath}/${defaultFeedInfoFile}`, `${repoPath}/${feedName}/${defaultFeedInfoFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFeedRulesFile}`, `${repoPath}/${feedName}/${defaultFeedRulesFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFakerRulesFile}`, `${repoPath}/${feedName}/${defaultFakerRulesFile}`)
+    } else if (info.type === 'restapi_feed') {
+      fs.copyFileSync(`${feedPath}/${defaultFeedApiEndpointFile}`, `${repoPath}/${feedName}/${defaultFeedApiEndpointFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFeedInfoFile}`, `${repoPath}/${feedName}/${defaultFeedInfoFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFeedRulesFile}`, `${repoPath}/${feedName}/${defaultFeedRulesFile}`)
+      fs.copyFileSync(`${feedPath}/${defaultFakerRulesFile}`, `${repoPath}/${feedName}/${defaultFakerRulesFile}`)
+    }  
 
-    var feeds = readFile(`${repoPath}/${defaultEventFeedsFile}`);
     feeds.push(info);
+    feeds.map((feed:any) => { delete feed?.contributed });
 
     writeJsonFile(`${repoPath}/${defaultEventFeedsFile}`, feeds, true);
 
@@ -228,35 +258,45 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     info.contributed = true;
     info.lastUpdated = new Date().toISOString();    
     writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
-
-
-    console.log(`
-${chalkBoldWhite(`Change directory to ${localRepo} and commit the changes, and create a PR.`)}
-${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
-`);
+    Logger.success(`feed ${chalkBoldLabel(info.name)} updated successfully`);
   } catch (error: any) {
     Logger.logDetailedError('feed copy failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     
-    console.log(`\n\n${chalkBoldLabel('However, you can follow the steps to contribute your event feed to EVENT-FEEDS repo for public access')}:`)
-    console.log(`
-${chalkBoldWhite('1. Copy the feed directory to the local repo')}
+    writeJsonFile(`${repoPath}/${defaultEventFeedsFile}`, origFeeds, true);
+    fs.rmdirSync(`${repoPath}/${feedName}`, { recursive: true })
+    if (info.type === 'asyncapi_feed') {
+      const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedAnalysisFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedSchemasFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${analysis.fileName}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedInfoFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedRulesFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFakerRulesFile}`)
+    } else if (info.type === 'restapi_feed') {
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedApiEndpointFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedInfoFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFeedRulesFile}`)
+      fs.rmSync(`${repoPath}/${feedName}/${defaultFakerRulesFile}`)
+    }  
+  
+    console.log(`\n\n${chalkBoldWarning('Something went wrong - review and resolve the error, and try again!')}:`)
+    Logger.success('Goodbye 👋');
+    return;
+  }
 
-${chalkItalic('$')} ${chalkBoldWhite(`cp -r "${defaultStmFeedsHome}/${feedName}" ${localRepo}`)}
+  console.log(`\n\n${chalkBoldLabel('Follow the steps to complete the feed contribution process.')}:`)
+  console.log(`
+${chalkBoldWhite(`1. Change directory to local repo`)}
 
-${chalkBoldWhite(`2. Open the ${localRepo}/${defaultEventFeedsFile} file and add the following feed info as last element in the array.`)}
+${chalkItalic('$')} ${chalkBoldWhite(`cd ${localRepo}`)}
 
-${chalkBoldWhite(JSON.stringify(info, null, 2))}
+${chalkBoldWhite(`2. Execute git add, commit followed by push to update the solace-event-feeds repository.`)}
 
-${chalkBoldWhite('3. Commit the changes to your EVENT-FEEDS repository.')}
-
-${chalkBoldWhite('4. Create a PR on the GitHub for review.')}
+${chalkBoldWhite('3. Create a PR on your repo for review.')}
 
 ${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
   `)
-
-    return false;
-  }
 
   Logger.success('Goodbye 👋')
 }
