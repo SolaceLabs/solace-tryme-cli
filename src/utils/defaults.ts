@@ -1,4 +1,6 @@
+import * as fs from 'fs'
 import solace from "solclientjs";
+import { Logger } from './logger';
 
 const os = require('os');
 
@@ -405,8 +407,26 @@ export const getType = (message:solace.Message) => {
   }
 }
 
-export const homedir = require('os').homedir();
-export const defaultStmHome = `${homedir}/.stm`
+var currentHomeDir = require('os').homedir();
+var currentStmHome = currentHomeDir;
+
+if (process.env.STM_HOME) {
+  currentStmHome = process.env.STM_HOME;
+}
+
+if (!fs.existsSync(currentStmHome)) {
+  Logger.warn(`STM_HOME directory ${currentStmHome} does not exist. Creating it.`)
+  try {
+    fs.mkdirSync(currentStmHome);
+    fs.mkdirSync(`${currentStmHome}/feeds`);
+  } catch (err) {
+    Logger.error(`Error creating STM_HOME directory ${currentStmHome}. ${err}`)
+    process.exit(1)
+  }
+}
+
+export const homedir = currentHomeDir;
+export const defaultStmHome = currentStmHome;
 export const defaultStmFeedsHome = `${defaultStmHome}/feeds`
 export const defaultStmTempFeedsHome = `${defaultStmHome}/feeds/tmp`
 export const defaultFeedAnalysisFile = 'analysis.json'
