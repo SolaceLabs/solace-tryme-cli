@@ -334,7 +334,7 @@ yarn run build
 # Creates packages for target platforms
 yarn run package
 
-# OptionaL: To get the latest changes from the feeds site repo: 
+# Optional: To get the latest changes from the feeds site repo: 
 git submodule update --remote
 
 ```
