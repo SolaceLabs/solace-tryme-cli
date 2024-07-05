@@ -423,6 +423,10 @@ if (!fs.existsSync(currentStmHome)) {
     Logger.error(`Error creating STM_HOME directory ${currentStmHome}. ${err}`)
     process.exit(1)
   }
+} else {
+  try {
+    fs.mkdirSync(`${currentStmHome}/feeds`);
+  } catch (err) {}
 }
 
 export const homedir = currentHomeDir;

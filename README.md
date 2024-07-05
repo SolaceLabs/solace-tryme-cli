@@ -319,10 +319,10 @@ Recommended version for Node environment:
 
 ``` shell
 # Clone
-git clone git@github.com:SolaceLabs/solace-tryme-cli.git
+git clone --recurse-submodules git@github.com:SolaceLabs/solace-tryme-cli.git
+cd solace-tryme-cli
 
 # Install dependencies
-cd solace-tryme-cli
 yarn install
 
 # Compiles and hot-reloads for development
@@ -333,6 +333,10 @@ yarn run build
 
 # Creates packages for target platforms
 yarn run package
+
+# OptionaL: To get the latest changes from the feeds site repo: 
+git submodule update --remote
+
 ```
 
 After a successful build, you will see the binary executable for each system in the `release` directory.
