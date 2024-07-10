@@ -28,50 +28,17 @@ jobs:
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-      - name: Rename stm-macos
-        run: mv release/stm-macos stm
-
-      - name: Bundle stm-macos
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of macos)
-        run: rm stm
       
-      - name: Rename stm-linux
-        run: mv release/stm-linux stm
+      - name: Install zip command line tool
+        run: sudo apt-get install zip
 
-      - name: Bundle stm-linux
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of linux)
-        run: rm stm
-
-      - name: Rename stm-alpine
-        run: mv release/stm-alpine stm
-
-      - name: Bundle stm-alpine
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of alpine)
-        run: rm stm
-
-      - name: Rename stm-win
-        run: mv release/stm-win.exe stm.exe
-
-      - name: Bundle stm-win
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip stm.exe
-
-      - name: Remove stm (of win)
-        run: rm stm.exe
+      - name: Prepare stm archives for different targets
+        run: |
+          zip -qq -r release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip stm-macos
+          zip -qq -r release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip stm-linux
+          zip -qq -r release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip stm-alpine
+          zip -qq -r release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip stm.exe
+          rm releases/stm-macos releases/stm-linux releases/stm-alpine releases/stm.exe
 
       - name: Release
         uses: softprops/action-gh-release@v1
