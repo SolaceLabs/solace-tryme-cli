@@ -96,8 +96,8 @@ const fakeEventGenerator = async (data:any) => {
     var topicValues:any = {};
     for (var j=0; j<keys.length; j++) {
       if (!mappedTopicParams.includes(keys[j]))
-        topic = topic.replace(`{${keys[j]}}`, topicParams[keys[j]][i]);
-      topicValues[`_${keys[j]}`] = topicParams[keys[j]][i];
+      topic = topic.replace(`{${keys[j]}}`, topicParams[keys[j]]);
+      topicValues[`_${keys[j]}`] = topicParams[keys[j]];
     }
     var payload = data.count > 1 ? payloads[i] : payloads;
 
@@ -115,8 +115,7 @@ const fakeEventGenerator = async (data:any) => {
           else
             source = getFieldValue(payload, sourceName);
         } else
-          source = topicValues[`_${mapping.source.name}`];
-
+          
         if (mapping.target.type === 'Payload Parameter') {
           let targetName = mapping.target.name.replaceAll('.properties', '').replaceAll('[]', '');
           // target = getField(payload, targetName);
