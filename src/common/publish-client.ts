@@ -5,7 +5,6 @@ import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } fr
 import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
-import { create } from 'domain';
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -195,14 +194,10 @@ export class SolaceClient extends VisualizeClient {
         }
       } 
       else {
-        if (payloadType === 'text')
+        if (payloadType === 'text') {
           message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
-        else {
-          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
-          // message.setBinaryAttachment("");
-        //   const encoder = new TextEncoder(); 
-        //   const result = encoder.encode(""); 
-        //   message.setBinaryAttachment(Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00]));
+        } else {
+          message.setBinaryAttachment("");
         }
       }
 

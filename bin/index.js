@@ -2,6 +2,7 @@
 const { Commander } = require('..')
 const chalk = require('chalk')
 const process = require('node:process');
+const { version, repository } = require('../package.json');
 process.noDeprecation = true
 
 const {emitWarning} = process;
@@ -63,6 +64,7 @@ try {
   console.log(chalk.hex('#00c895').bold("╚══██║██║  ██║██║   ██╔═██║██║   ██╔╝      ██║   ██╔═██╗  ╚██╔╝ ███  ██║╚██╝██║██╔╝  "))
   console.log(chalk.hex('#00c895').bold("█████║╚█████╔╝█████╗██║ ██║╚████╗████╗     ██║   ██║ ██║   ██║       ██║ ╚╝ ██║█████╗"))
   console.log(chalk.hex('#00c895').bold("╚════╝ ╚════╝ ╚════╝╚═╝ ╚═╝ ╚═══╝╚═══╝     ╚═╝   ╚═╝ ╚═╝   ╚═╝       ╚═╝    ╚═╝╚════╝"))
+  console.log(`v${version} - ${repository.url}`)
   console.log("")
 
   commander.init();

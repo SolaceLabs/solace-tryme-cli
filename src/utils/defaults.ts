@@ -144,7 +144,7 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
-  payloadType: "text",
+  payloadType: "TEXT",
   outputMode: 'DEFAULT',
   pretty: false
 }
@@ -408,7 +408,7 @@ export const getType = (message:solace.Message) => {
 }
 
 var currentHomeDir = require('os').homedir();
-var currentStmHome = currentHomeDir;
+var currentStmHome = `${currentHomeDir}/.stm`;
 
 if (process.env.STM_HOME) {
   currentStmHome = process.env.STM_HOME;
