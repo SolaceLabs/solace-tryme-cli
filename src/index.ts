@@ -62,7 +62,7 @@ export class Commander {
 
   getVersion() {
     this.newVersionCheck();
-    return `v${this.version}`;
+    return `Current Version: v${this.version}`;
   }
 
   newVersionCheck(): string {
