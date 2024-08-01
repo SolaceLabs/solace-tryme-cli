@@ -50,16 +50,15 @@ All feed commands can be executed interactively, in a guided manner with the too
 
 Here is an example of `preview` command that takes the options interactively on the command-line.
 
-/docrefs/interactive-1.mov
+**Option1:**
 
-
+https://github.com/user-attachments/assets/f079e34d-0f9b-486a-bba0-cb9205b048be
 
 The same command can be executed with parameterized options that will produce the same result.
 
-```
-stm feed preview -file "work/Kitchen Floor-0.1.0.json"
-```
+**Option2:**
 
+https://github.com/user-attachments/assets/0cdb4e94-371e-4ac6-a0d1-7dc7f3280068
 
 # `stm feed` Commands
 
