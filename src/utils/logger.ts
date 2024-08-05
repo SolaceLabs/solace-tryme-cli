@@ -68,7 +68,8 @@ const Logger = {
   keyPair: (key: string, value: string) => Signal.info('info: ' + chalk.whiteBright(`${key}: `).concat(chalk.whiteBright(`${value}`))),
   logKeyPair: (key: string, value: string) => Signal.info('info: ' + chalk.whiteBright(`${key}: `).concat(chalk.whiteBright(`${value}`))),
 
-  info: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
+  // info: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
+  info: (message: string) => Signal.info(chalk.yellowBright('info: ').concat(chalk.whiteBright(message))),
   logInfo: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
 
   message: (message: string) => Signal.info(chalk.keyword('orange')('message: ').concat(chalk.whiteBright(message))),

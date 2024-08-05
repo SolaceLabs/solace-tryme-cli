@@ -443,5 +443,4 @@ export const defaultFeedApiEndpointFile = 'feedapi.json'
 export const defaultGitRepo = 'https://raw.githubusercontent.com/solacecommunity/solace-event-feeds/main';
 export const defaultGitFeedRepo = 'https://github.com/solacecommunity/solace-event-feeds/tree/main';
 export const defaultProjectName = 'solace-tryme-cli'
-export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
 export const supportedFeedTypes = [ 'asyncapi_feed', 'restapi_feed' ]; //, 'custom_feed'
