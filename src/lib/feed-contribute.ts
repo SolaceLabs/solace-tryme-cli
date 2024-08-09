@@ -121,7 +121,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pGitUser = new Input({
-    message: 'GitHub username:',
+    message: 'GitHub username (optional):',
     initial: info.github
   });
 
@@ -153,7 +153,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pContributionChanges = new Input({
-    message: 'Describe the changes in your contribution: ',
+    message: 'Add extra details to be accompanied with your pull request: ',
   });
 
   await pContributionChanges.run()
@@ -202,7 +202,12 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
         if (answer) {
           Logger.info('Creating PR...\n\n\n');
           createPR(feedName, info, azureFunctionInfo, feedLocalPath).then(link => {
-            link ? Logger.success(`PR created successfully at ${link}`) : Logger.error('Error creating PR')
+            if (link) {
+              Logger.success(`PR created successfully at ${link}`);
+            } else {
+              Logger.error('Error creating PR');
+              process.exit(1);
+            }
           })
         }
       })
@@ -236,10 +241,9 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
   communityFeeds = communityFeeds.filter((feed:any) => feed.name !== feedName);
   // Add the feed info to the communityFeeds list
   communityFeeds.push(info);
-  // Update the local feedInfo file with the new info
-  writeJsonFile(`${feedLocalPath}/${defaultFeedInfoFile}`, info, true);
 
   // POST request to open PR with the files
+  let functionBody = null
   try {
     if (info.type === 'asyncapi_feed') {
       const analysis:any = readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`);
@@ -248,51 +252,62 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
       let formData = new FormData();
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`))]), defaultFeedAnalysisFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`))]), defaultFeedSchemasFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedInfoFile}`))]), defaultFeedInfoFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${analysis.fileName}`))]), analysis.fileName);
+      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
       formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
       formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
 
-      let response: Response = await fetch(azureFunctionURL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if(response.ok) {
-        PRLink = await response.text()
-      } else {
-        Logger.error(`Error executing function: ${response.statusText}`)
-      }
-       
+      functionBody = await executeFunction(azureFunctionURL, formData)
     } else if (info.type === 'restapi_feed') {
-      let formData = new FormData();
 
+      // Create form-data body payload 
+      let formData = new FormData();
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`))]), defaultFeedApiEndpointFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedInfoFile}`))]), defaultFeedInfoFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
       formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
+      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
       formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
       formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
 
-      let response: Response = await fetch(azureFunctionURL, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if(response.ok) {
-        PRLink = await response.text()
-      } else {
-        Logger.error(`Error executing function: ${response.statusText}`)
-      }
+      functionBody = await executeFunction(azureFunctionURL, formData)
     }
   } catch (error:any) {
     Logger.logDetailedError('Function Failed. Contact community@solace.com for help', error)
     Logger.alert('Please create a PR manually. See https://github.com/solacecommunity/solace-event-feeds for more details.')
     process.exit(1);
   }
-  return PRLink
+
+  if (functionBody.PRLink) {
+    // Update the local feedInfo file with the new info
+    writeJsonFile(`${feedLocalPath}/${defaultFeedInfoFile}`, info, true);
+    return functionBody.PRLink
+  } else {
+    Logger.error(`Error creating PR! \n${JSON.stringify(functionBody, null, 2)}`)
+    process.exit(1);
+  }
+}
+
+async function executeFunction (azureFunctionURL:string, formData:FormData) {
+  try {
+    let response: Response = await fetch(azureFunctionURL, {
+      method: 'POST',
+      body: formData,
+    });
+
+    let body  = await response.json()
+
+    if(response.ok) {
+      return body
+    } else {
+      Logger.error(`Error executing function:\n${JSON.stringify(body, null, 2)}`)
+      process.exit(1);
+    }
+  } catch (error) {
+    Logger.error(`Error executing function: contact community@solace.com for help`)
+    process.exit(1);
+  }
 }
 
 export default contribute
