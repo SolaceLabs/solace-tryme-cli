@@ -71,7 +71,7 @@ const processPayload = (msg: any) => {
     var schema = payload[prop];
     if (schema.type.toLowerCase() === 'string') {
       if (schema.enum) {
-        payload[prop].rule = { ...payload[prop], name: prop, type: 'string', group: 'StringRules', rule: 'enum', enum: schema.enum.join(',') }
+        payload[prop].rule = { ...payload[prop], name: prop, type: 'string', group: 'StringRules', rule: 'enum', enum: schema.enum }
       } else {
         payload[prop].rule = { ...payload[prop], name: prop, type: 'string', group: 'StringRules', rule: 'alpha', casing: 'mixed', minLength: 10, maxLength: 10 }
       }

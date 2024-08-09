@@ -34,6 +34,19 @@ export const processPath = (savePath: boolean | string) => {
   return filePath
 }
 
+export const processAsyncAPIFilePath = (savePath: boolean | string) => {
+  let filePath = ''
+  if (savePath === true) {
+    filePath = defaultPath
+  } else if (typeof savePath === 'string') {
+    filePath = path.normalize(savePath)
+    if (!path.isAbsolute(filePath)) {
+      filePath = path.resolve(filePath)
+    }
+  }
+  return filePath
+}
+
 export const processPlainPath = (savePath: boolean | string) => {
   let filePath = ''
   if (savePath === true) {
@@ -91,6 +104,18 @@ export const readFile = (path: string) => {
     return JSON.parse(config)
   } catch (error: any) {
     Logger.logDetailedError('read file failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const readRawFile = (path: string) => {
+  try {
+    const config = fs.readFileSync(path, 'utf-8')
+    return config;
+  } catch (error: any) {
+    Logger.logDetailedError('read raw file failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.logError('exiting...')
     process.exit(1)
@@ -496,10 +521,10 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
 
 export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) => {
   try {
-    const filePath = processPath(`${configFile}`)
+    const filePath = processAsyncAPIFilePath(`${configFile}`)
     if (fileExists(filePath)) {
       Logger.info(`loading file '${configFile}'`)
-      return readFile(filePath);
+      return readRawFile(filePath);
     } else {
       Logger.logDetailedError(`file not found`, `${decoratePath(configFile)}`)
       Logger.logError('exiting...')

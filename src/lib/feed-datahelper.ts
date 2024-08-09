@@ -73,12 +73,6 @@ function getObjectKeys(obj:any, path:string):any {
 }
 
 const fakeEventGenerator = async (data:any) => {
-  var topicParams:any = {};
-  var keys = Object.keys(data.rule.topicParameters);
-  for (var i=0; i<keys.length; i++) {
-    topicParams[keys[i]] = fakeDataValueGenerator({ rule: data.rule.topicParameters[keys[i]].rule, count: data.count});
-  }
-
   var payloads = fakeDataObjectGenerator({ payload: data.rule.payload, count: data.count});
   var fakeData = [];
   var mappedTopicParams:any = [];
@@ -92,6 +86,12 @@ const fakeEventGenerator = async (data:any) => {
   }
 
   for (var i=0; i<data.count; i++) {
+    var topicParams:any = {};
+    var keys = Object.keys(data.rule.topicParameters);
+    for (var kl=0; kl<keys.length; kl++) {
+      topicParams[keys[kl]] = fakeDataValueGenerator({ rule: data.rule.topicParameters[keys[kl]].rule, count: 1});
+    }
+    
     var topic = data.rule.topic;
     var topicValues:any = {};
     for (var j=0; j<keys.length; j++) {
@@ -115,7 +115,8 @@ const fakeEventGenerator = async (data:any) => {
           else
             source = getFieldValue(payload, sourceName);
         } else
-          
+          source = topicValues[`_${mapping.source.name}`];
+
         if (mapping.target.type === 'Payload Parameter') {
           let targetName = mapping.target.name.replaceAll('.properties', '').replaceAll('[]', '');
           // target = getField(payload, targetName);
