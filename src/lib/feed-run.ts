@@ -25,15 +25,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   var cmdLine = false;
-  if (optionsSource.feedName === 'cli' && optionsSource.eventNames === 'cli') {
-    cmdLine = true;
-    feedName = options.feedName;
-    eventNames = options.eventNames;
-    if (feedName && options.communityFeed)
-      gitFeed = true;
-
-    checkForFeedSettings(eventNames, feedName);
-  } else if (optionsSource.feedName === 'cli' && optionsSource.eventNames === undefined) {
+  if (optionsSource.feedName === 'cli') {
     cmdLine = true;
     feedName = options.feedName;
     eventNames = options.eventNames;
@@ -52,31 +44,47 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       }
     })
 
-    const { MultiSelect } = require('enquirer');
-    const pPickEvent = new MultiSelect({
-      name: 'localEvent',
-      message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-      `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
-      `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
-      `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
-      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-      choices: eventsList,
-      initial: eventsList.map((e:any, index:number) => index)
-    });
-
-    var eventChoices: string | any[] = []
-    await pPickEvent.run()
-      .then((answer:any) => eventChoices = answer)
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
+    if (optionsSource.eventNames !== 'cli') {
+      const { MultiSelect } = require('enquirer');
+      const pPickEvent = new MultiSelect({
+        name: 'localEvent',
+        message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+        `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
+        `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
+        `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
+        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+        choices: eventsList,
+        initial: eventsList.map((e:any, index:number) => index)
       });
-    
-    options.eventNames = eventChoices;
-    optionsSource.eventNames = 'cli';
+
+      var eventChoices: string | any[] = []
+      await pPickEvent.run()
+        .then((answer:any) => eventChoices = answer)
+        .catch((error:any) => {
+          Logger.logDetailedError('interrupted...', error)
+          process.exit(1);
+        });
+      
+      options.eventNames = eventChoices;
+      optionsSource.eventNames = 'cli';
+    } else {
+      var missingEvents = eventNames.filter((e:any) => !eventsList.find((el:any) => el.name === e));
+      if (missingEvents.length) {
+        Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
+        Logger.logError('exiting...')
+        process.exit(1);
+      }
+      
+      options.eventNames = eventNames;
+      optionsSource.eventNames = 'cli';
+    }
+  } else if (optionsSource.eventNames === 'cli') {
+    Logger.logError(`Missing event feed name...`)
+    Logger.logError('exiting...')
+    process.exit(1);
   }
-  
+
   // check for event in the feed
   if (!cmdLine) {
     const { Select, MultiSelect } = require('enquirer');

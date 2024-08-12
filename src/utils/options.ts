@@ -614,7 +614,7 @@ export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
     // feed options
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
-    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed URL')) .default(false))
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -647,7 +647,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-ui, --ui-portal [BOOLEAN]', chalk.whiteBright('launch feeds portal')) .default(false)  .hideHelp(advanced))
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) .hideHelp(advanced))
     .addOption(new Option('-events, --event-names <EVENT_NAME...>', chalk.whiteBright('the event name(s) as space-separated values if listing more than one (e.g., "Loan_Applied" "Loan_Approved" )'))  .hideHelp(advanced))
-    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed URL')) .default(false)  .hideHelp(advanced))
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false)  .hideHelp(advanced))
     .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
 
     // message options
