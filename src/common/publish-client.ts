@@ -125,9 +125,9 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess("delivery of message with correlation key '" + sessionEvent.correlationKey + "' confirmed");
+            Logger.logSuccess(`delivery of message with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString()}]`);
           else
-            Logger.logSuccess("delivery of message confirmed");
+            Logger.logSuccess(`delivery of message confirmed [${new Date().toLocaleString()}]`);
         });
 
         //REJECTED_MESSAGE implies that the vpn has rejected the message

@@ -5,6 +5,7 @@ import { defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile,
         defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome, defaultGitRepo } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
+import { prettyJSON } from '../utils/prettify';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const { Select, Confirm, Input, List } = require('enquirer');
@@ -32,7 +33,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   Logger.info('Let us first update the feed information\n')
 
   var info:any = loadLoadFeedInfo(feedName);
-  console.log('Current', info);
+  Logger.logMessage(`${chalkBoldWhite('Current Feed Information:')}\n` + prettyJSON(JSON.stringify(info)));
 
   if (info.contributed) {
     const pContributed = new Confirm({
@@ -56,88 +57,45 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   // Take user input
 
-    const pFeedDesc = new Input({
-      message: `${chalkBoldWhite('Feed description')}\n` +
-      `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
-        initial: info.description,
-      validate: (value: string) => {  return !!value; }
-    });
-    
-    await pFeedDesc.run()
-      .then((answer:any) => {
-        if (!infoUpdated) infoUpdated = info.description !== answer;
-        info.description = answer
-      })
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
-      });
-
-    const pFeedDomain = new Input({
-      message: `${chalkBoldWhite('Feed domain')}\n` +
-      `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
-      initial: info.domain,
-      validate: (value: string) => {  return !!value; }
-    });
+  const pFeedDesc = new Input({
+    message: `${chalkBoldWhite('Feed description')}\n` +
+    `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
+      initial: info.description,
+    validate: (value: string) => {  return !!value; }
+  });
   
-    await pFeedDomain.run()
-      .then((answer:any) => {
-        if (!infoUpdated) infoUpdated = info.domain !== answer;
-        info.domain = answer
-      })
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
-      }); 
-
-    const pFeedIcon = new Input({
-      message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
-      `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
-      initial: info.img
-    });
-  
-    await pFeedIcon.run()
+  await pFeedDesc.run()
     .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.img !== answer;
-      info.img = answer ? answer : 'assets/img/defaultfeed.png'
+      if (!infoUpdated) infoUpdated = info.description !== answer;
+      info.description = answer
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
 
-  const pFeedContributor = new Input({
-    message: `${chalkBoldWhite('Contributor name')}\n` +
-    `${chalkBoldLabel('Hint')}: Contributor name for attribution\n`,
-    initial: info.contributor
+  const pFeedDomain = new Input({
+    message: `${chalkBoldWhite('Feed domain')}\n` +
+    `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
+    initial: info.domain,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await pFeedContributor.run()
+  await pFeedDomain.run()
     .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.contributor !== answer;
-      // Make sure there is a list of unique contributors
-      info.contributor = [...new Set([...info.contributor.split(','), answer.split(',')].flat())].join(',');
+      if (!infoUpdated) infoUpdated = info.domain !== answer;
+      info.domain = answer
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
-    });
+    }); 
 
-  const pGitUser = new Input({
-    message: `${chalkBoldWhite('GitHub handle')}\n` +
-    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
-    initial: info.github
+  const pFeedIcon = new Input({
+    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+    `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
+    initial: info.img
   });
-
-  await pGitUser.run()
-    .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.github !== answer;
-      answer ? info.github = answer : info.github = 'solacecommunity-bot';
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
 
   const pFeedTags = new List({
     name: 'tags',
@@ -156,30 +114,76 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
-
-  const pContributionChanges = new Input({
-    message: 'Please include any additional details to accompany your pull request: ',
-  });
-
-  await pContributionChanges.run()
+  
+  await pFeedIcon.run()
     .then((answer:any) => {
-      contributionChanges = answer
-      infoUpdated = true
+      if (!infoUpdated) infoUpdated = info.img !== answer;
+      info.img = answer ? answer : 'assets/img/defaultfeed.png'
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
 
-  const pUserEmail = new Input({
-    message: `${chalkBoldWhite('Your email')}\n` +
-    `${chalkBoldLabel('Hint')}: Contact information for communication related to the contribution\n` +
-    `      Note: This is intended solely for internal communication and will not be shared publicly\n` 
+  const pFeedContributor = new Input({
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Contributor name for attribution. If not specified the contribution will be attributed to Solace Community!\n`,
+    initial: info.contributor
   });
 
-  await pUserEmail.run()
+  await pFeedContributor.run()
     .then((answer:any) => {
-      userEmail = answer
+      if (!infoUpdated) infoUpdated = info.contributor !== answer;
+      // Make sure there is a list of unique contributors
+      info.contributor = [...new Set([...info.contributor.split(','), answer.split(',')].flat())].join(',');
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  const pGitUser = new Input({
+    message: `${chalkBoldWhite('GitHub handle')}\n` +
+    `${chalkBoldLabel('Hint')}: Contributor's GitHub handle for attribution. If not specified the contribution will be attributed to Solace Community!\n`,
+    initial: info.github
+  });
+
+  await pGitUser.run()
+    .then((answer:any) => {
+      if (!infoUpdated) infoUpdated = info.github !== answer;
+      answer ? info.github = answer : info.github = 'solacecommunity-bot';
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  do {
+    const pUserEmail = new Input({
+      message: `${chalkBoldWhite('Your email')}\n` +
+      `${chalkBoldLabel('Hint')}: Contact information for communication related to the contribution\n` +
+      `      ${chalkBoldLabel('Note:')} This is intended solely for internal communication and will not be shared publicly\n` 
+    });
+
+    await pUserEmail.run()
+      .then((answer:any) => {
+        userEmail = answer
+        infoUpdated = true
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  } while (!userEmail);
+
+  const pContributionChanges = new Input({
+    message: `${chalkBoldWhite('Additional information to accompany your pull request)')}\n` +
+    `${chalkBoldLabel('Hint')}: Information related to the feed's purpose, changes (if updated), use cases and useful references related to the domain/API.\n`,
+  });
+
+  await pContributionChanges.run()
+    .then((answer:any) => {
+      contributionChanges = answer
       infoUpdated = true
     })
     .catch((error:any) => {
@@ -197,7 +201,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   info.lastUpdated = new Date().toISOString();   
   info.contributed = true; 
   
-  console.log('Updated', info);
+  Logger.logMessage(`${chalkBoldWhite('Updated Feed Information:')}\n` + prettyJSON(JSON.stringify(info)));
 
   if (infoUpdated) {
     const pFeedChanged = new Confirm({
