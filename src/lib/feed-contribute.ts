@@ -36,7 +36,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   if (info.contributed) {
     const pContributed = new Confirm({
-      message: `${chalkBoldWhite('It appears that the feed has been contributed already, do you want to update?')}`,
+      message: `${chalkBoldWhite('It appears that the feed has been contributed to community already, do you want to update?')}`,
     });
     await pContributed.run()
       .then((answer:any) => {
@@ -57,8 +57,9 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
   // Take user input
 
     const pFeedDesc = new Input({
-      message: 'Feed description:',
-      initial: info.description,
+      message: `${chalkBoldWhite('Feed description')}\n` +
+      `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
+        initial: info.description,
       validate: (value: string) => {  return !!value; }
     });
     
@@ -73,7 +74,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       });
 
     const pFeedDomain = new Input({
-      message: 'Feed domain:',
+      message: `${chalkBoldWhite('Feed domain')}\n` +
+      `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
       initial: info.domain,
       validate: (value: string) => {  return !!value; }
     });
@@ -89,8 +91,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       }); 
 
     const pFeedIcon = new Input({
-      message: 'Feed icon (an URL or a base64 image data):',
-      hint: 'Leave blank to use default feed icon',
+      message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+      `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
       initial: info.img
     });
   
@@ -105,7 +107,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pFeedContributor = new Input({
-    message: 'Comma separated Contributor(s) name or organization name:',
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Contributor name for attribution\n`,
     initial: info.contributor
   });
 
@@ -121,7 +124,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pGitUser = new Input({
-    message: 'GitHub username (optional):',
+    message: `${chalkBoldWhite('GitHub handle')}\n` +
+    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
     initial: info.github
   });
 
@@ -137,7 +141,8 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   const pFeedTags = new List({
     name: 'tags',
-    message: 'Feed keywords (as a comma-separated values):',
+    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+    `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
     initial: info.tags,
     validate: (value: string) => {  return !!value; }
   });
@@ -153,7 +158,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pContributionChanges = new Input({
-    message: 'Add extra details to be accompanied with your pull request: ',
+    message: 'Please include any additional details to accompany your pull request: ',
   });
 
   await pContributionChanges.run()
@@ -167,7 +172,9 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
     });
 
   const pUserEmail = new Input({
-    message: 'Put your email to be notified on updates. Note: This will not be public',
+    message: `${chalkBoldWhite('Your email')}\n` +
+    `${chalkBoldLabel('Hint')}: Contact information for communication related to the contribution\n` +
+    `      Note: This is intended solely for internal communication and will not be shared publicly\n` 
   });
 
   await pUserEmail.run()

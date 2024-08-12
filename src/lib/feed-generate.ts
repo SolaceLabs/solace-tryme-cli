@@ -47,26 +47,34 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   }
 
   if (feed.type === 'asyncapi_feed' && !fileName) {
-    const pFilename = new Input({
-      message: chalkBoldWhite('Enter AsyncAPI file'),
-      initial: 'asyncapi.json',
-      validate: (value: string) => {  return !!value; }
-    });
-
-    await pFilename.run()
-      .then((answer: string) => {
-        fileName = answer.trim();
-        options.fileName = fileName;
-      })
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
+    do {
+      const pFilename = new Input({
+        message: `${chalkBoldWhite('Enter AsyncAPI file')}\n` +
+          `${chalkBoldLabel('Hint')}: Enter the path to the AsyncAPI file\n`,
+        initial: 'asyncapi.json',
+        validate: (value: string) => {  return !!value; }
       });
+
+      await pFilename.run()
+        .then((answer: string) => {
+          fileName = answer.trim();
+          options.fileName = fileName;
+
+          if (!fileExists(fileName)) {
+            Logger.logError(`File ${fileName} does not exist, try again!`);
+          }
+        })
+        .catch((error:any) => {
+          Logger.logDetailedError('interrupted...', error)
+          process.exit(1);
+        });
+    } while (!fileExists(fileName));
   }
 
   if (!feedName) {
     const pFeedName = new Input({
-      message: chalkBoldWhite('Enter feed name'),
+      message: `${chalkBoldWhite('Enter feed name')}\n` +
+          `${chalkBoldLabel('Hint')}: A friendly name to identify the feed\n`,
       initial: feed.type === 'asyncapi_feed' ? getPotentialFeedName(fileName) : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -98,7 +106,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   const schemas = await formulateSchemas(JSON.parse(JSON.stringify(data)));
 
   const pFeedDesc = new Input({
-    message: chalkBoldWhite('Feed description'),
+    message: `${chalkBoldWhite('Feed description')}\n` +
+    `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
     initial: data.info.description,
     validate: (value: string) => {  return !!value; }
   });
@@ -113,8 +122,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedIcon = new Input({
-    message: chalkBoldWhite('Feed icon (an URL or a base64 image data):'),
-    hint: 'Leave blank to use default feed icon',
+    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+    `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
     initial: ''
   });
 
@@ -128,7 +137,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedContributor = new Input({
-    message: chalkBoldWhite('Contributor name or organization name'),
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
     initial: ''
   });
 
@@ -142,7 +152,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pGitUser = new Input({
-    message: chalkBoldWhite('GitHub username'),
+    message: `${chalkBoldWhite('GitHub handle')}\n` +
+    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
     initial: ''
   });
 
@@ -156,7 +167,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedDomain = new Input({
-    message: chalkBoldWhite('Feed domain'),
+    message: `${chalkBoldWhite('Feed domain')}\n` +
+    `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
     initial: '',
     validate: (value: string) => {  return !!value; }
   });
@@ -171,7 +183,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     });
 
   const pFeedTags = new Input({
-    message: chalkBoldWhite('Feed keywords (as a comma-separated values):'),
+    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+    `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
     initial: '',
     validate: (value: string) => {  return !!value; }
   });
@@ -285,7 +298,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   
   if (apiEndpoint.apiAuthType === 'API Key') {
     const pApiKey = new Input({
-      message: chalkBoldWhite('API Key:'),
+      message: `${chalkBoldWhite('API Key')}\n` +
+      `${chalkBoldLabel('Hint')}: A key to identify and authenticate API access\n`,
       initial: apiEndpoint?.apiKey ? apiEndpoint?.apiKey : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -301,7 +315,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
     if (apiEndpoint.apiKey) {
       const pApiKeyUrl = new Input({
-        message: chalkBoldWhite('URL to generate personal API Key:'),
+        message: `${chalkBoldWhite('URL to generate personal API Key')}\n` +
+        `${chalkBoldLabel('Hint')}: URL endpoint is used to generate API keys\n`,
         initial: apiEndpoint?.apiKeyUrl ? apiEndpoint?.apiKeyUrl : '',
         validate: (value: string) => {  return !!value; }
       });
@@ -319,7 +334,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     apiEndpoint.apiKeyUrlEmbedded = true;
 
     const pApiKeyUrlParam = new Input({
-      message: chalkBoldWhite('URL parameter of the API Key (matching case, sans the ') + chalkBoldVariable('$') + chalkBoldWhite('):'),
+      message: `${chalkBoldWhite('URL parameter of the API Key')}\n` +
+      `${chalkBoldLabel('Hint')}: Parameter name should match case without the ${chalkBoldVariable('$')} symbol')`,
       initial: apiEndpoint?.apiKeyUrlParam ? apiEndpoint?.apiKeyUrlParam : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -340,8 +356,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   } else if (apiEndpoint.apiAuthType === 'Basic Authentication') {
     const pApiToken = new Input({
-      message: chalkBoldWhite('Credential (Base64 encoded string):'),
-      hint: 'A Base64 encoded credential derived from user/password or user/secret pairs',
+      message: `${chalkBoldWhite('Credential (Base64 encoded string')}\n` +
+      `${chalkBoldLabel('Hint')}: A Base64 encoded credential derived from user/password or user/secret pairs\n`,
       initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -356,8 +372,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   } else if (apiEndpoint.apiAuthType === 'Token Authentication') {
     const pApiToken = new Input({
-      message: chalkBoldWhite('Credential (Base64 encoded string):'),
-      hint: 'API security/access token',
+      message: `${chalkBoldWhite('Credential (Base64 encoded string')}\n` +
+      `${chalkBoldLabel('Hint')}: API security/access token\n`,
       initial: apiEndpoint?.apiToken ? apiEndpoint?.apiToken : '',
       validate: (value: string) => {  return !!value; }
     });
@@ -384,8 +400,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       };
 
       const pxApiKey = new Input({
-        message: chalkBoldWhite('X-API Key:'),
-        hint: 'X-API Key (Enter to skip marking the end of the key-value pairs)',
+        message: `${chalkBoldWhite('X-API Key')}\n` +
+        `${chalkBoldLabel('Hint')}: X-API Key (Enter to skip marking the end of the key-value pairs)\n`,
         initial: xApiPair.key
       });
 
@@ -497,7 +513,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pCount = new Input({
-    message: chalkBoldWhite('Number of events:'),
+    message: `${chalkBoldWhite('Number of events')}\n` +
+    `${chalkBoldLabel('Hint')}: The total number of events to be published in a single feed run\n`,
     initial: apiRules.publishSettings ? apiRules.publishSettings.count : '20',
     validate: (value: string) => {  return !!value; }
   });
@@ -512,7 +529,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
     
     const pInterval = new Input({
-      message: chalkBoldWhite('Interval (in secs):'),
+      message: `${chalkBoldWhite('Publish interval')}\n` +
+      `${chalkBoldLabel('Hint')}: The time gap (in secs) between successive publish operations\n`,
       initial: apiRules.publishSettings ? apiRules.publishSettings.interval : '3',
       validate: (value: string) => {  return !!value; }
     });
@@ -527,7 +545,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       });
   
   const pDelay = new Input({
-    message: chalkBoldWhite('Initial Delay (in secs):'),
+    message: `${chalkBoldWhite('Initial delay')}\n` +
+    `${chalkBoldLabel('Hint')}: The initial delay (in secs) before the first publish operation starts\n`,
     initial: apiRules.publishSettings ? apiRules.publishSettings.delay : '0',
     validate: (value: string) => {  return !!value; }
   });
@@ -542,7 +561,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pDescription = new Input({
-    message: chalkBoldWhite('Feed description'),
+    message: `${chalkBoldWhite('Feed description')}\n` +
+    `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
     initial: feed?.description ? feed?.description : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -557,8 +577,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const feedImg = new Input({
-    message: chalkBoldWhite('Feed icon (an URL or a base64 image data):'),
-    hint: 'Leave blank to use default feed icon',
+    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+    `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
     initial: feed?.img ? feed?.img : ''
   });
 
@@ -572,7 +592,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pContributor = new Input({
-    message: chalkBoldWhite('Contributor name or organization name'),
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
     initial: feed?.contributor ? feed?.contributor : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -587,7 +608,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pGitUser = new Input({
-    message: chalkBoldWhite('GitHub username'),
+    message: `${chalkBoldWhite('GitHub handle')}\n` +
+    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
     initial: feed?.github ? feed?.github : ''
   });
 
@@ -601,7 +623,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pDomain = new Input({
-    message: chalkBoldWhite('Feed domain'),
+    message: `${chalkBoldWhite('Feed domain')}\n` +
+    `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
     initial: feed?.domain ? feed?.domain : '',
     validate: (value: string) => {  return !!value; }
   });
@@ -616,7 +639,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     });
 
   const pTags = new Input({
-    message: chalkBoldWhite('Feed keywords (as a comma-separated values):'),
+    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+    `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
     initial: feed?.tags ? feed?.tags : '',
     validate: (value: string) => {  return !!value; }
   });
