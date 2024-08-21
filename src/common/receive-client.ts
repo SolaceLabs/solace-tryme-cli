@@ -121,6 +121,7 @@ export class SolaceClient extends VisualizeClient {
         //SUBSCRIPTION ERROR implies that there was an error in subscribing on a topic
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) => {
           Logger.logDetailedError(`cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
+          process.exit(1)
         });
 
         //SUBSCRIPTION_OK implies that a subscription was successfully applied/removed from the broker
@@ -299,6 +300,7 @@ export class SolaceClient extends VisualizeClient {
     } catch (error: any) {
       Logger.logDetailedError(`subscribe action failed - `, error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      process.exit(1);
     }
   }
 
