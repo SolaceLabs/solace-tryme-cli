@@ -3,7 +3,7 @@ import http from 'http'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome, defaultFeedApiEndpointFile } from './defaults'
 import { buildMessageConfig } from './init'
 import { parseNumber } from './parse'
 import { fakerRulesJson } from './fakerrules';
@@ -30,6 +30,19 @@ export const processPath = (savePath: boolean | string) => {
       filePath = path.resolve(filePath)
     }
     filePath = filePath.concat(savePath.endsWith('.json') ? '' : '.json');
+  }
+  return filePath
+}
+
+export const processAsyncAPIFilePath = (savePath: boolean | string) => {
+  let filePath = ''
+  if (savePath === true) {
+    filePath = defaultPath
+  } else if (typeof savePath === 'string') {
+    filePath = path.normalize(savePath)
+    if (!path.isAbsolute(filePath)) {
+      filePath = path.resolve(filePath)
+    }
   }
   return filePath
 }
@@ -91,6 +104,18 @@ export const readFile = (path: string) => {
     return JSON.parse(config)
   } catch (error: any) {
     Logger.logDetailedError('read file failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const readRawFile = (path: string) => {
+  try {
+    const config = fs.readFileSync(path, 'utf-8')
+    return config;
+  } catch (error: any) {
+    Logger.logDetailedError('read raw file failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.logError('exiting...')
     process.exit(1)
@@ -496,10 +521,10 @@ export const saveOrUpdateCommandSettings = (options: MessageClientOptions | Mana
 
 export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) => {
   try {
-    const filePath = processPath(`${configFile}`)
+    const filePath = processAsyncAPIFilePath(`${configFile}`)
     if (fileExists(filePath)) {
       Logger.info(`loading file '${configFile}'`)
-      return readFile(filePath);
+      return readRawFile(filePath);
     } else {
       Logger.logDetailedError(`file not found`, `${decoratePath(configFile)}`)
       Logger.logError('exiting...')
@@ -545,19 +570,30 @@ export const createFeed = (fileName: string, feedName: string, apiJson: object, 
   }
 }
 
-export const validateFeed = (feedName: string) => {
+export const validateFeed = (feedName: string, type: string) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   try {
     if (!fileExists(feedPath))
       return `error: feed ${feedName} not found!`;
 
-    if (!fileExists(`${feedPath}/${defaultFeedAnalysisFile}`))
-      return `error: invalid or missing feed analysis, try regenerating feed!`;
+    if (type === 'asyncapi_feed') {
+      if (!fileExists(`${feedPath}/${defaultFeedAnalysisFile}`))
+        return `error: invalid or missing feed analysis, try regenerating feed!`;
 
-    if (!fileExists(`${feedPath}/${defaultFeedRulesFile}`))
-      return `error: invalid or missing feed ruleset, try regenerating feed!`;
+      if (!fileExists(`${feedPath}/${defaultFeedRulesFile}`))
+        return `error: invalid or missing feed ruleset, try regenerating feed!`;
 
-    return false;
+      return false;
+    } else if (type === 'restapi_feed') {
+      if (!fileExists(`${feedPath}/${defaultFeedApiEndpointFile}`))
+        return `error: invalid or missing feed api endpoint, try regenerating feed!`;
+
+      // const apiEndpoint:any = loadLocalFeedFile(feedName, defaultFeedApiEndpointFile) ;
+      // if (!apiEndpoint.apiUrl.includes('$'))
+      //   return `info: no placeholders found on the API endpoint, nothing to configure!`;
+
+      return false;
+    } 
   } catch (error: any) {
     Logger.logDetailedError('load feed analysis failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -566,26 +602,23 @@ export const validateFeed = (feedName: string) => {
   }
 }
 
-export const loadFeedInfo = async (feedName: string, feedType = 'stmfeed') => {
+export const loadLoadFeedInfo = (feedName: any) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   try {
-    var data = await loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    var info = readFile(`${feedPath}/${defaultFeedInfoFile}`);
+    return info;
+  } catch (error: any) {
+    Logger.logDetailedError('load feed info failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
 
-    if (!fileExists(`${feedPath}/${defaultFeedInfoFile}`)) {
-      Logger.logWarn(`feed info not, found creating a new one`)
-      var defaultInfo = {
-        "name": feedName,
-        "description": data.info['description'] ? data.info['description'].trim() : '',
-        "img": "",
-        "type": feedType,
-        "contributor": "",
-        "github": "",
-        "domain": "",
-        "tags": ""
-      }
-
-      writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, defaultInfo, true);
-    }
+export const updateAndLoadFeedInfo = (feed: any) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feed.name}`);
+  try {
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, feed, true);
 
     var info = readFile(`${feedPath}/${defaultFeedInfoFile}`);
     return info;
@@ -616,26 +649,57 @@ export const loadLocalFeedFile = (feedName: string, fileName: string) => {
   }
 }
 
+export const loadLocalApiFeedRuleFile = (feedName: string, fileName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logInfo('no feed rule exists!');
+      return false;
+    }
+
+    if (!fileExists(`${feedPath}/${fileName}`))
+      return false;
+
+    var feedRules = readFile(`${feedPath}/${fileName}`);
+    return feedRules;
+  } catch (error: any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
 export const getAllFeeds = () => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
   const directories:any = fs.readdirSync(feedPath);
   const feeds: any[] = [];
+  
   directories.forEach((feedName: string) => {
-    feeds.push({
-      name: feedName,
-      invalid: validateFeed(feedName),
-      config: loadLocalFeedFile(feedName, defaultFeedAnalysisFile)
-    })
+    var stat = fs.lstatSync(`${feedPath}/${feedName}`);
+    if (stat.isDirectory() && fs.existsSync(`${feedPath}/${feedName}/${defaultFeedInfoFile}`)) {
+      const info:any = loadLocalFeedFile(feedName, defaultFeedInfoFile) ;
+      feeds.push({
+        type: info.type,
+        name: feedName,
+        info: info,
+        invalid: validateFeed(feedName, info.type),
+        config: info.type === 'restapi_feed' ? loadLocalFeedFile(feedName, defaultFeedApiEndpointFile) :
+                  info.type === 'asyncapi_feed' ? loadLocalFeedFile(feedName, defaultFeedAnalysisFile) : null,
+      })
+    }
   })
 
   return feeds;
 }
 
-export const getFeed = (feedName: string) => {
+export const getFeed = (feedName: string, info: any = null) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   const configPath = processPlainPath(`${defaultStmHome}`);
   const files:any = fs.readdirSync(`${configPath}`);
   const brokers: any[] = [];
+  if (!info) info = loadLocalFeedFile(feedName, defaultFeedInfoFile) ;
+
   files.forEach((fileName: string) => {
     var filePath = `${configPath}/${fileName}`
     var stat = fs.lstatSync(filePath);
@@ -646,21 +710,38 @@ export const getFeed = (feedName: string) => {
     }
   })
 
-  const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+  const feed: any = { type: info.type };
+  if (info.type === 'restapi_feed') {
+    feed.name = feedName;
+    feed.info = info
+    feed.config = loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
+    feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
+    feed.brokers = brokers
+  } else if (info.type === 'asyncapi_feed') { 
+    feed.name = feedName;
+    feed.config = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
+    feed.schemas = fileExists(`${feedPath}/${defaultFeedSchemasFile}`) ? loadLocalFeedFile(feedName, defaultFeedSchemasFile) : null;
+    feed.brokers = brokers
+  } else if (info.type === 'custom_feed') {
+    Logger.logError(`${info.type} is not supported yet, please try again later!`)
+    Logger.error('exiting...');
+    process.exit(1);
+  } else {
+    Logger.logError(`invalid feed type ${info.type}!`)
+    Logger.error('exiting...');
+    process.exit(1);
+  }
 
-  const feed: any = {
-    name: feedName,
-    fileName: analysis.fileName,
-    config: loadLocalFeedFile(feedName, defaultFeedAnalysisFile),
-    rules: loadLocalFeedFile(feedName, defaultFeedRulesFile),
-    schemas: loadLocalFeedFile(feedName, defaultFeedSchemasFile),
-    brokers: brokers
-  };
+  if (info.type === 'asyncapi_feed') {
+    const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
+    feed.fileName = analysis.fileName;
+  }
 
   return feed;
 }
 
-export const updateRules = (feedName: string, rulesJson: any) => {
+export const updateRules = async (feedName: string, rulesJson: any) => {
   const feedPath = `${defaultStmFeedsHome}/${feedName}`;
   const rulesFile = processPath(`${defaultStmFeedsHome}/${feedName}/${defaultFeedRulesFile}`);
   try {
@@ -670,9 +751,35 @@ export const updateRules = (feedName: string, rulesJson: any) => {
     }
 
     writeFile(`${rulesFile}`, rulesJson)
+
+    var info = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    info.lastUpdated = new Date().toISOString();
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
     return true;
   } catch (error: any) {
     Logger.logDetailedError('update feed rules failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    return false;
+  }
+}
+
+export const updateApiRules = async (feedName: string, rulesJson: any) => {
+  const feedPath = `${defaultStmFeedsHome}/${feedName}`;
+  const rulesFile = processPath(`${defaultStmFeedsHome}/${feedName}/${defaultFeedRulesFile}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logWarn(`feed ${feedName} not found!`)
+      return false;
+    }
+
+    writeFile(`${rulesFile}`, rulesJson)
+
+    var info = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    info.lastUpdated = new Date().toISOString();
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
+    return true;
+  } catch (error: any) {
+    Logger.logDetailedError('update api rules failed', error.toString())
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     return false;
   }
@@ -743,3 +850,59 @@ export const loadGitFeedFile = async (feedName: string, fileName: string) => {
     process.exit(1)
   }
 }
+
+export const loadGitApiFeedRuleFile = async (feedName: string, fileName: string) => {
+  try {
+    var feedUrl = `${defaultGitRepo}/${feedName}`;
+    var validFeedUrl = await urlExists(encodeURI(`${feedUrl}/${fileName}`));
+    if (!validFeedUrl) {
+      Logger.logDetailedError('invalid or non-existing feed URL', feedUrl)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    return await fetch(`${feedUrl}/${fileName}`)
+      .then(async (response) => {
+        const data = await response.json();
+        return data;
+      })
+      .catch((error:any) => {
+        Logger.logInfo('no feed rule exists!');
+        return false;
+      })
+  } catch (error:any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const createApiFeed = (feed: any) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feed.name}`);
+  try {
+    if (fileExists(feedPath)) {
+      Logger.warn(`Feed '${feed.name}' already exists, `)
+      var prompt = require('prompt-sync')();
+      var confirmation = prompt(`${chalk.whiteBright('Feed already exists, do you want to overwrite (') + 
+                                  chalk.greenBright('y') + chalk.whiteBright('/') + 
+                                  chalk.redBright('n') + chalk.whiteBright('): ')}`);
+      if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+        Logger.logWarn('abort create feed...')
+        Logger.logError('exiting...')
+        process.exit(0);
+      } else {
+        fs.rmSync(feedPath, { recursive: true, force: true });
+      }
+    }
+
+    fs.mkdirSync(feedPath, { recursive: true })
+    writeJsonFile(`${feedPath}/${defaultFeedApiEndpointFile}`, feed)
+  } catch (error: any) {
+    Logger.logDetailedError('create feed failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+

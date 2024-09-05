@@ -3,8 +3,11 @@ import { loadLocalFeedFile, loadGitFeedFile, processPlainPath } from './config';
 import { defaultEventFeedsFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from './defaults';
 
 export const getLocalEventFeeds = () => {
-  const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
   var localFeeds: any[] = [];
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
+  if (!fs.existsSync(`${feedPath}`)) 
+    return localFeeds;
+  
   const files:any = fs.readdirSync(`${feedPath}`);
   files.forEach((fileName: string) => {
     var filePath = `${feedPath}/${fileName}`
@@ -35,6 +38,21 @@ export const getFeedEvents = (feedName:any) => {
   return events;
 }
 
+export const getGitEventFeeds = async () => {
+  var gitFeeds: any[] = [];
+  try {
+    await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
+      .then(async (response) => {
+        const data = await response.json();
+        data.forEach((d: any) => gitFeeds.push(d));
+      })
+  } catch (error:any) {
+    ;
+  }
+  
+  return gitFeeds;
+}
+
 export const getGitFeedEvents = async (feedName:any) => {
   var events: any[] = [];
   var data = await loadGitFeedFile(feedName, defaultFeedAnalysisFile)
@@ -51,20 +69,4 @@ export const getGitFeedEvents = async (feedName:any) => {
   });
 
   return events;
-}
-
-
-export const getGitEventFeeds = async () => {
-  var gitFeeds: any[] = [];
-  try {
-    await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
-      .then(async (response) => {
-        const data = await response.json();
-        data.forEach((d: any) => gitFeeds.push(d));
-      })
-  } catch (error:any) {
-    ;
-  }
-  
-  return gitFeeds;
 }

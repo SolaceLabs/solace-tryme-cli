@@ -1,6 +1,5 @@
-import { on } from 'events';
 import { getAllFeeds, getFeed, loadLocalFeedFile, updateRules } from '../utils/config';
-import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultGitRepo, defaultProjectName } from '../utils/defaults';
+import { defaultFakerRulesFile, defaultFeedInfoFile, defaultProjectName } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator, fakeEventGenerator } from './feed-datahelper';
@@ -8,19 +7,19 @@ import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
 
 const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
-  var feedConfig: any = undefined;
   var feedName: string | undefined = options.feedName;
   var publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
-
+  var feedInfo: any = undefined;
+  
   if (feedName) {
-    Logger.success(`loading broker feed config ${feedName}`)
-    feedConfig = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+    Logger.success(`loading broker feed info ${feedName}`)
+    feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);
   } 
   else {
     const { Select } = require('enquirer');
     var localFeeds:any[] = getLocalEventFeeds();
     localFeeds = [ 'All Event Feeds', ...localFeeds];
-    const prompt = new Select({
+    const pPickFeed = new Select({
       name: 'localFeed',
       message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -28,13 +27,12 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
       choices: localFeeds
     });
 
-    await prompt.run()
+    await pPickFeed.run()
       .then((answer:any) => feedName = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
-    await prompt.close();
 
     if (feedName === 'All Event Feeds') {
       feedName = undefined;
@@ -55,7 +53,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   app.use(express.static(publicDir + '/public'));
   app.use(express.json()); 
   app.use(function(req:any, res:any, next:any) {
-    // console.log('Request on ', req.path);
+    // console.log('Request: ', req.method, ' on ', req.path);
     if (req.path.startsWith('/index.html')) {
       res.redirect(302, '/feeds.html');
       res.end();
@@ -84,9 +82,9 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     res.json(rules);    
   })
 
-  app.post('/feedrules', (req:any, res:any) => {
+  app.post('/feedrules', async (req:any, res:any) => {
     var feed = req.body;
-    var result = updateRules(feed.name, feed.rules);
+    var result = await updateRules(feed.name, feed.rules);
     if (result) 
       res.status(200).json({success: 'updated feed rules successfully'});
     else
@@ -135,7 +133,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
 
   app.post('/exit', (req:any, res:any) => {
     console.log('exiting...')
-    process.exit(0);
+    setTimeout(process.exit(0), 2000)
   })
 
   let http = require('http');

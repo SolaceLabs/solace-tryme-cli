@@ -1,13 +1,13 @@
 import { checkConnectionParamsExists, checkForFeedSettings } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultFeedRulesFile, defaultGitRepo, delay } from '../utils/defaults';
+import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
 import { fakeEventGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkEventCounterValue, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
 import { getLocalEventFeeds, getGitEventFeeds, getFeedEvents, getGitFeedEvents } from '../utils/listfeeds';
 import sleep from 'sleep-promise';
-import { tr } from '@faker-js/faker';
+import feedRunApi from './feed-run-api';
 
 const selectedMessages: any[] = [];
 const eventFeedTimers: any[] = [];
@@ -25,19 +25,70 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   var cmdLine = false;
-  if (optionsSource.feedName === 'cli' && optionsSource.eventNames === 'cli') {
+  if (optionsSource.feedName === 'cli') {
+    cmdLine = true;
     feedName = options.feedName;
     eventNames = options.eventNames;
     if (feedName && options.communityFeed)
       gitFeed = true;
-    checkForFeedSettings(eventNames, feedName);
-    cmdLine = true;
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+
+    if (feedInfo.type === 'restapi_feed')
+      return feedRunApi(options, optionsSource);
+
+    var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
+    var eventsList:any = events.map((event:any) => {
+      return {
+        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
+        name: event.name,
+      }
+    })
+
+    if (optionsSource.eventNames !== 'cli') {
+      const { MultiSelect } = require('enquirer');
+      const pPickEvent = new MultiSelect({
+        name: 'localEvent',
+        message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+        `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
+        `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
+        `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
+        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+        choices: eventsList,
+        initial: eventsList.map((e:any, index:number) => index)
+      });
+
+      var eventChoices: string | any[] = []
+      await pPickEvent.run()
+        .then((answer:any) => eventChoices = answer)
+        .catch((error:any) => {
+          Logger.logDetailedError('interrupted...', error)
+          process.exit(1);
+        });
+      
+      options.eventNames = eventChoices;
+      optionsSource.eventNames = 'cli';
+    } else {
+      var missingEvents = eventNames.filter((e:any) => !eventsList.find((el:any) => el.name === e));
+      if (missingEvents.length) {
+        Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
+        Logger.logError('exiting...')
+        process.exit(1);
+      }
+      
+      options.eventNames = eventNames;
+      optionsSource.eventNames = 'cli';
+    }
+  } else if (optionsSource.eventNames === 'cli') {
+    Logger.logError(`Missing event feed name...`)
+    Logger.logError('exiting...')
+    process.exit(1);
   }
-  
+
   // check for event in the feed
   if (!cmdLine) {
     const { Select, MultiSelect } = require('enquirer');
-    const prompt = new Select({
+    const pFeedSource = new Select({
       name: 'source',
       message: `Pick the event feed source \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
                 `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -49,7 +100,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     });
 
     var choice = undefined;
-    await prompt.run()
+    await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -57,7 +108,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       });
     
     if (choice === 'Local Event Feeds') {
-      const prompt = new Select({
+      const pPickEvent = new Select({
         name: 'localFeed',
         message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
         `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -65,7 +116,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         choices: getLocalEventFeeds()
       });
   
-      await prompt.run()
+      await pPickEvent.run()
         .then((answer:any) => feedName = answer)
         .catch((error:any) => {
           Logger.logDetailedError('interrupted...', error)
@@ -96,14 +147,19 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     }
 
     options.feedName = feedName;
+
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    if (feedInfo.type === 'restapi_feed')
+      return feedRunApi(options, optionsSource);
+
     var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
     var eventsList:any = events.map((event:any) => {
       return {
-        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
+        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic, '$')),
         name: event.name,
       }
     })
-    const prompt2 = new MultiSelect({
+    const pPickEvent = new MultiSelect({
       name: 'localEvent',
       message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -116,7 +172,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     });
 
     var eventChoices: string | any[] = []
-    await prompt2.run()
+    await pPickEvent.run()
       .then((answer:any) => eventChoices = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
@@ -156,6 +212,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
+
   options.readyForExit = options.eventNames.length;
   options.eventNames.forEach((eventName:any) => {
     var feedRule:any = undefined;

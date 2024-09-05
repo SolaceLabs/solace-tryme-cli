@@ -1,7 +1,11 @@
 {
-  "name": "stm",
-  "version": "0.0.42",
+  "name": "@solace-community/stm",
+  "version": "0.0.49",
   "description": "Solace Try-Me Command Line Tool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SolaceLabs/solace-tryme-cli"
+  },
   "keywords": [
     "solace",
     "tryme",
@@ -17,7 +21,8 @@
     "dev": "tsc -w",
     "index": "ts-node bin/index.js",
     "build": "tsc",
-    "package": "pkg package.json"
+    "package": "pkg package.json",
+    "publish": "npm run build; npm publish --access public"
   },
   "main": "./dist/src/index.js",
   "bin": {

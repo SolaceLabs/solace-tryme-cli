@@ -44,10 +44,22 @@ export const chalkFeedTypeHint = (value: any) => {
   return chalk.yellowBright.bold(value);
 }
 
-export const colorizeTopic = (value: string) => {
+export const chalkFeedRestAPIValue = (value: any) => {
+  return chalk.hex('#ffb41a')(value);
+}
+
+export const chalkFeedOpenAPIValue = (value: any) => {
+  return chalk.hex('#98d71b')(value);
+}
+
+export const chalkFeedAsyncAPIValue = (value: any) => {
+  return chalk.hex('#d917a3')(value);
+}
+
+export const colorizeTopic = (value: string, marker: string = '{') => {
   let tokens = value.split('/');
   tokens.forEach((v, index) => {
-    if (v.startsWith('{')) 
+    if (v.startsWith(marker)) 
       tokens[index] = chalkBoldVariable(v.toString())
     else
       tokens[index] = chalkBoldWhite(v.toString())

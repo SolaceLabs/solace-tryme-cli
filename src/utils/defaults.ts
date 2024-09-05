@@ -1,4 +1,6 @@
+import * as fs from 'fs'
 import solace from "solclientjs";
+import { Logger } from './logger';
 
 const os = require('os');
 
@@ -142,7 +144,7 @@ export const defaultMessageConfig:any = {
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
-  payloadType: "text",
+  payloadType: "TEXT",
   outputMode: 'DEFAULT',
   pretty: false
 }
@@ -352,14 +354,15 @@ export const defaultManageClientUsernameConfig:any = {
 }
 
 export const defaultFeedConfig:any = {
-  feedName: "stm-event-feed",
-  feedType: "stm",
+  feedName: "stm-asyncapi_feed",
+  feedType: "asyncapi",
   communityFeed: false,
   fileName: "",
   eventNames: [],
   communityOnly: true,
   localOnly: true,
   verbose: false,
+  uiPortal: false,
   managePort: 0
 }
 
@@ -404,8 +407,30 @@ export const getType = (message:solace.Message) => {
   }
 }
 
-export const homedir = require('os').homedir();
-export const defaultStmHome = `${homedir}/.stm`
+var currentHomeDir = require('os').homedir();
+var currentStmHome = `${currentHomeDir}/.stm`;
+
+if (process.env.STM_HOME) {
+  currentStmHome = process.env.STM_HOME;
+}
+
+if (!fs.existsSync(currentStmHome)) {
+  Logger.warn(`STM_HOME directory ${currentStmHome} does not exist. Creating it.`)
+  try {
+    fs.mkdirSync(currentStmHome);
+    fs.mkdirSync(`${currentStmHome}/feeds`);
+  } catch (err) {
+    Logger.error(`Error creating STM_HOME directory ${currentStmHome}. ${err}`)
+    process.exit(1)
+  }
+} else {
+  try {
+    fs.mkdirSync(`${currentStmHome}/feeds`);
+  } catch (err) {}
+}
+
+export const homedir = currentHomeDir;
+export const defaultStmHome = currentStmHome;
 export const defaultStmFeedsHome = `${defaultStmHome}/feeds`
 export const defaultStmTempFeedsHome = `${defaultStmHome}/feeds/tmp`
 export const defaultFeedAnalysisFile = 'analysis.json'
@@ -414,7 +439,8 @@ export const defaultFeedInfoFile = 'feedinfo.json'
 export const defaultFeedRulesFile = 'feedrules.json'
 export const defaultFeedSchemasFile = 'feedschemas.json'
 export const defaultEventFeedsFile = 'EVENT_FEEDS.json'
-export const defaultGitRepo = 'https://raw.githubusercontent.com/gvensan/test-feeds/main';
-export const defaultGitFeedRepo = 'https://github.com/gvensan/test-feeds/tree/main';
+export const defaultFeedApiEndpointFile = 'feedapi.json'
+export const defaultGitRepo = 'https://raw.githubusercontent.com/solacecommunity/solace-event-feeds/main';
+export const defaultGitFeedRepo = 'https://github.com/solacecommunity/solace-event-feeds/tree/main';
 export const defaultProjectName = 'solace-tryme-cli'
-export const communityRepoUrl = 'https://github.com/solacecommunity/solace-event-feeds';
+export const supportedFeedTypes = [ 'asyncapi_feed', 'restapi_feed' ]; //, 'custom_feed'

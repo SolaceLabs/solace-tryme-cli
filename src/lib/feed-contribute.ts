@@ -1,103 +1,70 @@
-import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { fileExists, loadFeedInfo, processPlainPath, readFile, writeJsonFile } from '../utils/config';
-import { communityRepoUrl, defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
-        defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome } from '../utils/defaults';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkItalic } from '../utils/chalkUtils';
+import { processPlainPath, readFile, writeJsonFile, loadLoadFeedInfo } from '../utils/config';
+import { defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
+        defaultFeedApiEndpointFile, 
+        defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome, defaultGitRepo } from '../utils/defaults';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
+import { prettyJSON } from '../utils/prettify';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const { Select, Confirm, Input, List } = require('enquirer');
   var { feedName } = options;
+  var userEmail, contributionChanges = ''
 
   if (!feedName) {
-    const prompt0 = new Select({
+    const pPickFeed = new Select({
       name: 'localFeed',
-      message: `Pick a local event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      message: `Pick a local event feed \n\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
       `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
       choices: getLocalEventFeeds()
     });
 
-    await prompt0.run()
+    await pPickFeed.run()
       .then((answer:any) => feedName = answer)
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
   }
+  const feedLocalPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
 
   Logger.info('Let us first update the feed information\n')
 
-  var info:any = await loadFeedInfo(feedName);
-  console.log('Current', info);
+  var info:any = loadLoadFeedInfo(feedName);
+  Logger.logMessage(`${chalkBoldWhite('Current Feed Information:')}\n` + prettyJSON(JSON.stringify(info)));
 
-  info.name = feedName
-
-  const prompt = new Confirm({
-    message: `${chalkBoldWhite('Have you cloned the EVENT-FEEDS repo')} ${communityRepoUrl}?`,
-  });
-  
-  await prompt.run()
-    .then((answer:any) => {
-      if (!answer) {
-        Logger.error('Please clone the event feeds repo locally and try again');
-        process.exit(1)
-      }
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+  if (info.contributed) {
+    const pContributed = new Confirm({
+      message: `${chalkBoldWhite('It appears that the feed has been contributed to community already, do you want to update?')}`,
     });
+    await pContributed.run()
+      .then((answer:any) => {
+        if (!answer) {
+          Logger.success('Goodbye 👋');
+          process.exit(0)
+        }
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        Logger.error('Goodbye 👋');
+        process.exit(1);
+      });
+  }
 
-  const prompt2 = new Input({
-    message: 'Enter the cloned EVENT-FEEDS repo path:',
-    initial: ''
-  });
-  
-  var localRepo = '';
   var infoUpdated = false;
 
-  await prompt2.run()
-    .then((answer:any) => localRepo = answer)
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
+  // Take user input
 
-  if (!localRepo) {
-    Logger.error('Please clone the event feeds repo locally and specify the full path of the local repo!');
-    process.exit(1)
-  }
-
-  const repoPath = processPlainPath(`${localRepo}`);
-  try {
-    if (!fileExists(repoPath)) {
-      Logger.error('Specified local repo path does not exist, clone the event feeds repo locally and try again');
-      process.exit(1)
-    }
-
-    if (!fileExists(`${repoPath}/.git`)) {
-      Logger.error('Specified local repo is not a valid Git repository, clone the event feeds repo locally and try again');
-      process.exit(1)
-    }
-
-    if (!fileExists(`${repoPath}/${defaultEventFeedsFile}`)) {
-      Logger.error('Specified local repo is not a valid EVENT-FEEDS repository, clone the event feeds repo locally and try again');
-      process.exit(1)
-    }
-  } catch (error:any) {
-    Logger.error('Error while checking the local repo path, clone the event feeds repo locally and try again');
-    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
-    process.exit(1)
-  }
-
-  const prompt4 = new Input({
-    message: 'Feed description:',
-    initial: info.description
+  const pFeedDesc = new Input({
+    message: `${chalkBoldWhite('Feed description')}\n` +
+    `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
+      initial: info.description,
+    validate: (value: string) => {  return !!value; }
   });
-
-  await prompt4.run()
+  
+  await pFeedDesc.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.description !== answer;
       info.description = answer
@@ -107,58 +74,14 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
-    const prompt3 = new Input({
-      message: 'Feed icon (an URL or a base64 image data):',
-      hint: 'Leave blank to use default feed icon',
-      initial: info.img
-    });
-  
-    await prompt3.run()
-    .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.img !== answer;
-      info.img = answer ? answer : 'assets/img/defaultfeed.png'
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
-
-  const prompt5 = new Input({
-    message: 'Contributor name or organization name:',
-    initial: info.contributor
+  const pFeedDomain = new Input({
+    message: `${chalkBoldWhite('Feed domain')}\n` +
+    `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
+    initial: info.domain,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt5.run()
-    .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.contributor !== answer;
-      info.contributor = answer
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
-
-  const prompt6 = new Input({
-    message: 'GitHub username:',
-    initial: info.github
-  });
-
-  await prompt6.run()
-    .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.github !== answer;
-      info.github = answer
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    });
-
-  const prompt7 = new Input({
-    message: 'Feed domain:',
-    initial: info.domain
-  });
-
-  await prompt7.run()
+  await pFeedDomain.run()
     .then((answer:any) => {
       if (!infoUpdated) infoUpdated = info.domain !== answer;
       info.domain = answer
@@ -168,94 +91,234 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     }); 
 
-  const prompt8 = new List({
+  const pFeedIcon = new Input({
+    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+    `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
+    initial: info.img
+  });
+
+  const pFeedTags = new List({
     name: 'tags',
-    message: 'Feed keywords (as a comma-separated values):',
-    initial: info.tags
+    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+    `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
+    initial: info.tags,
+    validate: (value: string) => {  return !!value; }
   });
   
-  await prompt8.run()
+  await pFeedTags.run()
     .then((answer:any) => {
-      if (!infoUpdated) infoUpdated = info.tags !== (answer ? answer.join(', ') : '');
-      info.tags = answer ? answer.join(', ') : ''
+      if (!infoUpdated) infoUpdated = info.tags !== answer.join(', ');
+      info.tags = answer.join(', ');
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+  
+  await pFeedIcon.run()
+    .then((answer:any) => {
+      if (!infoUpdated) infoUpdated = info.img !== answer;
+      info.img = answer ? answer : 'assets/img/defaultfeed.png'
     })
     .catch((error:any) => {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
 
-  console.log('Updated', info);
+  const pFeedContributor = new Input({
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Contributor name for attribution. If not specified the contribution will be attributed to Solace Community!\n`,
+    initial: info.contributor
+  });
+
+  await pFeedContributor.run()
+    .then((answer:any) => {
+      if (!infoUpdated) infoUpdated = info.contributor !== answer;
+      // Make sure there is a list of unique contributors
+      info.contributor = [...new Set([...info.contributor.split(','), answer.split(',')].flat())].join(',');
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  const pGitUser = new Input({
+    message: `${chalkBoldWhite('GitHub handle')}\n` +
+    `${chalkBoldLabel('Hint')}: Contributor's GitHub handle for attribution. If not specified the contribution will be attributed to Solace Community!\n`,
+    initial: info.github
+  });
+
+  await pGitUser.run()
+    .then((answer:any) => {
+      if (!infoUpdated) infoUpdated = info.github !== answer;
+      answer ? info.github = answer : info.github = 'solacecommunity-bot';
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  do {
+    const pUserEmail = new Input({
+      message: `${chalkBoldWhite('Your email')}\n` +
+      `${chalkBoldLabel('Hint')}: Contact information for communication related to the contribution\n` +
+      `      ${chalkBoldLabel('Note:')} This is intended solely for internal communication and will not be shared publicly\n` 
+    });
+
+    await pUserEmail.run()
+      .then((answer:any) => {
+        userEmail = answer
+        infoUpdated = true
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  } while (!userEmail);
+
+  const pContributionChanges = new Input({
+    message: `${chalkBoldWhite('Additional information to accompany your pull request)')}\n` +
+    `${chalkBoldLabel('Hint')}: Information related to the feed's purpose, changes (if updated), use cases and useful references related to the domain/API.\n`,
+  });
+
+  await pContributionChanges.run()
+    .then((answer:any) => {
+      contributionChanges = answer
+      infoUpdated = true
+    })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    });
+
+  // Add the contributionChanges and userEmail to an TESTazureFunctionInfo object
+  const azureFunctionInfo = {
+    contributionChanges,
+    userEmail
+  }
+
+  // Update the feed info
+  info.lastUpdated = new Date().toISOString();   
+  info.contributed = true; 
+  
+  Logger.logMessage(`${chalkBoldWhite('Updated Feed Information:')}\n` + prettyJSON(JSON.stringify(info)));
+
   if (infoUpdated) {
-    const prompt9 = new Confirm({
+    const pFeedChanged = new Confirm({
       message: `${chalkBoldWhite('Feed info has changed and the feed will be updated, do you want to proceed?')}`,
     });
     
-    await prompt9.run()
+    await pFeedChanged.run()
       .then((answer:any) => {
-        if (!answer) {
-          Logger.success('exiting...');
-          process.exit(1)
+        if (answer) {
+          Logger.info('Creating PR...\n\n\n');
+          createPR(feedName, info, azureFunctionInfo, feedLocalPath).then(link => {
+            if (link) {
+              Logger.success(`PR created successfully at ${link}`);
+            } else {
+              Logger.error('Error creating PR');
+              process.exit(1);
+            }
+          })
         }
       })
       .catch((error:any) => {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
+  } else {
+    Logger.info('No changes detected. Exiting...')
   }
+}
 
-  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
-  const analysis:any = readFile(`${feedPath}/${defaultFeedAnalysisFile}`);
-
+async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedLocalPath:string, ) {
+  let PRLink = null
+  // const azureFunctionURL = 'http://localhost:7071/api/triggerContribute'
+  const azureFunctionURL = 'https://stm-contribute.azurewebsites.net/api/triggerContribute'
+  // Query EVENT-FEEDS.json
   try {
-    fs.mkdirSync(`${repoPath}/${feedName}`, { recursive: true })
-    fs.copyFileSync(`${feedPath}/${defaultFeedAnalysisFile}`, `${repoPath}/${feedName}/${defaultFeedAnalysisFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedInfoFile}`, `${repoPath}/${feedName}/${defaultFeedInfoFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedRulesFile}`, `${repoPath}/${feedName}/${defaultFeedRulesFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFakerRulesFile}`, `${repoPath}/${feedName}/${defaultFakerRulesFile}`)
-    fs.copyFileSync(`${feedPath}/${defaultFeedSchemasFile}`, `${repoPath}/${feedName}/${defaultFeedSchemasFile}`)
-    fs.copyFileSync(`${feedPath}/${analysis.fileName}`, `${repoPath}/${feedName}/${analysis.fileName}`)
-
-    var feeds = readFile(`${repoPath}/${defaultEventFeedsFile}`);
-    feeds.push(info);
-
-    writeJsonFile(`${repoPath}/${defaultEventFeedsFile}`, feeds, true);
-
-    // update local feedinfo 
-    info.contributed = true;
-    info.lastUpdated = new Date().toISOString();
-    
-    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
-
-
-    console.log(`
-${chalkBoldWhite(`Change directory to ${localRepo} and commit the changes, and create a PR.`)}
-${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
-`);
-  } catch (error: any) {
-    Logger.logDetailedError('feed copy failed', error.toString())
-    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
-    
-    console.log(`\n\n${chalkBoldLabel('However, you can follow the steps to contribute your event feed to EVENT-FEEDS repo for public access')}:`)
-    console.log(`
-${chalkBoldWhite('1. Copy the feed directory to the local repo')}
-
-${chalkItalic('$')} ${chalkBoldWhite(`cp -r "${defaultStmFeedsHome}/${feedName}" ${localRepo}`)}
-
-${chalkBoldWhite(`2. Open the ${localRepo}/${defaultEventFeedsFile} file and add the following feed info as last element in the array.`)}
-
-${chalkBoldWhite(JSON.stringify(info, null, 2))}
-
-${chalkBoldWhite('3. Commit the changes to your EVENT-FEEDS repository.')}
-
-${chalkBoldWhite('4. Create a PR on the GitHub for review.')}
-
-${chalkBoldWhite('Once the PR is reviewed and merged, your feed is will be publicly available for use by all users.')}
-  `)
-
-    return false;
+    const response = await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`);
+    if (response.ok) {
+      var communityFeeds = await response.json();
+    } else {
+      throw new Error(`Failed to fetch EVENT-FEEDS.json: ${response.status} ${response.statusText}`);
+    }
+  } catch (error:any) {
+    Logger.logDetailedError('Failed to fetch EVENT-FEEDS.json', error)
+    process.exit(1);
   }
 
-  Logger.success('Goodbye 👋')
+  // Remove the feed info from the list if it already exists
+  communityFeeds = communityFeeds.filter((feed:any) => feed.name !== feedName);
+  // Add the feed info to the communityFeeds list
+  communityFeeds.push(info);
+
+  // POST request to open PR with the files
+  let functionBody = null
+  try {
+    if (info.type === 'asyncapi_feed') {
+      const analysis:any = readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`);
+      
+      // Create form-data body payload 
+      let formData = new FormData();
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`))]), defaultFeedAnalysisFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`))]), defaultFeedSchemasFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${analysis.fileName}`))]), analysis.fileName);
+      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
+      formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
+      formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
+
+      functionBody = await executeFunction(azureFunctionURL, formData)
+    } else if (info.type === 'restapi_feed') {
+
+      // Create form-data body payload 
+      let formData = new FormData();
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`))]), defaultFeedApiEndpointFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
+      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
+      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
+      formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
+      formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
+
+      functionBody = await executeFunction(azureFunctionURL, formData)
+    }
+  } catch (error:any) {
+    Logger.logDetailedError('Function Failed. Contact community@solace.com for help', error)
+    Logger.alert('Please create a PR manually. See https://github.com/solacecommunity/solace-event-feeds for more details.')
+    process.exit(1);
+  }
+
+  if (functionBody.PRLink) {
+    // Update the local feedInfo file with the new info
+    writeJsonFile(`${feedLocalPath}/${defaultFeedInfoFile}`, info, true);
+    return functionBody.PRLink
+  } else {
+    Logger.error(`Error creating PR! \n${JSON.stringify(functionBody, null, 2)}`)
+    process.exit(1);
+  }
+}
+
+async function executeFunction (azureFunctionURL:string, formData:FormData) {
+  try {
+    let response: Response = await fetch(azureFunctionURL, {
+      method: 'POST',
+      body: formData,
+    });
+
+    let body  = await response.json()
+
+    if(response.ok) {
+      return body
+    } else {
+      Logger.error(`Error executing function:\n${JSON.stringify(body, null, 2)}`)
+      process.exit(1);
+    }
+  } catch (error) {
+    Logger.error(`Error executing function: contact community@solace.com for help`)
+    process.exit(1);
+  }
 }
 
 export default contribute

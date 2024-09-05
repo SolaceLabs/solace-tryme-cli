@@ -26,7 +26,9 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
 
     const promptFeed = new Select({
       name: 'gitFeed',
-      message: `Pick the event feed (↑↓ keys to ${chalkBoldVariable('move')} and ↵ to ${chalkBoldVariable('submit')})`,
+      message: `Pick the community event feed \n\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
       choices: gitFeeds
     });
 
@@ -41,8 +43,10 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   const { Input, List } = require('enquirer');
   
   const promptLocal = new Input({
-    message: 'Enter local feed name',
-    initial: feedName
+    message: `${chalkBoldWhite('Feed name')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current name\n`,
+    initial: feedName,
+    validate: (value: string) => {  return !!value; }
   });
   
   await promptLocal.run()
@@ -54,7 +58,7 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   
   const feedsPath = processPlainPath(`${defaultStmFeedsHome}`);
   if (!fileExists(feedsPath)) {
-    Logger.error('Local repo path does not exist, something wrong!');
+    Logger.error('Local feeds folder does not exist, something wrong!');
     process.exit(1)
   }
 
@@ -62,11 +66,11 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   if (fileExists(localFeedPath)) {
     const { Confirm } = require('enquirer');
 
-    const prompt = new Confirm({
-      message: `${chalkBoldWhite('A feed by name ${localFeedName} already exists, do you want to overwrite it?')}`
+    const pFeedOverwrite = new Confirm({
+      message: chalkBoldWhite(`A feed by name ${localFeedName} already exists, do you want to overwrite it?`)
     });
     
-    await prompt.run()
+    await pFeedOverwrite.run()
       .then((answer:any) => {
         if (!answer) {
           Logger.success('exiting...');
@@ -89,6 +93,7 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   data = await loadGitFeedFile(feedName, defaultFakerRulesFile);
   writeJsonFile(`${localFeedPath}/${defaultFakerRulesFile}`, data);
   var info = await loadGitFeedFile(feedName, defaultFeedInfoFile);
+  info.name = localFeedName;
   writeJsonFile(`${localFeedPath}/${defaultFeedInfoFile}`, info);
   data = await loadGitFeedFile(feedName, defaultFeedSchemasFile);
   writeJsonFile(`${localFeedPath}/${defaultFeedSchemasFile}`, data);
@@ -97,12 +102,13 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
   data = await loadGitFeedFile(feedName, defaultFeedSchemasFile);
   writeJsonFile(`${localFeedPath}/${defaultFeedSchemasFile}`, data);
 
-  const prompt3 = new Input({
-    message: 'Do you want to update the image url that represents the feed:',
+  const pImageOverwrite = new Input({
+    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current icon\n`,
     initial: info.img
   });
 
-  await prompt3.run()
+  await pImageOverwrite.run()
     .then((answer:any) => {
       info.img = answer
     })
@@ -111,26 +117,14 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt4 = new Input({
-    message: 'Do you want to update the title of the feed:',
-    initial: feedName
+  const pFeedDesc = new Input({
+    message: `${chalkBoldWhite('Feed description')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current description\n`,
+    initial: info.description,
+    validate: (value: string) => {  return !!value; }
   });
 
-  // await prompt4.run()
-  //   .then((answer:any) => {
-  //     info.title = answer
-  //   })
-  //   .catch((error:any) => {
-  //     Logger.logDetailedError('interrupted...', error)
-  //     process.exit(1);
-  //   });
-
-  const prompt5 = new Input({
-    message: 'Do you want to update the description of the feed',
-    initial: info.description
-  });
-
-  await prompt5.run()
+  await pFeedDesc.run()
     .then((answer:any) => {
       info.description = answer
     })
@@ -139,12 +133,13 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt6 = new Input({
-    message: 'Do you want to update your contributor:',
+  const pFeedContributor = new Input({
+    message: `${chalkBoldWhite('Contributor name')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current contributor info\n`,
     initial: info.contributor
   });
 
-  await prompt6.run()
+  await pFeedContributor.run()
     .then((answer:any) => {
       info.contributor = answer
     })
@@ -153,12 +148,14 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     });
 
-  const prompt7 = new Input({
-    message: 'Do you want to update the domain of the feed:',
-    initial: info.domain
+  const pFeedDomain = new Input({
+    message: `${chalkBoldWhite('Feed domain')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current contributor info\n`,
+    initial: info.domain,
+    validate: (value: string) => {  return !!value; }
   });
 
-  await prompt7.run()
+  await pFeedDomain.run()
     .then((answer:any) => {
       info.domain = answer
     })
@@ -167,13 +164,15 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       process.exit(1);
     }); 
 
-  const prompt8 = new List({
+  const pFeedTags = new List({
     name: 'tags',
-    message: 'Do you want to update tags that identifies the feed context better (as a comma-separated values):',
-    initial: info.tags
+    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+    `${chalkBoldLabel('Hint')}: Hit ${chalkBoldLabel('↵')} to keep the current contributor info\n`,
+    initial: info.tags,
+    validate: (value: string) => {  return !!value; }
   });
   
-  await prompt8.run()
+  await pFeedTags.run()
     .then((answer:any) => {
       info.tags = answer ? answer.join(', ') : ''
     })
@@ -181,7 +180,8 @@ const copyLocal = async (options: ManageFeedClientOptions, optionsSource: any) =
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
     });
-
+    
+  info.lastUpdated = new Date().toISOString();
   writeJsonFile(`${localFeedPath}/${defaultFeedInfoFile}`, info);
   Logger.success(`Feed ${localFeedName} copied successfully!`);
   Logger.success('exiting...');

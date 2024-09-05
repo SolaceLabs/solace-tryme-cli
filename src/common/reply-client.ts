@@ -96,6 +96,7 @@ export class SolaceClient extends VisualizeClient {
         });
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, (sessionEvent: solace.SessionEvent) => {
           Logger.logDetailedError(`cannot subscribe to topic ${sessionEvent.correlationKey} - `, sessionEvent.infoStr)
+          process.exit(1)
         });
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) => {
           if (this.replier.subscribed.includes(sessionEvent.correlationKey)) {
@@ -163,6 +164,7 @@ export class SolaceClient extends VisualizeClient {
     } catch (error: any) {
       Logger.logDetailedError(`subscribe action failed - `, error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+      process.exit(1);
     }
 
   };

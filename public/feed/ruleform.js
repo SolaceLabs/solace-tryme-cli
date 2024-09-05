@@ -92,54 +92,80 @@ function ruleAssignSubmit() {
         event.stopPropagation();
       }
 
-      let type = $('#parameterTopicVariableName').text();
-      let valid = type ? validateTopicVariableRule() : validatePayloadFieldRule();
-      // form.classList.add('was-validated');
-
-      if (valid) {
-        $('#field_rules_form').modal('toggle');
-        var page = window.location.href.split('/').pop();
-        var messageName = page.split('#').pop();
-        var feed = JSON.parse(localStorage.getItem('currentFeed'));
-        if (type) configureMessageSendTopics(messageName, feed.rules, true);
-
-        const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-        await fetch(path + `/feedrules`, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-          },
-          body: localStorage.getItem('currentFeed')
-        });
-
-        toastr.success('Rule updated successfully.')
-        form.classList.toggle('was-validated');
-
-        if (!type) {
+      let type = '';
+      let valid = false;
+      let ruleFor = $('#parameterRuleType').text();
+      if (ruleFor === 'API Variable') {
+        valid = validateAPIVariableRule();
+        if (valid) {
+          $('#field_rules_form').modal('toggle');
+          var page = window.location.href.split('/').pop();
           var feed = JSON.parse(localStorage.getItem('currentFeed'));
-          var messageName = page.split('#').pop();
-          messageName = decodeURIComponent(messageName);
-
-          var rule = feed.rules.find((r) => r.messageName === messageName);
-          if (!rule) return;
-
-          var parent = document.getElementById('payload-variable-pane');
-          parent.innerHTML = '';
-          parent.style.width = 'auto';
-    
-          var node = $('#payload-tree-pane').treeview('getSelected')
-          if (!node || !node.length) return;
-
-          var el = document.createElement('div');
-          var field = rule.payload[node[0].path];
-          if (node[0].path.indexOf('.') > 0)
-            field = getFieldRule(rule.payload, node[0].path)
-    
-          el.innerHTML = buildParamRuleUI('send', field.rule, rule.topic, 'payload', node[0]);
-          parent.appendChild(el);            
+          configureAPIVariables(feed.rules.rules, true);
+  
+          const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          await fetch(path + `/feedrules`, {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: localStorage.getItem('currentFeed')
+          });
+  
+          toastr.success('Rule updated successfully.')
+          form.classList.toggle('was-validated');  
+          return false;
         }
+  
+      } else {
+        type = $('#parameterTopicVariableName').text();
+        valid = type ? validateTopicVariableRule() : validatePayloadFieldRule();
+        if (valid) {
+          $('#field_rules_form').modal('toggle');
+          var page = window.location.href.split('/').pop();
+          var messageName = page.split('#').pop();
+          var feed = JSON.parse(localStorage.getItem('currentFeed'));
+          if (type) configureMessageSendTopics(messageName, feed.rules, true);
+  
+          const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          await fetch(path + `/feedrules`, {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: localStorage.getItem('currentFeed')
+          });
+  
+          toastr.success('Rule updated successfully.')
+          form.classList.toggle('was-validated');
+  
+          if (!type) {
+            var feed = JSON.parse(localStorage.getItem('currentFeed'));
+            var messageName = page.split('#').pop();
+            messageName = decodeURIComponent(messageName);
+  
+            var rule = feed.rules.find((r) => r.messageName === messageName);
+            if (!rule) return;
+  
+            var parent = document.getElementById('payload-variable-pane');
+            parent.innerHTML = '';
+            parent.style.width = 'auto';
       
-        return false;
+            var node = $('#payload-tree-pane').treeview('getSelected')
+            if (!node || !node.length) return;
+  
+            var el = document.createElement('div');
+            var field = rule.payload[node[0].path];
+            if (node[0].path.indexOf('.') > 0)
+              field = getFieldRule(rule.payload, node[0].path)
+      
+            el.innerHTML = buildParamRuleUI('send', field.rule, rule.topic, 'payload', node[0]);
+            parent.appendChild(el);            
+          }
+        
+          return false;
+        }
+  
       }
     });
   });

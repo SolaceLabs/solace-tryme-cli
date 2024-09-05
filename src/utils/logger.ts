@@ -54,7 +54,7 @@ const Logger = {
 
   success: (message: string) => Signal.success(`${chalk.greenBright('success: ').concat(chalk.greenBright(message))}`),
   logSuccess: (message: string) => Signal.success(`${chalk.greenBright('success: ').concat(chalk.whiteBright(message))}`),
-  logDetailedSuccess: (message: string, detail: string) => Signal.success(chalk.greenBright('success: ').concat(chalk.whiteBright(message)).concat(' - ').concat(chalk.greenBright(detail))),
+  logDetailedSuccess: (message: string, detail: string, hyphenate: boolean = true) => Signal.success(chalk.greenBright('success: ').concat(chalk.whiteBright(message)).concat(hyphenate ? ' - ' : '').concat(chalk.greenBright(detail))),
 
   aid: (aid: string) => Signal.aid(chalk.magentaBright(aid)),
 
@@ -68,7 +68,8 @@ const Logger = {
   keyPair: (key: string, value: string) => Signal.info('info: ' + chalk.whiteBright(`${key}: `).concat(chalk.whiteBright(`${value}`))),
   logKeyPair: (key: string, value: string) => Signal.info('info: ' + chalk.whiteBright(`${key}: `).concat(chalk.whiteBright(`${value}`))),
 
-  info: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
+  // info: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
+  info: (message: string) => Signal.info(chalk.yellowBright('info: ').concat(chalk.whiteBright(message))),
   logInfo: (message: string) => Signal.info(chalk.whiteBright('info: ').concat(chalk.whiteBright(message))),
 
   message: (message: string) => Signal.info(chalk.keyword('orange')('message: ').concat(chalk.whiteBright(message))),

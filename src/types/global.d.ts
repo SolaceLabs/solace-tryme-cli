@@ -211,6 +211,9 @@ declare global {
     communityOnly: boolean
     verbose: boolean
 
+    // ui based run options
+    uiPortal: boolean
+
     // manager port
     managePort: number | undefined
   }

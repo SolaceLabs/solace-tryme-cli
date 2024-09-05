@@ -14,7 +14,8 @@ Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), l
 
 | **For Windows**                                                                                                                                                                                                                                                                                                                        | **For Linux**                                                                                                                                                                                                                                                                                                                                    | **For Mac**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| You will find an extracted binary `stm.exe` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `%PATH%` or the `%PATH%` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by stm will be stored in `%USERPROFILE%\.stm` folder. | You will find an extracted binary `stm` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder. | You will find an extracted binary `stm`.<br><br>MacOS would complain that the executable is from an unidentified developer, run the following command to fix this.<br> <br>`xattr -dr com.apple.quarantine stm`<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Please note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder. |
+| You will find an extracted binary `stm.exe` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `%PATH%` or the `%PATH%` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by stm will be stored in `%USERPROFILE%\.stm` folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>set **STM_HOME** =  <new_folder_full_path> | You will find an extracted binary `stm` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>export **STM_HOME** =  <new_folder_full_path>| You will find an extracted binary `stm`.<br><br>MacOS would complain that the executable is from an unidentified developer, run the following command to fix this.<br> <br>`xattr -dr com.apple.quarantine stm`<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Please note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>export **STM_HOME** =  <new_folder_full_path>|
+
 
 #### Verify Installation
 Run the version command `stm -v` to ensure that you have downloaded the latest release.
@@ -38,28 +39,38 @@ The following view captures the command hierarchy of the *stm* cli tool.
 ```
 
 stm
-├── -v, --version                   /* output the version number        */
-├── -h, --help                      /* display help for command         */
-├── -he, --help-examples            /* display examples                 */
-├── send                            /* execute a send command           */
-├── receive                         /* execute a receive command        */
-├── request                         /* execute a request command        */
-├── reply                           /* execute a reply command          */
-├── config                          /* manage command configurations    */
-│   ├── -h, --help                  /* display help for command         */
-│   ├── -he, --help-examples        /* display examples                 */
-│   ├── init                        /* initialize command configuration */
-│   ├── list                        /* list command configurations      */
-│   └── delete                      /* delete command configuratio      */
-└── manage                          /* manage connection and resources  */
-    ├── -h, --help                  /* display help for command         */
-    ├── -he, --help-examples        /* display examples                 */
-    ├── connection                  /* manage VPN connection            */
-    ├── semp-connection             /* manage VPN SEMP connection       */
-    ├── queue                       /* manage queue                     */
-    ├── client-profile              /* manage client-profile            */
-    ├── acl-profile                 /* manage acl-profile               */
-    └── client-username             /* manage client-username           */
+├── -v, --version                   /* output the version number                      */
+├── -h, --help                      /* display help for command                       */
+├── -he, --help-examples            /* display examples                               */
+├── send                            /* execute a send command                         */
+├── receive                         /* execute a receive command                      */
+├── request                         /* execute a request command                      */
+├── reply                           /* execute a reply command                        */
+├── config                          /* manage command configurations                  */
+│   ├── -h, --help                  /* display help for command                       */
+│   ├── -he, --help-examples        /* display examples                               */
+│   ├── init                        /* initialize command configuration               */
+│   ├── list                        /* list command configurations                    */
+│   └── delete                      /* delete command configuratio                    */
+└── manage                          /* manage connection and resources                */
+│   └── -h, --help                  /* display help for command                       */
+│   ├── -he, --help-examples        /* display examples                               */
+│   ├── connection                  /* manage VPN connection                          */
+│   ├── semp-connection             /* manage VPN SEMP connection                     */
+│   ├── queue                       /* manage queue                                   */
+│   ├── client-profile              /* manage client-profile                          */
+│   ├── acl-profile                 /* manage acl-profile                             */
+│   └── client-username             /* manage client-username                         */
+└── feed                            /* manage event feeds                             */
+    ├── -h, --help                  /* display help for command                       */
+    ├── -he, --help-examples        /* display examples                               */
+    ├── preview                     /* Validate and preview an AsyncAPI document      */
+    ├── generate                    /* Generate event feed from an AsyncAPI document  */
+    ├── configure                   /* Configure event feed rules                     */
+    ├── run                         /* Run event feed                                 */
+    ├── list                        /* List event feeds                               */
+    ├── copy                        /* Duplicate a community event feed locally       */
+    └── contribute                  /* Contribute to community event feeds            */
 
 ```
 
@@ -307,6 +318,24 @@ stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/conf
 
 Refer to the [examples](EXAMPLES.md) guide for more details.
 
+## Using `stm feed` tool for event feed generation
+
+The `stm feed` tool helps you transform *Applications* designed in Solace Event Portal into event feeds for streaming events to a broker. It also supports publicly available REST API endpoints and convert them into event feeds by invoking the APIs to generate events. 
+
+`stm feed` allows you to preview and generate an event feed from an AsyncAPI document. The tool's primary purpose is to help you quickly set up an event feed on your local machine, configure data generation rules, and use it. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds available on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
+
+A quick overview of the supported commands:
+
+**preview** - Preview an AsyncAPI document or a local or community feed
+**generate** - Generate an event feed from an AsyncAPI document or a REST API
+**configure** - Configure event feed rules (mock data and publish rules)
+**list** - List available event feeds (local and community feeds)
+**run** - Run an event feed locally to stream events to a local or cloud broker
+**copy** - Copy/Clone a community feed to local `stm` feeds to customize/run locally
+**contribute** - Contribute your local feed for community consumption (publish to the community feeds site)
+
+For more details, please review the [EVENT FEEDS](EVENTFEEDS.md) documentation.
+
 ## Contributing
 
 Contributions are encouraged! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and the process for submitting pull requests to us.
@@ -319,10 +348,10 @@ Recommended version for Node environment:
 
 ``` shell
 # Clone
-git clone git@github.com:SolaceLabs/solace-tryme-cli.git
+git clone --recurse-submodules git@github.com:SolaceLabs/solace-tryme-cli.git
+cd solace-tryme-cli
 
 # Install dependencies
-cd solace-tryme-cli
 yarn install
 
 # Compiles and hot-reloads for development
@@ -333,6 +362,10 @@ yarn run build
 
 # Creates packages for target platforms
 yarn run package
+
+# Optional: To get the latest changes from the feeds site repo: 
+git submodule update --remote
+
 ```
 
 After a successful build, you will see the binary executable for each system in the `release` directory.

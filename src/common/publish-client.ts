@@ -5,7 +5,6 @@ import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } fr
 import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
-import { create } from 'domain';
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -126,9 +125,9 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess("delivery of message with correlation key '" + sessionEvent.correlationKey + "' confirmed");
+            Logger.logSuccess(`delivery of message with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString()}]`);
           else
-            Logger.logSuccess("delivery of message confirmed");
+            Logger.logSuccess(`delivery of message confirmed [${new Date().toLocaleString()}]`);
         });
 
         //REJECTED_MESSAGE implies that the vpn has rejected the message
@@ -195,14 +194,10 @@ export class SolaceClient extends VisualizeClient {
         }
       } 
       else {
-        if (payloadType === 'text')
+        if (payloadType === 'text') {
           message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
-        else {
-          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
-          // message.setBinaryAttachment("");
-        //   const encoder = new TextEncoder(); 
-        //   const result = encoder.encode(""); 
-        //   message.setBinaryAttachment(Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00]));
+        } else {
+          message.setBinaryAttachment("");
         }
       }
 

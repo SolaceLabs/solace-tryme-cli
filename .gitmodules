@@ -1,0 +1,3 @@
+[submodule "public/feedportal"]
+	path = public/feedportal
+	url = git@github.com:solacecommunity/solace-event-feeds-site.git

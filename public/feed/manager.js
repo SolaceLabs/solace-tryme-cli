@@ -14,22 +14,46 @@ function addFeed(feed) {
   if (!parent) return;
 
   var config = feed.config;
-  var feedTpl = `
-    <div  class='card card-primary card-outline card-tile'>
-      <div class='card-tile-header card-header'>
-        <h5 style='padding-right: 10px;' class='card-header-title m-0'>${feed.name}</h5>
-        ${feed.invalid ?
-          `<i class="fa fa-exclamation-triangle fa-lg card-header-button" style="text-align: center;color: #ffcc00" aria-hidden="true"></i>` :
-          `<a href='#' id='${feed.name}' data-feedname='${feed.name}' class="btn btn-primary card-header-button" onclick="explore(this)">Explore</a>`}
-      </div>
-      <div style='height: 220px' class='card-body'>
-        <h5 class='card-title' style='padding-bottom: 10px;'>AsyncAPI Document: <span class='card-body-title'>${config.fileName}</span></h5>
-        <h3 class='card-title' style='width: 100%;'>Title: <span style='font-style: unset;' class='card-body-title'>${config.info.title ? config.info.title : 'N/A'}</span></h3>
-        <h3 class='card-title'>Description: <span style='font-style: unset;' class='card-body-title'>${config.info.description ? config.info.description : 'N/A'}</span></h3>
-        ${feed.invalid ?  `<h6 class='card-title'style="color: red; padding-top: 20px;">${feed.invalid}</h6>` : ``}
+  var feedTpl = ``;
+  if (feed.type === 'asyncapi_feed') {
+    feedTpl = `
+      <div  class='card card-primary card-outline card-tile'>
+        <div class='card-tile-header card-header'>
+          <h5 style='padding-right: 10px;' class='card-header-title m-0'>${feed.name}</h5>
+          ${feed.invalid && feed.invalid.startsWith('info') ?
+            `<i class="fa fa-exclamation-triangle fa-lg card-header-button" style="text-align: center;color: #ffcc00" aria-hidden="true"></i>` :
+            `<a href='#' id='${feed.name}' data-feedtype='${feed.type}' data-feedname='${feed.name}' class="btn btn-primary card-header-button" onclick="explore(this)">Explore</a>`}
         </div>
-    </div>
-  `;
+        <div style='height: 220px' class='card-body'>
+          <h5 class='card-title' style='padding-bottom: 10px;'>AsyncAPI Document: <span class='card-body-title'>${config.fileName}</span></h5>
+          <h3 class='card-title' style='width: 100%;'>Title: <span style='font-style: unset;' class='card-body-title'>${config.info.title ? config.info.title : 'N/A'}</span></h3>
+          <h3 class='card-title'>Description: <span style='font-style: unset;' class='card-body-title'>${config.info.description ? config.info.description : 'N/A'}</span></h3>
+          ${feed.invalid ?  `<h6 class='card-title'style="color: red; padding-top: 20px;">${feed.invalid}</h6>` : ``}
+        </div>
+      </div>
+    `;
+  } else if (feed.type === 'restapi_feed') {
+    feedTpl = `
+      <div  class='card card-primary card-outline card-tile'>
+        <div class='card-tile-header card-header'>
+          <h5 style='padding-right: 10px;' class='card-header-title m-0'>${feed.name}</h5>
+          ${feed.invalid ?
+            `<i class="fa fa-exclamation-triangle fa-lg card-header-button" style="text-align: center;color: #ffcc00" aria-hidden="true"></i>` :
+            `<a href='#' id='${feed.name}' data-feedtype='${feed.type}' data-feedname='${feed.name}' class="btn btn-primary card-header-button" onclick="explore(this)">Explore</a>`}
+        </div>
+        <div style='height: 220px' class='card-body'>
+          ${config.apiUrl ?
+            `<h5 class='card-title' style='padding-bottom: 10px;'>API Endpoint: <span class='card-body-title'>${config.apiUrl}</span></h5>` : ''}
+          <h3 class='card-title' style='width: 100%;'>Title: <span style='font-style: unset;' class='card-body-title'>${feed.info.name ? feed.info.name : 'N/A'}</span></h3>
+          <h3 class='card-title'>Description: <span style='font-style: unset;' class='card-body-title'>${feed.info.description ? feed.info.description : 'N/A'}</span></h3>
+          ${feed.invalid ?  `<h6 class='card-title'style="color: ${feed.invalid.startsWith('info') ? 'green' : 'red'}; padding-top: 20px;">${feed.invalid}</h6>` : ``}
+          </div>
+      </div>
+    `;
+  } else if (feed.type === 'custom_feed') {
+
+  }
+
   var el = document.createElement('div');
   el.classList.add('col-lg-4');
   el.innerHTML = feedTpl;
@@ -432,6 +456,67 @@ async function editPayloadField(el) {
 
 }
 
+async function editAPIParameter(el) {
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var topic = $('#topic_name').text();
+  var param = el.dataset.name;
+  console.log(`topic - ${topic}, param - ${param}`);
+  console.log(feed.rules);
+
+  var rules = feed.rules.rules;
+  var rule = rules[param];
+  console.log('rule-param - ', rules[`${param}`])
+  
+  $('#parameterRuleType').html('API Variable');
+  $('#parameterTopicName').text(topic);
+  $('#dataFieldName').html(`${param}`)
+  $('#dataFieldType').html(`${rule.schema.type}`)
+  // $('#parameterMessageName').text(message);
+  $('#parameterTopicVariableName').text(param);
+  $('#parameterPayloadFieldName').text('');
+  $('#parameterName').attr("placeholder", param);
+  
+  var paramRule = rule.rule;
+  setRuleSet($('#parameterRuleSets'), $('#parameterRulesetFeedback'), paramRule.group, paramRule.type);
+  setRules($('#parameterRules'), $('#parameterRuleFeedback'), paramRule.group, paramRule.rule);
+
+  $('#parameterRuleSets').selectpicker();
+  $('#parameterRuleSets').attr('data-type', 'topic');
+
+  $('#parameterRuleSets').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+    if (isSelected) {
+      console.log('Here', clickedIndex, isSelected, previousValue);
+      var newRuleSet = Object.keys(defaultRules)[clickedIndex];
+      var firstRule = Object.keys(defaultRules[newRuleSet].rules)[0];
+      setRules($('#parameterRules'), $('#parameterRuleFeedback'), newRuleSet, firstRule);
+      setRuleFeedback(0, $('#parameterRuleSets').val(), $('#parameterRuleFeedback'));
+      setRulesetFeedback(clickedIndex, $('#parameterRulesetFeedback'));
+      $('#parameterRuleSets').selectpicker("refresh");
+      $('#parameterRules').selectpicker("refresh");
+
+      fixParameters($('#parameterRuleSets').val(), $('#parameterRules').val(), firstRule, true);
+    }
+  });
+
+  $('#parameterRules').selectpicker();
+  $('#parameterRules').attr('data-type', 'topic');
+
+  $('#parameterRules').selectpicker('val', paramRule.rule);
+  $('#parameterRules').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+    if (isSelected) {
+      console.log('Here', clickedIndex, isSelected, previousValue);
+      setRuleFeedback(clickedIndex, $('#parameterRuleSets').val(), $('#parameterRuleFeedback'));
+      fixParameters($('#parameterRuleSets').val(), $('#parameterRules').val(), paramRule.rule, true);
+      $('#parameterRuleSets').selectpicker("refresh");
+      $('#parameterRules').selectpicker("refresh");
+    }
+  });
+  $('#parameterRules').selectpicker("refresh");
+  $('#parameterRuleSets').selectpicker("refresh");
+  fixParameters($('#parameterRuleSets').val(), $('#parameterRules').val(), paramRule);
+
+}
+
 function buildParamRuleUI(action, rule, topic, type = 'topic', node = '', name = '') {
   var html = `      
       <div class="card" style="max-height: 320px;" >
@@ -449,6 +534,41 @@ function buildParamRuleUI(action, rule, topic, type = 'topic', node = '', name =
               <i class="fa fa-edit" aria-hidden="true"></i>
             </span>`
   }
+
+  html += `
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body" style="overflow-y: auto">
+          <dl class='row'>`;
+  Object.keys(rule).forEach((p) => {
+    html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+  });
+  html += `
+          </dl>
+        </div>
+        <!-- /.card-body -->
+      </div>
+  `;
+
+  return html;
+
+}
+
+function buildAPIParamRuleUI(rule) {
+  var html = `      
+      <div class="card" style="max-height: 320px;" >
+        <div class="card-header">
+          <div class="card-title w-100">          
+            <i class="fa fa-sticky-note "></i>
+            ${rule.name}`;
+  html += `
+          <span class="btn btn-primary" style="float:right;" data-name="${rule.name}" 
+            data-toggle="modal" data-target="#field_rules_form"
+            data-backdrop="static" data-keyboard="false"
+            onclick="editAPIParameter(this)">
+            <i class="fa fa-edit" aria-hidden="true"></i>
+          </span>`
 
   html += `
           </div>
@@ -667,10 +787,110 @@ async function pushUpMappingRule(el) {
   }
 }
   
+async function configureApiPlaceHolderRules(rules, refresh = false) {
+  if (!rules) {
+    el = document.getElementById("rules_section");
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
+    return;
+  }
+
+  // API VARIABLES
+  var params = Object.keys(rules.rules);
+  el = document.getElementById('api_variable_count');
+  if (params.length) {
+    if (el) el.innerHTML = `<b> (${params.length}) </b>`;
+  } else {
+    if (el) el.innerHTML = ``;
+  }
+  
+  el = document.getElementById('api_variable_info');
+  if (!params.length) {
+    el.innerHTML = 'No API variables identified on the endpoint!'
+  } else {
+    parent = document.getElementById('api_variable_info');
+    if (refresh)
+      $('#api_variable_info').empty();
+
+    params.forEach((param) => {
+      var el = document.createElement('div');
+      el.classList.add('col-md-6')
+    
+      el.innerHTML = buildAPIParamRuleUI(rules.rules[param].rule);
+      parent.appendChild(el);
+    })
+  }
+
+  // PUBLISH SETTINGS
+  el = document.getElementById('publish_settings');
+  if (el) el.innerHTML = `
+  <div class="card-body">
+    <div class="row">
+      <div class="col-4">
+        <label for="count-publish" class="small">No. of Events</label>
+        <input id="count-publish" type="number" class="form-control" 
+            value="${rules.publishSettings.count}" min="1" max="1000" data-param="count" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 1 to 1000</span>
+      </div>
+      <div class="col-4">
+        <label for="interval-publish" class="small">Interval (secs)</label>
+        <input id="interval-publish" type="number" class="form-control" 
+          value="${rules.publishSettings.interval}" min="1" max="30" data-param="interval" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 1 to 30 secs</span>
+      </div>
+      <div class="col-4">
+        <label for="delay-publish" class="small">Initial Delay (secs)</label>
+        <input id="delay-publish" type="number" class="form-control" 
+          value="${rules.publishSettings.delay}" min="0" max="30" data-param="delay" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 0 to 30</span>  
+      </div>
+    </div>
+  </div>`;
+  
+  el = document.getElementById('api_variable_count');
+  if (params.length) {
+    if (el) el.innerHTML = `<b> (${params.length}) </b>`;
+  } else {
+    if (el) el.innerHTML = ``;
+  }
+}
+
+async function configureAPIVariables(rules, refresh = false) {
+  if (!rules) {
+    el = document.getElementById("rules_section");
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
+    return;
+  }
+
+  var params = Object.keys(rules);
+  el = document.getElementById('api_variable_count');
+  if (params.length) {
+    if (el) el.innerHTML = `<b> (${params.length}) </b>`;
+  } else {
+    if (el) el.innerHTML = ``;
+  }
+  
+  el = document.getElementById('api_variable_info');
+  if (!params.length) {
+    el.innerHTML = 'No API variables identified on the endpoint!'
+  } else {
+    parent = document.getElementById('api_variable_info');
+    if (refresh)
+      $('#api_variable_info').empty();
+
+    params.forEach((param) => {
+      var el = document.createElement('div');
+      el.classList.add('col-md-6')
+    
+      el.innerHTML = buildAPIParamRuleUI(rules[param].rule);
+      parent.appendChild(el);
+    })
+  }
+}
+
 async function configureMessageSendTopics(messageName, rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -840,7 +1060,7 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
 async function configureMessageReceiveTopics(messageName, rules, refresh = false) {
   if (!rules) {
     el = document.getElementById("recv_rules_section");
-    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stmfeed generate</pre>"
+    if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
@@ -1132,17 +1352,19 @@ function addServers(config) {
   }
 }
 
-function addBrokers(brokers) {
+function addBrokers(brokers, type) {
   var parent = document.getElementById('feed-config-list');
   if (!parent) return;
 
   for (var i=0; i<brokers.length; i++) {
-    var brkerType = brokers[i].config.url.indexOf('localhost') > 0 ? 'swbroker' : 'clbroker';
+    var brokerType = brokers[i].config.url.indexOf('localhost') > 0 ? 'swbroker' : 'clbroker';
     var brokerName = brokers[i].broker.substring(0, brokers[i].broker.lastIndexOf('.'));
+    var brokerHtml = type === 'asyncapi_feed' ? 'broker.html' : 
+                        type === 'restapi_feed' ? 'apibroker.html' : 'custombroker.html'
     var brokerTpl = `
-      <a id="m_${decodeURIComponent(brokerName)}" href="broker.html#${brokerName}" class="nav-link" style="display: flex; align-items: center;"
-        onclick="window.location.href='broker.html#${brokerName}'; window.location.reload();">
-        <i class="nav-icon"><img width=24 src="images/${brkerType}.png"/></i>
+      <a id="m_${decodeURIComponent(brokerName)}" href="${brokerHtml}#${brokerName}" class="nav-link" style="display: flex; align-items: center;"
+        onclick="window.location.href='${brokerHtml}#${brokerName}'; window.location.reload();">
+        <i class="nav-icon"><img width=24 src="images/${brokerType}.png"/></i>
         <p style="margin-left: 8px;word-break: break-word;">${brokerName.trim()}</p>
       </a>
     `;
@@ -1159,17 +1381,20 @@ function addBrokers(brokers) {
 // HOME PAGE
 const explore = async (btn) => {
   var feedName = btn.dataset.feedname;
+  var feedType = btn.dataset.feedtype;
   if (!feedName) return;
 
   var feed = await getFeed(feedName);
   console.log('Feed', feed);
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-  var rules = await getFakerRules(feedName);
+  var rules = feed.type === 'asyncapi_feed' ? await getFakerRules(feedName) :
+                  feed.type === 'restapi_feed' ? await getFakerRules(feedName) : null;
   console.log('Rules', rules);
   localStorage.setItem('defaultRules', JSON.stringify(rules));
 
-  window.location.href = 'feed.html';
+  window.location.href = feedType === 'asyncapi_feed' ? 'feed.html' : 
+                            feedType === 'restapi_feed' ? 'apifeed.html' : 'custom_feed.html';
 }
 // HOME PAGE
 
@@ -1294,6 +1519,37 @@ document.addEventListener('DOMContentLoaded', async function () {
       updateInfo(feed)
     }
   }
+  if (page === 'apifeed.html') {
+    if (localStorage.getItem('currentFeed')) {
+      var feed = JSON.parse(localStorage.getItem('currentFeed'));
+      document.getElementById('api-feed-name').innerHTML = feed.info.name;
+      if (feed.info.description)
+        document.getElementById('api-feed-description').innerHTML = feed.info.description;
+      else 
+        document.getElementById('api-feed-description-pane').remove();
+
+      if (feed.config.apiKey)
+        document.getElementById('api-feed-key').innerHTML = "*******"; //feed.config.apiKey;
+      else 
+        document.getElementById('api-feed-key-pane').remove();
+        
+      document.getElementById('topic_name').innerHTML = feed.config.topic;
+      document.getElementById('api-feed-url').innerHTML = feed.config.apiUrl;
+      document.getElementById('api-feed-auth-type').innerHTML = feed.config.apiAuthType;
+      document.getElementById('api-feed-key').innerHTML = feed.config.apiKey;
+      if (feed.config.apiKeyUrlEmbedded) {
+        document.getElementById('api-feed-key-embedded').innerHTML = feed.config.apiKeyUrlEmbedded;
+        document.getElementById('api-feed-key-param').innerHTML = feed.config.apiKeyUrlParam;
+      } else {
+        $('#api-feed-key-embedded-pane').remove();
+        $('#api-feed-key-param-pane').remove();
+      }
+
+      document.getElementById('api-feed-key-gen-url').innerHTML = feed.config.apiKeyUrl;
+      document.getElementById('api-feed-topic').innerHTML = feed.config.topic;
+      updateInfo(feed)
+    }
+  }
 });
 
 
@@ -1316,10 +1572,12 @@ function loadPage() {
 
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   if (feed) {
-    addBrokers(feed.brokers)
-    addMessages(feed.config);
-    addSchemas(feed.config);
-    addServers(feed.config);
+    addBrokers(feed.brokers, feed.type)
+    if (feed.type === 'asyncapi_feed') {
+      addMessages(feed.config);
+      addSchemas(feed.config);
+      addServers(feed.config);
+    }
   }
   if (page.startsWith('feed.html')) {
     $('#sidebar-application-root')[0].classList.add('menu-open');
@@ -1372,16 +1630,25 @@ function loadPage() {
       var brokerName = loadBroker(feed, page);
       menuSelection = document.getElementById(`m_${brokerName}`);
     }
+  } else if (page.startsWith('apibroker.html')) {
+    $('#sidebar-application-root')[0].classList.remove('menu-open');
+    $('#sidebar-broker-root')[0].classList.add('menu-open');
+    if (feed) {
+      var brokerName = loadBroker(feed, page);
+      menuSelection = document.getElementById(`m_${brokerName}`);
+    }
+  } else if (page.startsWith('apifeed.html')) {
+    configureApiPlaceHolderRules(feed.rules);
   }
-
+  
   $( "nav li.nav-item a.nav-link" ).css( "bobackground-color", "unset" );
 
   if (menuSelection) menuSelection.style.backgroundColor = "#00968857";
 
   if (localStorage.getItem('currentFeed')) {
     var feed = JSON.parse(localStorage.getItem('currentFeed'));
-    document.getElementById('footer-feed-info-filename').innerHTML = feed.fileName;
-    document.getElementById('footer-feed-name').innerHTML = feed.name;
+    if (document.getElementById('footer-feed-info-filename')) document.getElementById('footer-feed-info-filename').innerHTML = feed.fileName;
+    if (document.getElementById('footer-feed-name')) document.getElementById('footer-feed-name').innerHTML = feed.name;
   }
 }
 
@@ -1437,6 +1704,52 @@ async function exitTool() {
   } catch (error) {
     console.log(error);
   }
+}
+
+async function publishApiSettingsChange(evt) {
+  var data = evt.dataset;
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var rule = feed.rules
+
+  console.log('RULE', rule);
+  if (!rule) return;
+
+  var publishSettings = rule.publishSettings ? rule.publishSettings : {};
+  if (data.param === 'count') {
+    var val = document.getElementById('count-publish').value;
+    if (val < 1 || val > 1000) {
+      document.getElementById('count-publish').value = publishSettings.count ? publishSettings.count : 20;
+      return;
+    }
+    publishSettings[data.param] = val;
+  }
+  else if (data.param === 'interval') {
+    var val = document.getElementById('interval-publish').value;
+    if (val < 1 || val > 30) {
+      document.getElementById('interval-publish').value = publishSettings.interval ? publishSettings.interval : 1;
+      return;
+    }
+    publishSettings[data.param] = val;
+  } else if (data.param === 'delay') {
+    var val = document.getElementById('delay-publish').value;
+    if (val < 0 || val > 30) {
+      document.getElementById('delay-publish').value = publishSettings.delay ? publishSettings.delay : 0;
+      return;
+    }
+    publishSettings[data.param] = val;
+  }
+
+  rule.publishSettings = publishSettings;
+  localStorage.setItem('currentFeed', JSON.stringify(feed));
+
+  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  await fetch(path + `/feedrules`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    body: localStorage.getItem('currentFeed')
+  });
 }
 
 const defaultRules = localStorage.getItem('defaultRules') ? JSON.parse(localStorage.getItem('defaultRules')) : {};

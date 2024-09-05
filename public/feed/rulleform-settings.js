@@ -41,9 +41,10 @@ function fixStringRulesParameters(rule, value, changed) {
         </div>
       </div>`
 
-    panel.append(p_casing); 
-    // $("#p_casing select").val(value.casing !== undefined ? value.casing : 'mixed');
-    $("#p_casing").selectpicker('val', (value.casing !== undefined ? value.casing : 'mixed'));
+    if (rule !== 'nanoid') {
+      panel.append(p_casing); 
+      $("#p_casing").selectpicker('val', (value.casing !== undefined ? value.casing : 'mixed'));
+    }
 
     panel.append(p_min_max); 
   } else if (rule === 'words') {
@@ -65,10 +66,16 @@ function fixStringRulesParameters(rule, value, changed) {
       </div>`;
     panel.append(p_regexp); 
   } else if (rule === 'enum') {
+    var enumValues = '';
+    if (value.enum !== undefined) {
+      (typeof value.enum === 'object') ? 
+        enumValues = value.enum : 
+        enumValues = value.enum.split(',').map(v => v.trim());
+    }
     var p_enums = `
       <div class="form-group">
         <label for="p_enums">Enumeration</label>
-        <textarea id="p_enums" class="form-control" rows="3" placeholder="Enter enum values...">${value.enum !== undefined ? value.enum.join(', ') : ''}</textarea>
+        <textarea id="p_enums" class="form-control" rows="3" placeholder="Enter enum values...">${enumValues}</textarea>
         <div class="feedback" style="font-size: 12px;">A comma-separated list of values.</div>
         <div id="p_enums_feedback" class="invalid-feedback">Invalid or missing enumeration values</div>
       </div>`;
