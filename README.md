@@ -6,18 +6,54 @@
 
 The Solace Try-Me CLI is a command line tool used to publish and receive messages from the Solace PubSub+ Broker. Designed to help develop, test and debug Solace PubSub+ services and applications faster without the need to use a graphical interface.
 
+- [Solace Try-Me CLI](#solace-try-me-cli)
+  * [Documentation](#documentation)
+    + [Quick Start](#quick-start)
+      - [Homebrew](#homebrew)
+      - [Archives](#archives)
+    + [Verify Installation](#verify-installation)
+    + [Command Structure](#command-structure)
+    + [Command Parameters](#command-parameters)
+    + [Command Examples](#command-examples)
+    + [Command Persistence](#command-persistence)
+  * [Setup `stm` configuration](#setup-stm-configuration)
+    + [Use with a Software Broker](#use-with-a-software-broker)
+    + [Use with a Cloud Broker](#use-with-a-cloud-broker)
+  * [Run `stm` tool](#run-stm-tool)
+    + [Working with Software Broker](#working-with-software-broker)
+    + [Receive Messages](#receive-messages)
+    + [Working with Cloud Broker](#working-with-cloud-broker)
+  * [Using `stm` to create and modify Broker resources](#using-stm-to-create-and-modify-broker-resources)
+    + [Create a Queue](#create-a-queue)
+  * [Using `stm feed` tool for event feed generation](#using-stm-feed-tool-for-event-feed-generation)
+  * [Contributing](#contributing)
+    + [Develop](#develop)
+        * [Run from build](#run-from-build)
+  * [Technology Stack](#technology-stack)
+  * [Resources](#resources)
+  * [Authors](#authors)
+  * [License](#license)
+
 ## Documentation
 
 ### Quick Start
 
-Go to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
+#### Homebrew
+
+```
+brew tap SolaceLabs/stm
+brew install stm
+```
+
+#### Archives
+For manual installation of the tool directly from archives, navigate to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
 
 | **For Windows**                                                                                                                                                                                                                                                                                                                        | **For Linux**                                                                                                                                                                                                                                                                                                                                    | **For Mac**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | You will find an extracted binary `stm.exe` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `%PATH%` or the `%PATH%` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by stm will be stored in `%USERPROFILE%\.stm` folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>set **STM_HOME** =  <new_folder_full_path> | You will find an extracted binary `stm` and is ready for use.<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>export **STM_HOME** =  <new_folder_full_path>| You will find an extracted binary `stm`.<br><br>MacOS would complain that the executable is from an unidentified developer, run the following command to fix this.<br> <br>`xattr -dr com.apple.quarantine stm`<br><br>Make sure that either the binary file is copied over to a directory that is in the `$PATH` or the `$PATH` is updated with the directory where the binary is present.<br><br>Please note that the configuration files created by `stm` will be stored in `$HOME/.stm` (or `~/.stm`) folder by default. <br><br>**NOTE:** If you want to use a different directory for storing `stm` artifacts, set the environment variable `STM_HOME` pointing to the full path of the desired folder. <br>export **STM_HOME** =  <new_folder_full_path>|
 
 
-#### Verify Installation
+### Verify Installation
 Run the version command `stm -v` to ensure that you have downloaded the latest release.
 ```
 $ stm -v

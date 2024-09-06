@@ -1,11 +1,12 @@
-name: Release Artifacts
+name: Release
 on:
   push:
     tags:
-     - "v*"
+     - 'v*.*.*'  # Matches version tags like v1.0.0
 
 jobs:
   release:
+    name: Build and Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout with Submodules
@@ -31,24 +32,27 @@ jobs:
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
-      
-      - name: Install zip command line tool
-        run: sudo apt-get install zip
 
       - name: Prepare stm archives for different targets
         run: |
-          zip -qq -r release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip stm-macos
-          zip -qq -r release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip stm-linux
-          zip -qq -r release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip stm-alpine
-          zip -qq -r release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip stm.exe
-          rm releases/stm-macos releases/stm-linux releases/stm-alpine releases/stm.exe
-
-      - name: Release
+          cd release
+          zip -qq -r stm-macos-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-macos
+          zip -qq -r stm-linux-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-linux
+          zip -qq -r stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-alpine
+          zip -qq -r stm-win-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-win.exe
+          rm stm-macos stm-linux stm-alpine stm-win.exe
+          cd ..
+      
+      - name: Publish artifacts to github
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
 
-      - name: Publish to NPM
-        run: yarn run publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Update Homebrew 
+        run: ./scripts/update_homebrew.sh ${{ steps.package-version.outputs.current-version}}
+
+      # - name: Update APT Repository
+      #   run: ./scripts/update_apt.sh
+
+      # - name: Update Chocolatey
+      #   run: ./scripts/update_chocolatey.sh
