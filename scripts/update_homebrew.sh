@@ -18,7 +18,7 @@ sed -i "s|sha256 .*|sha256 \"$(shasum -a 256 ../release/stm-macos-v$pkg_version.
 # Commit and push changes
 git config --global user.email "community@solace.com"
 git config --global user.name "SollyBot"
-git commit -am "TESTING: Update $FORMULA_NAME to $pkg_version"
+git commit -am "Update $FORMULA_NAME to $pkg_version"
 git push
 
 cd ..
