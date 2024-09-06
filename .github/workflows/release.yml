@@ -1,11 +1,12 @@
-name: Release Artifacts
+name: Release
 on:
   push:
     tags:
-     - "v*"
+     - 'v*.*.*'  # Matches version tags like v1.0.0
 
 jobs:
   release:
+    name: Build and Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout with Submodules
@@ -32,56 +33,28 @@ jobs:
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-      - name: Rename stm-macos
-        run: mv release/stm-macos stm
-
-      - name: Bundle stm-macos
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of macos)
-        run: rm stm
+      - name: Prepare stm archives for different targets
+        run: |
+          cd release
+          zip -qq -r stm-macos-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-macos
+          zip -qq -r stm-linux-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-linux
+          zip -qq -r stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-alpine
+          zip -qq -r stm-win-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-win.exe
+          rm stm-macos stm-linux stm-alpine stm-win.exe
+          cd ..
       
-      - name: Rename stm-linux
-        run: mv release/stm-linux stm
-
-      - name: Bundle stm-linux
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of linux)
-        run: rm stm
-
-      - name: Rename stm-alpine
-        run: mv release/stm-alpine stm
-
-      - name: Bundle stm-alpine
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip stm
-
-      - name: Remove stm (of alpine)
-        run: rm stm
-
-      - name: Rename stm-win
-        run: mv release/stm-win.exe stm.exe
-
-      - name: Bundle stm-win
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip stm.exe
-
-      - name: Remove stm (of win)
-        run: rm stm.exe
-
-      - name: Release
+      - name: Publish artifacts to github
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
 
-      - name: Publish to NPM
-        run: yarn run publish
+      - name: Update Homebrew 
+        run: ./scripts/update_homebrew.sh ${{ steps.package-version.outputs.current-version}}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SOLLYBOT_GITHUB_PAT }}
+
+      # - name: Update APT Repository
+      #   run: ./scripts/update_apt.sh
+
+      # - name: Update Chocolatey
+      #   run: ./scripts/update_chocolatey.sh
