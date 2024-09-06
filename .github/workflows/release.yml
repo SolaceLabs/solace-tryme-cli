@@ -50,6 +50,8 @@ jobs:
 
       - name: Update Homebrew 
         run: ./scripts/update_homebrew.sh ${{ steps.package-version.outputs.current-version}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SOLLYBOT_GITHUB_PAT }}
 
       # - name: Update APT Repository
       #   run: ./scripts/update_apt.sh
