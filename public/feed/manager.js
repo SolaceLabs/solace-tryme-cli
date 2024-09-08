@@ -1533,20 +1533,24 @@ document.addEventListener('DOMContentLoaded', async function () {
       else 
         document.getElementById('api-feed-key-pane').remove();
         
-      document.getElementById('topic_name').innerHTML = feed.config.topic;
-      document.getElementById('api-feed-url').innerHTML = feed.config.apiUrl;
-      document.getElementById('api-feed-auth-type').innerHTML = feed.config.apiAuthType;
-      document.getElementById('api-feed-key').innerHTML = feed.config.apiKey;
+      if (document.getElementById('topic_name')) document.getElementById('topic_name').innerHTML = feed.config.topic;
+      if (document.getElementById('api-feed-url')) document.getElementById('api-feed-url').innerHTML = feed.config.apiUrl;
+      if (document.getElementById('api-feed-auth-type')) document.getElementById('api-feed-auth-type').innerHTML = feed.config.apiAuthType;
+      if (document.getElementById('api-feed-key')) document.getElementById('api-feed-key').innerHTML = feed.config.apiKey;
       if (feed.config.apiKeyUrlEmbedded) {
-        document.getElementById('api-feed-key-embedded').innerHTML = feed.config.apiKeyUrlEmbedded;
-        document.getElementById('api-feed-key-param').innerHTML = feed.config.apiKeyUrlParam;
+        if (document.getElementById('api-feed-key-embedded')) document.getElementById('api-feed-key-embedded').innerHTML = feed.config.apiKeyUrlEmbedded;
+        if (document.getElementById('api-feed-key-param')) document.getElementById('api-feed-key-param').innerHTML = feed.config.apiKeyUrlParam;
       } else {
         $('#api-feed-key-embedded-pane').remove();
         $('#api-feed-key-param-pane').remove();
       }
 
-      document.getElementById('api-feed-key-gen-url').innerHTML = feed.config.apiKeyUrl;
-      document.getElementById('api-feed-topic').innerHTML = feed.config.topic;
+      if (feed.config.apiKeyUrl) {
+        if (document.getElementById('api-feed-key-gen-url')) document.getElementById('api-feed-key-gen-url').innerHTML = feed.config.apiKeyUrl;
+      } else {
+        $('#api-feed-key-gen-pane').remove();
+      }
+      if (document.getElementById('api-feed-topic')) document.getElementById('api-feed-topic').innerHTML = feed.config.topic;
       updateInfo(feed)
     }
   }
@@ -1647,6 +1651,7 @@ function loadPage() {
 
   if (localStorage.getItem('currentFeed')) {
     var feed = JSON.parse(localStorage.getItem('currentFeed'));
+    if (document.getElementById('footer-feed-type')) document.getElementById('footer-feed-type').innerHTML = '[ ' + feed.type + '] ';
     if (document.getElementById('footer-feed-info-filename')) document.getElementById('footer-feed-info-filename').innerHTML = feed.fileName;
     if (document.getElementById('footer-feed-name')) document.getElementById('footer-feed-name').innerHTML = feed.name;
   }

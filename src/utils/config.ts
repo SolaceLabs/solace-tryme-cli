@@ -319,12 +319,12 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
       Logger.info(`loading configuration '${defaultConfigFile}'`)
       return readFile(defaultConfigFile)
     }
-
+    
     var commandName = options.name ? options.name : cmd
     const filePath = processPath(`${defaultStmHome}/${options.config as string}`)
     if (fileExists(filePath)) {
       const config = readFile(filePath)
-      Logger.info(`loading '${commandName}' command from configuration '${options.config}'`)
+      Logger.info(`loading '${commandName}' command from configuration '${chalk.cyanBright(filePath)}'`)
       if (!config[group][commandName]) {
         Logger.logError(`could not find '${commandName}' command`)
         // commandName = cmd

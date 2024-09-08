@@ -1,8 +1,22 @@
 #!/usr/bin/env node
 const { Commander } = require('..')
 const chalk = require('chalk')
-const process = require('node:process');
 const { version, repository } = require('../package.json');
+const processCheck = require('process');
+try {
+  const [major, minor, patch] = processCheck.versions.node.split('.').map(Number)
+  if (major < 18) {
+    console.log(`Node.js version ${processCheck.versions.node} is not supported, please upgrade to Node.js version 18 or later`)
+    console.log('exiting...')
+    processCheck.exit(1)
+  }
+} catch (error) {
+  console.log(`Please upgrade to Node.js version 18 or later`)
+  console.log('exiting...')
+  processCheck.exit(1)
+}
+
+const process = require('node:process');
 process.noDeprecation = true
 
 const {emitWarning} = process;

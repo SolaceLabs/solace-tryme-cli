@@ -21,11 +21,6 @@ export const addRootHelpOptions = (cmd: Command) => {
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli command examples')). preset({ helpExamples: true }))
 }
 
-export const addFeedHelpOptions = (cmd: Command) => {
-  cmd
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli feed command examples')))
-}
-
 export const addConfigHelpOptions = (cmd: Command) => {
   cmd
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli config command examples')))
@@ -618,7 +613,7 @@ export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed summarize command examples')))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed preview command examples')))
 }
 
 export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
@@ -724,9 +719,20 @@ export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed list command examples')))
 }
 
-export const addFeedCopyOptions = (cmd: Command, advanced: boolean) => {
+export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feedExport.zip'))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
+}
+
+export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
+    .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(false))
+    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) )
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))

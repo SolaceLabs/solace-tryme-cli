@@ -362,6 +362,7 @@ export const defaultFeedConfig:any = {
   communityOnly: true,
   localOnly: true,
   verbose: false,
+  archiveFile: "",
   uiPortal: false,
   managePort: 0
 }

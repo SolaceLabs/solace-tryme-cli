@@ -10,10 +10,11 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addReceiveOptions, addRequestOptions,  addReplyOptions, 
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
         addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, 
-        addManageHelpOptions, addFeedHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
+        addManageHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
         addFeedRunOptions, addFeedListOptions,
         addFeedContributeOptions,
-        addFeedCopyOptions,
+        addFeedImportOptions,
+        addFeedExportOptions,
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -36,7 +37,8 @@ import feedConfigure from './lib/feed-configure';
 import feedRun from './lib/feed-run'
 import feedContribute from './lib/feed-contribute';
 import feedList from './lib/feed-list';
-import feedCopy from './lib/feed-copy';
+import feedImport from './lib/feed-import';
+import feedExport from './lib/feed-export';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
 import feedPortal from './lib/feed-portal';
@@ -536,14 +538,7 @@ if (process.env.SHOW_VISUALIZATION) {
     const feedCmd = this.program
       .command('feed')
       .description(chalk.whiteBright('Manage event feeds'))
-      .allowUnknownOption(false)
-      feedCmd.action((options) => {
-      if (options.helpExamples)
-        displayFeedConfigHelpExamples();
-      else
-        feedCmd.help();
-    });
-    addFeedHelpOptions(feedCmd);
+      .allowUnknownOption(false);
 
     // stm feed preview
     const feedPreviewCmd = feedCmd
@@ -646,20 +641,36 @@ if (process.env.SHOW_VISUALIZATION) {
       feedList(options, optionsSource);
     })
 
-    // stm feed copy
-    const feedCopyCmd = feedCmd
-      .command('copy')
-      .description(chalk.whiteBright('Duplicate a community event feed locally'))
+    // stm feed import
+    const feedImportCmd = feedCmd
+      .command('import')
+      .description(chalk.whiteBright('Import an event feed'))
       .allowUnknownOption(false)
-    addFeedCopyOptions(feedCopyCmd, this.advanced);
-    feedCopyCmd.action((options: ManageFeedPublishOptions) => {
+    addFeedImportOptions(feedImportCmd, this.advanced);
+    feedImportCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
       for (var i=0; i<defaultFeedKeys.length; i++) {
-        optionsSource[defaultFeedKeys[i]] = feedCopyCmd.getOptionValueSource(defaultFeedKeys[i]);
+        optionsSource[defaultFeedKeys[i]] = feedImportCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
-      feedCopy(options, optionsSource);
+      feedImport(options, optionsSource);
+    })
+
+    // stm feed export
+    const feedExportCmd = feedCmd
+      .command('export')
+      .description(chalk.whiteBright('Export an event feed'))
+      .allowUnknownOption(false)
+    addFeedExportOptions(feedExportCmd, this.advanced);
+    feedExportCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedExportCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedExport(options, optionsSource);
     })
 
     // stm feed contribute

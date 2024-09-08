@@ -173,8 +173,7 @@ export class SolaceClient extends VisualizeClient {
             if (typeof payload === 'object') {
               message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
             } else {
-              var jsonPayload = JSON.parse(payload.toString());
-              message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
+              message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
             }
           } catch (error) {
             message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));

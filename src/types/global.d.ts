@@ -211,6 +211,9 @@ declare global {
     communityOnly: boolean
     verbose: boolean
 
+    // import/export
+    archiveFile: string
+
     // ui based run options
     uiPortal: boolean
 

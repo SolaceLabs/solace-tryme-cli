@@ -266,6 +266,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
   eventNames: string[];
   communityOnly: boolean
   localOnly: boolean
+  archiveFile: string
   uiPortal: boolean
   verbose: boolean
 
@@ -278,6 +279,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
     this.communityFeed = false;
     this.eventNames = [];
     this.communityOnly = true;
+    this.archiveFile = "";
     this.localOnly = true;
     this.verbose = false;
     this.uiPortal = false;

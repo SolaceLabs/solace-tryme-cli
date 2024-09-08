@@ -260,47 +260,55 @@ ${chalk.yellowBright('NOTE: The default commands created by the initialize opera
 }
 
 export const displayHelpExamplesForPublish = () => {
-}
-
-export const displayHelpExamplesForPublish1 = () => {
   console.log(`
 Examples:
 // execute the default publish command with settings defined on the 
-// default configuration 'stm-cli-config.json' 
+// default configuration 'stm-cli-config.json' publishing to a
+// a default topic ${getDefaultTopic('send')}
 
 ${chalk.greenBright('stm send')}
+${chalk.magentaBright('HINT: Publishes a default message to the topic ' + getDefaultTopic('send') + ' with a payload of object \nwith local machine properties')}
+${chalk.magentaBright('{\n\
+    osType: "OS_TYPE",\n\
+    freeMem: "FREE_MEM",\n\
+    totalMem: "TOTAL_MEM",\n\
+    dateTime: "DATE_TIME"\n\
+}')};
 
-${chalk.magentaBright(`HINT: You can view the default publish command settings 'stm config list --name send'!`)}
+// publish with a specified topic
 
-// execute the default publish command with settings defined on the default 
-// configuration 'stm-cli-config.json', but publish on topic specified in the 
-// command-line (overriding the command settings)
-
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send'))}
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send'))}
 
 // publish with payload via the command-line parameter
 
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' -m "Hello World!"')}
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' -m "Hello World!"')}
 
 // publish with a default payload 
 
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --default-message')}
-
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' --default-message')}
+${chalk.magentaBright('HINT: Publishes a default message to the topic ' + getDefaultTopic('send') + ' with a payload of object \nwith local machine properties')}
+${chalk.magentaBright('{\n\
+    osType: "OS_TYPE",\n\
+    freeMem: "FREE_MEM",\n\
+    totalMem: "TOTAL_MEM",\n\
+    dateTime: "DATE_TIME"\n\
+}')};
+  
 // publish with payload from a file
 
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' -f OrderCreated.json')}
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' -f OrderCreated.json')}
 
 // publish with payload from stdin (console)
 
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --stdin')}
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' --stdin')}
 
 // publish events to multiple events in a specified interval(ms)
 
-${chalk.greenBright('stm send --topic ' + getDefaultTopic('send') + ' --count 100 --interval 5000')}
+${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' --count 100 --interval 5000')}
 
-// publish events to multiple topics
+// publish events to multiple topics (space separated list of topics)
 
-${chalk.greenBright('stm send --topic "stm/logistics/shipped" "stm/inventory/check"')}
+${chalk.greenBright('stm send -t "stm/logistics/shipped" "stm/inventory/check"')}
 
 
 ${chalk.yellowBright('You can override any of the publish parameters \n' +
@@ -310,13 +318,17 @@ ${chalk.yellowBright('You can override any of the publish parameters \n' +
 // without any reference to recorded command settings, you can do so by specifying
 // requisite parameters in the command-line
 
-${chalk.greenBright('stm send --url ws://localhost:8008 --vpn default --username default --password default --topic ' + getDefaultTopic('send') + ' --count 5 --interval 1000')}
+${chalk.greenBright('stm send --url ws://localhost:8008 --vpn default --username default --password default -t ' + getDefaultTopic('send') + ' --count 5 --interval 1000')}
 
 ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
 'in a configuration, as well as how to duplicate (copy) a command \n' +
 'setting to a new name!')}
 
-// Update the command setting with the specified command-line parameters (if specified)
+// execute a named send command from the named configuration 
+
+${chalk.greenBright('stm send --config cloud-broker --name send')}
+
+// Update the default send command setting with the specified command-line parameters (if specified)
 
 ${chalk.greenBright('stm send --count 100 --interval 1000 --name publish2 --config cloud-broker --save')}
 
@@ -331,6 +343,8 @@ ${chalk.greenBright('stm send --config cloud-broker --name publish2')}
 // Duplicate the command setting
 
 ${chalk.greenBright('stm send  --name publish2 --config cloud-broker --save publish3')}
+
+${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)
 }
 
@@ -338,7 +352,7 @@ export const displayHelpExamplesForReceive = () => {
   console.log(`
 Examples:
 // execute the default receive command with settings defined on the 
-// default configuration 'stm-cli-config.json' which subscribes to 
+// default configuration 'stm-cli-config.json' subscribing to 
 // a default topic ${getDefaultTopic('receive')}
 
 ${chalk.greenBright('stm receive')}
@@ -379,11 +393,11 @@ ${chalk.yellowBright('NOTE: The following examples demonstrate how to update an 
 'in a configuration, as well as how to duplicate (copy) a command \n' +
 'setting to a new name!')}
 
-// execute a specific receive command from the named configuration 
+// execute a named receive command from the named configuration 
 
 ${chalk.greenBright('stm receive --config cloud-broker --name receive')}
 
-// Update the command setting with the specified command-line parameters (if specified)
+// Update the default receive command setting with the specified command-line parameters (if specified)
 
 ${chalk.greenBright('stm receive --topic "stm/logistics/shipped" "stm/inventory/>" --name receive --config cloud-broker --save')}
 

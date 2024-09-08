@@ -62,7 +62,9 @@ function prettyXML(str: string, indent: number) {
 function prettyJSON(str: string) {
   if (!str) return str;
   try {
-      var obj = JSON.parse(str);
+    let isNum = /^\d+$/.test(str);
+
+      var obj = isNum ? str : JSON.parse(str);
       return prettyPrint(obj, {
         indent: '  ',
         singleQuotes: false
