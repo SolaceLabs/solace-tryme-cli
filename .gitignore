@@ -31,7 +31,6 @@ dist
 *.json
 
 # test scripts
-*.sh
 config
 yarn.lock
 samples

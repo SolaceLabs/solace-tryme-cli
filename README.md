@@ -45,6 +45,20 @@ brew tap SolaceLabs/stm
 brew install stm
 ```
 
+#### Apt-get
+
+Run the following commands to add the SolaceLabs repo to APT
+
+```
+echo "deb [arch=amd64 trusted=yes] https://raw.githubusercontent.com/SolaceLabs/apt-stm/master stm main" | sudo tee  /etc/apt/sources.list.d/solace-stm-test.list
+```
+
+Install the latest version of stm
+```
+sudo apt-get update
+sudo apt-get install stm
+
+```
 #### Archives
 For manual installation of the tool directly from archives, navigate to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
 
