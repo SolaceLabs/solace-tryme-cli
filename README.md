@@ -38,14 +38,14 @@ The Solace Try-Me CLI is a command line tool used to publish and receive message
 
 ### Quick Start
 
-#### Homebrew
+#### MacOS using Homebrew
 
 ```
 brew tap SolaceLabs/stm
 brew install stm
 ```
 
-#### Apt-get
+#### Linux (or WSL on Windows) using apt-get
 
 Run the following commands to add the SolaceLabs repo to APT
 
