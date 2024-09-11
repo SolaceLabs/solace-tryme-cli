@@ -8,7 +8,7 @@ The Solace Try-Me CLI is a command line tool used to publish and receive message
 
 - [Solace Try-Me CLI](#solace-try-me-cli)
   * [Documentation](#documentation)
-    + [Installation](#install)
+    + [Installation](#installation)
       - [Homebrew](#homebrew)
       - [apt-get](#apt-get)
       - [Download](#download)
