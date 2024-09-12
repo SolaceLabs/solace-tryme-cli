@@ -88,7 +88,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('TOPIC SUBSCRIPTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic subscriptions as space-separated values if listing more than one (e.g., test/1 "user/>" "profile/*")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .hideHelp(advanced))
 
     // message body options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE BODY SETTINGS')} */`) .hideHelp(advanced))
