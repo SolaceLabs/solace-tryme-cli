@@ -6,6 +6,8 @@ import { defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile,
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { prettyJSON } from '../utils/prettify';
+import axios, { AxiosResponse } from 'axios';
+import FormData from 'form-data';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const { Select, Confirm, Input, List } = require('enquirer');
@@ -233,7 +235,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
 async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedLocalPath:string, ) {
   let PRLink = null
-  // const azureFunctionURL = 'http://localhost:7071/api/triggerContribute'
+  // const azureFunctionURL = 'http://127.0.0.1:7071/api/triggerContribute'
   const azureFunctionURL = 'https://stm-contribute.azurewebsites.net/api/triggerContribute'
   // Query EVENT-FEEDS.json
   try {
@@ -258,29 +260,37 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
   try {
     if (info.type === 'asyncapi_feed') {
       const analysis:any = readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`);
-      
-      // Create form-data body payload 
+      //  Create a new FormData object
       let formData = new FormData();
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`))]), defaultFeedAnalysisFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`))]), defaultFeedSchemasFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${analysis.fileName}`))]), analysis.fileName);
-      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
-      formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
-      formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
 
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`)), defaultFeedAnalysisFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`)), defaultFeedSchemasFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`)), defaultFakerRulesFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${analysis.fileName}`)), analysis.fileName);
+      formData.append('files', JSON.stringify(info), defaultFeedInfoFile);
+      formData.append('files', JSON.stringify(communityFeeds), 'EVENT_FEEDS.json');
+      formData.append('files', JSON.stringify(azureFunctionInfo), 'azureFunctionInfo.json');
+      
+      // formData.getLength((err: Error | null, length: number) => {
+      //   if (err) {
+      //     console.error('Error getting form data length:', err);
+      //   } else {
+      //     console.log('Form data length:', length);
+      //   }
+      // });
+      
       functionBody = await executeFunction(azureFunctionURL, formData)
     } else if (info.type === 'restapi_feed') {
 
-      // Create form-data body payload 
+      //  Create a new FormData object
       let formData = new FormData();
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`))]), defaultFeedApiEndpointFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`))]), defaultFeedRulesFile);
-      formData.append('files', new Blob([JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`))]), defaultFakerRulesFile);
-      formData.append('files', new Blob([JSON.stringify(info)]), defaultFeedInfoFile);
-      formData.append('files', new Blob([JSON.stringify(communityFeeds)]), 'EVENT_FEEDS.json');
-      formData.append('files', new Blob([JSON.stringify(azureFunctionInfo)]), 'azureFunctionInfo.json');
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`)), defaultFeedApiEndpointFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`)), defaultFakerRulesFile);
+      formData.append('files', JSON.stringify(info), defaultFeedInfoFile);
+      formData.append('files', JSON.stringify(communityFeeds), 'EVENT_FEEDS.json');
+      formData.append('files', JSON.stringify(azureFunctionInfo), 'azureFunctionInfo.json');
 
       functionBody = await executeFunction(azureFunctionURL, formData)
     }
@@ -302,21 +312,24 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
 
 async function executeFunction (azureFunctionURL:string, formData:FormData) {
   try {
-    let response: Response = await fetch(azureFunctionURL, {
-      method: 'POST',
-      body: formData,
+    const response: AxiosResponse = await axios.post(azureFunctionURL, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+      maxContentLength: Infinity,  
+      maxBodyLength: Infinity      
     });
 
-    let body  = await response.json()
-
-    if(response.ok) {
+    let body  = response.data
+    if(response.status === 200) {
       return body
     } else {
       Logger.error(`Error executing function:\n${JSON.stringify(body, null, 2)}`)
       process.exit(1);
     }
   } catch (error) {
-    Logger.error(`Error executing function: contact community@solace.com for help`)
+    Logger.error(`Error executing function: contact community@solace.com for help.`)
+    axios.isAxiosError(error) ? Logger.error(`\n${JSON.stringify(error.response?.data, null, 2)}`) : null
     process.exit(1);
   }
 }
