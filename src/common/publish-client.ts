@@ -41,7 +41,7 @@ export class SolaceClient extends VisualizeClient {
 
     //Initializing the solace client library
     let factoryProps = new solace.SolclientFactoryProperties();
-    factoryProps.profile = solace.SolclientFactoryProfiles.version10;
+    factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
     this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('pub')
@@ -178,6 +178,8 @@ export class SolaceClient extends VisualizeClient {
           } catch (error) {
             message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
           }
+        } else if (payloadType === 'bytes') {
+          message.setBinaryAttachment(payload);
         } else {
           if (typeof payload === 'object') {
             const encoder = new TextEncoder(); 

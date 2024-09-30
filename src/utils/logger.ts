@@ -137,7 +137,10 @@ const Logger = {
         Logger.logMessage(`Properties\r\n${properties}`)
 
       if (payload) {
-        if (messageType === 0 || messageType === 3) {
+        if (messageType === 0) {
+          var hexdump = require('hexdump-nodejs');
+          Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+        } else if (messageType === 3) {
           if (payload.startsWith('<?xml')) {
             var prettyPayload = prettyXML(payload.trim(), 2);
             Logger.logMessage(`Payload\r\n${prettyPayload}`);
@@ -171,7 +174,10 @@ const Logger = {
     } else {
       Logger.logMessage(`Destination: ${message.getDestination()}`);
       if (payload) {
-        if (messageType === 0 || messageType === 3) {
+        if (messageType === 0) {
+          var hexdump = require('hexdump-nodejs');
+          Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+        } else if (messageType === 3) {
           if (payload.startsWith('<?xml')) {
             var prettyPayload = prettyXML(payload.trim(), 2);
             Logger.logMessage(`Payload\r\n${prettyPayload}`);

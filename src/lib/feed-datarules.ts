@@ -553,7 +553,8 @@ export const processObjectRules = (payload:any, count:number) => {
 
 const generateArray = (obj:any) => {
   var data:any = [];
-  for (var i=0; i<3; i++) {
+  var count = obj.rule.count ? obj.rule.count : 2;
+  for (var i=0; i<count; i++) {
     if (obj.subType === 'object')
       data.push(generateObject(obj.properties));
     else if (obj.subType === 'string') {

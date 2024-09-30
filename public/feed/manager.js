@@ -383,6 +383,46 @@ async function editTopicVariable(el) {
 
 }
 
+function editArrayInstanceCount(name, topic, type, nodeId) {
+  var html = ``;
+  if (type === 'topic') return html;
+
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var topic = $('#topic_name').text();
+  var message = $('#message-feed-name').text();
+  console.log(`topic - ${topic}, param - ${name}`);
+  console.log(feed.rules);
+
+  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
+  var node = $('#payload-tree-pane').treeview('getSelected');
+  if (!node || !node.length) return;
+
+  var param = node[0].path
+  console.log('rule-param - ', rule.payload[`${name}`])
+  
+  var field = rule.payload[param];
+  if (param.indexOf('.') > 0)
+    field = getFieldRule(rule.payload, param)
+
+  if (field.type !== 'array') return html;
+
+  var count = ' ('.concat(field.rule.count ? field.rule.count : 2).concat(')');
+  html = `
+        <span class='jstooltip' style="margin-right: 10px">
+          <span class="btn btn-primary" data-topic="${topic}" data-name="${rule.name}" 
+              data-count="${rule.count ? rule.count : 2}"
+              data-toggle="modal" data-target="#field_instance_count_form" data-type="${type}"
+              data-backdrop="static" data-keyboard="false" ` +
+              `onclick="editInstanceCount(this, '${node.nodeId}')`+ 
+              `">
+              <i class="fa fa-hashtag" aria-hidden="true">${count}</i>
+          </span>
+          <span class="jstooltiptext jstooltip-top">Instance count</span>
+        </span>`;
+
+  return html;
+}
+
 async function editPayloadField(el) {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topic = $('#topic_name').text();
@@ -456,6 +496,37 @@ async function editPayloadField(el) {
 
 }
 
+async function editInstanceCount(el) {
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var topic = $('#topic_name').text();
+  var message = $('#message-feed-name').text();
+  var param = el.dataset.name;
+  console.log(`topic - ${topic}, param - ${param}`);
+  console.log(feed.rules);
+
+  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
+  var node = $('#payload-tree-pane').treeview('getSelected');
+  if (!node || !node.length) return;
+
+  var param = node[0].path
+  console.log('rule-param - ', rule.payload[`${param}`])
+  
+  var field = rule.payload[param];
+  if (param.indexOf('.') > 0)
+    field = getFieldRule(rule.payload, param)
+
+  $('#arr_parameterRuleType').html('Payload Array Field');
+  $('#arr_parameterTopicName').text(topic);
+  $('#arr_dataFieldName').html(`${param.replaceAll('.properties', '')}`)
+  $('#arr_dataFieldType').html(`${field.type}${field.subType ? ' of ' + field.subType : ''}`)
+  $('#arr_parameterMessageName').text(message);
+  $('#arr_parameterPayloadFieldName').text(param);
+  $('#arr_parameterTopicVariableName').text('');
+  $('#arr_parameterName').attr("placeholder", param);
+  $('#arr_dataFieldCount').val(field.rule.count ? field.rule.count : 2);
+
+}
+
 async function editAPIParameter(el) {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topic = $('#topic_name').text();
@@ -519,21 +590,75 @@ async function editAPIParameter(el) {
 
 function buildParamRuleUI(action, rule, topic, type = 'topic', node = '', name = '') {
   var html = `      
-      <div class="card" style="max-height: 320px;" >
+      <div class="card"  >
         <div class="card-header">
           <div class="card-title w-100">          
             <i class="fa fa-sticky-note "></i>
             ${action === 'receive' ? name : rule.name}`;
   if (action === 'send') {
-    html += `
+    html += `<span style="display:flex;float:right;">`;
+    if (type !== 'topic')
+      html += editArrayInstanceCount(rule.name, topic, type, node.nodeId);
+    if (!(node.type === 'array' && node.subType === 'object')) {
+      html += `
+          <span class='jstooltip'>
             <span class="btn btn-primary" style="float:right;" data-topic="${topic}" data-name="${rule.name}" 
               data-toggle="modal" data-target="#field_rules_form" data-type="${type}"
               data-backdrop="static" data-keyboard="false" ` +
               `onclick="` + (type === 'topic' ? `editTopicVariable(this)` : `editPayloadField(this, '${node.nodeId}')`) + 
               `">
               <i class="fa fa-edit" aria-hidden="true"></i>
-            </span>`
+            </span>
+            <span class="jstooltiptext jstooltip-top">Set rule</span>
+          </span>`;
+    }
+    html += `</span>`;
   }
+
+  html += `
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body" style="overflow-y: auto">
+          <dl class='row'>`;
+  Object.keys(rule).forEach((p) => {
+    html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+  });
+  html += `
+          </dl>
+        </div>
+        <!-- /.card-body -->
+      </div>
+  `;
+
+  return html;
+
+}
+
+function buildArrayParamRuleUI(action, rule, topic, type = 'topic', node = '', name = '') {
+  var html = `      
+      <div class="card"  >
+        <div class="card-header">
+          <div class="card-title w-100">          
+            <i class="fa fa-sticky-note "></i>
+            ${action === 'receive' ? name : rule.name}`;
+  if (action === 'send') {
+    html += `<span style="display:flex;float:right;">`;
+    if (type !== 'topic')
+      html += editArrayInstanceCount(rule.name, topic, type, node.nodeId);
+    html += `</span>`;
+  }
+
+  html += `<div class="lockscreen-wrapper">
+              <div class="lockscreen-logo">
+                <b>${node.text}</b>
+              </div>
+              
+              <!-- /.lockscreen-item -->
+              <div class="help-block text-center">
+                An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object atributes'}!
+              </div>
+            </div>`
 
   html += `
           </div>
@@ -974,23 +1099,24 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
           </div>
           `
           return;
-        } else if (node.type === 'array' && node.subType === 'object') {
-          var el = document.getElementById('payload-variable-pane');
-          el.innerHTML = '';
-          el.style.width = 'auto';
-          el.innerHTML = `<div class="lockscreen-wrapper">
-            <div class="lockscreen-logo">
-              <b>${node.text}</b>
-            </div>
+        } 
+        // else if (node.type === 'array' && node.subType === 'object') {
+        //   var el = document.getElementById('payload-variable-pane');
+        //   el.innerHTML = '';
+        //   el.style.width = 'auto';
+        //   el.innerHTML = `<div class="lockscreen-wrapper">
+        //     <div class="lockscreen-logo">
+        //       <b>${node.text}</b>
+        //     </div>
             
-            <!-- /.lockscreen-item -->
-            <div class="help-block text-center">
-              An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object atributes'}!
-            </div>
-          </div>
-          `
-          return;
-        }
+        //     <!-- /.lockscreen-item -->
+        //     <div class="help-block text-center">
+        //       An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object atributes'}!
+        //     </div>
+        //   </div>
+        //   `
+        //   return;
+        // }
 
         parent = document.getElementById('payload-variable-pane');
         parent.innerHTML = '';
@@ -1647,7 +1773,7 @@ function loadPage() {
   
   $( "nav li.nav-item a.nav-link" ).css( "bobackground-color", "unset" );
 
-  if (menuSelection) menuSelection.style.backgroundColor = "#00968857";
+  if (menuSelection) menuSelection.style.backgroundColor = "#00c89587";
 
   if (localStorage.getItem('currentFeed')) {
     var feed = JSON.parse(localStorage.getItem('currentFeed'));

@@ -42,13 +42,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Right navbar links -->
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" data-widget="sign-out" href="#" role="button" onclick="exitTool()">
-            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+            <i class="fas fa-sign-out-alt fa-2x" aria-hidden="true"></i>
           </a>
         </li>
       </ul>
@@ -656,6 +651,46 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
     </div>
   </div>
+  <!-- <div data-include="instancecountmodal"></div> -->
+  <div class="modal fade" id="field_instance_count_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" style="width:100%"><span id="arr_parameterRuleType"></span></h5>
+        </div>
+        <form id="arrayParameterCountForm" class="needs-validation" novalidate>
+          <div id="arr_parameterTopicName" hidden></div>
+          <div id="arr_parameterMessageName" hidden></div>
+          <div id="arr_parameterTopicVariableName" hidden></div>
+          <div id="arr_parameterPayloadFieldName" hidden></div>
+          
+          <div class="modal-body" style="padding:unset;">
+            <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
+              <div class="card card-default">
+                <div class="card-body" style="padding-top: 0.5rem; padding-bottom: 0.5rem;;">
+                  <label>Name:</label>        
+                  <span id="arr_dataFieldName" class="form-group" style="font-weight: normal;"></span><br/>
+                  <label>Type:</label>
+                  <span id="arr_dataFieldType" class="form-group" style="font-weight: normal;"></span>
+                </div>
+              </div>
+    
+              <div class="form-group">
+                <label for="arr_dataFieldCount">Instance Count</label>
+                <input type="number" id="arr_dataFieldCount" class="form-control" min="2" placeholder="Enter instance count..." required
+                value=2>
+                <div id="instanceFormError" class="feedback" style="font-size: 12px;">Size of the array (default: 2).</div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-primary" type="submit">Submit</button>
+          </div>
+        </form>        
+      </div>
+    </div>
+  </div>  
   
   <!-- <div data-include="savechanges"></div> -->
   <!-- <div data-include="sampleview"></div> -->
@@ -699,7 +734,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script type="text/javascript" src="feed/ruleform.js"></script>
   <script type="text/javascript" src="feed/rulleform-settings.js"></script>
   <script type="text/javascript" src="feed/ruleform-validation.js"></script>
-
+  <script type="text/javascript" src="feed/countform.js"></script>
+  
   <!-- REQUIRED SCRIPTS -->
   <script>
     window.onload = function () {
@@ -707,6 +743,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           document.getElementById("body").style.display = "block";
           mapAssignSubmit();
           ruleAssignSubmit();
+          arrayInstanceCountAssignSubmit();
       }, 200);
     }
 

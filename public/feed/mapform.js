@@ -52,7 +52,10 @@ async function manageFieldMap() {
     onNodeSelected: function(event, node) {
       console.log(node.text + ' @ ' + node.path + ' was selected');
       var el = document.getElementById('sourceField');
-      el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
+      if (node.type === 'array' || node.type === 'object') 
+        el.value = '';
+      else
+        el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
 
       $('#srcType').text(node.type);
       $('#srcSubType').text(node.subType);
@@ -108,7 +111,11 @@ async function manageFieldMap() {
     onNodeSelected: function(event, node) {
       console.log(node.text + ' @ ' + node.path + ' was selected');
       var el = document.getElementById('targetField');
-      el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
+      if (node.type === 'array' || node.type === 'object') 
+        el.value = '';
+      else
+        el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
+
       $('#tgtType').text(node.type);
       $('#tgtSubType').text(node.subType);
       $('#tgtFullPath').text(node.fullPath);

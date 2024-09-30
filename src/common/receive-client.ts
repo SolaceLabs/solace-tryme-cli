@@ -30,7 +30,7 @@ export class SolaceClient extends VisualizeClient {
 
     //Initializing the solace client library
     let factoryProps = new solace.SolclientFactoryProperties();
-    factoryProps.profile = solace.SolclientFactoryProfiles.version10;
+    factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
     this.receiver.topics = new Set<string>();
