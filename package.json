@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
     "@types/long": "^5.0.0",
     "@types/node": "^20.8.9",
     "ascii-table": "^0.0.9",
-    "axios": "^1.7.7",
+    "axios": "0.27.0",
     "chalk": "~4.1.2",
     "commander": "^11.1.0",
     "core-js": "^3.26.0",
@@ -83,7 +83,8 @@
     "outputPath": "release",
     "assets": [
       "node_modules/solclientjs/**/*.js",
-      "public/**/*"
+      "public/**/*",
+      "node_modules/axios/**/*.js"
     ]
   }
 }
