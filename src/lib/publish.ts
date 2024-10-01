@@ -6,7 +6,16 @@ import { getDefaultMessage, delay } from '../utils/defaults';
 import { displayHelpExamplesForPublish } from '../utils/examples';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 import { StdinRead } from '../utils/stdinread'
-const { isText, isBinary, getEncoding } = require('istextorbinary')
+
+const isBinaryFile = (filePath: string): boolean => {
+  const fileBuffer = fs.readFileSync(filePath);
+  for (let i = 0; i < 24; i++) {
+    if (fileBuffer[i] === 0) {
+      return true;
+    }
+  }
+  return false;
+};
 
 const publish = async (
   options: MessageClientOptions,
@@ -50,13 +59,13 @@ const publish = async (
     }
     
     try {
-      const binary = isBinary(file);
-      if (binary) {
+      if (isBinaryFile(file)) {
         message = fs.readFileSync(file, 'binary');
         payloadType = 'bytes';
       } else {
         message = fs.readFileSync(file, 'utf8');
       }
+
     } catch (error: any) {
       Logger.logDetailedError('read file failed', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)

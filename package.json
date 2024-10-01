@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -44,7 +44,6 @@
     "express": "^4.18.2",
     "form-data": "^4.0.0",
     "hexdump-nodejs": "^0.1.0",
-    "istextorbinary": "^9.5.0",
     "http": "^0.0.1-security",
     "json-schema-library": "^10.0.0-rc1",
     "node-localstorage": "^3.0.5",
