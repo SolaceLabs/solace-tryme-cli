@@ -648,8 +648,8 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
-    .addOption(new Option('--interval <SECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(3) .hideHelp(advanced))
-    .addOption(new Option('--initial-delay <SECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
+    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(3000) .hideHelp(advanced))
+    .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
     
     // message print options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))

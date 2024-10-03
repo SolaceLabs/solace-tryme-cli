@@ -7,16 +7,6 @@ import { displayHelpExamplesForPublish } from '../utils/examples';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 import { StdinRead } from '../utils/stdinread'
 
-const isBinaryFile = (filePath: string): boolean => {
-  const fileBuffer = fs.readFileSync(filePath);
-  for (let i = 0; i < 24; i++) {
-    if (fileBuffer[i] === 0) {
-      return true;
-    }
-  }
-  return false;
-};
-
 const publish = async (
   options: MessageClientOptions,
   optionsSource: any
@@ -59,7 +49,7 @@ const publish = async (
     }
     
     try {
-      if (isBinaryFile(file)) {
+      if (Logger.isBinaryFile(file)) {
         message = fs.readFileSync(file, 'binary');
         payloadType = 'bytes';
       } else {

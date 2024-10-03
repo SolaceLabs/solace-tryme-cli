@@ -212,8 +212,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   var feed:any = { type: 'restapi_feed', name: feedName };
   var apiRules:any = {
     publishSettings: {
-      "count": 20,
-      "interval": 1,
+      "count": 0,
+      "interval": 1000,
       "delay": 0
     }
   }
@@ -514,8 +514,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const pCount = new Input({
     message: `${chalkBoldWhite('Number of events')}\n` +
-    `${chalkBoldLabel('Hint')}: The total number of events to be published in a single feed run\n`,
-    initial: apiRules.publishSettings ? apiRules.publishSettings.count : '20',
+    `${chalkBoldLabel('Hint')}: The total number of events to be published: 0 (infinite) or a valid count\n`,
+    initial: apiRules.publishSettings ? apiRules.publishSettings.count : 0,
     validate: (value: string) => {  return !!value; }
   });
 
@@ -530,8 +530,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     
     const pInterval = new Input({
       message: `${chalkBoldWhite('Publish interval')}\n` +
-      `${chalkBoldLabel('Hint')}: The time gap (in secs) between successive publish operations\n`,
-      initial: apiRules.publishSettings ? apiRules.publishSettings.interval : '3',
+      `${chalkBoldLabel('Hint')}: The time gap (in milliseconds) between successive publish operations\n`,
+      initial: apiRules.publishSettings ? apiRules.publishSettings.interval : 1000,
       validate: (value: string) => {  return !!value; }
     });
   
@@ -546,8 +546,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   
   const pDelay = new Input({
     message: `${chalkBoldWhite('Initial delay')}\n` +
-    `${chalkBoldLabel('Hint')}: The initial delay (in secs) before the first publish operation starts\n`,
-    initial: apiRules.publishSettings ? apiRules.publishSettings.delay : '0',
+    `${chalkBoldLabel('Hint')}: The initial delay (in milliseconds) before the first publish operation starts\n`,
+    initial: apiRules.publishSettings ? apiRules.publishSettings.delay : 0,
     validate: (value: string) => {  return !!value; }
   });
 

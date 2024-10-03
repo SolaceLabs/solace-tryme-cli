@@ -106,8 +106,8 @@ const formulateRules = async (data: any) => {
           topic.payload = send.message.payload.properties;
         }
         topic.publishSettings = {
-          count: 20,
-          interval: 1,
+          count: 0,
+          interval: 1000,
           delay: 0
         }
         ruleSet.push(topic);

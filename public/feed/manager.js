@@ -953,20 +953,20 @@ async function configureApiPlaceHolderRules(rules, refresh = false) {
       <div class="col-4">
         <label for="count-publish" class="small">No. of Events</label>
         <input id="count-publish" type="number" class="form-control" 
-            value="${rules.publishSettings.count}" min="1" max="1000" data-param="count" onchange="publishApiSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 1 to 1000</span>
+            value="${rules.publishSettings.count}" min="0" max="1000" default="0" data-min="0" data-max="1000" data-default="0" data-param="count" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Default: 0 (infinite) or a +ve number</span>
       </div>
       <div class="col-4">
-        <label for="interval-publish" class="small">Interval (secs)</label>
+        <label for="interval-publish" class="small">Interval (milliseconds)</label>
         <input id="interval-publish" type="number" class="form-control" 
-          value="${rules.publishSettings.interval}" min="1" max="30" data-param="interval" onchange="publishApiSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 1 to 30 secs</span>
+          value="${rules.publishSettings.interval}" min="1000" max="120000" default="1000" data-min="1000" data-max="120000" data-default="1000" data-param="interval" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 1000 - 120000 ms</span>
       </div>
       <div class="col-4">
-        <label for="delay-publish" class="small">Initial Delay (secs)</label>
+        <label for="delay-publish" class="small">Initial Delay (milliseconds)</label>
         <input id="delay-publish" type="number" class="form-control" 
-          value="${rules.publishSettings.delay}" min="0" max="30" data-param="delay" onchange="publishApiSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 0 to 30</span>  
+          value="${rules.publishSettings.delay}" min="0" max="120000" default="0" data-min="0" data-max="120000" data-default="0" data-param="delay" onchange="publishApiSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 0 - 120000 ms</span>  
       </div>
     </div>
   </div>`;
@@ -1152,20 +1152,20 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
       <div class="col-4">
         <label for="count-publish" class="small">No. of Events</label>
         <input id="count-publish" type="number" class="form-control" 
-            value="${rule.publishSettings.count}" min="1" max="1000" data-param="count" onchange="publishSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 1 to 1000</span>
+            value="${rule.publishSettings.count}" min="0" max="1000" default="0" data-min="0" data-max="1000" data-default="0" data-param="count" onchange="publishSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Default: 0 (infinite) or a +ve number</span>
       </div>
       <div class="col-4">
-        <label for="interval-publish" class="small">Interval (secs)</label>
+        <label for="interval-publish" class="small">Interval (milliseconds)</label>
         <input id="interval-publish" type="number" class="form-control" 
-          value="${rule.publishSettings.interval}" min="1" max="30" data-param="interval" onchange="publishSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 1 to 30 secs</span>
+          value="${rule.publishSettings.interval}" min="0" max="120000" default="1000" data-min="0" data-max="120000" data-default="1000" data-param="interval" onchange="publishSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 0 - 120000 ms</span>
       </div>
       <div class="col-4">
-        <label for="delay-publish" class="small">Initial Delay (secs)</label>
+        <label for="delay-publish" class="small">Initial Delay (milliseconds)</label>
         <input id="delay-publish" type="number" class="form-control" 
-          value="${rule.publishSettings.delay}" min="0" max="30" data-param="delay" onchange="publishSettingsChange(this)">
-        <span style="font-size: 0.75rem;">Range: 0 to 30</span>  
+          value="${rule.publishSettings.delay}" min="0" max="120000" default="0" data-min="0" data-max="120000" data-default="0" data-param="delay" onchange="publishSettingsChange(this)">
+        <span style="font-size: 0.75rem;">Range: 0 - 120000 ms</span>  
       </div>
     </div>
   </div>`;
@@ -1839,6 +1839,8 @@ async function exitTool() {
 
 async function publishApiSettingsChange(evt) {
   var data = evt.dataset;
+  console.log('DATA', data);
+
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var rule = feed.rules
 
@@ -1846,27 +1848,31 @@ async function publishApiSettingsChange(evt) {
   if (!rule) return;
 
   var publishSettings = rule.publishSettings ? rule.publishSettings : {};
-  if (data.param === 'count') {
-    var val = document.getElementById('count-publish').value;
-    if (val < 1 || val > 1000) {
-      document.getElementById('count-publish').value = publishSettings.count ? publishSettings.count : 20;
-      return;
+  var el = document.getElementById(`${data.param}-publish`);
+  var val = el.value;
+  console.log('VAL', val);
+
+if (data.param === 'count') {
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   }
   else if (data.param === 'interval') {
-    var val = document.getElementById('interval-publish').value;
-    if (val < 1 || val > 30) {
-      document.getElementById('interval-publish').value = publishSettings.interval ? publishSettings.interval : 1;
-      return;
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   } else if (data.param === 'delay') {
-    var val = document.getElementById('delay-publish').value;
-    if (val < 0 || val > 30) {
-      document.getElementById('delay-publish').value = publishSettings.delay ? publishSettings.delay : 0;
-      return;
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   }
 

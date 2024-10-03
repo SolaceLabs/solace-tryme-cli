@@ -60,9 +60,9 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
     topic: optionsSource.topic === 'cli' ? options.topic : 
             apiFeedRule?.hasOwnProperty('topic') ? apiFeedRule.topic : 'solace/feed/' + apiFeedInfo.name.toLowerCase(),
     count: optionsSource.count === 'cli' ? options.count : 
-            apiFeedRule.publishSettings?.hasOwnProperty('count') ? apiFeedRule.publishSettings?.count : 20,
+            apiFeedRule.publishSettings?.hasOwnProperty('count') ? apiFeedRule.publishSettings?.count : 0,
     interval: optionsSource.interval === 'cli' ? options.interval :
-            apiFeedRule.publishSettings?.hasOwnProperty('interval') ? apiFeedRule.publishSettings?.interval : 3,
+            apiFeedRule.publishSettings?.hasOwnProperty('interval') ? apiFeedRule.publishSettings?.interval : 1000,
     delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
             apiFeedRule.publishSettings?.hasOwnProperty('delay') ? apiFeedRule.publishSettings?.delay : 0,
     published: 0

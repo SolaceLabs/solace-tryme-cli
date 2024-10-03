@@ -333,7 +333,8 @@ function mapAssignSubmit() {
 
 async function publishSettingsChange(evt) {
   var data = evt.dataset;
-console.log(data);
+  console.log('DATA', data);
+
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topic = $('#topic_name').text();
   var message = $('#message-feed-name').text();
@@ -343,31 +344,36 @@ console.log(data);
   if (!rule) return;
 
   var publishSettings = rule.publishSettings ? rule.publishSettings : {};
+  var el = document.getElementById(`${data.param}-publish`);
+  var val = el.value;
+  console.log('VAL', val);
+
   if (data.param === 'count') {
-    var val = document.getElementById('count-publish').value;
-    if (val < 1 || val > 1000) {
-      document.getElementById('count-publish').value = publishSettings.count ? publishSettings.count : 20;
-      return;
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   }
   else if (data.param === 'interval') {
-    var val = document.getElementById('interval-publish').value;
-    if (val < 1 || val > 30) {
-      document.getElementById('interval-publish').value = publishSettings.interval ? publishSettings.interval : 1;
-      return;
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   } else if (data.param === 'delay') {
-    var val = document.getElementById('delay-publish').value;
-    if (val < 0 || val > 30) {
-      document.getElementById('delay-publish').value = publishSettings.delay ? publishSettings.delay : 0;
-      return;
+    if (el && (parseInt(val) < parseInt(el.getAttribute('min')) || 
+                parseInt(val) > parseInt(el.getAttribute('max')))) {
+      val = parseInt(el.getAttribute('default'));
     }
+    document.getElementById(`${data.param}-publish`).value = val;
     publishSettings[data.param] = val;
   }
 
   rule.publishSettings = publishSettings;
+  console.log('Updated Settings', rule.publishSettings)
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
   const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));

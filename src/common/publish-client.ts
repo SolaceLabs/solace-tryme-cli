@@ -178,8 +178,6 @@ export class SolaceClient extends VisualizeClient {
           } catch (error) {
             message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, payload));
           }
-        } else if (payloadType === 'bytes') {
-          message.setBinaryAttachment(payload);
         } else {
           if (typeof payload === 'object') {
             const encoder = new TextEncoder(); 
@@ -195,11 +193,7 @@ export class SolaceClient extends VisualizeClient {
         }
       } 
       else {
-        if (payloadType === 'text') {
-          message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
-        } else {
-          message.setBinaryAttachment("");
-        }
+        message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
       }
 
       this.options.acknowledgeImmediately && message.setAcknowledgeImmediately(true);

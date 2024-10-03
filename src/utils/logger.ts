@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import chalk from 'chalk';
 import { Signale } from 'signale'
 import { prettyXML, prettyJSON } from '../utils/prettify'
@@ -95,6 +96,7 @@ const Logger = {
     });
     return str;
   },
+
   printStream: (stream: any, out: any) => {
     stream.getFields().forEach((field: any) => {
       if (field.getType() === 15)
@@ -103,6 +105,21 @@ const Logger = {
         out += `${field.getName()}=${field.getValue()}\r\n`;
     });
   },
+
+  isBinaryFile: (filePath: string): boolean => {
+    const fileBuffer = fs.readFileSync(filePath);
+    return Logger.isBinaryPayload(fileBuffer);
+  },
+
+  isBinaryPayload(payload: any): boolean {
+    for (let i = 0; i < 24; i++) {
+      if (payload[i] === 0) {
+        return true;
+      }
+    }
+    return false;
+  },
+  
   prettyPrintMessage: (message: any, payload:any, messageType: number, outputMode:string, pretty: boolean) => {
     var properties = message.dump(0);
     if (messageType === 1) { // MAP MESSAGE
@@ -138,8 +155,18 @@ const Logger = {
 
       if (payload) {
         if (messageType === 0) {
-          var hexdump = require('hexdump-nodejs');
-          Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+          var bPayload = payload.toString('utf8').trim();
+          var binaryData = Logger.isBinaryPayload(payload);
+          if (binaryData) {
+            var hexdump = require('hexdump-nodejs');
+            Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+          } else if (bPayload.startsWith('<?xml')) {
+            var prettyPayload = prettyXML(bPayload, 2);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          } else {
+            var prettyPayload = prettyJSON(bPayload);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          }
         } else if (messageType === 3) {
           if (payload.startsWith('<?xml')) {
             var prettyPayload = prettyXML(payload.trim(), 2);
@@ -175,8 +202,18 @@ const Logger = {
       Logger.logMessage(`Destination: ${message.getDestination()}`);
       if (payload) {
         if (messageType === 0) {
-          var hexdump = require('hexdump-nodejs');
-          Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+          var bPayload = payload.toString('utf8').trim();
+          var binaryData = Logger.isBinaryPayload(payload);
+          if (binaryData) {
+            var hexdump = require('hexdump-nodejs');
+            Logger.logMessage(`Payload\r\n${hexdump(payload)}`);
+          } else if (bPayload.startsWith('<?xml')) {
+            var prettyPayload = prettyXML(bPayload, 2);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          } else {
+            var prettyPayload = prettyJSON(bPayload);
+            Logger.logMessage(`Payload\r\n${prettyPayload}`);
+          }
         } else if (messageType === 3) {
           if (payload.startsWith('<?xml')) {
             var prettyPayload = prettyXML(payload.trim(), 2);

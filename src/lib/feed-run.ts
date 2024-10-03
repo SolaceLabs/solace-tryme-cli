@@ -238,9 +238,9 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       options: options,
       optionsSource: optionsSource,
       count: optionsSource.count === 'cli' ? options.count : 
-              feedRule.publishSettings?.hasOwnProperty('count') ? feedRule.publishSettings?.count : 20,
+              feedRule.publishSettings?.hasOwnProperty('count') ? feedRule.publishSettings?.count : 0,
       interval: optionsSource.interval === 'cli' ? options.interval :
-              feedRule.publishSettings?.hasOwnProperty('interval') ? feedRule.publishSettings?.interval : 3,
+              feedRule.publishSettings?.hasOwnProperty('interval') ? feedRule.publishSettings?.interval : 1000,
       delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
               feedRule.publishSettings?.hasOwnProperty('delay') ? feedRule.publishSettings?.delay : 0,
       published: 0
