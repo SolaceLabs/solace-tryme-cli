@@ -46,7 +46,7 @@ Options:
   -p, --password <PASSWORD>                     the password (default: "default")
 
   /* TOPIC SUBSCRIPTION SETTINGS */
-  -t, --topic <TOPIC...>                        the topic subscriptions as space-separated values if listing more than one (e.g., test/1 "user/>" "profile/*") (default: ["solace/try/me"])
+  -t, --topic <TOPIC...>                        the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3") (default: ["solace/try/me"])
 
   /* MESSAGE BODY SETTINGS */
   -m, --message <MESSAGE>                       the message body
