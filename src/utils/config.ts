@@ -268,12 +268,18 @@ export const saveConfig = (data: any) => {
 
 export const loadConfig = (configFile: string) => {
   try {
+    const localFilePath = processPath(`${configFile}`)
     const filePath = processPath(`${defaultStmHome}/${configFile}`)
     if (fileExists(filePath)) {
       Logger.info(`loading configuration '${configFile}'`)
       const config = readFile(filePath)
       // TODO: validateConfig(config)
       return config;   
+    } else if (fileExists(localFilePath)) {
+      Logger.info(`loading configuration '${configFile}'`)
+      const config = readFile(filePath)
+      // TODO: validateConfig(config)
+      return config;
     } else {
       Logger.logDetailedError(`configuration not found`, `${decoratePath(configFile)}`)
       Logger.logError('exiting...')
@@ -322,9 +328,39 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     
     var commandName = options.name ? options.name : cmd
     const filePath = processPath(`${defaultStmHome}/${options.config as string}`)
+    const localFilePath = processPath(`${options.config as string}`)
+    var config = null;
     if (fileExists(filePath)) {
-      const config = readFile(filePath)
+      config = readFile(filePath)
       Logger.info(`loading '${commandName}' command from configuration '${chalk.cyanBright(filePath)}'`)
+      if (!config[group][commandName]) {
+        Logger.logError(`could not find '${commandName}' command`)
+        // commandName = cmd
+        Logger.logError('exiting...')
+        process.exit(1)
+      }
+      if (config[group][commandName].command !== cmd) {
+        Logger.logDetailedError(`expected '${commandName}' command, but found '${config[group][commandName].command}'`, `specify a valid command name`)
+        Logger.logError('exiting...')
+        process.exit(1)
+      }
+      // TODO: validateConfig(config)
+
+      const configOptions:any = {}
+      const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
+      for (var i=0; i<connectionKeys.length; i++) {
+        configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
+      }
+      const defaultConfig = getDefaultConfig(cmd);
+      const clientKeys = Object.keys(defaultConfig);
+      for (var i=0; i<clientKeys.length; i++) {
+        configOptions[clientKeys[i]] = config[group][commandName][clientKeys[i]];
+      }
+
+      return configOptions
+    } else if (fileExists(localFilePath)) {
+      config = readFile(localFilePath)
+      Logger.info(`loading '${commandName}' command from configuration '${chalk.cyanBright(localFilePath)}'`)
       if (!config[group][commandName]) {
         Logger.logError(`could not find '${commandName}' command`)
         // commandName = cmd
