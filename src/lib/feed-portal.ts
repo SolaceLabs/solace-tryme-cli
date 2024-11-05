@@ -12,7 +12,7 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   const express = require('express');
   const app = express();
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.static(publicDir + '/public/feedportal'));
+  app.use(express.static(publicDir + '/public/feedportal/public'));
   app.use(express.json()); 
   app.use(function(req:any, res:any, next:any) {
     // console.log('Request: ', req.method, ' on ', req.path);
