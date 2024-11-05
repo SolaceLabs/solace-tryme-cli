@@ -658,9 +658,8 @@ function validateTopicVariableRule() {
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
   } else if (ruleSet === 'NumberRules') {
-    let minimum = parseInt($('#p_minimum').first().val())
-    let maximum = parseInt($('#p_maximum').first().val())
-
+    let minimum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
+    let maximum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
     if (isNaN(minimum)) {
       document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
       document.getElementById('p_minimum').reportValidity();
@@ -1195,8 +1194,8 @@ function validatePayloadFieldRule() {
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
   } else if (ruleSet === 'NumberRules') {
-    let minimum = parseInt($('#p_minimum').first().val())
-    let maximum = parseInt($('#p_maximum').first().val())
+    let minimum = field.rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
+    let maximum = field.rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
     
     if (isNaN(minimum)) {
       document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');

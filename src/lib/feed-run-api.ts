@@ -60,11 +60,11 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
     topic: optionsSource.topic === 'cli' ? options.topic : 
             apiFeedRule?.hasOwnProperty('topic') ? apiFeedRule.topic : 'solace/feed/' + apiFeedInfo.name.toLowerCase(),
     count: optionsSource.count === 'cli' ? options.count : 
-            apiFeedRule.publishSettings?.hasOwnProperty('count') ? apiFeedRule.publishSettings?.count : 0,
+            apiFeedRule.publishSettings?.hasOwnProperty('count') ? parseInt(apiFeedRule.publishSettings?.count) : 0,
     interval: optionsSource.interval === 'cli' ? options.interval :
-            apiFeedRule.publishSettings?.hasOwnProperty('interval') ? apiFeedRule.publishSettings?.interval : 1000,
+            apiFeedRule.publishSettings?.hasOwnProperty('interval') ? parseInt(apiFeedRule.publishSettings?.interval) : 1000,
     delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
-            apiFeedRule.publishSettings?.hasOwnProperty('delay') ? apiFeedRule.publishSettings?.delay : 0,
+            apiFeedRule.publishSettings?.hasOwnProperty('delay') ? parseInt(apiFeedRule.publishSettings?.delay) : 0,
     published: 0
   });
 
@@ -105,6 +105,10 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
 }
 
 async function publishFeed(publisher:any, feed:any) {
+  if (publisher.exited) {
+    return;
+  }
+  
   try {
     var headers:any = { Accept: 'application/json' };
 
@@ -158,7 +162,7 @@ async function publishFeed(publisher:any, feed:any) {
       publisher.publish(topic, payload, feed.options.payloadType, feed.published++);
       publishStats[`${feed.api.topic}`]++;
       Logger.info(chalkEventCounterValue(publishStats[`${feed.api.topic}`]) + ' ' +  chalkEventCounterLabel(feed.name));
-      if (publishStats[`${feed.api.topic}`] >= feed.count) {
+      if (feed.count > 0 && publishStats[`${feed.api.topic}`] >= feed.count) {
         var index = eventFeedTimers.findIndex((t) => t.name === feed.name);
         if (index < 0) {
           console.error('Hmm... could not find the timer');
@@ -184,12 +188,16 @@ async function publishFeed(publisher:any, feed:any) {
 
 function addEventFeedTimer(feed: any, publisher: any) {
   // console.log('Timer', msg);
-  sleep(feed.delay * 1000).then(() => { 
+  sleep(feed.delay).then(() => { 
+    if (!feed.count || feed.count >= 1) {
+      eventFeedTimers.push({
+        name: feed.name,
+        timer: setInterval(publishFeed, feed.interval, publisher, feed)
+      });
+    }
+
     publishStats[`${feed.api.topic}`] = 0;
-    eventFeedTimers.push({
-      name: feed.name,
-      timer: setInterval(publishFeed, feed.interval * 1000, publisher, feed)
-    });
+    publishFeed(publisher, feed);
   });
 }
 

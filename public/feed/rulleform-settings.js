@@ -59,9 +59,9 @@ function fixStringRulesParameters(rule, value, changed) {
   } else if (rule === 'fromRegExp') {
     var p_regexp = `
       <div class="form-group">
-        <label>Word Count</label>
+        <label>Pattern</label>
         <input type="text" id="p_regexp" class="form-control" placeholder="Enter the regular expression..." required
-          value=${value.pattern !== undefined ? value.pattern : "^[A-Za-z]$"}>
+          value=${value.pattern !== undefined ? value.pattern : "[A-Za-z]{5,10}"}>
         <div class="invalid-feedback">Invalid pattern</div>
       </div>`;
     panel.append(p_regexp); 
@@ -162,7 +162,7 @@ function fixNumberRulesParameters(rule, value, changed) {
         <div class="col-sm-6">
           <div class="form-group">
             <label>Minimum Value</label>
-            <input type="number" id="p_minimum" class="form-control" placeholder="Enter minimum value..." required
+            <input type="${rule === 'int' ? "number" : "decimal"}" id="p_minimum" class="form-control" placeholder="Enter minimum value..." required
               value=${value.minimum !== undefined ? value.minimum : 0}>
             <div class="invalid-feedback">Invalid minimum value</div>
           </div>
@@ -170,7 +170,7 @@ function fixNumberRulesParameters(rule, value, changed) {
         <div class="col-sm-6">
           <div class="form-group">
             <label>Maximum Value</label>
-            <input type="number" id="p_maximum" class="form-control" placeholder="Enter maximum value..." required
+            <input type="${rule === 'int' ? "number" : "decimal"}" id="p_maximum" class="form-control" placeholder="Enter maximum value..." required
               value=${value.maximum !== undefined ? value.maximum : 1000}>
             <div class="invalid-feedback">Invalid maximum value</div>
           </div>

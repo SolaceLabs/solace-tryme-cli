@@ -12687,7 +12687,7 @@ body:not(.layout-fixed) .main-sidebar .sidebar {
 .nav-sidebar .menu-is-opening > .nav-link svg.right,
 .nav-sidebar .menu-is-opening > .nav-link i.right {
   -webkit-transform: rotate(-90deg);
-  transform: rotate(-90deg);
+  transform: rotate(90deg);
 }
 
 .nav-sidebar > .nav-item {

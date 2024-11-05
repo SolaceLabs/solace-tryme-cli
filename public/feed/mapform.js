@@ -85,11 +85,11 @@ async function manageFieldMap() {
           `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
           Note that the mapped array fields are of different data types!</div>`
         )
-      } else if (tgtType && srcType !== tgtType && $('#targetField').val()) {
-        $('#mismatchConfirm').html(
-          `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-          Note that the mapped fields are of different data types!</div>`
-        )
+      // } else if (tgtType && srcType !== tgtType && $('#targetField').val()) {
+      //   $('#mismatchConfirm').html(
+      //     `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      //     Note that the mapped fields are of different data types!</div>`
+      //   )
       } else {
         $('#mismatchConfirm').html('');
       }
@@ -139,11 +139,11 @@ async function manageFieldMap() {
           `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
           Cannot map to or from object to non-object fields!</div>`
         )
-      } else if (tgtType && srcType !== tgtType && $('#sourceField').val()) {
-        $('#mismatchConfirm').html(
-          `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-          Note that the mapped fields are of different data types!</div>`
-        )
+      // } else if (tgtType && srcType !== tgtType && $('#sourceField').val()) {
+      //   $('#mismatchConfirm').html(
+      //     `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      //     Note that the mapped fields are of different data types!</div>`
+      //   )
       } else if (tgtType && tgtType === 'array' && srcType === tgtType && srcSubType !== tgtSubType &&  $('#sourceField').val()) {
         $('#mismatchConfirm').html(
           `<div class="btn-sm bg-red fg-white"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>

@@ -9,6 +9,7 @@ import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedRestAPIValu
 import { fa } from '@faker-js/faker';
 import { fakerRulesJson } from '../utils/fakerrules';
 import { validate } from '@asyncapi/parser/esm/validate';
+import chalk from 'chalk';
 
 const getPotentialFeedName = (fileName: string) => {
   var feedName = fileName.split('/').pop();
@@ -50,7 +51,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     do {
       const pFilename = new Input({
         message: `${chalkBoldWhite('Enter AsyncAPI file')}\n` +
-          `${chalkBoldLabel('Hint')}: Enter the path to the AsyncAPI file\n`,
+          `${chalkBoldLabel('Hint')}: Enter the full path to the AsyncAPI file\n`,
         initial: 'asyncapi.json',
         validate: (value: string) => {  return !!value; }
       });
@@ -203,6 +204,10 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   updateAndLoadFeedInfo(feed);
 
   Logger.success(`Successfully created event feed ${feedName}`);
+
+  Logger.hint(`What's next?\n` +
+              `    You can either run the feed to stream events ${chalk.italic.greenBright('stm feed run')} or \n` +
+              `    configure data generation rules to customize the content of the messages ${chalk.italic.greenBright('stm feed configure')}`);
   Logger.success('exiting...');
   process.exit(0);
 }
@@ -719,6 +724,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   writeJsonFile(`${feedPath}/${defaultFeedRulesFile}`, feedRule, true);
 
   Logger.success(`Successfully created event feed ${feedName}`);
+  Logger.hint(`What's next?\n` +
+    `    You can run the feed to stream events ${chalk.italic.greenBright('stm feed run')}`);
   Logger.success('exiting...');
   process.exit(0);
 }

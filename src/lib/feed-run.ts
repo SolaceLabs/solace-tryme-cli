@@ -238,11 +238,11 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       options: options,
       optionsSource: optionsSource,
       count: optionsSource.count === 'cli' ? options.count : 
-              feedRule.publishSettings?.hasOwnProperty('count') ? feedRule.publishSettings?.count : 0,
+              feedRule.publishSettings?.hasOwnProperty('count') ? parseInt(feedRule.publishSettings?.count) : 0,
       interval: optionsSource.interval === 'cli' ? options.interval :
-              feedRule.publishSettings?.hasOwnProperty('interval') ? feedRule.publishSettings?.interval : 1000,
+              feedRule.publishSettings?.hasOwnProperty('interval') ? parseInt(feedRule.publishSettings?.interval) : 1000,
       delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
-              feedRule.publishSettings?.hasOwnProperty('delay') ? feedRule.publishSettings?.delay : 0,
+              feedRule.publishSettings?.hasOwnProperty('delay') ? parseInt(feedRule.publishSettings?.delay) : 0,
       published: 0
     });
   });
@@ -282,12 +282,16 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
 }
 
 async function publishFeed(publisher:any, msg:any) {
+  if (publisher.exited) {
+    return;
+  }
+  
   var events = await fakeEventGenerator({rule: msg.rule, count: 1});  
   events.forEach((event, index) => {
     publisher.publish(event.topic, event.payload, msg.options.payloadType, msg.published++);
     publishStats[`${msg.message}-${msg.topic}`]++;
     Logger.info(chalkEventCounterValue(publishStats[`${msg.message}-${msg.topic}`]) + ' ' +  chalkEventCounterLabel(msg.rule.eventName));
-    if (publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
+    if (msg.count > 0 && publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
       var index = eventFeedTimers.findIndex((t) => t.name === msg.message);
       if (index < 0) {
         console.error('Hmm... could not find the timer');
@@ -301,13 +305,16 @@ async function publishFeed(publisher:any, msg:any) {
 
 function addEventFeedTimer(msg: any, publisher: any) {
   // console.log('Timer', msg);
-  sleep(msg.delay * 1000).then(() => { 
+  sleep(msg.delay).then(() => { 
+    if (!msg.count || msg.count >= 1) {
+      eventFeedTimers.push({
+        name: msg.message,
+        message: msg,
+        timer: setInterval(publishFeed, msg.interval, publisher, msg)
+      });
+    }
     publishStats[`${msg.message}-${msg.topic}`] = 0;
-    eventFeedTimers.push({
-      name: msg.message,
-      message: msg,
-      timer: setInterval(publishFeed, msg.interval * 2000, publisher, msg)
-    });
+    publishFeed(publisher, msg);
   });
 }
 
