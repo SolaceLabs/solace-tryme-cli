@@ -11,6 +11,11 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   const express = require('express');
   const app = express();
+
+  const feedsPath = process.env.STM_HOME
+  ? path.resolve(process.env.STM_HOME)
+  : path.resolve(process.env.HOME || '', '.stm/feeds');
+
   app.use(express.urlencoded({ extended: true }));
   app.use(express.static(publicDir + '/public/feedportal/public'));
   app.use(express.json()); 
@@ -65,6 +70,52 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
     setTimeout(process.exit(0), 2000)
   })
 
+  // @ts-ignore
+  app.get('/feeds', (req, res) => {
+    fs.readdir(feedsPath, { withFileTypes: true }, (err, entries) => {
+      if (err) {
+        res.status(500).json({ error: 'Failed to read directory' });
+        return;
+      }
+
+      const feedPromises = entries
+        .filter((entry) => entry.isDirectory())
+        .map((dir) => {
+          const feedInfoPath = path.join(feedsPath, dir.name, 'feedinfo.json');
+          const feedRulesPath = path.join(feedsPath, dir.name, 'feedrules.json');
+
+          return new Promise((resolve) => {
+            // Read feedinfo.json and feedrules.json in parallel
+            Promise.all([
+              fs.promises.readFile(feedInfoPath, 'utf8').catch(() => null),
+              fs.promises.readFile(feedRulesPath, 'utf8').catch(() => null),
+            ]).then(([feedInfoData, feedRulesData]) => {
+              if (feedInfoData || feedRulesData) {
+                try {
+                  const feedInfo = feedInfoData ? JSON.parse(feedInfoData) : null;
+                  const feedRules = feedRulesData ? JSON.parse(feedRulesData) : null;
+                  resolve({ directory: dir.name, feedinfo: feedInfo, feedrules: feedRules });
+                } catch (parseError) {
+                  resolve(null);  // Ignore parsing errors
+                }
+              } else {
+                resolve(null);  // No data found for this directory
+              }
+            });
+          });
+        });
+
+      Promise.all(feedPromises).then((feeds) => {
+        const validFeeds = feeds.filter((feed) => feed !== null);
+        res.json(validFeeds);
+      });
+    });
+  });
+
+  app.listen(8081, () => {
+    console.log(`Server is running on http://127.0.0.1:8081`);
+  });
+
   let http = require('http');
   let server = http.createServer(app);
   server.listen(managePort, () => {
@@ -81,6 +132,7 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   });
 
 }
+
 export default feedPortal
 
 export { feedPortal }
