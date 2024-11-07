@@ -27,7 +27,7 @@ jobs:
         run: yarn run build
       
       - name: Build feeds portal site
-        run: cd public/feedportal; npm install; npm run build; cd -
+        run: cd public/feedportal; npm install; npm run build; find . -mindepth 1 -maxdepth 1 ! -name 'public' -exec rm -rf {} +; cd -
         
       - name: Package
         run: yarn run package

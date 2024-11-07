@@ -113,16 +113,16 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   });
 
   app.listen(8081, () => {
-    console.log(`Server is running on http://127.0.0.1:8081`);
+    // console.log(`Server is running on http://127.0.0.1:8081`);
   });
 
   let http = require('http');
   let server = http.createServer(app);
   server.listen(managePort, () => {
-    console.info(`App listening on port ${server.address().port}`);
+    // console.info(`App listening on port ${server.address().port}`);
     var opener = require("opener");
-    console.log(`Accessible at http://localhost:${server.address().port}/index.html`);
-    opener(`http://localhost:${server.address().port}/index.html`)
+    console.log(`Accessible at http://127.0.0.1:8081`);
+    opener(`http://127.0.0.1:8081`)
   });
 
   process.on('SIGINT', function () {
