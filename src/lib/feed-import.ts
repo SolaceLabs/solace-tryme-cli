@@ -24,7 +24,8 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
       });
   }
 
-  var zipPath = `${process.cwd()}/${archiveFile}`;
+  archiveFile = archiveFile.trim().replace(/['"]+/g, '');
+  let zipPath = !fileExists(archiveFile) ? `${process.cwd()}/${archiveFile}` : archiveFile;
   if (!fileExists(zipPath)) {
     Logger.logError(`File ${archiveFile} does not exist!`);
     Logger.error('exiting...');
