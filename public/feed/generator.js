@@ -1,5 +1,6 @@
 async function generateEvents(rule, count) {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   // console.log(rule, count);
   const response = await fetch(path + `/fakeevent`, {
     method: "POST",
@@ -21,7 +22,8 @@ async function generateEvents(rule, count) {
 }
 
 async function generateRuleBasedValue(rule, count) {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   // console.log(rule, count);
   const response = await fetch(path + `/fakedata`, {
     method: "POST",
@@ -43,7 +45,8 @@ async function generateRuleBasedValue(rule, count) {
 }
 
 async function generateRuleBasedPayload(payload, count) {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   // console.log(payload, count);
   const response = await fetch(path + `/fakepayload`, {
     method: "POST",

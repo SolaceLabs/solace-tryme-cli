@@ -33,6 +33,9 @@ export const fakerRulesJson = {
         "leadingZeros": false,
         "description": "Generates a given length string of digits." 
       },
+      "static": { 
+        "description": "Assign a static value." 
+      },
       "symbol": { 
         "minLength": 5,
         "maxLength": 5,
@@ -77,6 +80,16 @@ export const fakerRulesJson = {
         "minimum": 0,
         "maximum": 1000,
         "description": "Returns a single random integer.",
+      },
+      "countUp": {
+        "description": "Generates an incremental number.",
+        "start": 1,
+        "change": 1,
+      },
+      "countDown": {
+        "description": "Generates a decremental number.",
+        "start": 9999999,
+        "change": 1,
       }
     }
   },
@@ -91,6 +104,18 @@ export const fakerRulesJson = {
   "DateRules": {
     "description": "Module to generate dates",
     "rules": {
+      "currentDate": {
+        "description": "Returns a current date",
+        "format": "MM-DD-YYYY"
+      },
+      "currentDateWithTime": {
+        "description": "Returns a current date with time",
+        "format": "MM-DD-YYYY HH:mm:ss"
+      },
+      "currentTime": {
+        "description": "Returns a current time",
+        "format": "HH:mm:ss"
+      },
       "anytime": { 
         "description": "Generates a random date that can be either in the past or in the future." 
       },
@@ -227,39 +252,43 @@ export const fakerRulesJson = {
       }
     }
   },
-  // "InternetRules": {
-  //   "description": "Module to generate internet related entries",
-  //   "rules": {
-  //     "domainName": { 
-  //       "description": "Generates a random domain name." 
-  //     },
-  //     "email": { 
-  //       "description": "Generates a random email address." 
-  //     },
-  //     "emoji": { 
-  //       "description": "Generates a random emoji." 
-  //     },
-  //     "ipv4": { 
-  //       "description": "Generates a random IPv4 address." 
-  //     },
-  //     "ipv6": { 
-  //       "description": "Generates a random IPv6 address." 
-  //     },
-  //     "mac": { 
-  //       "description": "Generates a random mac address." 
-  //     },
-  //     "password": { 
-  //       "length": 15,
-  //       "description": "Generates a random password." 
-  //     },
-  //     "url": { 
-  //       "description": "Generates a random http(s) url." 
-  //     },
-  //     "userName": { 
-  //       "description": "Generates a random username."
-  //     }
-  //   }
-  // },
+  "InternetRules": {
+    "description": "Module to generate internet related entries",
+    "rules": {
+      "domainName": { 
+        "description": "Generates a random domain name.",
+        "casing": "lower"
+      },
+      "domainWord": { 
+        "description": "Generates a random machine/host name.",
+        "casing": "lower"
+      },
+      "email": { 
+        "description": "Generates a random email address.",
+        "casing": "lower"
+      },
+      "emoji": { 
+        "description": "Generates a random emoji." 
+      },
+      "ipv4": { 
+        "description": "Generates a random IPv4 address." 
+      },
+      "ipv6": { 
+        "description": "Generates a random IPv6 address." 
+      },
+      "mac": { 
+        "description": "Generates a random mac address." 
+      },
+      "url": { 
+        "description": "Generates a random http(s) url.",
+        "casing": "lower"
+      },
+      "username": {
+        "description": "Generates a random username.",
+        "casing": "lower"
+      }
+    }
+  },
   "FinanceRules": {
     "description": "Module to generate finance and money related entries",
     "rules": {
@@ -303,29 +332,6 @@ export const fakerRulesJson = {
       }
     }
   },
-  // "VehicleRules": {
-  //   "description": "Module to generate vehicle related entries",
-  //   "rules": {
-  //     "manufacturer": { 
-  //       "description": "Returns a manufacturer name." 
-  //     },
-  //     "model": { 
-  //       "description": "Returns a vehicle model." 
-  //     },
-  //     "type": { 
-  //       "description": "Returns a vehicle type." 
-  //     },
-  //     "vehicle": { 
-  //       "description": "Returns a random vehicle." 
-  //     },
-  //     "vin": { 
-  //       "description": "Returns a vehicle identification number (VIN)." 
-  //     },
-  //     "vrm": { 
-  //       "description": "Returns a vehicle registration number (VRM)"
-  //     }
-  //   }
-  // },
   "AirlineRules": {
     "description": "Module to generate airline and airport related data.",
     "rules": {
@@ -379,98 +385,5 @@ export const fakerRulesJson = {
         "description": "Generates a random descriptive product name."
       }
     }
-  },
-  // "ArrayRules": {
-  //   "description": "Generates array of fake items of specified type.",
-  //   "rules": {
-  //     "float": { 
-  //       "minimum": 0,
-  //       "maximum": 1000,
-  //       "length": 10,
-  //       "description": "Returns an array of random floating-point numbers"
-  //     },
-  //     "int": { 
-  //       "minimum": 0,
-  //       "maximum": 1000,
-  //       "length": 10,
-  //       "description": "Returns an array of random integers."
-  //     },
-  //     "boolean": { 
-  //       "length": 10,
-  //       "description": "Returns an array of random boolean value true or false"
-  //     },
-  //     "phoneNumber": { 
-  //       "length": 10,
-  //       "description": "Generates an array of random phone numbers."
-  //     },
-  //     "date": { 
-  //       "length": 10,
-  //       "description": "Generates an array of random dates that can be either in the past or in the future." 
-  //     },
-  //     // "text": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates an array of text based on a random lorem method." 
-  //     // },
-  //     "word": { 
-  //       "length": 10,
-  //       "description": "Generates an array of words of a specified length." 
-  //     },
-  //     "companyName": { 
-  //       "length": 10,
-  //       "description": "Generates an array of random company names." 
-  //     },
-  //     "firstName": { 
-  //       "length": 10,
-  //       "description": "Returns an array of random first name." 
-  //     },
-  //     "fullName": { 
-  //       "length": 10,
-  //       "description": "Generates an array of random full names." 
-  //     },
-  //     "city": { 
-  //       "length": 10,
-  //       "description": "Generates an array of random localized city names." 
-  //     },
-  //     "country": { 
-  //       "length": 10,
-  //       "description": "Returns an array of random country names." 
-  //     },
-  //     // "latitude": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a random latitude." 
-  //     // },
-  //     // "longitude": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a random longitude." 
-  //     // },
-  //     // "ipv4": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a random IPv4 address." 
-  //     // },
-  //     // "url": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a random http(s) url." 
-  //     // },
-  //     // "creditCardNumber": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a random credit card number." 
-  //     // },
-  //     // "currencyCode": { 
-  //     //   "length": 10,
-  //     //   "description": "Returns a random currency code." 
-  //     // },
-  //     // "isbn": { 
-  //     //   "length": 10,
-  //     //   "description": "Returns a random ISBN identifier." 
-  //     // },
-  //     // "price": { 
-  //     //   "length": 10,
-  //     //   "description": "Generates a price between min and max." 
-  //     // },
-  //     "product": { 
-  //       "length": 10,
-  //       "description": "Returns a short product name." 
-  //     }
-  //   }
-  // }
+  }
 }

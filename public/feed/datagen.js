@@ -1,9 +1,14 @@
 async function showSampleData() {
-  var page = window.location.href.split('/').pop();
-  var messageName = page.split('#').pop();
+  // var page = window.location.href.split('/').pop();
+  var page = window.location.href.split('#').pop();
+  var messageName = decodeURIComponent(page.split('#').pop());
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var rule = feed.rules.find((r) => r.messageName === messageName);
-  if (!rule) return;
+  var rules = feed.rules.filter((r) => r.messageName === messageName);
+  if (!rules) return;
+
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  var rule = rules[ruleIndex];
 
   var events = await generateEvents(rule, 5);
   var fakeData = [];

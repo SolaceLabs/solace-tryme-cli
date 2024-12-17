@@ -72,6 +72,8 @@ function fixParameters(group, rule, value, changed = false) {
     fixAirlineRulesParameters(rule, value, changed);
   } else if (group == 'CommerceRules') {
     fixCommerceRulesParameters(rule, value, changed);
+  } else if (group == 'InternetRules') {
+    fixInternetRulesParameters(rule, value, changed);
   }
 }
 
@@ -103,7 +105,8 @@ function ruleAssignSubmit() {
           var feed = JSON.parse(localStorage.getItem('currentFeed'));
           configureAPIVariables(feed.rules.rules, true);
   
-          const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          const path = window.location.origin;
           await fetch(path + `/feedrules`, {
             method: "POST",
             headers: {
@@ -125,9 +128,12 @@ function ruleAssignSubmit() {
           var page = window.location.href.split('/').pop();
           var messageName = page.split('#').pop();
           var feed = JSON.parse(localStorage.getItem('currentFeed'));
-          if (type) configureMessageSendTopics(messageName, feed.rules, true);
+          var ruleIndex = localStorage.getItem('currentRuleIndex');
+          if (ruleIndex === null) ruleIndex = 0;
+          if (type) configureMessageSendTopics(messageName, feed.rules, ruleIndex, true);
   
-          const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          const path = window.location.origin;
           await fetch(path + `/feedrules`, {
             method: "POST",
             headers: {
@@ -143,10 +149,13 @@ function ruleAssignSubmit() {
             var feed = JSON.parse(localStorage.getItem('currentFeed'));
             var messageName = page.split('#').pop();
             messageName = decodeURIComponent(messageName);
-  
-            var rule = feed.rules.find((r) => r.messageName === messageName);
+
+            var topicRules = feed.rules.filter((r) => r.messageName === messageName);
+            var ruleIndex = localStorage.getItem('currentRuleIndex');
+            if (ruleIndex === null) ruleIndex = 0;
+            var rule = topicRules[ruleIndex];
             if (!rule) return;
-  
+          
             var parent = document.getElementById('payload-variable-pane');
             parent.innerHTML = '';
             parent.style.width = 'auto';

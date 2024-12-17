@@ -218,7 +218,8 @@ function loadMessage(feed, page) {
     return;
   }
 
-  var messageName = page.split('#').pop();
+  // var messageName = page.split('#').pop();
+  var messageName = window.location.href.split('#').pop();
   if (!messageName) {
     console.log(`Missing message name in URL`);
     return;
@@ -235,8 +236,10 @@ function loadMessage(feed, page) {
   if (el) el.innerHTML = feed.fileName;
 
   configureMessageInfo(messageName, message, config);
-  configureMessageSendTopics(messageName, feed.rules);
-  configureMessageReceiveTopics(messageName, feed.schemas);
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  configureMessageSendTopics(messageName, feed.rules, ruleIndex, true);
+  configureMessageReceiveTopics(messageName, feed.rules, ruleIndex, true);
 
   return messageName;
 }
@@ -245,15 +248,15 @@ function configureMessageInfo(messageName, message, config) {
   el = document.getElementById('message-feed-name');
   if (el) el.innerHTML = messageName;
   el = document.getElementById('message-name');
-  if (el) el.innerHTML = messageName;
+  if (el) el.innerHTML = fixAnonNames(messageName);
   el = document.getElementById('schema-name');
-  if (el) el.innerHTML = message.schema ? message.schema : 'N/A';
+  if (el) el.innerHTML = message.schema ? fixAnonNames(message.schema) : 'N/A';
 
   value = 'N/A';
   if (config && config.messages) {
     value = config.messages[messageName].send ? config.messages[messageName].send.length : 0;
     var ptl = document.getElementById('send_topics');
-    config.messages[messageName].send.forEach(send => {
+    config.messages[messageName].send && config.messages[messageName].send.forEach(send => {
       var tl = document.createElement('tr');
       tl.innerHTML = `<td style="word-break: break-word;">${send.topicName}</td>`;
       ptl.appendChild(tl);
@@ -272,7 +275,7 @@ function configureMessageInfo(messageName, message, config) {
   if (config && config.messages) {
     value = config.messages[messageName].receive ? config.messages[messageName].receive.length : 0;
     var ptl = document.getElementById('receive_topics');
-    config.messages[messageName].receive.forEach(receive => {
+    config.messages[messageName].receive && config.messages[messageName].receive.forEach(receive => {
       var tl = document.createElement('tr');
       tl.innerHTML = `<td style="word-break: break-word;">${receive.topicName}</td>`;
       ptl.appendChild(tl);
@@ -294,7 +297,7 @@ function configureMessageInfo(messageName, message, config) {
     var ptl = document.getElementById('consumers');
     config.messages[messageName].receive.forEach(receive => {
       consumerCount += receive.consumers ? Object.keys(receive.consumers).length : 0;
-      Object.keys(receive.consumers).forEach(consumerName => {
+      receive.consumers && Object.keys(receive.consumers).forEach(consumerName => {
         var tl = document.createElement('tr');
         tl.innerHTML = `<td style="word-break: break-word;">${consumerName}</td>`;
         ptl.appendChild(tl);  
@@ -333,7 +336,7 @@ async function editTopicVariable(el) {
   $('#parameterRuleType').html('Topic Variable');
   $('#parameterTopicName').text(topic);
   $('#dataFieldName').html(`${param.replaceAll('.properties', '')}`)
-  $('#dataFieldType').html(`${rule.topicParameters[`${param}`].schema.type}`)
+  $('#dataFieldType').html(`${rule.topicParameters[`${param}`].rule.type}`)
   $('#parameterMessageName').text(message);
   $('#parameterTopicVariableName').text(param);
   $('#parameterPayloadFieldName').text('');
@@ -589,6 +592,9 @@ async function editAPIParameter(el) {
 }
 
 function buildParamRuleUI(action, rule, topic, type = 'topic', node = '', name = '') {
+  // no need to process receive messages
+  if (!rule) return;
+
   var html = `      
       <div class="card"  >
         <div class="card-header">
@@ -621,8 +627,23 @@ function buildParamRuleUI(action, rule, topic, type = 'topic', node = '', name =
         <!-- /.card-header -->
         <div class="card-body" style="overflow-y: auto">
           <dl class='row'>`;
-  Object.keys(rule).forEach((p) => {
-    html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+
+  const orderedFields = ['name', 'description', 'type', 'group', 'rule'];
+  orderedFields.forEach((p) => {
+    if (!rule || !rule[p]) 
+      console.log('rule[p]', p, rule[p]);
+    if (rule[p]) {
+      if (p === 'type' && node.type === 'array') {
+        html += `<dt class='col-sm-4'>TYPE</dt><dd class='col-sm-8'>Array of ${rule.type}s</dd>`;
+      } else {
+        html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`;
+      }
+    }
+  });
+  Object.keys(rule).sort().forEach((p) => {
+    if (!orderedFields.includes(p)) {
+      html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+    }
   });
   html += `
           </dl>
@@ -666,8 +687,16 @@ function buildArrayParamRuleUI(action, rule, topic, type = 'topic', node = '', n
         <!-- /.card-header -->
         <div class="card-body" style="overflow-y: auto">
           <dl class='row'>`;
-  Object.keys(rule).forEach((p) => {
-    html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+  const orderedFields = ['name', 'description', 'type', 'group', 'rule'];;
+  orderedFields.forEach((p) => {
+    if (rule[p]) {
+      html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`;
+    }
+  });
+  Object.keys(rule).sort().forEach((p) => {
+    if (!orderedFields.includes(p)) {
+      html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+    }
   });
   html += `
           </dl>
@@ -701,8 +730,16 @@ function buildAPIParamRuleUI(rule) {
         <!-- /.card-header -->
         <div class="card-body" style="overflow-y: auto">
           <dl class='row'>`;
-  Object.keys(rule).forEach((p) => {
-    html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+  const orderedFields = ['name', 'description', 'type', 'group', 'rule'];;
+  orderedFields.forEach((p) => {
+    if (rule[p]) {
+      html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`;
+    }
+  });
+  Object.keys(rule).sort().forEach((p) => {
+    if (!orderedFields.includes(p)) {
+      html += `<dt class='col-sm-4'>${p.toUpperCase()}</dt><dd class='col-sm-8'>${rule[p]}</dd>`
+    }
   });
   html += `
           </dl>
@@ -718,21 +755,44 @@ function buildAPIParamRuleUI(rule) {
 function getTree(json) {
   var tree = [];
   var root = { text: 'Payload', type: 'object', path: '', nodes: [] }
-  buildTree(json, root);
+  buildTree('Payload', json, root);
   tree.push(root);
 
   return tree;
 }
 
-function buildTree(json, parent) {
+function buildTree(name, json, parent) {
+  if (!json) {
+    console.log('JSON is empty');
+    return;
+  }
+  console.log('JSON', json);
   var fields = Object.keys(json);
+  console.log('FIELDS', fields);
+
+  if (name === 'mentions') {
+    console.log('MENTIONS', json);
+  }
+
+  var doNotIgnoreFields = {
+    'type': fields.includes('type') && !json?.type?.rules,
+    'subType': fields.includes('subType') && !json?.subType?.rules,
+    'rule': fields.includes('rule') && !json?.rule?.rules,
+    'properties': fields.includes('properties') && !json?.properties?.rules,
+  }
+
   fields.forEach(field => {
-    if (field === 'type' || field === 'subType' || field === 'rule' || field === 'properties') return;
+    if ((field === 'type' && !doNotIgnoreFields.type) || 
+        (field === 'subType' && !doNotIgnoreFields.subType) || 
+        (field === 'rule' && !doNotIgnoreFields.rule) || 
+        (field === 'properties' && !doNotIgnoreFields.properties)) 
+      return;
+
     var node = { text: field, type: json[field].type, path: parent.path ?`${parent.path}.properties.${field}` : field};
     if (json[field].type === 'object' && json[field].properties) {
       node.nodes = [];
-      buildTree(json[field].properties, node);
-    } else if (json[field].type === 'array' && json[field].subType === 'string') {
+      buildTree(field, json[field].properties, node);
+    } else if (json[field].type === 'array' && json[field].subType !== 'object') {
       node.text += '[]'
       node.subType = json[field].subType;
       node.nodes = [];
@@ -740,7 +800,7 @@ function buildTree(json, parent) {
       node.text += '[]'
       node.subType = json[field].subType;
       node.nodes = [];
-      buildTree(json[field].properties, node);
+      buildTree(field, json[field].items.properties, node);
     }
     parent.nodes.push(node)
   })
@@ -754,6 +814,8 @@ function getFieldRule(obj, path) {
 
   let field = path.substring(0, path.indexOf('.'));
   var remaining = path.substring(path.indexOf('.')+1);
+  if (obj[field].type === 'array' && obj[field].subType === 'object')
+    obj[field] = obj[field].items;
   return getFieldRule(obj[field], remaining);
 }
 
@@ -838,14 +900,19 @@ async function deleteMappingRule(el) {
   var page = window.location.href.split('/').pop();
   var messageName = page.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var rule = feed.rules.find((r) => r.messageName === messageName);
+  var topicRules = feed.rules.filter((r) => r.messageName === messageName);
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  var rule = topicRules[ruleIndex];
+
   if (!rule) return;
 
   var pos = parseInt(el.dataset.mapIndex);
   rule.mappings.splice(pos, 1);
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   await fetch(path + `/feedrules`, {
     method: "POST",
     headers: {
@@ -862,7 +929,11 @@ async function pushDownMappingRule(el) {
   var page = window.location.href.split('/').pop();
   var messageName = page.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var rule = feed.rules.find((r) => r.messageName === messageName);
+  
+  var topicRules = feed.rules.filter((r) => r.messageName === messageName);
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  var rule = topicRules[ruleIndex];
   if (!rule) return;
 
   var pos = parseInt(el.dataset.mapIndex);
@@ -871,7 +942,8 @@ async function pushDownMappingRule(el) {
 
     localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-    const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    const path = window.location.origin;
     await fetch(path + `/feedrules`, {
       method: "POST",
       headers: {
@@ -889,7 +961,10 @@ async function pushUpMappingRule(el) {
   var page = window.location.href.split('/').pop();
   var messageName = page.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var rule = feed.rules.find((r) => r.messageName === messageName);
+  var topicRules = feed.rules.filter((r) => r.messageName === messageName);
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  var rule = topicRules[ruleIndex];
   if (!rule) return;
 
   var pos = parseInt(el.dataset.mapIndex);
@@ -898,7 +973,8 @@ async function pushUpMappingRule(el) {
 
     localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-    const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    const path = window.location.origin;
     await fetch(path + `/feedrules`, {
       method: "POST",
       headers: {
@@ -1012,16 +1088,43 @@ async function configureAPIVariables(rules, refresh = false) {
   }
 }
 
-async function configureMessageSendTopics(messageName, rules, refresh = false) {
+async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, refresh = false) {
   if (!rules) {
     el = document.getElementById("rules_section");
     if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
-  var rule = rules.find((r) => r.messageName === messageName);
-  if (!rule) return;
+  var topicRules = rules.filter((r) => r.messageName === messageName);
+  if (!topicRules || !topicRules.length) return;
 
+  $('#p_send_topics').empty();
+  localStorage.setItem('currentRuleIndex', ruleIndex);
+  topicRules.forEach((rule, index) => {
+    $('#p_send_topics').append(`<option value="${rule.topic}">${rule.topic}</option>`);
+  })
+  $('#p_send_topics').selectpicker("refresh");
+  $('#p_send_topics').selectpicker('val', topicRules[ruleIndex].topic);
+  $('#p_send_topics').selectpicker('render')
+  $('#send_topic_count').html(`(${topicRules.length})`);
+
+  $('#p_send_topics').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+    if (clickedIndex === null || !isSelected) return;
+
+    console.log('Selected');
+    var page = window.location.href.split('/').pop();
+    var messageName = page.split('#').pop();
+    var feed = JSON.parse(localStorage.getItem('currentFeed'));
+    $('#p_send_topics').empty();
+
+    var el = document.getElementById('payload-variable-pane');
+    el.innerHTML = '';
+    el.style.width = 'auto';
+
+    configureMessageSendTopics(messageName, feed.rules, clickedIndex, true);
+  });
+
+  var rule = topicRules[ruleIndex];
   el = document.getElementById('topic_name');
   if (el) el.innerHTML = rule.topic;
 
@@ -1060,11 +1163,12 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
     </div>
     `
   } else {
+    let nodeData = getTree(rule.payload, null);
     $('#payload-tree-pane').treeview({
       expandIcon: 'glyphicon glyphicon-plus',
       collapseIcon: 'glyphicon glyphicon-minus',
       nodeIcon: 'glyphicon',
-      data: getTree(rule.payload, null),
+      data: nodeData,
       onNodeSelected: function(event, node) {
         console.log(node.text + ' @ ' + node.path + ' was selected');
         if (!node.path) {
@@ -1100,32 +1204,35 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
           `
           return;
         } 
-        // else if (node.type === 'array' && node.subType === 'object') {
-        //   var el = document.getElementById('payload-variable-pane');
-        //   el.innerHTML = '';
-        //   el.style.width = 'auto';
-        //   el.innerHTML = `<div class="lockscreen-wrapper">
-        //     <div class="lockscreen-logo">
-        //       <b>${node.text}</b>
-        //     </div>
+        else if (node.type === 'array' && node.subType === 'object') {
+          var el = document.getElementById('payload-variable-pane');
+          el.innerHTML = '';
+          el.style.width = 'auto';
+          el.innerHTML = `<div class="lockscreen-wrapper">
+            <div class="lockscreen-logo">
+              <b>${node.text}</b>
+            </div>
             
-        //     <!-- /.lockscreen-item -->
-        //     <div class="help-block text-center">
-        //       An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object atributes'}!
-        //     </div>
-        //   </div>
-        //   `
-        //   return;
-        // }
+            <!-- /.lockscreen-item -->
+            <div class="help-block text-center">
+              An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object attributes'}!
+            </div>
+          </div>
+          `
+          // return;
+        }
 
         parent = document.getElementById('payload-variable-pane');
         parent.innerHTML = '';
         parent.style.width = 'auto';
 
         var page = window.location.href.split('/').pop();
-        var messageName = page.split('#').pop();
+        var messageName = window.location.href.split('#').pop();
         var feed = JSON.parse(localStorage.getItem('currentFeed'));
-        var rule = feed.rules.find((r) => r.messageName === messageName);
+        var topicRules = feed.rules.filter((r) => r.messageName === messageName);
+        var ruleIndex = localStorage.getItem('currentRuleIndex');
+        if (ruleIndex === null) ruleIndex = 0;
+        var rule = topicRules[ruleIndex];
         if (!rule) return;
       
         var el = document.createElement('div');
@@ -1139,6 +1246,9 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
       },
       onNodeUnselected: function (event, node) {
         console.log(node.text + ' was unselected');
+        var el = document.getElementById('payload-variable-pane');
+        el.innerHTML = '';
+        el.style.width = 'auto';
       }
     });
   }
@@ -1183,14 +1293,17 @@ async function configureMessageSendTopics(messageName, rules, refresh = false) {
   refreshMappingRules(rule);  
 }
 
-async function configureMessageReceiveTopics(messageName, rules, refresh = false) {
+async function configureMessageReceiveTopics(messageName, rules, ruleIndex = 0, refresh = false) {
   if (!rules) {
     el = document.getElementById("recv_rules_section");
     if (el) el.innerHTML = "Missing rules, try regenerating feed by running <pre>stm feed generate</pre>"
     return;
   }
 
-  var rule = rules.find((r) => r.messageName === messageName);
+  var topicRules = rules.filter((r) => r.messageName === messageName);
+  var ruleIndex = localStorage.getItem('currentRuleIndex');
+  if (ruleIndex === null) ruleIndex = 0;
+  var rule = topicRules[ruleIndex];
   if (!rule) return;
 
   el = document.getElementById('recv_topic_name');
@@ -1309,6 +1422,9 @@ async function configureMessageReceiveTopics(messageName, rules, refresh = false
       },
       onNodeUnselected: function (event, node) {
         console.log(node.text + ' was unselected');
+        var el = document.getElementById('recv_payload-variable-pane');
+        el.innerHTML = '';
+        el.style.width = 'auto';
       }
     });
   }
@@ -1361,6 +1477,14 @@ async function configureMessageReceiveTopics(messageName, rules, refresh = false
   manageFieldMap();
 }
 
+function fixAnonNames (name) {
+  if (name.length > 3 && name[0] === '<' && name[name.length-1] === '>')
+    name = name.substring(1, name.length-1);
+  // name = name.replaceAll('/', '_');
+  // name = name.replace(/[^a-zA-Z0-9]/g,'_');
+  return name;
+}
+
 function addMessages(config) {
   if (!config.messages || !Object.keys(config.messages).length)
     return;
@@ -1372,11 +1496,11 @@ function addMessages(config) {
   var messageNames = Object.keys(messages); 
   for (var i=0; i<messageNames.length; i++) {
     var schemaTpl = `
-      <a id="m_${decodeURIComponent(messageNames[i])}" href="message.html#${messageNames[i]}" 
+      <a id="m_${decodeURIComponent(fixAnonNames(messageNames[i]))}" href="message.html#${fixAnonNames(messageNames[i])}" 
         class="nav-link" style="display: flex; align-items: center; cursor: pointer;" 
       >
         <i class="nav-icon"><img width=24 src="images/msginstance.png"/></i>
-        <p style="margin-left: 8px;word-break: break-word;">${messageNames[i].trim()}</p>
+        <p style="margin-left: 8px;word-break: break-word;">${fixAnonNames(messageNames[i].trim())}</p>
       </a>
     `;
 
@@ -1580,6 +1704,12 @@ function updateInfo(feed) {
       el.innerHTML = `<td>Description</td><td>${info.description}</td>`;
       parent.appendChild(el);
     }
+    if (feed.config) {
+      el = document.createElement('tr');
+      el.innerHTML = `<td>View</td><td>${feed.config?.view === 'receiver' ? 
+                          'Feed built on receive events' : 'Feed built on send events'}</td>`;
+      parent.appendChild(el);
+    }
   } 
 
   parent = document.getElementById('custom_attributes');
@@ -1597,6 +1727,8 @@ function updateInfo(feed) {
 // INFO PAGE
 
 document.addEventListener('DOMContentLoaded', async function () {
+  localStorage.setItem('currentRuleIndex', 0);
+  
   window.history.pushState({ prevUrl: window.location.href }, null);
   var queryString = window.location.search || '';
   var keyValPairs = [];
@@ -1688,7 +1820,8 @@ $(window).bind("load", function () {
 });
 
 function loadPage() {
-  var page = window.location.href.split('/').pop();
+  // var page = window.location.href.split('/').pop();
+  var page = window.location.pathname.split('/').pop();
   var menuSelection = undefined;
   page = !page ? 'feed.html' : page;
   if (page === 'feeds.html') {
@@ -1785,21 +1918,24 @@ function loadPage() {
 
 // server interactions
 async function getFeeds() {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   const response = await fetch(path + "/feeds");
   const feeds = await response.json();
   return feeds;
 }
 
 async function getFeed(feedName) {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   const response = await fetch(path + `/feeds?feed=${feedName}`);
   const feed = await response.json();
   return feed;
 }
 
 async function getFakerRules(feedName) {
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   const response = await fetch(path + `/fakerrules?feed=${feedName}`);
   const rules = await response.json();
   return rules;

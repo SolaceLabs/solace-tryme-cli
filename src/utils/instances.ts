@@ -260,8 +260,12 @@ export class ManageClientOptionsEmpty implements StmConfigOptions, ManageConnect
 
 export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
   fileName: string
+  outputPath: string
+  outputName: string
   feedType: string
+  feedView: string
   feedName: string
+  useDefaults: boolean
   communityFeed: boolean
   eventNames: string[];
   communityOnly: boolean
@@ -274,8 +278,12 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
 
   constructor() {
     this.fileName = "";
+    this.outputPath = "";
+    this.outputName = "";
     this.feedName = "";
     this.feedType = "";
+    this.feedView = "default";
+    this.useDefaults = false;
     this.communityFeed = false;
     this.eventNames = [];
     this.communityOnly = true;

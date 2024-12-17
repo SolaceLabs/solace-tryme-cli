@@ -1,6 +1,8 @@
-import { processAirlineRules, processBooleanRules, processCommerceRules, processDateRules, 
-        processFinanceRules, processLocationRules, processLoremRules, processNullRules, 
-        processNumberRules, processObjectRules, processPersonRules, processStringRules } from './feed-datarules';
+import { Logger } from '../utils/logger';
+import { processAirlineRules, processBaseObjectRules, processBooleanRules, processCommerceRules, processDateRules, 
+        processFinanceRules, processInternetRules, processLocationRules, processLoremRules, processNullRules, 
+        processNumberRules, processObjectRules, processPersonRules, processStringRules,
+      } from './feed-datarules';
 
 function getFieldValue (obj:any, path:string):any {
   if (path.indexOf('.') < 0)
@@ -73,7 +75,10 @@ function getObjectKeys(obj:any, path:string):any {
 }
 
 const fakeEventGenerator = async (data:any) => {
-  var payloads = fakeDataObjectGenerator({ payload: data.rule.payload, count: data.count});
+  var backwardCompatibility = typeof data?.rule?.hasPayload === 'undefined' ? true : false;
+  var payloads = backwardCompatibility || data?.rule?.hasPayload  ? 
+                    fakeDataObjectGenerator({ payload: data.rule.payload, count: data.count}) : 
+                    Array(data.count).fill({});
   var fakeData = [];
   var mappedTopicParams:any = [];
   if (data.rule.mappings && data.rule.mappings.length) {
@@ -183,10 +188,21 @@ const fakeEventGenerator = async (data:any) => {
 const fakeDataObjectGenerator = (data:any) => {
   var fakeObjects: any[] | any = [];
   var count = data.count ? data.count : 1;
-  if (data.payload)
+  if (data.payload.type === 'array') {
+    if (data.payload.subType === 'object')
+      fakeObjects = processObjectRules(data.payload.properties, count);
+    else {
+      // need to test
+      // fakeObjects = Array(count).fill(fakeDataValueGenerator({ rule: data.payload, count: 1}));
+    }
+  } else if (!data.payload?.schema && (typeof data.payload?.type === 'object' || 
+             data.payload?.type === 'object' || !data.payload?.type)) {
     fakeObjects = processObjectRules(data.payload, count);
-  else
-    fakeObjects = Array(count).fill({});
+  } else if (data.payload?.schema) {
+    fakeObjects = processBaseObjectRules(data.payload.schema, count);
+  } else {
+    fakeObjects = processBaseObjectRules(data.payload, count);
+  }
 
   return fakeObjects
 }
@@ -194,6 +210,9 @@ const fakeDataObjectGenerator = (data:any) => {
 const fakeDataValueGenerator = (data:any) => {
   var fakeData: any[] | any = [];
   var count = data.count ? data.count : 1;
+  if (!data || !data.rule || !data.rule.group)
+    console.log('here');
+  
   if (data.rule.group === 'StringRules')
     fakeData = processStringRules(data.rule, count);
   else if (data.rule.group === 'NullRules')
@@ -216,8 +235,12 @@ const fakeDataValueGenerator = (data:any) => {
     fakeData = processAirlineRules(data.rule, count);
   else if (data.rule.group === 'CommerceRules')
     fakeData = processCommerceRules(data.rule, count);
-  else throw new Error("Unknown rules group");
-
+  else if (data.rule.group === 'InternetRules')
+    fakeData = processInternetRules(data.rule, count);
+  else {
+    Logger.error("Unknown rules group: " + JSON.stringify(data.rule, null, 2));
+    throw new Error("Unknown rules group");
+  }
   return fakeData;
 }
 

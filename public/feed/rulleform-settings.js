@@ -2,10 +2,13 @@ function fixStringRulesParameters(rule, value, changed) {
   var panel = $('#rule_parameters');
   panel.empty();
 
+  let minLength = value.minLength !== undefined ? value.minLength : 10;
+  let maxLength = value.maxLength !== undefined ? value.maxLength : 100;
+
   if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid') {
     if (changed) {
-      value.minLength = rule !== 'nanoid' ? 10 : 5;
-      value.maxLength = rule !== 'nanoid' ? 100 : 5;
+      value.minLength = rule !== 'nanoid' ? minLength : 5;
+      value.maxLength = rule !== 'nanoid' ? maxLength : 5;
       value.casing = "mixed";
     }
 
@@ -65,11 +68,33 @@ function fixStringRulesParameters(rule, value, changed) {
         <div class="invalid-feedback">Invalid pattern</div>
       </div>`;
     panel.append(p_regexp); 
+  } else if (rule === 'static') {
+    if (changed) {
+      value.static = 'Hello!';
+    }
+
+    var p_static = `
+      <div class="form-group">
+        <label>Static Value</label>
+        <input id="p_static" class="form-control" placeholder="Enter static value..." required
+          value="${value.static !== undefined ? value.static : 'Hello!'}">
+        <div class="invalid-feedback">Missing value</div>
+      </div>`;
+    panel.append(p_static); 
+  } else if (rule === 'fromRegExp') {
+    var p_regexp = `
+      <div class="form-group">
+        <label>Pattern</label>
+        <input type="text" id="p_regexp" class="form-control" placeholder="Enter the regular expression..." required
+          value=${value.pattern !== undefined ? value.pattern : "[A-Za-z]{5,10}"}>
+        <div class="invalid-feedback">Invalid pattern</div>
+      </div>`;
+    panel.append(p_regexp); 
   } else if (rule === 'enum') {
     var enumValues = '';
     if (value.enum !== undefined) {
       (typeof value.enum === 'object') ? 
-        enumValues = value.enum : 
+        enumValues = value.enum.toString() : 
         enumValues = value.enum.split(',').map(v => v.trim());
     }
     var p_enums = `
@@ -156,7 +181,34 @@ function fixNumberRulesParameters(rule, value, changed) {
     rule === 'float' ? value.fractionDigits = 2 : '';
   }
 
-  if (rule === 'float' || rule === 'int') {
+  if (rule === 'countUp' || rule === 'countDown') {
+    if (changed) {
+      value.start = rule === 'countUp' ? 1 : 9999999;
+      value.change = 1;
+    }
+
+    var p_start_change = `
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Initial Value</label>
+            <input type="number" id="p_start" class="form-control" placeholder="Enter start value..." required
+              value=${value.start !== undefined ? value.start : (rule === 'countUp' ? 1 : 9999999)}>
+            <div class="invalid-feedback">Invalid start value</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Change</label>
+            <input type="number" id="p_change" class="form-control" placeholder="Enter change..." required
+              value=${value.change !== undefined ? value.change : rule === 'countUp' ? 1 : -1}>
+            <div class="invalid-feedback">Invalid change value</div>
+          </div>
+        </div>
+      </div>`
+
+    panel.append(p_start_change); 
+  } else if (rule === 'float' || rule === 'int') {
     var p_min_max = `
       <div class="row">
         <div class="col-sm-6">
@@ -376,7 +428,57 @@ function fixDateRulesParameters(rule, value, changed) {
   var panel = $('#rule_parameters');
   panel.empty();
 
-  if (rule === 'future' || rule === 'past') {
+  if (rule === 'currentDate') {
+    value.format = "MM-DD-YYYY";
+
+    var p_format = `
+      <div class="row">
+        <div class="col-sm-12 form-group">
+          <label for="p_format">Date Format</label>
+          <select class="selectpicker form-control-border" data-width="100%" id="p_format">
+            <option` + (value.format == 'MM-DD-YYYY' ? ' selected' : '') + `>MM-DD-YYYY</option>
+            <option` + (value.format == 'DD-MM-YYYY' ? ' selected' : '') + `>DD-MM-YYYY</option>
+          </select>
+        </div>
+      </div>`;
+
+    panel.append(p_format); 
+    $("#p_format").selectpicker('val', (value.format !== undefined ? value.format : 'MM-DD-YYYY'));
+  } else if (rule === 'currentTime') {
+    value.format = "HH:mm:ss";
+
+    var p_format = `
+      <div class="row">
+        <div class="col-sm-12 form-group">
+          <label for="p_format">Time Format</label>
+          <select class="selectpicker form-control-border" data-width="100%" id="p_format">
+            <option` + (value.format == 'HH:mm:ss' ? ' selected' : '') + `>HH:mm:ss</option>
+            <option` + (value.format == 'hh:mm:ss a' ? ' selected' : '') + `>hh:mm:ss a</option>
+          </select>
+        </div>
+      </div>`;
+
+    panel.append(p_format); 
+    $("#p_format").selectpicker('val', (value.format !== undefined ? value.format : 'HH:mm:ss'));
+  } else if (rule === 'currentDateWithTime') {
+    value.format = "MM-DD-YYYY HH:mm:ss";
+
+    var p_format = `
+      <div class="row">
+        <div class="col-sm-12 form-group">
+          <label for="p_format">Date-Time Format</label>
+          <select class="selectpicker form-control-border" data-width="100%" id="p_format">
+            <option` + (value.format == 'MM-DD-YYYY HH:mm:ss' ? ' selected' : '') + `>MM-DD-YYYY HH:mm:ss</option>
+            <option` + (value.format == 'MM-DD-YYYY hh:mm:ss a' ? ' selected' : '') + `>MM-DD-YYYY hh:mm:ss a</option>
+            <option` + (value.format == 'DD-MM-YYYY HH:mm:ss' ? ' selected' : '') + `>DD-MM-YYYY HH:mm:ss</option>
+            <option` + (value.format == 'DD-MM-YYYY hh:mm:ss a' ? ' selected' : '') + `>DD-MM-YYYY hh:mm:ss a</option>
+          </select>
+        </div>
+      </div>`;
+
+    panel.append(p_format); 
+    $("#p_format").selectpicker('val', (value.format !== undefined ? value.format : 'MM-DD-YYYY HH:mm:ss'));
+  } else if (rule === 'future' || rule === 'past') {
     var p_years = `
       <div class="form-group">
         <label>Number of Years</label>
@@ -462,3 +564,28 @@ function fixLoremRulesParameters(rule, value, changed) {
   }
 }
 
+function fixInternetRulesParameters(rule, value, changed) {
+  var panel = $('#rule_parameters');
+  panel.empty();
+
+  if (rule === 'domainName' || rule === 'domainWord' || rule === 'email' || rule === 'url' || rule === 'username') {
+    if (changed) {
+      value.casing = 'lower';
+    }
+
+    var p_casing = `
+      <div class="row">
+        <div class="col-sm-12 form-group">
+          <label for="p_casing">Casing of the string</label>
+          <select class="selectpicker form-control-border" data-width="100%" id="p_casing">
+            <option` + (value.casing == 'mixed' ? ' selected' : '') + `>mixed</option>
+            <option` + (value.casing == 'upper' ? ' selected' : '') + `>upper</option>
+            <option` + (value.casing == 'lower' ? ' selected' : '') + `>lower</option>
+          </select>
+        </div>
+      </div>`;
+
+    panel.append(p_casing);
+    $("#p_casing").selectpicker('val', (value.casing !== undefined ? value.casing : 'lower'));
+  }
+}

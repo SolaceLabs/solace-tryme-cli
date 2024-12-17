@@ -15,6 +15,7 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addFeedContributeOptions,
         addFeedImportOptions,
         addFeedExportOptions,
+        addFeedValidateOptions,
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -42,6 +43,7 @@ import feedExport from './lib/feed-export';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
 import feedPortal from './lib/feed-portal';
+import { feedValidate } from './lib/feed-validate';
 
 export class Commander {
   program: Command
@@ -540,10 +542,28 @@ if (process.env.SHOW_VISUALIZATION) {
       .description(chalk.whiteBright('Manage event feeds'))
       .allowUnknownOption(false);
 
+    // stm feed validate
+    const feedValidateCmd = feedCmd
+      .command('validate', { hidden: true })
+      .description(chalk.whiteBright('Validate an AsyncAPI document'))
+      .allowUnknownOption(false)
+    addFeedValidateOptions(feedValidateCmd, this.advanced)
+
+    feedValidateCmd.action((options: ManageFeedClientOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedValidateCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedValidate(options, optionsSource);
+    })
+
+
     // stm feed preview
     const feedPreviewCmd = feedCmd
       .command('preview')
-      .description(chalk.whiteBright('Validate and preview an AsyncAPI document'))
+      .description(chalk.whiteBright('preview an AsyncAPI document'))
       .allowUnknownOption(false)
     addFeedPreviewOptions(feedPreviewCmd, this.advanced)
 
@@ -688,6 +708,5 @@ if (process.env.SHOW_VISUALIZATION) {
 
       feedContribute(options, optionsSource);
     })
-
   }
 }

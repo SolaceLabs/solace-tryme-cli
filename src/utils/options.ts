@@ -6,7 +6,8 @@ import {
   parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
   parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKeys,
   parsePartitionKeysCount,
-  parseFeedType
+  parseFeedType,
+  parseFeedView
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -604,11 +605,25 @@ export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 }
 
+export const addFeedValidateOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    // feed options
+    .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed preview command examples')))
+}
+
 export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // feed options
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
+    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
+      .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
+    .addOption(new Option('-view, --feed-view <VIEW>', chalk.whiteBright('the feed view: default, reverse;\n    default setting would collect "send" events,\n    and a reverse would collect "receive" events.')) 
+                  .argParser(parseFeedView) .default(defaultFeedConfig.feedView) .conflicts('feedName'))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
 
     // help options
@@ -620,7 +635,12 @@ export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')) )
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
-    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type: stm, api or custom')) .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
+    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
+      .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
+    .addOption(new Option('-view, --feed-view <VIEW>', chalk.whiteBright('the feed view: default, reverse;\n    default setting would collect "send" events,\n    and a reverse would collect "receive" events.')) 
+                  .argParser(parseFeedView) .default(defaultFeedConfig.feedView) .conflicts('feedName'))
+    // hidden option to use defaults 
+    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults for feed name and feed type')) .hideHelp(true) .default(false))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
@@ -692,6 +712,9 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
+    // hidden option to use defaults 
+    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults feed run settings')) .hideHelp(true) .default(false))
+
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help for command with options not shown in basic help')))
@@ -721,7 +744,7 @@ export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
 
 export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
   cmd
-    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feedExport.zip'))
+    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feed-export.zip'))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))

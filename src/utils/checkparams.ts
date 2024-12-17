@@ -1,5 +1,5 @@
 import { loadLocalFeedFile } from "./config"
-import { defaultFeedAnalysisFile, getDefaultTopic } from "./defaults"
+import { defaultFeedAnalysisFile, defaultFeedConfig, getDefaultTopic } from "./defaults"
 import { Logger } from "./logger"
 
 export const checkPubTopicExists = (topic: string) => {
@@ -429,3 +429,41 @@ export const checkForFeedSettings = (eventNames:string[], feedName:string) => {
     }
   });
 }
+
+export const checkFeedGenerateOptions = (options: ManageFeedClientOptions, optionsSource: any) => {
+  if (options.useDefaults && !options.fileName) {
+    Logger.logError(`File name is required when using --use-defaults option`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (options.useDefaults) {
+    options.feedType = options.feedType || defaultFeedConfig.feedType;
+    optionsSource.feedType = 'cli';
+    
+    if (options.fileName && !options.feedName) {
+      options.feedName = getPotentialFeedName(options.fileName);
+      optionsSource.feedName = 'cli';
+    }
+  }
+}
+
+export const checkFeedRunOptions = (options: ManageFeedPublishOptions, optionsSource: any) => {
+  if (options.useDefaults && !options.feedName) {
+    Logger.logError(`Feed name is required when using --use-defaults option`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const getPotentialFeedName = (fileName: string) => {
+  var feedName = fileName.split('/').pop();
+  feedName = feedName?.split('.').shift() ?? '';// Add nullish coalescing operator to provide a default value
+  return feedName;
+}
+
+export const getPotentialTopicFromFeedName = (name: string) => {
+  var feedName = name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase();
+  return feedName;
+}
+

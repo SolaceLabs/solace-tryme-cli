@@ -17,71 +17,227 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="styles/adminlte.css">
   <link rel="stylesheet" href="styles/manager.css">
   <link rel="stylesheet" href="plugins/bootstrap-select/bootstrap-select.css">
+  <style>
+    /* Style tab links */
+    .tablink {
+      background-color: #000;
+      color: white;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      font-size: 17px;
+      width: 50%;
+    }
+
+    .tablink:hover {
+      background-color: #777;
+    }
+
+    /* Style the tab content (and add height:100% for full page content) */
+    .tabcontent {
+      color: white;
+      display: none;
+      /* padding: 100px 20px; */
+      height: 100%;
+    }    
+  </style>
 </head>
 <body class="hold-transition sidebar-mini layout-boxed">
-<div class="wrapper">
-  <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand sidebar-dark-primary navbar-dark" style="width: 100%; top: 0px;">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a href="feeds.html" class="brand-link" style="border-bottom: unset">
-          <img src="images/stmfeed.png" class="brand-image img-circle elevation-3">
-          <span class="font-weight-bolder text-white">Supported Regular Expressions</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
   
-
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Main content -->
-    <section class="content" style="margin-left:10%;margin-right: 10% ">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body p-0">
-                <table class="table">
-                  <thead>
-                    <tr><th style="width: 10px">#</th><th>Rule</th><th>Description</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>1.</td><td style="font-size:1.05rem;font-weight:800;">x{times} </td><td> Repeat the x exactly times times.</td></tr>
-                    <tr><td>2.</td><td style="font-size:1.05rem;font-weight:800;">x{min,max} </td><td> Repeat the x min to max times.</td></tr>
-                    <tr><td>3.</td><td style="font-size:1.05rem;font-weight:800;">[x-y] </td><td> Randomly get a character between x and y (inclusive).</td></tr>
-                    <tr><td>4.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]{times} </td><td> Randomly get a character between x and y (inclusive) and repeat it times times.</td></tr>
-                    <tr><td>5.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]{min,max} </td><td> Randomly get a character between x and y (inclusive) and repeat it min to max times.</td></tr>
-                    <tr><td>6.</td><td style="font-size:1.05rem;font-weight:800;">[^...] </td><td> Randomly get an ASCII number or letter character that is not in the given range. (e.g. [^0-9] will get a random non-numeric character).</td></tr>
-                    <tr><td>7.</td><td style="font-size:1.05rem;font-weight:800;">[-...] </td><td> Include dashes in the range. Must be placed after the negate character ^ and before any character sets if used (e.g. [^-0-9] will not get any numeric characters or dashes).</td></tr>
-                    <tr><td>8.</td><td style="font-size:1.05rem;font-weight:800;">x? </td><td> Randomly decide to include or not include x.</td></tr>
-                    <tr><td>9.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]? </td><td> Randomly decide to include or not include characters between x and y (inclusive).</td></tr>
-                    <tr><td>10.</td><td style="font-size:1.05rem;font-weight:800;">x* </td><td> Repeat x 0 or more times.</td></tr>
-                    <tr><td>11.</td><td style="font-size:1.05rem;font-weight:800;">x+ </td><td> Repeat x 1 or more times.</td></tr>
-                    <tr><td>12.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]* </td><td> Repeat characters between x and y (inclusive) 0 or more times.</td></tr>
-                    <tr><td>13.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]+ </td><td> Repeat characters between x and y (inclusive) 1 or more times.</td></tr>
-                  </tbody>
-                </table>
+  <div class="wrapper" style="overflow: unset;">
+    <button class="tablink" onclick="openPage('page1', this)" id="defaultOpen">Data Generation Rules</button>
+    <button class="tablink" onclick="openPage('page2', this)">Supported RegEx Patterns</button>
+    <div id="page1" class="tabcontent">    
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content" style="margin-left:10%;margin-right: 10% ">
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body p-0">
+                    <table class="table" style="color: #212529">
+                      <thead>
+                        <tr><th style="width: 10px">Rules Group</th><th>Rule</th><th>Parameters</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">StringRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate string related entries</span></td><td><span style="font-size:1.05rem;font-weight:800;">alpha</span><br>Generating a string consisting of letters in the English alphabet.</td><td>minLength [default: 10]<br>maxLength [default: 100]<br>casing [default: mixed]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">alphanumeric</span><br>Generating a string consisting of alpha characters and digits.</td><td>minLength [default: 10]<br>maxLength [default: 100]<br>casing [default: mixed]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">enum</span><br>Returns a random value from an Enum object</td><td></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">words</span><br>Returns a string containing a number of space separated random words.</td><td>count [default: 5]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">nanoid</span><br>Generates a Nano ID.</td><td>minLength [default: 5]<br>maxLength [default: 5]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">numeric</span><br>Generates a given length string of digits.</td><td>minLength [default: 5]<br>maxLength [default: 5]<br>leadingZeros [default: false]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">static</span><br>Assign a static value.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">symbol</span><br>Returns a string containing only special characters</td><td>minLength [default: 5]<br>maxLength [default: 5]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">uuid</span><br>Returns a UUID v4 (Universally Unique Identifier).</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">fromRegExp</span><br>Generates a string matching the given regex like expressions</td><td>pattern [default: ^[A-Za-z]$]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">phoneNumber</span><br>Returns a random phone number</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">json</span><br>Returns a string representing JSON object with 7 pre-defined properties.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">NullRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate null or empty values.</span></td><td><span style="font-size:1.05rem;font-weight:800;">null</span><br>Returns null value</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">empty</span><br>Returns an empty string</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">NumberRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate numbers of any kind.</span></td><td><span style="font-size:1.05rem;font-weight:800;">float</span><br>Returns a single random floating-point number</td><td>minimum [default: 0]<br>maximum [default: 1000]<br>fractionDigits [default: 2]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">int</span><br>Returns a single random integer.</td><td>minimum [default: 0]<br>maximum [default: 1000]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">countUp</span><br>Generates an incremental number.</td><td>start [default: 1]<br>change [default: 1]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">countDown</span><br>Generates a decremental number.</td><td>start [default: 9999999]<br>change [default: 1]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">BooleanRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate boolean values.</span></td><td><span style="font-size:1.05rem;font-weight:800;">boolean</span><br>Returns the boolean value true or false</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">DateRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate dates</span></td><td><span style="font-size:1.05rem;font-weight:800;">currentDate</span><br>Returns a current date</td><td>format [default: MM-DD-YYYY]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">currentDateWithTime</span><br>Returns a current date with time</td><td>format [default: MM-DD-YYYY HH:mm:ss]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">currentTime</span><br>Returns a current time</td><td>format [default: HH:mm:ss]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">anytime</span><br>Generates a random date that can be either in the past or in the future.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">future</span><br>Generates a random date in the future.</td><td>years [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">past</span><br>Generates a random date in the past.</td><td>years [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">recent</span><br>Generates a random date in the recent past.</td><td>days [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">soon</span><br>Generates a random date in the near future.</td><td>days [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">month</span><br>Returns a random name of a month.</td><td>abbreviated [default: false]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">weekday</span><br>Returns a random day of the week.</td><td>abbreviated [default: false]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">LoremRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate random texts and words</span></td><td><span style="font-size:1.05rem;font-weight:800;">lines</span><br>Generates the given number lines of lorem separated by '</td><td><br>minimum [default: 2]<br>maximum [default: 5]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">paragraph</span><br>Generates a paragraph with the given number of sentences.</td><td>minimum [default: 2]<br>maximum [default: 5]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">sentence</span><br>Generates a space separated list of words.</td><td>minimum [default: 5]<br>maximum [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">text</span><br>Generates a random text based on a random lorem method.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">word</span><br>Generates a word of a specified length.</td><td>minimum [default: 5]<br>maximum [default: 10]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">PersonRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate people's personal information such as names and job titles.</span></td><td><span style="font-size:1.05rem;font-weight:800;">prefix</span><br>Returns a random person prefix.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">firstName</span><br>Returns a random first name.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">lastName</span><br>Returns a random last name.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">middleName</span><br>Returns a random middle name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">fullName</span><br>Generates a random full name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">suffix</span><br>Returns a random person suffix.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">sex</span><br>Returns a random sex.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">jobTitle</span><br>Generates a random job title.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">jobDescriptor</span><br>Generates a random job descriptor.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">jobType</span><br>Generates a random job type.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">LocationRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate addresses and locations</span></td><td><span style="font-size:1.05rem;font-weight:800;">buildingNumber</span><br>Generates a random building number.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">street</span><br>Generates a random localized street name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">streetAddress</span><br>Generates a random localized street address.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">city</span><br>Generates a random localized city name.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">state</span><br>Returns a random localized state.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">zipCode</span><br>Generates random zip code from specified format.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">country</span><br>Returns a random country name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">countryCode</span><br>Returns a random ISO_3166-1 country code.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">latitude</span><br>Generates a random latitude.</td><td>minimum [default: -90]<br>maximum [default: 90]<br>precision [default: 4]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">longitude</span><br>Generates a random longitude.</td><td>minimum [default: -90]<br>maximum [default: 90]<br>precision [default: 4]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">timeZone</span><br>Returns a random time zone.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">InternetRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate internet related entries</span></td><td><span style="font-size:1.05rem;font-weight:800;">domainName</span><br>Generates a random domain name.</td><td>casing [default: lower]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">domainWord</span></td><td></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">email</span><br>Generates a random email address.</td><td>casing [default: lower]<br>emoji<br>Generates a random emoji.<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">emoji</span></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">ipv4</span><br>Generates a random IPv4 address.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">ipv6</span><br>Generates a random IPv6 address.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">mac</span><br>Generates a random mac address.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">url</span><br>Generates a random http(s) url.</td><td>casing [default: lower]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">username</span><br>Generates a random username.</td><td>casing [default: lower]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">FinanceRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate finance and money related entries</span></td><td><span style="font-size:1.05rem;font-weight:800;">accountNumber</span><br>Generates a random account number.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">amount</span><br>Generates a random amount between the given bounds.</td><td>minimum [default: 0]<br>maximum [default: 1000]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">swiftOrBic</span><br>Generates a random SWIFT/BIC code based on the ISO-9362 format.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">creditCardIssuer</span><br>Returns a random credit card issuer.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">creditCardNumber</span><br>Generates a random credit card number.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">currencyCode</span><br>Returns a random currency code.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">currencyName</span><br>Returns a random currency name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">currencySymbol</span><br>Returns a random currency symbol.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">bitcoinAddress</span><br>Generates a random Bitcoin address.</tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">ethereumAddress</span><br>Creates a random, non-checksum Ethereum address.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">transactionDescription</span><br>Generates a random transaction description.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">transactionType</span><br>Returns a random transaction type.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">AirlineRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate airline and airport related data.</span></td><td><span style="font-size:1.05rem;font-weight:800;">airline</span><br>Generates a random airline.</td><td>airplane<br>Generates a random airplane.<br>airport<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">airplane</span><br>Generates a random airplane.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">airport</span><br>Generates a random airport name with code.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">airportName</span><br>Generates a random airport name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">airportCode</span><br>Generates a random airport code.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">flightNumber</span><br>Returns a random flight number.</td><td>minimum [default: 1]<br>maximum [default: 3]<br>leadingZeros [default: false]<br></td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;">CommerceRules</span><br><span style="font-size:1.05rem;font-weight:500;">Module to generate commerce and product related entries.</span></td><td><span style="font-size:1.05rem;font-weight:800;">companyName</span><br>Generates a random company name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">department</span><br>Returns a random department inside a shop.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">isbn</span><br>Returns a random ISBN identifier.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">price</span><br>Generates a random price between min and max.</td><td>minimum [default: 1]<br>maximum [default: 999]</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">product</span><br>Returns a random short product name.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">productDescription</span><br>Returns a random product description.</td></tr>
+                        <tr><td><span style="font-size:1.05rem;font-weight:800;"></span><br><span style="font-size:1.05rem;font-weight:500;"></span></td><td><span style="font-size:1.05rem;font-weight:800;">productName</span><br>Generates a random descriptive product name.</td><td><br><br><br></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+    
               </div>
-              <!-- /.card-body -->
             </div>
-
-          </div>
-        </div>
-    </section>
-    <!-- /.content -->
+        </section>
+        <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+    
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+      </aside>
+      <!-- /.control-sidebar -->
+    </div>    
+  
+    <div id="page2" class="tabcontent">    
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content" style="margin-left:10%;margin-right: 10% ">
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body p-0">
+                    <table class="table" style="color: #212529">
+                      <thead>
+                        <tr><th style="width: 10px">#</th><th>Rule</th><th>Description</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>1.</td><td style="font-size:1.05rem;font-weight:800;">x{times} </td><td> Repeat the x exactly times times.</td></tr>
+                        <tr><td>2.</td><td style="font-size:1.05rem;font-weight:800;">x{min,max} </td><td> Repeat the x min to max times.</td></tr>
+                        <tr><td>3.</td><td style="font-size:1.05rem;font-weight:800;">[x-y] </td><td> Randomly get a character between x and y (inclusive).</td></tr>
+                        <tr><td>4.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]{times} </td><td> Randomly get a character between x and y (inclusive) and repeat it times times.</td></tr>
+                        <tr><td>5.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]{min,max} </td><td> Randomly get a character between x and y (inclusive) and repeat it min to max times.</td></tr>
+                        <tr><td>6.</td><td style="font-size:1.05rem;font-weight:800;">[^...] </td><td> Randomly get an ASCII number or letter character that is not in the given range. (e.g. [^0-9] will get a random non-numeric character).</td></tr>
+                        <tr><td>7.</td><td style="font-size:1.05rem;font-weight:800;">[-...] </td><td> Include dashes in the range. Must be placed after the negate character ^ and before any character sets if used (e.g. [^-0-9] will not get any numeric characters or dashes).</td></tr>
+                        <tr><td>8.</td><td style="font-size:1.05rem;font-weight:800;">x? </td><td> Randomly decide to include or not include x.</td></tr>
+                        <tr><td>9.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]? </td><td> Randomly decide to include or not include characters between x and y (inclusive).</td></tr>
+                        <tr><td>10.</td><td style="font-size:1.05rem;font-weight:800;">x* </td><td> Repeat x 0 or more times.</td></tr>
+                        <tr><td>11.</td><td style="font-size:1.05rem;font-weight:800;">x+ </td><td> Repeat x 1 or more times.</td></tr>
+                        <tr><td>12.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]* </td><td> Repeat characters between x and y (inclusive) 0 or more times.</td></tr>
+                        <tr><td>13.</td><td style="font-size:1.05rem;font-weight:800;">[x-y]+ </td><td> Repeat characters between x and y (inclusive) 1 or more times.</td></tr>
+    
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+    
+              </div>
+            </div>
+        </section>
+        <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+    
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+      </aside>
+      <!-- /.control-sidebar -->
+    </div>    
   </div>
-  <!-- /.content-wrapper -->
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
-</div>
-<!-- ./wrapper -->
 
 
+  <script>
+  function openPage(pageName,elmnt) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    // tablinks = document.getElementsByClassName("tablink");
+    // for (i = 0; i < tablinks.length; i++) {
+    //   tablinks[i].style.backgroundColor = "";
+    // }
+    document.getElementById(pageName).style.display = "block";
+  }  
+
+  document.getElementById("defaultOpen").click();
+
+  </script>
 </body>
 </html>

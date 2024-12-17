@@ -1,4 +1,4 @@
-import { checkConnectionParamsExists, checkForFeedSettings } from '../utils/checkparams';
+import { checkConnectionParamsExists, checkFeedRunOptions, checkForFeedSettings } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
 import { Logger } from '../utils/logger';
 import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile } from '../utils/defaults';
@@ -24,65 +24,92 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     process.exit(0);
   }
 
+  checkFeedRunOptions(options, optionsSource);
+
   var cmdLine = false;
-  if (optionsSource.feedName === 'cli') {
+  if (options.useDefaults) {
     cmdLine = true;
-    feedName = options.feedName;
-    eventNames = options.eventNames;
-    if (feedName && options.communityFeed)
-      gitFeed = true;
-    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    var feedInfo = await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
+    // if (feedInfo.type === 'restapi_feed')
+    //   return feedRunApi(options, optionsSource);
 
-    if (feedInfo.type === 'restapi_feed')
-      return feedRunApi(options, optionsSource);
-
-    var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
-    var eventsList:any = events.map((event:any) => {
-      return {
-        message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
-        name: event.name,
-      }
-    })
-
-    if (optionsSource.eventNames !== 'cli') {
-      const { MultiSelect } = require('enquirer');
-      const pPickEvent = new MultiSelect({
-        name: 'localEvent',
-        message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-        `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
-        `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
-        `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
-        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-        choices: eventsList,
-        initial: eventsList.map((e:any, index:number) => index)
-      });
-
-      var eventChoices: string | any[] = []
-      await pPickEvent.run()
-        .then((answer:any) => eventChoices = answer)
-        .catch((error:any) => {
-          Logger.logDetailedError('interrupted...', error)
-          process.exit(1);
-        });
-      
-      options.eventNames = eventChoices;
-      optionsSource.eventNames = 'cli';
-    } else {
-      var missingEvents = eventNames.filter((e:any) => !eventsList.find((el:any) => el.name === e));
-      if (missingEvents.length) {
-        Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
-        Logger.logError('exiting...')
-        process.exit(1);
-      }
-      
-      options.eventNames = eventNames;
-      optionsSource.eventNames = 'cli';
+    var events = getFeedEvents(options.feedName);
+    if (events.length === 0) {
+      Logger.logDetailedError(`No events found in the feed`, feedName);
+      Logger.error('exiting...')
+      process.exit(1)
     }
-  } else if (optionsSource.eventNames === 'cli') {
-    Logger.logError(`Missing event feed name...`)
-    Logger.logError('exiting...')
-    process.exit(1);
+    
+    gitFeed = false;
+    feedName = options.feedName;
+    eventNames = options.eventNames = events.map((event:any) => event.name);
+    options.count = 1;
+    optionsSource.count = 'cli';
+    options.interval = 1000;
+    optionsSource.interval = 'cli';
+    options.initialDelay = 0;
+    optionsSource.initialDelay = 'cli';
+    optionsSource.eventNames = 'cli';    
+  } else {
+    if (optionsSource.feedName === 'cli') {
+      cmdLine = true;
+      feedName = options.feedName;
+      eventNames = options.eventNames;
+      if (feedName && options.communityFeed)
+        gitFeed = true;
+      var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+
+      if (feedInfo.type === 'restapi_feed')
+        return feedRunApi(options, optionsSource);
+
+      var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
+      var eventsList:any = events.map((event:any) => {
+        return {
+          message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
+          name: event.name,
+        }
+      })
+
+      if (optionsSource.eventNames !== 'cli') {
+        const { MultiSelect } = require('enquirer');
+        const pPickEvent = new MultiSelect({
+          name: 'localEvent',
+          message: `Pick one or more event events \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+          `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+          `    ${chalkBoldLabel('<space>')} to ${chalkBoldVariable('select')}\n` +
+          `    ${chalkBoldLabel('a')} to ${chalkBoldVariable('toggle choices to be enabled or disabled')}\n` +
+          `    ${chalkBoldLabel('i')} to ${chalkBoldVariable('invert current selection')}\n` +
+          `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+          choices: eventsList,
+          initial: eventsList.map((e:any, index:number) => index)
+        });
+
+        var eventChoices: string | any[] = []
+        await pPickEvent.run()
+          .then((answer:any) => eventChoices = answer)
+          .catch((error:any) => {
+            Logger.logDetailedError('interrupted...', error)
+            process.exit(1);
+          });
+        
+        options.eventNames = eventChoices;
+        optionsSource.eventNames = 'cli';
+      } else {
+        var missingEvents = eventNames.filter((e:any) => !eventsList.find((el:any) => el.name === e));
+        if (missingEvents.length) {
+          Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
+          Logger.logError('exiting...')
+          process.exit(1);
+        }
+        
+        options.eventNames = eventNames;
+        optionsSource.eventNames = 'cli';
+      }
+    } else if (optionsSource.eventNames === 'cli') {
+      Logger.logError(`Missing event feed name...`)
+      Logger.logError('exiting...')
+      process.exit(1);
+    }
   }
 
   // check for event in the feed
@@ -147,16 +174,26 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     }
 
     options.feedName = feedName;
+    options.communityFeed = gitFeed;
 
     var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
     if (feedInfo.type === 'restapi_feed')
       return feedRunApi(options, optionsSource);
 
     var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
+    if (events.length === 0) {
+      Logger.logDetailedError(`No events found in the feed`, feedName);
+      Logger.error('exiting...')
+      process.exit(1)
+    }
+    
     var eventsList:any = events.map((event:any) => {
       return {
         message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic, '$')),
-        name: event.name,
+        eventName: event.name,
+        eventTopic: event.topic,
+        // name: event.name,
+        name: event.name + '      ' + event.topic
       }
     })
     const pPickEvent = new MultiSelect({
@@ -181,6 +218,22 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     
     options.eventNames = eventChoices;
     optionsSource.eventNames = 'cli';
+  } else {
+    var feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    if (feedInfo.type === 'restapi_feed')
+      return feedRunApi(options, optionsSource);
+
+    var events = getFeedEvents(feedName);
+    if (events.length === 0) {
+      Logger.logDetailedError(`No events found in the feed`, feedName);
+      Logger.error('exiting...')
+      process.exit(1)
+    }
+    
+    options.eventNames = [];
+    events.map((event:any) => {
+      options.eventNames.push(event.name + '      ' + event.topic);
+    })
   }
 
   // check connection params found
@@ -216,18 +269,16 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   options.readyForExit = options.eventNames.length;
   options.eventNames.forEach((eventName:any) => {
     var feedRule:any = undefined;
+    var name = eventName.split('      ')[0];
+    var topic = eventName.split('      ')[1];
     feed.forEach((rule:any) => {
-      if (rule.messageName === eventName) {
-        if (feedRule) {
-          Logger.warn('Hmm.. multiple channels defined on the same event - not expected!')
-        } else {
-          feedRule = rule;
-        }
+      if (rule.messageName === name && rule.topic === topic) {
+        feedRule = rule;
       }
     })
 
     if (!feedRule) {
-      Logger.logError(`No feed rule found for name '${eventName}' in the feed '${feedName}'`)
+      Logger.logWarn(`No feed rule found for name '${name}' in the feed '${feedName}'`)
       return;
     }
 
@@ -290,9 +341,10 @@ async function publishFeed(publisher:any, msg:any) {
   events.forEach((event, index) => {
     publisher.publish(event.topic, event.payload, msg.options.payloadType, msg.published++);
     publishStats[`${msg.message}-${msg.topic}`]++;
-    Logger.info(chalkEventCounterValue(publishStats[`${msg.message}-${msg.topic}`]) + ' ' +  chalkEventCounterLabel(msg.rule.eventName));
+    Logger.info(chalkEventCounterValue(publishStats[`${msg.message}-${msg.topic}`]) + ' ' +  chalkEventCounterLabel(msg.message ? msg.message : 
+      msg.rule.eventName ? msg.rule.eventName : msg.ruleMessageName));
     if (msg.count > 0 && publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
-      var index = eventFeedTimers.findIndex((t) => t.name === msg.message);
+      var index = eventFeedTimers.findIndex((t) => t.name === msg.message && t.topic === msg.topic);
       if (index < 0) {
         console.error('Hmm... could not find the timer');
         return;
@@ -309,6 +361,7 @@ function addEventFeedTimer(msg: any, publisher: any) {
     if (!msg.count || msg.count >= 1) {
       eventFeedTimers.push({
         name: msg.message,
+        topic: msg.topic,
         message: msg,
         timer: setInterval(publishFeed, msg.interval, publisher, msg)
       });

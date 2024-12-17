@@ -30,9 +30,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@asyncapi/parser": "^3.0.4",
+    "@apidevtools/json-schema-ref-parser": "^11.7.2",
+    "@asyncapi/parser": "^3.2.1",
     "@base2/pretty-print-object": "^1.0.2",
     "@faker-js/faker": "^8.4.1",
+    "@stoplight/spectral-core": "^1.19.4",
+    "@stoplight/spectral-functions": "^1.9.3",
     "@types/long": "^5.0.0",
     "@types/node": "^20.8.9",
     "ascii-table": "^0.0.9",
@@ -64,7 +67,7 @@
     "@types/concat-stream": "^2.0.0",
     "@types/form-data": "^2.5.0",
     "@types/node-fetch": "^2.6.11",
-    "@types/signale": "^1.4.4",
+    "@types/signale": "^1.4.7",
     "typescript": "^4.7.3"
   },
   "signale": {

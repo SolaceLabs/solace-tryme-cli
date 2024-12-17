@@ -1,15 +1,13 @@
-import * as fs from 'fs'
-import { Parser } from '@asyncapi/parser';
 import { Logger } from '../utils/logger'
 import { chalkBoldWhite, chalkBoldLabel, chalkBoldVariable, chalkBoldTopicSeparator, chalkWhite, colorizeTopic, wrapContent } from '../utils/chalkUtils'
-import { ManageFeedClientOptionsEmpty } from '../utils/instances';
-import analyze from './feed-analyze';
-import { loadLocalFeedFile, loadGitFeedFile, processPlainPath, readFile } from '../utils/config';
+import { loadLocalFeedFile, loadGitFeedFile, processPlainPath, readFile, readAsyncAPIFile } from '../utils/config';
 import { defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
+import { analyze, analyzeEP, analyzeV2, load } from './feed-analyze';
+import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 
 const preview = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var feedName, fileName, gitFeed = undefined;
+  var feedName, fileName, feedView, gitFeed = undefined;
 
   if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
     feedName = options.feedName;
@@ -42,7 +40,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     if (choice === 'AsyncAPI File') {
       const pFilename = new Input({
         message: 'Enter AsyncAPI file',
-        initial: 'asyncapi.json',
+        // initial: 'asyncapi.json',
         validate: (value: string) => {  return !!value; }
       });
       
@@ -96,12 +94,29 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     }
   }
 
+  if (optionsSource.feedView === 'cli') {
+    feedView = options.feedView;
+  } else {
+    feedView = 'default';
+  }
+
+  const reverseView = feedView === 'reverse';
   var data:any = undefined;
   var info:any = undefined;
   var type:any = undefined;
   if (fileName) {
-    options.fileName = fileName;
-    data = await analyze(options, optionsSource);
+    const asyncApiSchema = readAsyncAPIFile(fileName);  
+    const loaded:any = await load(asyncApiSchema);
+    const document = loaded.document as AsyncAPIDocumentInterface;
+    if (!document) {
+      Logger.error('Unable to load AsyncAPI document');
+      Logger.error('exiting...');
+      process.exit(1);
+    }
+    data = loaded.epSpecification ? await analyzeEP(document, reverseView) : 
+                loaded.asyncApiVersion && loaded.asyncApiVersion.startsWith('2') ? 
+                  await analyzeV2(document, reverseView) : await analyze(document, reverseView);
+    data.fileName = fileName.lastIndexOf('/') >= 0 ? fileName.substring(fileName.lastIndexOf('/')+1) : fileName;
     type = "file";
   } else if (feedName) {
     options.feedName = feedName;

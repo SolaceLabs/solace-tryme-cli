@@ -10,12 +10,9 @@ const removeMetaParams = (obj: any) => {
 const setDefaultTopicVariableRules = (obj: any) => {
   for(const prop in obj) {
     var schema = obj[prop].schema;
+    schema = !schema || !schema.type ? { type: 'string' } : schema;
     if (schema.type.toLowerCase() === 'string') {
-      if (schema.enum) {
-        obj[prop].rule = { name: prop, type: 'string', group: 'StringRules', rule: 'enum', enum: schema.enum }
-      } else {
-        obj[prop].rule = { name: prop, type: 'string', group: 'StringRules', rule: 'alpha', casing: 'mixed', minLength: 10, maxLength: 10 }
-      }
+      obj[prop].rule = { name: prop, type: 'string', group: 'StringRules', rule: 'alpha', casing: 'mixed', minLength: 10, maxLength: 10 }
     } else if (schema.type.toLowerCase() === 'number') {
       obj[prop].rule = { name: prop, type: 'number', group: 'NumberRules', rule: 'float', minimum: 0, maximum: 1000, fractionDigits: 2 }
     } else if (schema.type.toLowerCase() === 'integer') {        
@@ -146,6 +143,5 @@ const formulateSchemas = async (data: any) => {
   removeMetaParams(schemaSet);
   return schemaSet;
 }
-
 
 export { formulateRules, formulateSchemas }

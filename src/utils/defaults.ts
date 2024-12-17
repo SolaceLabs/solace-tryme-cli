@@ -356,8 +356,12 @@ export const defaultManageClientUsernameConfig:any = {
 export const defaultFeedConfig:any = {
   feedName: "stm-asyncapi_feed",
   feedType: "asyncapi",
+  feedView: "default",
   communityFeed: false,
   fileName: "",
+  useDefaults: false,
+  outputPath: "",
+  outputName: "",
   eventNames: [],
   communityOnly: true,
   localOnly: true,

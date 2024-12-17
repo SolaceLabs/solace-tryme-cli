@@ -40,9 +40,9 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
     }, options.exitAfter * 1000);
   }
 
-  var apiFeed = options.communityFeed ? loadGitFeedFile(options.feedName, defaultFeedApiEndpointFile) : loadLocalFeedFile(options.feedName, defaultFeedApiEndpointFile);
-  var apiFeedInfo = options.communityFeed ? loadGitFeedFile(options.feedName, defaultFeedInfoFile) : loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
-  var apiFeedRule = options.communityFeed ? loadGitFeedFile(options.feedName, defaultFeedRulesFile) : loadLocalFeedFile(options.feedName, defaultFeedRulesFile);
+  var apiFeed = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedApiEndpointFile) : await loadLocalFeedFile(options.feedName, defaultFeedApiEndpointFile);
+  var apiFeedInfo = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedInfoFile) : await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
+  var apiFeedRule = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedRulesFile) : await loadLocalFeedFile(options.feedName, defaultFeedRulesFile);
   
   if (apiFeed.apiUrl.includes('$') && !apiFeedRule) {
     Logger.logError('api endpoint contains placeholders, please configure parameter rules...')

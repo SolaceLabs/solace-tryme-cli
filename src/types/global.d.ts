@@ -198,10 +198,18 @@ declare global {
     // asyncapi base
     fileName: string
 
+    // output file
+    outputPath: string
+    outputName: string
+
     // event feed options
     feedName: string
     feedType: string
+    feedView: string
     communityFeed: boolean
+
+    // use defaults
+    useDefaults: boolean
 
     // list of events
     eventNames: string[]

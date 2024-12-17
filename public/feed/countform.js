@@ -59,7 +59,8 @@ function arrayInstanceCountAssignSubmit() {
       $('#field_instance_count_form').modal('toggle');
       validateInstanceCountRule();
 
-      const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      const path = window.location.origin;
       await fetch(path + `/feedrules`, {
         method: "POST",
         headers: {

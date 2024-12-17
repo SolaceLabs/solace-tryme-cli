@@ -52,7 +52,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- Main Sidebar Container -->
     <!-- <div data-include="sidebar"></div> -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4" style="position: fixed; top: 72px; min-height: calc(100% - 74px)">
+    <aside class="main-sidebar sidebar-dark-primary elevation-4" style="position: fixed; top: 72px; height: calc(100vh - 74px); position: relative;">
       <!-- Sidebar -->
       <div class="sidebar">
         <!-- Sidebar Menu -->
@@ -265,7 +265,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                           </div>            
                         </div>
                         <div class="tab-pane fade" id="message-tabs-stopics" role="tabpanel" aria-labelledby="message-tabs-stopics-tab">
-                          <div class="col-12">
+                          <div class="row">
+                            <div class="col-sm-12 form-group">
+                              <label for="p_send_topics">Choose Topic: <span id="send_topic_count"></span></label>
+                              <select class="selectpicker form-control-border" data-width="100%" id="p_send_topics">
+                              </select>
+                            </div>
+                          </div>`
+                          <div id="send-topics-list" class="col-12" style="margin:15px;">
                             <!-- <div data-include="send"></div> -->
                             <!-- Main content -->
                             <section id="rules_section" class="content">
@@ -574,7 +581,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <div class="form-group">
                 <div class="text-muted text-sm" style="margin-top: 10px;margin-bottom: 10px;">
                   <strong><i class="fas fa-book mr-1"></i> Note:</strong>
-                  Review the supported rules <a href="ruleshelp.html" target="_blank">here</a>
+                  Review the supported rules and rule parameters <a href="ruleshelp.html" target="_blank">here</a>
                 </div>
               </div>
             </div>

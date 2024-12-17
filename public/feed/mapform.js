@@ -166,7 +166,10 @@ function getMapTree(topicVars, payload) {
   var vars = { text: 'Topic Parameters', type: 'object', path: '', nodes: [] }
   tree.push(vars);
   Object.keys(topicVars).forEach(v => {
-    var node = { text: v, class: 'Topic Parameter', type: topicVars[v].schema.type, path: v};
+    var node = { text: v, class: 'Topic Parameter', 
+                  type: topicVars[v]?.schema?.type ? topicVars[v]?.schema?.type : 
+                          topicVars[v]?.rule?.type ? topicVars[v]?.rule?.type : 'string',
+                  path: v};
     vars.nodes.push(node)
   })
   var pl = { text: 'Payload', class: 'Payload Parameter', type: 'object', path: '', nodes: [] }
@@ -178,11 +181,20 @@ function getMapTree(topicVars, payload) {
 
 function buildMapTree(json, parent) {
   var fields = Object.keys(json);
+  if (json.properties) {
+    buildMapTree(json.properties, parent);
+  } else if (json.items) {
+    buildMapTree(json.items, parent);
+  }
   fields.forEach(field => {
     if (field === 'type' || field === 'properties') return;
-    var node = { text: json[field].type === 'array' ? `${field}[]` : field, class: 'Payload Parameter', 
-                  type: json[field].type, path: parent.path ?`${parent.path}.properties.${field}` : field}
-    node.fullPath = parent.fullPath ? `${parent.fullPath}.${node.text}` : node.text;
+    // if (field === 'type') return;
+    var isArray = json[field].type === 'array';
+    var node = { text: isArray ? `${field}[]` : field, 
+                  class: 'Payload Parameter', 
+                  type: json[field].type, 
+                  path: parent.path ? `${parent.path}.${field}` : field}
+    node.fullPath = parent.fullPath ? `${parent.fullPath}.${field}` : field;
     if (json[field].type === 'object' && json[field].properties) {
       node.nodes = [];
       buildMapTree(json[field].properties, node);
@@ -190,7 +202,7 @@ function buildMapTree(json, parent) {
       node.subType = json[field].subType;
       node.nodes = [];
       if (json[field].subType === 'object')
-      buildMapTree(json[field].properties, node);
+        buildMapTree(json[field].items, node);
     }
     parent.nodes.push(node)
   })
@@ -313,7 +325,8 @@ function mapAssignSubmit() {
           rule.mappings = mappings;
           localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-          const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+          const path = window.location.origin;
           await fetch(path + `/feedrules`, {
             method: "POST",
             headers: {
@@ -376,7 +389,8 @@ async function publishSettingsChange(evt) {
   console.log('Updated Settings', rule.publishSettings)
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
-  const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
   await fetch(path + `/feedrules`, {
     method: "POST",
     headers: {

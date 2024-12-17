@@ -14,8 +14,19 @@ function validateAPIVariableRule() {
     let enumValues = undefined;
     let count = undefined;
     let pattern = undefined;
+    let staticValue = undefined;
 
-    if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
+    if (rule === 'static') {
+      staticValue = $('#p_static').first().val();
+      if (!staticValue || staticValue.length === 0) {
+        document.getElementById('p_static').setCustomValidity('Missing value!');
+        document.getElementById('p_static').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_static')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_static').setCustomValidity('');
+      }
+    } else if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
       minimum = parseInt($('#p_minimum').first().val())
       maximum = parseInt($('#p_maximum').first().val())
       if (isNaN(minimum) || minimum < 1) {
@@ -100,6 +111,8 @@ function validateAPIVariableRule() {
         apiVar.rule.casing = $('#p_casing').selectpicker('val');
       if (rule === 'numeric')
         apiVar.rule.leadingZeros = $('#p_leading_zeros').is(':checked')
+      if (staticValue !== undefined) 
+        apiVar.rule.static = staticValue;
 
       console.log(apiVar.rule);
       localStorage.setItem('changed', true);
@@ -125,55 +138,96 @@ function validateAPIVariableRule() {
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
   } else if (ruleSet === 'NumberRules') {
-    let minimum = parseInt($('#p_minimum').first().val())
-    let maximum = parseInt($('#p_maximum').first().val())
-
-    if (isNaN(minimum)) {
-      document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
-      document.getElementById('p_minimum').reportValidity();
-      setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
-      valid = false;
-    } else {
-      document.getElementById('p_minimum').setCustomValidity('');
-    }
-    
-    if (isNaN(maximum)) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+    if (rule === 'countUp' || rule === 'countDown') {
+      let start = parseInt($('#p_start').first().val())
+      let change = parseInt($('#p_change').first().val())
+      if (isNaN(start) ) {
+        document.getElementById('p_start').setCustomValidity('Invalid start value!');
+        document.getElementById('p_end').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_start')), 3000);
         valid = false;
-    } else {
-      document.getElementById('p_maximum').setCustomValidity('');
-    }
-
-    if (valid && maximum < minimum) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+      } else {
+        document.getElementById('p_start').setCustomValidity('');
+      }
+      
+      if (isNaN(change)) {
+        document.getElementById('p_change').setCustomValidity('Invalid change value!');
+        document.getElementById('p_start').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_change')), 3000);
         valid = false;
-    }
-
-    if (valid) {
-      apiVar.rule = {
-        name: apiVar.rule.name,
-        type: apiVar.rule.type,
-        group: $('#parameterRuleSets').selectpicker('val'),
-        rule: $('#parameterRules').selectpicker('val'),
-        minimum: minimum,
-        maximum: maximum,
+      } else {
+        document.getElementById('p_change').setCustomValidity('');
       }
 
-      if (rule === 'float')
-        apiVar.rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+      if (valid) {
+        apiVar.rule = {
+          name: apiVar.rule.name,
+          type: apiVar.rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+        }
+  
+        apiVar.rule.start = start;
+        apiVar.rule.change = change;
+  
+        console.log(apiVar.rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+  
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;  
+    } else {
+      let minimum = parseInt($('#p_minimum').first().val())
+      let maximum = parseInt($('#p_maximum').first().val())
+        if (isNaN(minimum)) {
+        document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
+        document.getElementById('p_minimum').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_minimum').setCustomValidity('');
+      }
+      
+      if (isNaN(maximum)) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+          setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+          valid = false;
+      } else {
+        document.getElementById('p_maximum').setCustomValidity('');
+      }
 
-      console.log(apiVar.rule);
-      localStorage.setItem('changed', true);
-      localStorage.setItem('currentFeed', JSON.stringify(feed));
+      if (valid && maximum < minimum) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+          setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+          valid = false;
+      }
+
+      if (valid) {
+        apiVar.rule = {
+          name: apiVar.rule.name,
+          type: apiVar.rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+          minimum: minimum,
+          maximum: maximum,
+        }
+
+        if (rule === 'float')
+          apiVar.rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+
+        console.log(apiVar.rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;
     }
-
-    var els = document.querySelectorAll('.form-control');
-    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
-    return valid;
   } else if (ruleSet === 'FinanceRules') {
     let minimum = undefined; 
     let maximum = undefined;
@@ -446,7 +500,7 @@ function validateAPIVariableRule() {
       } else {
         document.getElementById('p_days').setCustomValidity('');
       }
-    }
+    } 
 
     if (valid) {
       apiVar.rule = {
@@ -463,6 +517,8 @@ function validateAPIVariableRule() {
 
       if (rule === 'month' || rule === 'weekday')
         apiVar.rule.abbreviated = $('#p_abbreviated').is(':checked');
+      if (rule === 'currentDate' || rule === 'currentTime' || rule === 'currentDateWithTime')
+        apiVar.rule.format = $('#p_format').selectpicker('val');
 
       console.log(apiVar.rule);
       localStorage.setItem('changed', true);
@@ -526,6 +582,25 @@ function validateAPIVariableRule() {
     var els = document.querySelectorAll('.form-control');
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
+  } else if (ruleSet === 'InternetRules') {
+    apiVar.rule = {
+      name: apiVar.rule.name,
+      type: apiVar.rule.type,
+      group: $('#parameterRuleSets').selectpicker('val'),
+      rule: $('#parameterRules').selectpicker('val'),
+    }
+
+    if (rule === 'domainName' || rule === 'domainWord' || rule === 'email' || rule === 'url' || rule === 'username') {
+      apiVar.rule.casing = $('#p_casing').selectpicker('val');
+    }
+
+    console.log(apiVar.rule);
+    localStorage.setItem('changed', true);
+    localStorage.setItem('currentFeed', JSON.stringify(feed));
+
+    var els = document.querySelectorAll('.form-control');
+    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+    return valid;
   }
 }
 
@@ -547,8 +622,19 @@ function validateTopicVariableRule() {
     let enumValues = undefined;
     let count = undefined;
     let pattern = undefined;
+    let staticValue = undefined;
 
-    if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
+    if (rule === 'static') {
+      staticValue = $('#p_static').first().val();
+      if (!staticValue || staticValue.length === 0) {
+        document.getElementById('p_static').setCustomValidity('Missing value!');
+        document.getElementById('p_static').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_static')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_static').setCustomValidity('');
+      }
+    } else if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
       minimum = parseInt($('#p_minimum').first().val())
       maximum = parseInt($('#p_maximum').first().val())
       if (isNaN(minimum) || minimum < 1) {
@@ -633,6 +719,8 @@ function validateTopicVariableRule() {
         topicVar.topicParameters[param].rule.casing = $('#p_casing').selectpicker('val');
       if (rule === 'numeric')
         topicVar.topicParameters[param].rule.leadingZeros = $('#p_leading_zeros').is(':checked')
+      if (staticValue !== undefined) 
+        topicVar.rule.static = staticValue;
 
       console.log(topicVar.topicParameters[param].rule);
       localStorage.setItem('changed', true);
@@ -658,54 +746,96 @@ function validateTopicVariableRule() {
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
   } else if (ruleSet === 'NumberRules') {
-    let minimum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
-    let maximum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
-    if (isNaN(minimum)) {
-      document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
-      document.getElementById('p_minimum').reportValidity();
-      setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
-      valid = false;
-    } else {
-      document.getElementById('p_minimum').setCustomValidity('');
-    }
-    
-    if (isNaN(maximum)) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+    if (rule === 'countUp' || rule === 'countDown') {
+      let start = parseInt($('#p_start').first().val())
+      let change = parseInt($('#p_change').first().val())
+      if (isNaN(start) ) {
+        document.getElementById('p_start').setCustomValidity('Invalid start value!');
+        document.getElementById('p_end').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_start')), 3000);
         valid = false;
-    } else {
-      document.getElementById('p_maximum').setCustomValidity('');
-    }
-
-    if (valid && maximum < minimum) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+      } else {
+        document.getElementById('p_start').setCustomValidity('');
+      }
+      
+      if (isNaN(change)) {
+        document.getElementById('p_change').setCustomValidity('Invalid change value!');
+        document.getElementById('p_start').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_change')), 3000);
         valid = false;
-    }
-
-    if (valid) {
-      topicVar.topicParameters[param].rule = {
-        name: topicVar.topicParameters[param].rule.name,
-        type: topicVar.topicParameters[param].rule.type,
-        group: $('#parameterRuleSets').selectpicker('val'),
-        rule: $('#parameterRules').selectpicker('val'),
-        minimum: minimum,
-        maximum: maximum,
+      } else {
+        document.getElementById('p_change').setCustomValidity('');
       }
 
-      if (rule === 'float')
-        topicVar.topicParameters[param].rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+      if (valid) {
+        topicVar.rule = {
+          name: topicVar.rule.name,
+          type: topicVar.rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+        }
+  
+        topicVar.rule.start = start;
+        topicVar.rule.change = change;
+  
+        console.log(topicVar.rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+  
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;  
+    } else {
+      let minimum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
+      let maximum = topicVar.topicParameters[param].rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
+      if (isNaN(minimum)) {
+        document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
+        document.getElementById('p_minimum').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_minimum').setCustomValidity('');
+      }
+      
+      if (isNaN(maximum)) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+          setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+          valid = false;
+      } else {
+        document.getElementById('p_maximum').setCustomValidity('');
+      }
 
-      console.log(topicVar.topicParameters[param].rule);
-      localStorage.setItem('changed', true);
-      localStorage.setItem('currentFeed', JSON.stringify(feed));
+      if (valid && maximum < minimum) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+          setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+          valid = false;
+      }
+
+      if (valid) {
+        topicVar.topicParameters[param].rule = {
+          name: topicVar.topicParameters[param].rule.name,
+          type: topicVar.topicParameters[param].rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+          minimum: minimum,
+          maximum: maximum,
+        }
+
+        if (rule === 'float')
+          topicVar.topicParameters[param].rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+
+        console.log(topicVar.topicParameters[param].rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;
     }
-
-    var els = document.querySelectorAll('.form-control');
-    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
-    return valid;
   } else if (ruleSet === 'FinanceRules') {
     let minimum = undefined; 
     let maximum = undefined;
@@ -995,6 +1125,8 @@ function validateTopicVariableRule() {
 
       if (rule === 'month' || rule === 'weekday')
         topicVar.topicParameters[param].rule.abbreviated = $('#p_abbreviated').is(':checked');
+      if (rule === 'currentDate' || rule === 'currentTime' || rule === 'currentDateWithTime')
+        topicVar.rule.format = $('#p_format').selectpicker('val');
 
       console.log(topicVar.topicParameters[param].rule);
       localStorage.setItem('changed', true);
@@ -1058,6 +1190,25 @@ function validateTopicVariableRule() {
     var els = document.querySelectorAll('.form-control');
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
+  } else if (ruleSet === 'InternetRules') {
+    topicVar.rule = {
+      name: topicVar.rule.name,
+      type: topicVar.rule.type,
+      group: $('#parameterRuleSets').selectpicker('val'),
+      rule: $('#parameterRules').selectpicker('val'),
+    }
+
+    if (rule === 'domainName' || rule === 'domainWord' || rule === 'email' || rule === 'url' || rule === 'username') {
+      topicVar.rule.casing = $('#p_casing').selectpicker('val');
+    }
+
+    console.log(topicVar.rule);
+    localStorage.setItem('changed', true);
+    localStorage.setItem('currentFeed', JSON.stringify(feed));
+
+    var els = document.querySelectorAll('.form-control');
+    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+    return valid;
   }
 }
 
@@ -1083,8 +1234,19 @@ function validatePayloadFieldRule() {
     let enumValues = undefined;
     let count = undefined;
     let pattern = undefined;
+    let staticValue = undefined;
 
-    if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
+    if (rule === 'static') {
+      staticValue = $('#p_static').first().val();
+      if (!staticValue || staticValue.length === 0) {
+        document.getElementById('p_static').setCustomValidity('Missing value!');
+        document.getElementById('p_static').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_static')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_static').setCustomValidity('');
+      }
+    } else if (rule === 'alpha' || rule === 'alphanumeric' || rule === 'nanoid' || rule === 'sample' || rule === 'symbol' || rule === 'numeric') {
       minimum = parseInt($('#p_minimum').first().val())
       maximum = parseInt($('#p_maximum').first().val())
       if (isNaN(minimum) || minimum < 1) {
@@ -1169,6 +1331,8 @@ function validatePayloadFieldRule() {
         field.rule.casing = $('#p_casing').selectpicker('val');
       if (field.rule.rule === 'numeric')
         field.rule.leadingZeros = $('#p_leading_zeros').is(':checked')
+      if (staticValue !== undefined) 
+        field.rule.static = staticValue;
 
       console.log(field.rule);
       localStorage.setItem('changed', true);
@@ -1194,55 +1358,97 @@ function validatePayloadFieldRule() {
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
     return valid;
   } else if (ruleSet === 'NumberRules') {
-    let minimum = field.rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
-    let maximum = field.rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
-    
-    if (isNaN(minimum)) {
-      document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
-      document.getElementById('p_minimum').reportValidity();
-        setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
+    if (rule === 'countUp' || rule === 'countDown') {
+      let start = parseInt($('#p_start').first().val())
+      let change = parseInt($('#p_change').first().val())
+      if (isNaN(start) ) {
+        document.getElementById('p_start').setCustomValidity('Invalid start value!');
+        document.getElementById('p_end').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_start')), 3000);
         valid = false;
-    } else {
-      document.getElementById('p_minimum').setCustomValidity('');
-    }
-    
-    if (isNaN(maximum)) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-      setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
-      valid = false;
-    } else {
-      document.getElementById('p_maximum').setCustomValidity('');
-    }
-
-    if (valid && maximum < minimum) {
-      document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
-      document.getElementById('p_maximum').reportValidity();
-      setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
-      valid = false;
-    }
-
-    if (valid) {
-        field.rule = {
-        name: field.rule.name,
-        type: field.rule.type,
-        group: $('#parameterRuleSets').selectpicker('val'),
-        rule: $('#parameterRules').selectpicker('val'),
-        minimum: minimum,
-        maximum: maximum,
+      } else {
+        document.getElementById('p_start').setCustomValidity('');
+      }
+      
+      if (isNaN(change)) {
+        document.getElementById('p_change').setCustomValidity('Invalid change value!');
+        document.getElementById('p_start').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_change')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_change').setCustomValidity('');
       }
 
-      if (field.rule.rule === 'float')
-        field.rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+      if (valid) {
+        field.rule = {
+          name: field.rule.name,
+          type: field.rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+        }
+  
+        field.rule.start = start;
+        field.rule.change = change;
+        
+        console.log(field.rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+  
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;  
+    } else {
+      let minimum = field.rule.rule === 'int' ? parseInt($('#p_minimum').first().val()) : parseFloat($('#p_minimum').first().val())
+      let maximum = field.rule.rule === 'int' ? parseInt($('#p_maximum').first().val()) : parseFloat($('#p_maximum').first().val())
+      
+      if (isNaN(minimum)) {
+        document.getElementById('p_minimum').setCustomValidity('Invalid minimum value!');
+        document.getElementById('p_minimum').reportValidity();
+          setTimeout(() => clearValidationError(document.getElementById('p_minimum')), 3000);
+          valid = false;
+      } else {
+        document.getElementById('p_minimum').setCustomValidity('');
+      }
+      
+      if (isNaN(maximum)) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+        valid = false;
+      } else {
+        document.getElementById('p_maximum').setCustomValidity('');
+      }
 
-      console.log(field.rule);
-      localStorage.setItem('changed', true);
-      localStorage.setItem('currentFeed', JSON.stringify(feed));
+      if (valid && maximum < minimum) {
+        document.getElementById('p_maximum').setCustomValidity('Invalid maximum value!');
+        document.getElementById('p_maximum').reportValidity();
+        setTimeout(() => clearValidationError(document.getElementById('p_maximum')), 3000);
+        valid = false;
+      }
+
+      if (valid) {
+          field.rule = {
+          name: field.rule.name,
+          type: field.rule.type,
+          group: $('#parameterRuleSets').selectpicker('val'),
+          rule: $('#parameterRules').selectpicker('val'),
+          minimum: minimum,
+          maximum: maximum,
+        }
+
+        if (field.rule.rule === 'float')
+          field.rule.fractionDigits = parseInt($('#p_fraction').selectpicker('val')),
+
+        console.log(field.rule);
+        localStorage.setItem('changed', true);
+        localStorage.setItem('currentFeed', JSON.stringify(feed));
+      }
+
+      var els = document.querySelectorAll('.form-control');
+      els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+      return valid;
     }
-
-    var els = document.querySelectorAll('.form-control');
-    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
-    return valid;
   } else if (ruleSet === 'FinanceRules') {
     let minimum = undefined;
     let maximum = undefined;
@@ -1529,6 +1735,8 @@ function validatePayloadFieldRule() {
 
       if (rule === 'month' || rule === 'weekday')
         field.rule.abbreviated = $('#p_abbreviated').is(':checked');
+      if (rule === 'currentDate' || rule === 'currentTime' || rule === 'currentDateWithTime')
+        field.rule.format = $('#p_format').selectpicker('val');
 
       console.log(field.rule);
       localStorage.setItem('changed', true);
@@ -1588,6 +1796,25 @@ function validatePayloadFieldRule() {
       localStorage.setItem('changed', true);
       localStorage.setItem('currentFeed', JSON.stringify(feed));
     }
+
+    var els = document.querySelectorAll('.form-control');
+    els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');
+    return valid;
+  } else if (ruleSet === 'InternetRules') {
+    field.rule = {
+      name: field.rule.name,
+      type: field.rule.type,
+      group: $('#parameterRuleSets').selectpicker('val'),
+      rule: $('#parameterRules').selectpicker('val'),
+    }
+
+    if (rule === 'domainName' || rule === 'domainWord' || rule === 'email' || rule === 'url' || rule === 'username') {
+      field.rule.casing = $('#p_casing').selectpicker('val');
+    }
+
+    console.log(field.rule);
+    localStorage.setItem('changed', true);
+    localStorage.setItem('currentFeed', JSON.stringify(feed));
 
     var els = document.querySelectorAll('.form-control');
     els.forEach(el => typeof el.reportValidity === 'function' ? el.reportValidity() : '');

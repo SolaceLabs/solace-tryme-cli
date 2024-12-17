@@ -574,21 +574,25 @@ export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) =>
   }
 }
 
-export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object) => {
+export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object, overWrite: boolean = false) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   try {
     if (fileExists(feedPath)) {
-      Logger.warn(`Feed '${feedName}' already exists, `)
-      var prompt = require('prompt-sync')();
-      var confirmation = prompt(`${chalk.whiteBright('Feed already exists, do you want to overwrite (') + 
-                                  chalk.greenBright('y') + chalk.whiteBright('/') + 
-                                  chalk.redBright('n') + chalk.whiteBright('): ')}`);
-      if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
-        Logger.logWarn('abort create feed...')
-        Logger.logError('exiting...')
-        process.exit(0);
+      if (overWrite) {
+        Logger.warn(`Feed '${feedName}' already exists, overwriting...`)
       } else {
-        fs.rmSync(feedPath, { recursive: true, force: true });
+        Logger.warn(`Feed '${feedName}' already exists, `)
+        var prompt = require('prompt-sync')();
+        var confirmation = prompt(`${chalk.whiteBright('Feed already exists, do you want to overwrite (') + 
+                                    chalk.greenBright('y') + chalk.whiteBright('/') + 
+                                    chalk.redBright('n') + chalk.whiteBright('): ')}`);
+        if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
+          Logger.logWarn('abort create feed...')
+          Logger.logError('exiting...')
+          process.exit(0);
+        } else {
+          fs.rmSync(feedPath, { recursive: true, force: true });
+        }
       }
     }
 
@@ -676,6 +680,25 @@ export const loadLocalFeedFile = (feedName: string, fileName: string) => {
     }
 
     var analysis = readFile(`${feedPath}/${fileName}`);
+    return analysis;
+  } catch (error: any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const loadRawLocalFeedFile = (feedName: string, fileName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logError(`feed ${feedName} not found!`)
+      Logger.logError('exiting...')
+      process.exit(1);
+    }
+
+    var analysis = readRawFile(`${feedPath}/${fileName}`);
     return analysis;
   } catch (error: any) {
     Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
@@ -873,6 +896,33 @@ export const loadGitFeedFile = async (feedName: string, fileName: string) => {
       .then(async (response) => {
         const data = await response.json();
         return data;
+      })
+      .catch((error:any) => {
+        Logger.logError('invalid feed, check whether the feed exists!');
+        Logger.logError('exiting...')
+        process.exit(1)
+      })
+  } catch (error:any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const loadRawGitFeedFile = async (feedName: string, fileName: string) => {
+  try {
+    var feedUrl = `${defaultGitRepo}/${feedName}`;
+    var validFeedUrl = await urlExists(encodeURI(`${feedUrl}/${fileName}`));
+    if (!validFeedUrl) {
+      Logger.logDetailedError('invalid or non-existing feed URL', feedUrl)
+      Logger.logError('exiting...')
+      process.exit(1)
+    }
+
+    return await fetch(`${feedUrl}/${fileName}`)
+      .then(async (response) => {
+        return response;
       })
       .catch((error:any) => {
         Logger.logError('invalid feed, check whether the feed exists!');

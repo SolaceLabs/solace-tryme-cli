@@ -1,33 +1,23 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { createApiFeed, createFeed, fileExists, updateAndLoadFeedInfo, loadGitFeedFile, loadLocalFeedFile, processPlainPath, writeConfig, writeJsonFile } from '../utils/config';
-import analyze from './feed-analyze';
-import { formulateRules, formulateSchemas } from './feed-ruleset';
+import { createApiFeed, createFeed, fileExists, updateAndLoadFeedInfo, loadGitFeedFile, loadLocalFeedFile, processPlainPath, writeConfig, writeJsonFile, readAsyncAPIFile } from '../utils/config';
 import { prettyJSON } from '../utils/prettify';
 import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultStmFeedsHome, supportedFeedTypes } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedRestAPIValue } from '../utils/chalkUtils';
-import { fa } from '@faker-js/faker';
 import { fakerRulesJson } from '../utils/fakerrules';
-import { validate } from '@asyncapi/parser/esm/validate';
 import chalk from 'chalk';
-
-const getPotentialFeedName = (fileName: string) => {
-  var feedName = fileName.split('/').pop();
-  feedName = feedName?.split('.').shift() ?? '';// Add nullish coalescing operator to provide a default value
-  return feedName;
-}
-
-const getPotentialTopicFromFeedName = (name: string) => {
-  var feedName = name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase();
-  return feedName;
-}
+import { analyze, analyzeV2, analyzeEP, formulateRules, formulateSchemas, load } from './feed-analyze';
+import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
+import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFeedName } from '../utils/checkparams';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var { fileName, feedName, feedType } = options;
+  var { fileName, feedName, feedType, feedView } = options;
   var feed:any = {};
   const { Input, Select } = require('enquirer');
 
-  if (optionsSource.feedType === 'default') {
+  checkFeedGenerateOptions(options, optionsSource);
+
+  if (optionsSource.feedType !== 'cli') {
     const pFeedType = new Select({
       message: `${chalkBoldWhite('Pick a feed type')} \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
       `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
@@ -45,6 +35,16 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
+  } else {
+    feed.feedType = options.feedType;
+  }
+  
+  if (optionsSource.feedView === 'cli') {
+    feed.feedView = options.feedView;
+  } else {
+    optionsSource.feedView = 'cli';
+    options.feedView = 'default';
+    feed.feedView = 'default';
   }
 
   if (feed.type === 'asyncapi_feed' && !fileName) {
@@ -52,7 +52,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       const pFilename = new Input({
         message: `${chalkBoldWhite('Enter AsyncAPI file')}\n` +
           `${chalkBoldLabel('Hint')}: Enter the full path to the AsyncAPI file\n`,
-        initial: 'asyncapi.json',
+        // initial: 'asyncapi.json',
         validate: (value: string) => {  return !!value; }
       });
 
@@ -72,6 +72,10 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     } while (!fileExists(fileName));
   }
 
+  if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
+    feedName = options.feedName;
+    fileName = options.fileName;
+  } 
   if (!feedName) {
     const pFeedName = new Input({
       message: `${chalkBoldWhite('Enter feed name')}\n` +
@@ -97,38 +101,60 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     return generateAPIFeed(options, optionsSource);
   }
 
-  if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
-    feedName = options.feedName;
-    fileName = options.fileName;
-  } 
-  
-  const data = await analyze(options, optionsSource);
-  const rules = await formulateRules(JSON.parse(JSON.stringify(data)));
-  const schemas = await formulateSchemas(JSON.parse(JSON.stringify(data)));
+  const asyncApiSchema = readAsyncAPIFile(fileName);  
+  const loaded:any = await load(asyncApiSchema);
+  const document = loaded.document as AsyncAPIDocumentInterface;
+  if (!document) {
+    Logger.error('Unable to load AsyncAPI document');
+    Logger.error('exiting...');
+    process.exit(1);
+  }
 
-  const pFeedDesc = new Input({
-    message: `${chalkBoldWhite('Feed description')}\n` +
-    `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
-    initial: data.info.description,
-    validate: (value: string) => {  return !!value; }
-  });
+  const reverseView = feed.feedView === 'reverse';
+  const loadedCopy:any = await load(asyncApiSchema, false);
+  const documentCopy = loadedCopy.document as AsyncAPIDocumentInterface;
 
-  await pFeedDesc.run()
-    .then((answer: string) => {
-      feed.description = answer.trim();
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+  const data = loaded.epSpecification ? await analyzeEP(documentCopy, reverseView) : 
+                loaded.asyncApiVersion && loaded.asyncApiVersion.startsWith('2') ? 
+                  await analyzeV2(documentCopy, reverseView) : await analyze(documentCopy, reverseView);
+  data.fileName = fileName.lastIndexOf('/') >= 0 ? fileName.substring(fileName.lastIndexOf('/')+1) : fileName;
+
+  const rules = await formulateRules(document, reverseView); // Uses original unmodified document
+  const schemas = await formulateSchemas(document); // Uses original unmodified document
+
+  if (options.useDefaults) {
+    feed.type = 'asyncapi_feed';
+    feed.name = feedName;
+    feed.description = data.info.description ? data.info.description : '';
+    feed.img = '';
+    feed.contributor = '';
+    feed.github = '';
+    feed.domain = 'Default';
+    feed.tags = 'default';
+  } else {
+    const pFeedDesc = new Input({
+      message: `${chalkBoldWhite('Feed description')}\n` +
+      `${chalkBoldLabel('Hint')}: A brief description on the scope and purpose of the feed\n`,
+      initial: data.info.description,
+      validate: (value: string) => {  return !!value; }
     });
 
-  const pFeedIcon = new Input({
-    message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
-    `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
-    initial: ''
-  });
+    await pFeedDesc.run()
+      .then((answer: string) => {
+        feed.description = answer.trim();
+      })
+    .catch((error:any) => {
+      Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
 
-  await pFeedIcon.run()
+    const pFeedIcon = new Input({
+      message: `${chalkBoldWhite('Feed icon (an URL or a base64 image data)')}\n` +
+      `${chalkBoldLabel('Hint')}: Leave blank to use a default feed icon\n`,
+      initial: ''
+    });
+
+    await pFeedIcon.run()
     .then((answer: string) => {
       feed.img = answer.trim();
     })
@@ -137,69 +163,70 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       process.exit(1);
     });
 
-  const pFeedContributor = new Input({
-    message: `${chalkBoldWhite('Contributor name')}\n` +
-    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
-    initial: ''
-  });
-
-  await pFeedContributor.run()
-    .then((answer: string) => {
-      feed.contributor = answer.trim();
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+    const pFeedContributor = new Input({
+      message: `${chalkBoldWhite('Contributor name')}\n` +
+      `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
+      initial: ''
     });
 
-  const pGitUser = new Input({
-    message: `${chalkBoldWhite('GitHub handle')}\n` +
-    `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
-    initial: ''
-  });
+    await pFeedContributor.run()
+      .then((answer: string) => {
+        feed.contributor = answer.trim();
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
 
-  await pGitUser.run()
-    .then((answer: string) => {
-      feed.github = answer.trim();
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+    const pGitUser = new Input({
+      message: `${chalkBoldWhite('GitHub handle')}\n` +
+      `${chalkBoldLabel('Hint')}: Optional, can be updated at the time of feed contribution\n`,
+      initial: ''
     });
 
-  const pFeedDomain = new Input({
-    message: `${chalkBoldWhite('Feed domain')}\n` +
-    `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
-    initial: '',
-    validate: (value: string) => {  return !!value; }
-  });
+    await pGitUser.run()
+      .then((answer: string) => {
+        feed.github = answer.trim();
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
 
-  await pFeedDomain.run()
-    .then((answer: string) => {
-      feed.domain = answer.trim();
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+    const pFeedDomain = new Input({
+      message: `${chalkBoldWhite('Feed domain')}\n` +
+      `${chalkBoldLabel('Hint')}: A high-level business domain that the feed can be identified with\n`,
+      initial: '',
+      validate: (value: string) => {  return !!value; }
     });
 
-  const pFeedTags = new Input({
-    message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
-    `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
-    initial: '',
-    validate: (value: string) => {  return !!value; }
-  });
+    await pFeedDomain.run()
+      .then((answer: string) => {
+        feed.domain = answer.trim();
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
 
-  await pFeedTags.run()
-    .then((answer: string) => {
-      feed.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
-    })
-    .catch((error:any) => {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
+    const pFeedTags = new Input({
+      message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
+      `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
+      initial: '',
+      validate: (value: string) => {  return !!value; }
     });
 
-  createFeed(fileName, feedName, data, rules, schemas);
+    await pFeedTags.run()
+      .then((answer: string) => {
+        feed.tags = answer ? answer.split(',').map((t: string) => t.trim()).join(', ') : ''
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  }
+
+  createFeed(fileName, feedName, data, rules, schemas, options.useDefaults ? true : false);
   feed.lastUpdated = new Date().toISOString();
   updateAndLoadFeedInfo(feed);
 
