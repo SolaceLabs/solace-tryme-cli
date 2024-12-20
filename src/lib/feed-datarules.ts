@@ -708,7 +708,7 @@ const generateArray = (obj:any) => {
   var count = obj.rule.count ? obj.rule.count : 2;
   for (var i=0; i<count; i++) {
     if (obj.subType === 'object')
-      data.push(generateObject(obj.items.properties));
+      data.push(generateObject(obj?.items?.properties ? obj.items.properties : obj.properties));
     else if (obj.subType === 'array')
       data.push(generateObject(obj.items));
     // else if (obj.subType === 'string') {
