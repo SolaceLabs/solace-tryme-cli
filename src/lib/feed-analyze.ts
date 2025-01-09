@@ -444,12 +444,100 @@ const setDefaultPayloadRules = (msgs: any) => {
   });
 }
 
+const checkIfPlainJson = (schemaFormant: string) => {
+  const jsonFormats = ['vnd.aai.asyncapi+json;', 'application/json;'];
+  let plainJson = jsonFormats.some((format: string) =>
+    schemaFormant.toLowerCase().includes(format.toLowerCase())
+  );
+  return plainJson;
+}
+
 const checkSchemaFormat = (schemaFormat: string) => {
   const supportedSchemaFormats = ['vnd.aai.asyncapi+json', 'application/schema+yaml', 'vnd.aai.asyncapi', 'json', 'avro'];
   let supported = supportedSchemaFormats.some((format: string) => 
     schemaFormat.toLowerCase().includes(format.toLowerCase())
   );
   return supported;
+}
+
+const fixUpJsonPayload = (payload:any, parent:any) => {
+  if (payload.type === 'object' && !payload.properties) {
+    payload = {
+      type: 'object',
+      properties: { ...payload }
+    }
+    delete payload.properties.type;
+    for (const prop in payload.properties) {
+      if (prop.startsWith('x-')) delete payload.properties[prop];
+      if (Array.isArray(payload.properties[prop]) && payload.properties[prop].length > 1) {
+        if (Array.isArray(payload.properties[prop][0])) {
+          payload.properties[prop] = {
+            type: 'array',
+            items: {
+              type: typeof payload.properties[prop][0],
+              properties: payload.properties[prop][0]
+            }
+          }
+        } else
+        if (typeof payload.properties[prop][0] === 'object') {
+          payload.properties[prop] = {
+            type: 'object',
+            properties: payload.properties[prop][0]
+          }
+        } else {
+          payload.properties[prop] = {
+            type: typeof payload.properties[prop][0]
+          }
+        }
+      }
+    }
+    console.log('fixUpJsonPayload - Object: ' + Object.keys(payload.properties));
+    for (const prop in payload.properties) {
+      payload.properties[prop] = fixUpJsonPayload(payload.properties[prop], payload.properties);
+    }  
+  } else if (Array.isArray(payload) && payload.length === 1) {
+    payload = {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: payload[0]
+      }
+    }
+    for (const prop in payload.items.properties) {
+      if (prop.startsWith('x-')) delete payload.items.properties[prop];
+      if (Array.isArray(payload.items.properties[prop]) && payload.items.properties[prop].length > 1) {
+        if (Array.isArray(payload.items.properties[prop][0])) {
+          payload.items.properties[prop] = {
+            type: 'array',
+            items: {
+              type: typeof payload.items.properties[prop][0],
+              properties: payload.items.properties[prop][0]
+            }
+          }
+        } else
+        if (typeof payload.items.properties[prop][0] === 'object') {
+          payload.items.properties[prop] = {
+            type: 'object',
+            properties: payload.items.properties[prop][0]
+          }
+        } else {
+          payload.items.properties[prop] = {
+            type: typeof payload.items.properties[prop][0]
+          }
+        }
+      }      
+    }
+    console.log('fixUpJsonPayload - Array: ' + Object.keys(payload.items.properties));
+    for (const prop in payload.items.properties) {
+      payload.items.properties[prop] = fixUpJsonPayload(payload.items.properties[prop], payload.items.properties);
+    }  
+  } else {
+    payload = typeof payload === 'object' ? 
+                  { ...payload, type: payload.type ? payload.type : typeof payload } : 
+                  { type: payload.type ? payload.type : typeof payload};
+  }
+
+  return payload;
 }
 
 const fixUpMessageApplicators = (message:any) => {
@@ -987,6 +1075,11 @@ const formulateRules = (document:AsyncAPIDocumentInterface|undefined, reverse:bo
           let fixedUpPayload = hasPayload ? 
                                     fixUpMessageApplicators(message?.payload()?.json()) : 
                                     undefined;
+          let plainJson = hasPayload ? checkIfPlainJson(message.schemaFormat()) : false;
+          if (plainJson) {
+            fixedUpPayload = fixUpJsonPayload(fixedUpPayload, fixedUpPayload);
+          }
+
           let rule = {
             topic: channel.address(),
             topicParameters: getChannelParameters(channel),

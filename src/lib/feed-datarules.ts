@@ -674,8 +674,11 @@ const generateObject = (obj:any) => {
       data[key] = generateArray(obj[key]);
     else if (typeof obj[key] === 'object' && !Object.keys(obj[key]).length)
       data[key] = {}; // empty object (should we consider undefined!!)
-    else
-      data[key] = fakeDataValueGenerator(obj[key])
+    else {
+      let value = fakeDataValueGenerator(obj[key]);
+      // if (!value && obj[key].rule.rule === 'null') {
+      data[key] = value;
+    }
   })
 
   return data;
@@ -705,7 +708,7 @@ const generateArray = (obj:any) => {
   var data:any = [];
   if (obj.items && Object.keys(obj.items).length === 0)
     return data;
-  var count = obj.rule.count ? obj.rule.count : 2;
+  var count = obj.rule.count ? obj.rule.count : 1;
   for (var i=0; i<count; i++) {
     if (obj.subType === 'object')
       data.push(generateObject(obj?.items?.properties ? obj.items.properties : obj.properties));

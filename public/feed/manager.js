@@ -409,11 +409,11 @@ function editArrayInstanceCount(name, topic, type, nodeId) {
 
   if (field.type !== 'array') return html;
 
-  var count = ' ('.concat(field.rule.count ? field.rule.count : 2).concat(')');
+  var count = ' ('.concat(field.rule.count ? field.rule.count : 1).concat(')');
   html = `
         <span class='jstooltip' style="margin-right: 10px">
           <span class="btn btn-primary" data-topic="${topic}" data-name="${rule.name}" 
-              data-count="${rule.count ? rule.count : 2}"
+              data-count="${rule.count ? rule.count : 1}"
               data-toggle="modal" data-target="#field_instance_count_form" data-type="${type}"
               data-backdrop="static" data-keyboard="false" ` +
               `onclick="editInstanceCount(this, '${node.nodeId}')`+ 
@@ -526,7 +526,7 @@ async function editInstanceCount(el) {
   $('#arr_parameterPayloadFieldName').text(param);
   $('#arr_parameterTopicVariableName').text('');
   $('#arr_parameterName').attr("placeholder", param);
-  $('#arr_dataFieldCount').val(field.rule.count ? field.rule.count : 2);
+  $('#arr_dataFieldCount').val(field.rule.count ? field.rule.count : 1);
 
 }
 

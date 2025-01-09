@@ -55,7 +55,7 @@ async function manageFieldMap() {
       if (node.type === 'array' || node.type === 'object') 
         el.value = '';
       else
-        el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
+        el.value = node.path ? `${node.class} : ${node.fullPath.replaceAll('[]', '[0]')}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
 
       $('#srcType').text(node.type);
       $('#srcSubType').text(node.subType);
@@ -114,7 +114,7 @@ async function manageFieldMap() {
       if (node.type === 'array' || node.type === 'object') 
         el.value = '';
       else
-        el.value = node.path ? `${node.class} : ${node.path}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
+        el.value = node.path ? `${node.class} : ${node.fullPath.replaceAll('[]', '[0]')}, ${node.type}${node.subType ? ' of ' + node.subType : ''}` : '';
 
       $('#tgtType').text(node.type);
       $('#tgtSubType').text(node.subType);
@@ -169,7 +169,7 @@ function getMapTree(topicVars, payload) {
     var node = { text: v, class: 'Topic Parameter', 
                   type: topicVars[v]?.schema?.type ? topicVars[v]?.schema?.type : 
                           topicVars[v]?.rule?.type ? topicVars[v]?.rule?.type : 'string',
-                  path: v};
+                  path: v, fullPath: v};
     vars.nodes.push(node)
   })
   var pl = { text: 'Payload', class: 'Payload Parameter', type: 'object', path: '', nodes: [] }
@@ -194,7 +194,7 @@ function buildMapTree(json, parent) {
                   class: 'Payload Parameter', 
                   type: json[field].type, 
                   path: parent.path ? `${parent.path}.${field}` : field}
-    node.fullPath = parent.fullPath ? `${parent.fullPath}.${field}` : field;
+    node.fullPath = parent.fullPath ? `${parent.fullPath}.${isArray ? `${field}[]` : field}` : isArray ? `${field}[]` : field;
     if (json[field].type === 'object' && json[field].properties) {
       node.nodes = [];
       buildMapTree(json[field].properties, node);
@@ -248,10 +248,10 @@ function mapAssignSubmit() {
         valid = false;
       }
 
-      if (sourcePath.indexOf('[].') > 0) {
-        $('#mapRulesFormError').text('Cannot map an array source to target field...')
-        valid = false;
-      }
+      // if (sourcePath.indexOf('[].') > 0) {
+      //   $('#mapRulesFormError').text('Cannot map an array source to target field...')
+      //   valid = false;
+      // }
 
       form.classList.add('was-validated');
 
