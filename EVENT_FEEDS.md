@@ -43,7 +43,7 @@ Here is an example of `preview` command that takes the options interactively on 
 
 Interactive Mode| CLI Parameters
 --|--
-![](./docrefs/interactive-1.gif)<br>Click [here](./docrefs/interactive-1.gif){target="_blank"} to open in new tab|![](./docrefs/interactive-2.gif)<br>Click [here](./docrefs/interactive-2.gif){target="_blank"} to open in new tab
+![](./docrefs/interactive-1.gif)|![](./docrefs/interactive-2.gif)
 
 > Be sure to checkout the command-line options available for each command.
 > 
@@ -76,7 +76,7 @@ Options:
 
 AsyncAPI Document| Local Feed | Community Feed
 --|--|--
-![](./docrefs/preview-asyncapi.gif)<br>Click [here](./docrefs/preview-asyncapi.gif){target="_blank"} to open in new tab|![](./docrefs/preview-local.gif)<br>Click [here](./docrefs/preview-local.gif){target="_blank"} to open in new tab|![](./docrefs/preview-community.gif)<br>Click [here](./docrefs/preview-community.gif){target="_blank"} to open in new tab
+![](./docrefs/preview-asyncapi.gif)|![](./docrefs/preview-local.gif)|![](./docrefs/preview-community.gif)|
 
 ## Generate an Event Feed
 
@@ -112,7 +112,7 @@ You can verify the generated feed with the `stm feed preview` -> `Local Event Fe
 
 Generate a Feed| Validate the Feed
 --|--
-![](./docrefs/feed-generate.gif)<br>Click [here](./docrefs/feed-generate.gif){target="_blank"} to open in new tab|![](./docrefs/feed-generate-verify.gif)<br>Click [here](./docrefs/feed-generate-verify.gif){target="_blank"} to open in new tab
+![](./docrefs/feed-generate.gif)|![](./docrefs/feed-generate-verify.gif)|
 
 ## Configure Data Generation Rules for an Event Feed
 
@@ -145,13 +145,13 @@ An Event Feed configuration exposes feed operations — send and receive events 
 
 Step| Video
 --|--
-Launch Feed Config|![](./docrefs/feed-config-launch.gif)<br>Click [here](./docrefs/feed-config-launch.gif){target="_blank"} to open in new tab|
-List Available Feeds & Choose the feed|![](./docrefs/feed-config-review.gif)<br>Click [here](./docrefs/feed-config-review.gif){target="_blank"} to open in new tab|
-Configure Data Generation Rules - 1|![](./docrefs/feed-config-payload-1.gif)<br>Click [here](./docrefs/feed-config-payload-1.gif){target="_blank"} to open in new tab|
-Configure Data Generation Rules - 2|![](./docrefs/feed-config-payload-2.gif)<br>Click [here](./docrefs/feed-config-payload-2.gif){target="_blank"} to open in new tab|
-Configure Data Generation Rules - 3 & Review/Configure Topic Parameters|![](./docrefs/feed-config-payload-and-topic.gif)<br>Click [here](./docrefs/feed-config-payload-and-topic.gif){target="_blank"} to open in new tab|
-Define Attribute Mapping|![](./docrefs/feed-config-mapping.gif)<br>Click [here](./docrefs/feed-config-mapping.gif){target="_blank"} to open in new tab|
-Review Sample Data - 3|![](./docrefs/feed-config-sample-data.gif)<br>Click [here](./docrefs/feed-config-sample-data.gif){target="_blank"} to open in new tab|
+Launch Feed Config|![](./docrefs/feed-config-launch.gif)|
+List Available Feeds & Choose the feed|![](./docrefs/feed-config-review.gif)|
+Configure Data Generation Rules - 1|![](./docrefs/feed-config-payload-1.gif)|
+Configure Data Generation Rules - 2|![](./docrefs/feed-config-payload-2.gif)|
+Configure Data Generation Rules - 3 & Review/Configure Topic Parameters|![](./docrefs/feed-config-payload-and-topic.gif)|
+Define Attribute Mapping|![](./docrefs/feed-config-mapping.gif)|
+Review Sample Data - 3|![](./docrefs/feed-config-sample-data.gif)|
 
 ## Run an Event Feed to stream events
 
@@ -203,16 +203,16 @@ Options:
 
 Step| Video
 --|--
-Launch CLI & Start Streaming|![](./docrefs/feed-run-cli-feed-start.gif)<br>Click [here](./docrefs/feed-run-cli-feed-start.gif){target="_blank"} to open in new tab|
+Launch CLI & Start Streaming|![](./docrefs/feed-run-cli-feed-start.gif)|
 
 
 ### Streaming via UI
 
   Step| Video
 --|--
-Launch Feed UI|![](./docrefs/feed-run-ui-launch.gif)<br>Click [here](./docrefs/feed-run-ui-launch.gif){target="_blank"} to open in new tab|
-Select a Feed|![](./docrefs/feed-run-ui-feed-select.gif)<br>Click [here](./docrefs/feed-run-ui-feed-select.gif){target="_blank"} to open in new tab|
-Start Streaming|![](./docrefs/feed-run-ui-feed-start.gif)<br>Click [here](./docrefs/feed-run-ui-feed-start.gif){target="_blank"} to open in new tab|
+Launch Feed UI|![](./docrefs/feed-run-ui-launch.gif)|
+Select a Feed|![](./docrefs/feed-run-ui-feed-select.gif)|
+Start Streaming|![](./docrefs/feed-run-ui-feed-start.gif)|
 
 ## List Event Feeds
 
@@ -236,8 +236,8 @@ Options:
 ```
 Step| Video
 --|--
-List Feeds (Simple)|![](./docrefs/feed-list-simple.gif)<br>Click [here](./docrefs/feed-list-simple.gif){target="_blank"} to open in new tab|
-List Feeds (Verbos)|![](./docrefs/feed-list-verbose.gif)<br>Click [here](./docrefs/feed-list-verbose.gif){target="_blank"} to open in new tab|
+List Feeds (Simple)|![](./docrefs/feed-list-simple.gif)|
+List Feeds (Verbos)|![](./docrefs/feed-list-verbose.gif)
 
 ## Export & Import an Event Feed
 
@@ -268,7 +268,7 @@ Options:
 
 Step| Video
 --|--
-Export a Community Feed|![](./docrefs/feed-export.gif)<br>Click [here](./docrefs/feed-export.gif){target="_blank"} to open in new tab|
+Export a Community Feed|![](./docrefs/feed-export.gif)
 
 
 ### Importing a Feed
@@ -290,7 +290,7 @@ Options:
 
 Step| Video
 --|--
-Import a Feed from Archive File|![](./docrefs/feed-import.gif)<br>Click [here](./docrefs/feed-import.gif){target="_blank"} to open in new tab|
+Import a Feed from Archive File|![](./docrefs/feed-import.gif)|
 
 
 ## Contribute Event Feed to Community
@@ -330,6 +330,6 @@ By contributing, you share valuable configurations with the community and foster
 
 Step| Video
 --|--
-Contribute Feed|![](./docrefs/feed-contribute-steps.gif)<br>Click [here](./docrefs/feed-contribute-steps.gif){target="_blank"} to open in new tab|
-PR for Review|![](./docrefs/feed-contribute-pr.gif)<br>Click [here](./docrefs/feed-contribute-pr.gif){target="_blank"} to open in new tab|
-Run Feed from Community Feed Portal|![](./docrefs/feed-contribute-feed-run.gif)<br>Click [here](./docrefs/feed-contribute-feed-run.gif){target="_blank"} to open in new tab|
+Contribute Feed|![](./docrefs/feed-contribute-steps.gif)|
+PR for Review|![](./docrefs/feed-contribute-pr.gif)|
+Run Feed from Community Feed Portal|![](./docrefs/feed-contribute-feed-run.gif)|

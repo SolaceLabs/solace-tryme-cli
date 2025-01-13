@@ -4,7 +4,7 @@
 
 The __stm__ CLI commands can be executed by providing all required parameters as command-line arguments. However, if one want to reuse the settings and not have to type them on each execution, the command settings can be persisted to a configuration file. At runtime, the configuration file and the command name can be specified as arguments.
 
-Checkout the default configuration file - [stm-cli-config.json](stm-cli-config.json) populated with commands and connection settings corresponding to Solace PubSub+ software broker running on a local host.
+Checkout the default configuration file - [stm-cli-config.json](sample-config/stm-cli-config.json) populated with commands and connection settings corresponding to Solace PubSub+ software broker running on a local host.
 
 ## Configuration File
 
