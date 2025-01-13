@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.70",
+  "version": "0.0.71",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -77,10 +77,7 @@
   },
   "pkg": {
     "targets": [
-      "node18-linux-x64",
-      "node18-macos-x64",
-      "node18-win-x64",
-      "node18-alpine-x64"
+      "node18-macos-x64"
     ],
     "outputPath": "release",
     "assets": [

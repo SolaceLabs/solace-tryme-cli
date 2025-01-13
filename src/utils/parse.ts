@@ -347,8 +347,8 @@ export const parseFeedType = (value: string) => {
 }
 
 export const parseFeedView = (value: string) => {
-  if (!['DEFAULT', 'REVERSE'].includes(value.toUpperCase())) {
-    Logger.logError(`only 'DEFAULT', 'REVERSE' are supported, and if not specified a DEFAULT mode is used.`)
+  if (!['PUBLISHER', 'PROVIDER'].includes(value.toUpperCase())) {
+    Logger.logError(`only 'PUBLISHER', 'PROVIDER' are supported, and if not specified a PUBLISHER mode is used.`)
     Logger.logError('exiting...')
     process.exit(1)
   }

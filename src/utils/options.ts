@@ -622,8 +622,10 @@ export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
     .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
       .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
-    .addOption(new Option('-view, --feed-view <VIEW>', chalk.whiteBright('the feed view: default, reverse;\n    default setting would collect "send" events,\n    and a reverse would collect "receive" events.')) 
-                  .argParser(parseFeedView) .default(defaultFeedConfig.feedView) .conflicts('feedName'))
+    .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa')) 
+                  .argParser(parseFeedView) 
+                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider') 
+                  .conflicts('feedName'))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
 
     // help options
@@ -637,8 +639,10 @@ export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
     .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
       .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
-    .addOption(new Option('-view, --feed-view <VIEW>', chalk.whiteBright('the feed view: default, reverse;\n    default setting would collect "send" events,\n    and a reverse would collect "receive" events.')) 
-                  .argParser(parseFeedView) .default(defaultFeedConfig.feedView) .conflicts('feedName'))
+    .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa')) 
+                  .argParser(parseFeedView) 
+                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider') 
+                  .conflicts('feedName'))
     // hidden option to use defaults 
     .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults for feed name and feed type')) .hideHelp(true) .default(false))
 

@@ -100,7 +100,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     feedView = 'default';
   }
 
-  const reverseView = feedView === 'reverse';
+  const reverseView = feedView === 'provider';
   var data:any = undefined;
   var info:any = undefined;
   var type:any = undefined;

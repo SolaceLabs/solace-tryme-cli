@@ -40,7 +40,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   }
   
   if (optionsSource.feedView === 'cli') {
-    feed.feedView = options.feedView;
+    feed.feedView = options.feedView === 'provider' ? 'provider' : 'default';
   } else {
     optionsSource.feedView = 'cli';
     options.feedView = 'default';
@@ -110,7 +110,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     process.exit(1);
   }
 
-  const reverseView = feed.feedView === 'reverse';
+  const reverseView = feed.feedView === 'provider';
   const loadedCopy:any = await load(asyncApiSchema, false);
   const documentCopy = loadedCopy.document as AsyncAPIDocumentInterface;
 

@@ -491,7 +491,6 @@ const fixUpJsonPayload = (payload:any, parent:any) => {
         }
       }
     }
-    console.log('fixUpJsonPayload - Object: ' + Object.keys(payload.properties));
     for (const prop in payload.properties) {
       payload.properties[prop] = fixUpJsonPayload(payload.properties[prop], payload.properties);
     }  
@@ -527,7 +526,6 @@ const fixUpJsonPayload = (payload:any, parent:any) => {
         }
       }      
     }
-    console.log('fixUpJsonPayload - Array: ' + Object.keys(payload.items.properties));
     for (const prop in payload.items.properties) {
       payload.items.properties[prop] = fixUpJsonPayload(payload.items.properties[prop], payload.items.properties);
     }  

@@ -1,8 +1,27 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
-# Solace Try-Me CLI
+# Solace Try-Me CLI 
 
----
+The Solace Try-Me CLI (_**stm**_) is a command-line tool designed for messaging and streaming operations. It simplifies tasks like publishing, receiving, and performing request-reply messaging with a Solace PubSub+ Broker — all directly from the command line and without requiring any coding.
+
+![](docrefs/messaging.webp "stm - messaging")
+
+_**stm**_ provides a feature to generate event feeds directly from AsyncAPI documents representing asynchronous applications or APIs (command _**feed**_). These feeds enable seamless streaming of events as specified in the document—entirely code-free. The streamed events include mock payload data, generated using the Faker.js library, ensuring conformity to the data types and formats defined in the document. Additionally, STM's feed functionality allows users to define custom data-generation rules from an extensive library of rule sets, producing realistic values for payload fields across categories such as strings, numbers, personal data, locations, internet, finance, and more.
+
+> This document covers more details on how to use `stm` CLI for messaging.
+
+![](docrefs/eventfeeds.webp "stm - feeds")
+
+`stm feed` allows you to preview and generate an event feed from an AsyncAPI document. The tool's primary purpose is to help you quickly set up an event feed on your local machine, configure data generation rules, and use it. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds available on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
+
+> For more details, please review the [EVENT_FEEDS](EVENT_FEEDS.md) documentation. 
+
+![](docrefs/streaming.webp "stm - streaming")
+
+You can contribute an event feed for reuse to the Community. By following the `stm feed contribute` process, your submitted feed will be hosted on the feeds site - [Solace Event Feeds](https://feeds.solace.dev/). Of course, you can also stream events off a feed from command-line `stm feed run`.
+
+
+----
 
 The Solace Try-Me CLI is a command line tool used to publish and receive messages from the Solace PubSub+ Broker. Designed to help develop, test and debug Solace PubSub+ services and applications faster without the need to use a graphical interface.
 
@@ -26,7 +45,6 @@ The Solace Try-Me CLI is a command line tool used to publish and receive message
     - [Working with Cloud Broker](#working-with-cloud-broker)
   - [Using `stm` to create and modify Broker resources](#using-stm-to-create-and-modify-broker-resources)
     - [Create a Queue](#create-a-queue)
-  - [Using `stm feed` tool for event feed generation](#using-stm-feed-tool-for-event-feed-generation)
   - [Contributing](#contributing)
     - [Develop](#develop)
         - [Run from build](#run-from-build)
@@ -60,7 +78,7 @@ Run the following commands to add the SolaceLabs repo to APT
 echo "deb [arch=amd64 trusted=yes] https://raw.githubusercontent.com/SolaceLabs/apt-stm/master stm main" | sudo tee  /etc/apt/sources.list.d/solace-stm-test.list
 ```
 
-Install the latest version of stm
+Install the latest version of `stm`
 ```
 sudo apt-get update
 sudo apt-get install stm
@@ -94,7 +112,17 @@ $ stm -v
 
 <version_goes_here>
 ```
-NOTE: The version number should match the stm version you downloaded.
+
+**NOTE:** The version number should match the ```stm``` version you downloaded.
+
+
+> The `stm` tool automatically checks if a newer version is available whenever a command is executed and notifies the user accordingly.
+
+```
+ℹ  info: new version available: v0.0.70, current version: 0.0.69
+📢  Download URL: https://github.com/SolaceLabs/solace-tryme-cli/releases/tag/v0.0.70
+```
+
 
 ### Command Structure
 
@@ -127,20 +155,20 @@ stm
 │   └── client-username             /* manage client-username                         */
 └── feed                            /* manage event feeds                             */
     ├── -h, --help                  /* display help for command                       */
-    ├── -he, --help-examples        /* display examples                               */
     ├── preview                     /* Validate and preview an AsyncAPI document      */
     ├── generate                    /* Generate event feed from an AsyncAPI document  */
     ├── configure                   /* Configure event feed rules                     */
     ├── run                         /* Run event feed                                 */
     ├── list                        /* List event feeds                               */
-    ├── copy                        /* Duplicate a community event feed locally       */
+    ├── import                      /* Import an event feed                           */
+    ├── export                      /* Export an event feed                           */
     └── contribute                  /* Contribute to community event feeds            */
 
 ```
 
 ### Command Parameters
 
-For details on CLI parameters, refer to the [parameters](PARAMETERS.md) guide.
+For details on CLI parameters, refer to the [parameters](MESSAGING_PARAMETERS.md) guide.
 
 You can also use:
 - _-h_ or _--help_ option on the command to see basic parameters.
@@ -149,7 +177,7 @@ You can also use:
 
 ### Command Examples
 
-Refer to the [examples](EXAMPLES.md) guide for sample commands. 
+Refer to the [examples](MESSAGING_EXAMPLES.md) guide for sample commands. 
 
 You can use:
 - _-he_ or _--help-examples_ option on the command to see corresponding examples.
@@ -158,7 +186,7 @@ You can use:
 
 The __stm__ utility supports persisting command settings to a file, that can be referenced by name. In fact, the default configuration file present is populated with messaging and manage comments with default settings.
 
-To know more about configuration file and how to create and manage commands, refer to [configuration](CONFIGURATION.md) guide.
+To know more about configuration file and how to create and manage commands, refer to [configuration](STM_CONFIGURATION.md) guide.
 
 ## Setup `stm` configuration
 
@@ -215,13 +243,13 @@ Unlike Software Broker, a Cloud Broker requires explicit initialization as the p
 
 Before proceeding, collect information on the following settings from the “Connect” and “Manage” tabs for your Messaging Service in Solace Cloud. 
 
-| **Broker Connection**<br>**(from Connect → “Solace Web Messaging”)** | **Broker SEMP Connection**<br>**(from Manage → “SEMP - REST API”)** |
-|----------------------------------------------------------------------|---------------------------------------------------------------------|
-| **URL**                                                              | **URL**                                                             |
-| **VPN Name**                                                         | **VPN Name**                                                        |
-| **Username**                                                         | **Username**                                                        |
-| **Password**                                                         | **Password**                                                        |
--------------------
+| **Broker Connection**<br>**(from Connect → “Solace Web Messaging”)**               | **Broker SEMP Connection**<br>**(from Manage → “SEMP - REST API”)**                                |
+|-------------------------------------|-----------------------------------------------------------|
+| **Broker URL:** <_Broker URL_> | **Broker SEMP URL:** <_Broker SEMP URL_> |
+| **VPN Name:** <_VPN Name_>               | **VPN Name:** <_VPN Name_>                                      |
+| **Username:** <_User Name_>               | **SEMP Username:** <_User Name_>                                  |
+| **Password:** <_Password_>               | **SEMP Password:** <_Password_>                                  |
+
 
 1. Initialize Configuration
 
@@ -380,25 +408,7 @@ stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/conf
 ....
 ```
 
-Refer to the [examples](EXAMPLES.md) guide for more details.
-
-## Using `stm feed` tool for event feed generation
-
-The `stm feed` tool helps you transform *Applications* designed in Solace Event Portal into event feeds for streaming events to a broker. It also supports publicly available REST API endpoints and convert them into event feeds by invoking the APIs to generate events. 
-
-`stm feed` allows you to preview and generate an event feed from an AsyncAPI document. The tool's primary purpose is to help you quickly set up an event feed on your local machine, configure data generation rules, and use it. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds available on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
-
-A quick overview of the supported commands:
-
-**preview** - Preview an AsyncAPI document or a local or community feed
-**generate** - Generate an event feed from an AsyncAPI document or a REST API
-**configure** - Configure event feed rules (mock data and publish rules)
-**list** - List available event feeds (local and community feeds)
-**run** - Run an event feed locally to stream events to a local or cloud broker
-**copy** - Copy/Clone a community feed to local `stm` feeds to customize/run locally
-**contribute** - Contribute your local feed for community consumption (publish to the community feeds site)
-
-For more details, please review the [EVENT FEEDS](EVENTFEEDS.md) documentation.
+Refer to the [examples](MESSAGING_EXAMPLES.md) guide for more details.
 
 ## Contributing
 
