@@ -7,7 +7,9 @@ import {
   parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKeys,
   parsePartitionKeysCount,
   parseFeedType,
-  parseFeedView
+  parseFeedView,
+  parseRate,
+  parseFrequency
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -671,9 +673,17 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
-    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(3000) .hideHelp(advanced))
-    .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
+    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish\n[a value of 0 would stream events continuously]')) 
+      .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
+    .addOption(new Option('--rate <RATE>', chalk.whiteBright('the publish rate')) 
+      .conflicts('interval') .argParser(parseRate) .default(defaultMessagePublishConfig.rate) .hideHelp(advanced))
+    .addOption(new Option('--frequency <OPTION>', chalk.whiteBright('the publish frequency: msg/s, msg/m or msg/h')) 
+      .conflicts('interval') .argParser(parseFrequency) .default(defaultMessagePublishConfig.frequency) .hideHelp(advanced))
+    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) 
+      .conflicts('rate') .conflicts('frequency') 
+      .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
+    .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) 
+      .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
     
     // message print options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))

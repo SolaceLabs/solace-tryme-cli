@@ -1,7 +1,7 @@
 import { checkConnectionParamsExists, checkFeedRunOptions, checkForFeedSettings } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile } from '../utils/defaults';
+import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultMessagePublishConfig } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
 import { fakeEventGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkEventCounterValue, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
@@ -282,6 +282,29 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       return;
     }
 
+    let publishInterval = optionsSource.interval === 'cli' ? options.interval :
+                            feedRule.publishSettings?.hasOwnProperty('interval') ? 
+                              parseInt(feedRule.publishSettings?.interval) : defaultMessagePublishConfig.interval;
+    if (optionsSource.rate === 'cli' && optionsSource.frequency === 'cli') {
+      let rate = options.rate ? options.rate : 1.0;
+      let freq = 1000;
+      switch (options.frequency) {
+        case 'msg/s':
+          freq = 1000;
+          break;
+        case 'msg/m':
+          freq = 60000;
+          break;
+        case 'msg/h':
+          freq = 3600000;
+          break;
+        default:
+          freq = 1000; // Default to 1 second if undefined
+      }
+
+      publishInterval = rate > 1.0 ? freq / rate : freq * rate;
+    }
+
     selectedMessages.push({
       message: feedRule.messageName, 
       topic: feedRule.topic,
@@ -289,11 +312,18 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       options: options,
       optionsSource: optionsSource,
       count: optionsSource.count === 'cli' ? options.count : 
-              feedRule.publishSettings?.hasOwnProperty('count') ? parseInt(feedRule.publishSettings?.count) : 0,
-      interval: optionsSource.interval === 'cli' ? options.interval :
-              feedRule.publishSettings?.hasOwnProperty('interval') ? parseInt(feedRule.publishSettings?.interval) : 1000,
+              feedRule.publishSettings?.hasOwnProperty('count') ? 
+                parseInt(feedRule.publishSettings?.count) : defaultMessagePublishConfig.count,
+      interval: publishInterval,
+      rate: optionsSource.rate === 'cli' ? options.rate :
+              feedRule.publishSettings?.hasOwnProperty('rate') ? 
+                parseInt(feedRule.publishSettings?.rate) : defaultMessagePublishConfig.rate,
+      frequency: optionsSource.frequency === 'cli' ? options.frequency :
+              feedRule.publishSettings?.hasOwnProperty('frequency') ? 
+                parseInt(feedRule.publishSettings?.frequency) : defaultMessagePublishConfig.frequency,
       delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
-              feedRule.publishSettings?.hasOwnProperty('delay') ? parseInt(feedRule.publishSettings?.delay) : 0,
+              feedRule.publishSettings?.hasOwnProperty('delay') ? 
+                parseInt(feedRule.publishSettings?.delay) : defaultMessagePublishConfig.initialDelay,
       published: 0
     });
   });

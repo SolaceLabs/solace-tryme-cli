@@ -22,6 +22,17 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
   ['NON_PERSISTENT', MessageDeliveryModeType.NON_PERSISTENT],
 ]);
 
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
+  hour12: false,
+  year: 'numeric' as 'numeric',
+  month: '2-digit' as '2-digit',
+  day: '2-digit' as '2-digit',
+  hour: '2-digit' as '2-digit',
+  minute: '2-digit' as '2-digit',
+  second: '2-digit' as '2-digit',
+  fractionalSecondDigits: 3 // Include milliseconds with 3 digits
+};
+
 export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
@@ -123,9 +134,9 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess(`delivery of message with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString()}]`);
+            Logger.logSuccess(`delivery of message with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
           else
-            Logger.logSuccess(`delivery of message confirmed [${new Date().toLocaleString()}]`);
+            Logger.logSuccess(`delivery of message confirmed [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
         });
 
         //REJECTED_MESSAGE implies that the vpn has rejected the message
@@ -161,7 +172,7 @@ export class SolaceClient extends VisualizeClient {
       return;
     }
     try {
-      if (!topicName.startsWith('@STM')) Logger.await(`publishing ${this.options.deliveryMode} message...`);
+      if (!topicName.startsWith('@STM')) Logger.await(`publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       if (payload) {

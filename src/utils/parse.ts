@@ -356,7 +356,23 @@ export const parseFeedView = (value: string) => {
   return `${value.toLowerCase()}`;
 }
 
+export const parseRate = (value: string) => {
+  let rate = Number(value);
+  if (isNaN(rate) || rate < 0.5 || rate > 10.0) {
+    Logger.logError(`invalid rate value - ${value}, valid range is 0.5 to 10.0`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  return rate;
+}
 
+export const parseFrequency = (value: string) => {
+  if (!['msg/s', 'msg/m', 'msg/h'].includes(value.toLowerCase())) {
+    Logger.logError(`only 'msg/s', 'msg/m', 'msg/h' are supported, and if not specified a 'msg/s' mode is used.`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
 
-
+  return `${value.toLowerCase()}`;
+}
 

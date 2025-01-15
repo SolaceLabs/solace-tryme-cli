@@ -14,6 +14,17 @@ const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
   ['TRACE', LogLevel.TRACE]
 ]);
 
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
+  hour12: false,
+  year: 'numeric' as 'numeric',
+  month: '2-digit' as '2-digit',
+  day: '2-digit' as '2-digit',
+  hour: '2-digit' as '2-digit',
+  minute: '2-digit' as '2-digit',
+  second: '2-digit' as '2-digit',
+  fractionalSecondDigits: 3 // Include milliseconds with 3 digits
+};
+
 export class SolaceClient extends VisualizeClient {
   //Solace session object
   options:any = null;
@@ -147,7 +158,8 @@ export class SolaceClient extends VisualizeClient {
 
         //Message callback function
         this.session.on(solace.SessionEventCode.MESSAGE, (message:any) => {
-          Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
+          Logger.await(`receiving message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`)
+          Logger.logSuccess(`received ${getType(message)} message on topic ${message.getDestination()}`)
           //Get the topic name from the message's destination
           let topicName: string = message.getDestination().getName();
           if (!this.receiver.topics.has(topicName)) {

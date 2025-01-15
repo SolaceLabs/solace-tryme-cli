@@ -25,6 +25,7 @@
 |     | _**countDown**_  <br>Generates a decremental number. | start \[default: 9999999\]  <br>change \[default: 1\] |
 | **BooleanRules**  <br>Module to generate boolean values. | _**boolean**_  <br>Returns the boolean value true or false |
 | **DateRules**  <br>Module to generate dates | _**currentDate**_  <br>Returns a current date | format \[default: MM-DD-YYYY\] |
+|     | _**timeStamp**_  <br>Returns current time as timestamp, the number of seconds since January 1, 1970 UTC |
 |     | _**currentDateWithTime**_  <br>Returns a current date with time | format \[default: MM-DD-YYYY HH:mm:ss\] |
 |     | _**currentTime**_  <br>Returns a current time | format \[default: HH:mm:ss\] |
 |     | _**anytime**_  <br>Generates a random date that can be either in the past or in the future. |

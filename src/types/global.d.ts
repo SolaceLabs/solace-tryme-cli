@@ -74,6 +74,8 @@ declare global {
     // misc.
     count?: number
     interval?: number
+    rate?: number
+    frequency?: string
     initialDelay?: number
     clientName?: string
     description?: string

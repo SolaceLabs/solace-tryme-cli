@@ -104,6 +104,9 @@ export const fakerRulesJson = {
   "DateRules": {
     "description": "Module to generate dates",
     "rules": {
+      "timeStamp": {
+        "description": "Returns current time as timestamp, the number of seconds since January 1, 1970 UTC"
+      },
       "currentDate": {
         "description": "Returns a current date",
         "format": "MM-DD-YYYY"

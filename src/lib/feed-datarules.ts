@@ -192,7 +192,11 @@ export const processDateRules = (rule:any, count:number) => {
   var data: any[] = [];
   var options:any = {};
 
-  if (rule.rule === 'currentDate') {
+  if (rule.rule === 'timeStamp') {
+    for (var i=0; i<count; i++) {
+      data.push(Date.now());
+    }
+  } else if (rule.rule === 'currentDate') {
     const formatter = new Intl.DateTimeFormat('en-US', {
       month: '2-digit',
       day: '2-digit',

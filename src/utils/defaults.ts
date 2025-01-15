@@ -151,8 +151,10 @@ export const defaultMessageConfig:any = {
 
 export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
-  count: 1,
+  count: 0,
   interval: 1000,
+  rate: 1.0,
+  frequency: 'msg/s',
   initialDelay: 0,
   clientName: undefined,
   description: 'Publish application created via Solace Try-Me CLI',
