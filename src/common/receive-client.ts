@@ -116,17 +116,17 @@ export class SolaceClient extends VisualizeClient {
         //ACKNOWLEDGED MESSAGE implies that the broker has confirmed message receipt
         this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logSuccess("delivery of message with correlation key = " + sessionEvent.correlationKey + " confirmed");
+            Logger.logSuccess(`message acknowledged with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
           else
-            Logger.logSuccess("delivery of message confirmed");
+            Logger.logSuccess(`message acknowledged [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
         });
 
         //REJECTED_MESSAGE implies that the broker has rejected the message
         this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
           if (sessionEvent.correlationKey) 
-            Logger.logWarn("delivery of message with correlation key = " + sessionEvent.correlationKey + " rejected, info: " + sessionEvent.infoStr);
+            Logger.logSuccess(`message rejected with correlation key '${sessionEvent.correlationKey}', info: ${sessionEvent.infoStr} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
           else
-            Logger.logWarn("delivery of message rejected: " + sessionEvent.infoStr);
+            Logger.logSuccess(`message rejected, info: ${sessionEvent.infoStr} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
         });
 
         //SUBSCRIPTION ERROR implies that there was an error in subscribing on a topic

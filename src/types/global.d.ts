@@ -51,6 +51,7 @@ declare global {
     includeSenderId?: boolean
     generateSequenceNumber?: boolean
     sendBufferMaxSize?: number
+    publishConfirmation?: boolean
     guaranteedPublisher?: boolean
 
     windowSize?: number

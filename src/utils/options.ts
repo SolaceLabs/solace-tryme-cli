@@ -146,6 +146,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--publish-confirmation [BOOLEAN]', chalk.whiteBright('[advanced] generate publish confirmation')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .default(false) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
@@ -675,12 +676,12 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish\n[a value of 0 would stream events continuously]')) 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
-    .addOption(new Option('--rate <RATE>', chalk.whiteBright('the publish rate')) 
-      .conflicts('interval') .argParser(parseRate) .default(defaultMessagePublishConfig.rate) .hideHelp(advanced))
-    .addOption(new Option('--frequency <OPTION>', chalk.whiteBright('the publish frequency: msg/s, msg/m or msg/h')) 
-      .conflicts('interval') .argParser(parseFrequency) .default(defaultMessagePublishConfig.frequency) .hideHelp(advanced))
+    // .addOption(new Option('--rate <RATE>', chalk.whiteBright('the publish rate')) 
+    //   .conflicts('interval') .argParser(parseRate) .default(defaultMessagePublishConfig.rate) .hideHelp(advanced))
+    // .addOption(new Option('--frequency <OPTION>', chalk.whiteBright('the publish frequency: msg/s, msg/m or msg/h')) 
+    //   .conflicts('interval') .argParser(parseFrequency) .default(defaultMessagePublishConfig.frequency) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) 
-      .conflicts('rate') .conflicts('frequency') 
+      // .conflicts('rate') .conflicts('frequency') 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
@@ -723,6 +724,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--publish-confirmation [BOOLEAN]', chalk.whiteBright('[advanced] generate publish confirmation')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .default(false) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 

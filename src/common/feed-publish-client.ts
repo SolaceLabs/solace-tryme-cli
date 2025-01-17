@@ -24,9 +24,6 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
 
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
   hour12: false,
-  year: 'numeric' as 'numeric',
-  month: '2-digit' as '2-digit',
-  day: '2-digit' as '2-digit',
   hour: '2-digit' as '2-digit',
   minute: '2-digit' as '2-digit',
   second: '2-digit' as '2-digit',
@@ -41,6 +38,7 @@ export class SolaceClient extends VisualizeClient {
   active:boolean = false;
   clientName:string = ""
   exited:boolean = false;
+  pubConfirmationId = 100001;
 
   constructor(options:any) {
     super();
@@ -53,7 +51,7 @@ export class SolaceClient extends VisualizeClient {
     factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
-    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('feedpub')
+    this.clientName = this.options.clientName ? this.options.clientName : getDefaultClientName('feed_cli')
   }
 
   setExited(exited: boolean) {
@@ -131,21 +129,23 @@ export class SolaceClient extends VisualizeClient {
           }
         });
 
-        //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
-        this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
-          if (sessionEvent.correlationKey) 
-            Logger.logSuccess(`delivery of message with correlation key '${sessionEvent.correlationKey}' confirmed [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
-          else
-            Logger.logSuccess(`delivery of message confirmed [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
-        });
+        if (this.options.publishConfirmation) {
+          //ACKNOWLEDGED MESSAGE implies that the vpn has confirmed message receipt
+          this.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, (sessionEvent: solace.SessionEvent) => {
+            if (sessionEvent.correlationKey) 
+              Logger.await(`publish confirmation received for message with correlation key ${sessionEvent.correlationKey} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+            else
+              Logger.await(`publish confirmation received for message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);            
+          });
 
-        //REJECTED_MESSAGE implies that the vpn has rejected the message
-        this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
-          if (sessionEvent.correlationKey) 
-            Logger.logWarn(`delivery of message with correlation key '${sessionEvent.correlationKey}' rejected, info: ${sessionEvent.infoStr}  [${new Date().toLocaleString()}]`);
-          else
-            Logger.logWarn(`delivery of message rejected: ${sessionEvent.infoStr} [${new Date().toLocaleString()}]`);
-        });
+          //REJECTED_MESSAGE implies that the vpn has rejected the message
+          this.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, (sessionEvent: solace.SessionEvent) => {
+            if (sessionEvent.correlationKey) 
+              Logger.logError(`publish rejected for message with correlation key ${sessionEvent.correlationKey}, info: ${sessionEvent.infoStr} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+            else
+              Logger.logError(`publish rejected for message, info: ${sessionEvent.infoStr} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+          });
+        }
       } catch (error: any) {
         Logger.logDetailedError('session creation failed - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
@@ -172,7 +172,11 @@ export class SolaceClient extends VisualizeClient {
       return;
     }
     try {
-      if (!topicName.startsWith('@STM')) Logger.await(`publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+      if (!topicName.startsWith('@STM')) {
+        this.options.publishConfirmation ?
+                  Logger.await(`publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
+                  Logger.await(`publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+      }
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       if (payload) {
@@ -216,6 +220,7 @@ export class SolaceClient extends VisualizeClient {
 
       this.options.acknowledgeImmediately && message.setAcknowledgeImmediately(true);
       this.options.correlationKey  && message.setCorrelationKey(this.options.correlationKey);
+      !this.options.correlationKey && this.options.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);
       this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
       this.options.dmqEligible && message.setDMQEligible(true);
@@ -248,7 +253,7 @@ export class SolaceClient extends VisualizeClient {
         message.setUserPropertyMap(propertyMap);    
       }
       
-      Logger.logSuccess(`message published to topic - ${message.getDestination()}, type - ${getType(message)}`)
+      Logger.logSuccess(`published ${getType(message)} message to topic - ${message.getDestination()} }`)
       Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
       this.session.send(message);
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_PUBLISHED, { 

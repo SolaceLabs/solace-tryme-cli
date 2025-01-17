@@ -22,6 +22,8 @@ stm
     └── contribute                  /* Contribute to community event feeds            */
 ```
 
+> **A contributed (aka community feed) can be run directly from the  [Solace Event Feeds](https://feeds.solace.dev) site. Refer to the [Contribute & Run an Event Feed](#contribute-event-feed-to-community) section for more details.**
+
 ## Local vs Community (also referred to as Contributed) feeds
 
 As you are building and testing an event feed using *stm*, you would create event feeds locally. You can configure feed rules, test and execute them by pointing to local or cloud brokers easily. These are referred to as *local event feeds*.

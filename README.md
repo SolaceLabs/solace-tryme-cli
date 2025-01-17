@@ -8,24 +8,21 @@ The Solace Try-Me CLI (_**stm**_) is a command-line tool designed for messaging 
 
 _**stm**_ provides a feature to generate event feeds directly from AsyncAPI documents representing asynchronous applications or APIs (command _**feed**_). These feeds enable seamless streaming of events as specified in the document—entirely code-free. The streamed events include mock payload data, generated using the Faker.js library, ensuring conformity to the data types and formats defined in the document. Additionally, STM's feed functionality allows users to define custom data-generation rules from an extensive library of rule sets, producing realistic values for payload fields across categories such as strings, numbers, personal data, locations, internet, finance, and more.
 
-> This document covers more details on how to use `stm` CLI for messaging.
+> **Continue reading this [document](./README.md) to know more about how to use `stm` CLI for messaging.**
 
+---
 ![](docrefs/eventfeeds.webp "stm - feeds")
 
-`stm feed` allows you to preview and generate an event feed from an AsyncAPI document. The tool's primary purpose is to help you quickly set up an event feed on your local machine, configure data generation rules, and use it. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds available on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
+`stm` supports a set of operations to generate, configure and run an event feed from an AsyncAPI document corresponding to an asynchronous application or an API (from Event Portal). The goal is to help you quickly set up an event feed on your local machine, configure data generation rules, and run to stream events to a broker. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds shared on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
 
-> For more details, please review the [EVENT_FEEDS](EVENT_FEEDS.md) documentation. 
-
-![](docrefs/streaming.webp "stm - streaming")
-
-You can contribute an event feed for reuse to the Community. By following the `stm feed contribute` process, your submitted feed will be hosted on the feeds site - [Solace Event Feeds](https://feeds.solace.dev/). Of course, you can also stream events off a feed from command-line `stm feed run`.
-
+> **For more details on working with event feeds, please review the [EVENT_FEEDS](EVENT_FEEDS.md) documentation.**
 
 ----
-
+# `stm` Messaging
 The Solace Try-Me CLI is a command line tool used to publish and receive messages from the Solace PubSub+ Broker. Designed to help develop, test and debug Solace PubSub+ services and applications faster without the need to use a graphical interface.
 
 - [Solace Try-Me CLI](#solace-try-me-cli)
+- [`stm` Messaging](#stm-messaging)
   - [Documentation](#documentation)
     - [Installation](#installation)
       - [MacOS using Homebrew](#macos-using-homebrew)

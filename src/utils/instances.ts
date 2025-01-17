@@ -24,6 +24,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   includeSenderId?: boolean | undefined
   generateSequenceNumber?: boolean | undefined
   sendBufferMaxSize?: number | undefined
+  publishConfirmation?: boolean | undefined
   guaranteedPublisher?: boolean | undefined
   windowSize?: number | undefined
   receiveTimestamps?: boolean | undefined
@@ -93,6 +94,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.includeSenderId = false
     this.generateSequenceNumber = false
     this.sendBufferMaxSize = 1
+    this.publishConfirmation = false;
     this.guaranteedPublisher = true
     this.windowSize = 1
     this.receiveTimestamps = false

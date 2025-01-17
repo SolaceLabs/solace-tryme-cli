@@ -1204,23 +1204,23 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
           `
           return;
         } 
-        else if (node.type === 'array' && node.subType === 'object') {
-          var el = document.getElementById('payload-variable-pane');
-          el.innerHTML = '';
-          el.style.width = 'auto';
-          el.innerHTML = `<div class="lockscreen-wrapper">
-            <div class="lockscreen-logo">
-              <b>${node.text}</b>
-            </div>
+        // else if (node.type === 'array' && node.subType === 'object') {
+        //   var el = document.getElementById('payload-variable-pane');
+        //   el.innerHTML = '';
+        //   el.style.width = 'auto';
+        //   el.innerHTML = `<div class="lockscreen-wrapper">
+        //     <div class="lockscreen-logo">
+        //       <b>${node.text}</b>
+        //     </div>
             
-            <!-- /.lockscreen-item -->
-            <div class="help-block text-center">
-              An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object attributes'}!
-            </div>
-          </div>
-          `
-          // return;
-        }
+        //     <!-- /.lockscreen-item -->
+        //     <div class="help-block text-center">
+        //       An array of ${node.subType}s - go ahead and set rules for ${node.subType === 'string' ? 'array element' : 'object attributes'}!
+        //     </div>
+        //   </div>
+        //   `
+        //   return;
+        // }
 
         parent = document.getElementById('payload-variable-pane');
         parent.innerHTML = '';

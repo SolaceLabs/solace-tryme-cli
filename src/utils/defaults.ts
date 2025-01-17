@@ -113,6 +113,7 @@ export const defaultMessageConnectionConfig:any = {
   reconnectRetries: 3,
   reconnectRetryWait: 3000,
   sendBufferMaxSize: 65536,
+  publishConfirmation: false,
   // log level
   logLevel: 'ERROR',
 
