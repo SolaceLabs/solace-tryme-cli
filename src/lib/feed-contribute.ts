@@ -1,4 +1,5 @@
 import { Logger } from '../utils/logger'
+import * as fs from 'fs'
 import { processPlainPath, readFile, writeJsonFile, loadLoadFeedInfo } from '../utils/config';
 import { defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
         defaultFeedApiEndpointFile, 
@@ -8,6 +9,7 @@ import { getLocalEventFeeds } from '../utils/listfeeds';
 import { prettyJSON } from '../utils/prettify';
 import axios, { AxiosResponse } from 'axios';
 import FormData from 'form-data';
+import yaml from 'js-yaml';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const { Select, Confirm, Input, List } = require('enquirer');
@@ -267,19 +269,17 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`)), defaultFeedSchemasFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`)), defaultFakerRulesFile);
-      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${analysis.fileName}`)), analysis.fileName);
+      
+      let analysisContent = fs.readFileSync(`${feedLocalPath}/${analysis.fileName}`, 'utf-8')
+      // Handle yaml spec files
+      if (analysis.fileName.endsWith('.yaml') || analysis.fileName.endsWith('.yml')) {
+        analysisContent = JSON.stringify(yaml.load(analysisContent));
+        analysis.fileName = analysis.fileName.replace(/\.(yaml|yml)$/, '.json');
+      }
+      formData.append('files', analysisContent, analysis.fileName);
       formData.append('files', JSON.stringify(info), defaultFeedInfoFile);
       formData.append('files', JSON.stringify(communityFeeds), 'EVENT_FEEDS.json');
       formData.append('files', JSON.stringify(azureFunctionInfo), 'azureFunctionInfo.json');
-      
-      // formData.getLength((err: Error | null, length: number) => {
-      //   if (err) {
-      //     console.error('Error getting form data length:', err);
-      //   } else {
-      //     console.log('Form data length:', length);
-      //   }
-      // });
-      
       functionBody = await executeFunction(azureFunctionURL, formData)
     } else if (info.type === 'restapi_feed') {
 
