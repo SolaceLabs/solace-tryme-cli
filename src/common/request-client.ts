@@ -4,6 +4,8 @@ import { getDefaultClientName, getDefaultTopic, getType } from "../utils/default
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REQUESTED, STM_EVENT_REPLY_RECEIVED } from "../utils/controlevents";
 import { randomUUID } from "crypto";
+import chalk from "chalk";
+import { chalkEventCounterLabel } from "../utils/chalkUtils";
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -113,17 +115,20 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // sends one request
-  request = (topicName: string, payload: string | Buffer | undefined, payloadType: string) => {
+  request = (topicName: string, payload: string | Buffer | undefined, payloadType: string, iter: number = 1) => {
     if (!this.session) {
       Logger.logWarn("cannot subscribe because not connected to Solace message router!");
       return;
     }
     
-    Logger.await('requesting...');
+    Logger.await(`${chalkEventCounterLabel(iter)} requesting...`);
     var request = solace.SolclientFactory.createMessage();
     request.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
+    this.options.httpContentEncoding && request.setHttpContentEncoding(this.options.httpContentEncoding);
+    this.options.httpContentType && request.setHttpContentType(this.options.httpContentType);
+
     if (payload) {
-      if (payloadType === 'text') {
+      if (payloadType.toLocaleLowerCase() === 'text') {
         try {
           if (typeof payload === 'object') {
             request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
@@ -190,17 +195,17 @@ export class SolaceClient extends VisualizeClient {
           this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REPLY_RECEIVED, { 
             type: 'requestor', topicName: topicName + ' [reply]', clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
           })    
-          if (this.options.waitBeforeExit) {
-            setTimeout(() => {
-              Logger.logWarn(`exiting session (wait-before-exit set for ${this.options.waitBeforeExit})...`);
-              this.exit();
-            }, this.options.waitBeforeExit * 1000);
-          } else {
-            this.exit();
-          }
+          // if (this.options.waitBeforeExit) {
+          //   setTimeout(() => {
+          //     Logger.logWarn(`exiting session (wait-before-exit set for ${this.options.waitBeforeExit})...`);
+          //     this.exit();
+          //   }, this.options.waitBeforeExit * 1000);
+          // } else {
+          //   this.exit();
+          // }
         },
         (session:any, event:any) => {
-          Logger.logDetailedError('send request failed - ', event.infoStr)
+          Logger.logDetailedError('request failed - ', event.infoStr)
           if (this.options.waitBeforeExit) {
             setTimeout(() => {
               Logger.logWarn(`exiting session (wait-before-exit set for ${this.options.waitBeforeExit})...`);
@@ -216,7 +221,7 @@ export class SolaceClient extends VisualizeClient {
         type: 'requestor', topicName, clientName: this.clientName, uuid: uuid(), msgId: request.getApplicationMessageId()
       })    
     } catch (error:any) {
-      Logger.logDetailedError('send request failed - ', error.toString())
+      Logger.logDetailedError('request failed - ', error.toString())
       if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     }
   }

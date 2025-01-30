@@ -3,6 +3,8 @@ import { Logger } from '../utils/logger'
 import { getDefaultClientName, getDefaultMessage, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_REPLIED, STM_EVENT_REQUEST_RECEIVED } from "../utils/controlevents";
+import chalk from "chalk";
+import { chalkEventCounterLabel } from "../utils/chalkUtils";
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -27,6 +29,7 @@ export class SolaceClient extends VisualizeClient {
   clientName:string = "";
   payload:any = null;
   payloadType:string = "";
+  count:number = 0;
 
   constructor(options:any) {
     super();
@@ -190,12 +193,15 @@ export class SolaceClient extends VisualizeClient {
   };
 
   reply = (message:any, payload: string | Buffer | undefined, payloadType: string) => {
-    Logger.logSuccess(`request Received - ${message.getDestination()}, type - ${getType(message)}`)
+    Logger.await(`${chalkEventCounterLabel(++this.count)} receiving request...`)
+    Logger.logSuccess(`request received - ${message.getDestination()}, type - ${getType(message)}`)
     Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
     if (this.session !== null) {
       var reply = solace.SolclientFactory.createMessage();
+      this.options.httpContentEncoding && reply.setHttpContentEncoding(this.options.httpContentEncoding);
+      this.options.httpContentType && reply.setHttpContentType(this.options.httpContentType);
       if (payload) {
-        if (payloadType === 'text') {
+        if (payloadType.toLocaleLowerCase() === 'text') {
           try {
             if (typeof payload === 'object') {
               reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));

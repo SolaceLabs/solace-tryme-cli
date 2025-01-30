@@ -146,6 +146,8 @@ export const defaultMessageConfig:any = {
   // userData: NOT CONSIDERED
   userPropertyMap: undefined,
   payloadType: "TEXT",
+  httpContentType: undefined,
+  httpContentEncoding: undefined,
   outputMode: 'DEFAULT',
   pretty: false
 }
@@ -215,7 +217,9 @@ export const defaultMessageRequestConfig:any = {
   enabled: false, // guaranteed publisher
   windowSize: 50,
 
-  payloadType: "text",
+  payloadType: "TEXT",
+  httpContentType: undefined,
+  httpContentEncoding: undefined,
   outputMode: 'DEFAULT',
   pretty: false,
 
@@ -243,7 +247,9 @@ export const defaultMessageReplyConfig:any = {
   exitAfter: 0,
   traceVisualization: false,
 
-  payloadType: "text",
+  payloadType: "TEXT",
+  httpContentType: undefined,
+  httpContentEncoding: undefined,
   outputMode: 'DEFAULT',
   pretty: false,
   

@@ -5,6 +5,7 @@ import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED } fr
 import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
+import { chalkEventCounterValue } from '../utils/chalkUtils';
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -166,7 +167,7 @@ export class SolaceClient extends VisualizeClient {
   }
 
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer | undefined, payloadType: string, iteration: number = 0) {
+  publish(topicName: string, payload: string | Buffer | undefined, payloadType: string, iter: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -176,13 +177,15 @@ export class SolaceClient extends VisualizeClient {
     try {
       if (!topicName.startsWith('@STM')) {
         this.options.publishConfirmation ?
-          Logger.await(`publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
-          Logger.await(`publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+          Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
+          Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
       }
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
+      this.options.httpContentEncoding && message.setHttpContentEncoding(this.options.httpContentEncoding);
+      this.options.httpContentType && message.setHttpContentType(this.options.httpContentType);
       if (payload) {
-        if (payloadType === 'text') {
+        if (payloadType.toLocaleLowerCase() === 'text') {
           payload = payload === "{}" ? "" : payload;
           try {
             if (typeof payload === 'object') {
@@ -234,7 +237,7 @@ export class SolaceClient extends VisualizeClient {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey1 = this.options.partitionKeys[iteration % this.options.partitionKeys.length];
+        var pKey1 = this.options.partitionKeys[iter % this.options.partitionKeys.length];
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
         message.setUserPropertyMap(propertyMap);    
       } else if (this.options.partitionKeysCount) {

@@ -95,6 +95,26 @@ export const parsePayloadType = (value: string) => {
   return value.toLowerCase();
 }
 
+export const parseHttpContentType = (value: string) => {
+  if (!value) {
+    Logger.logError("required option '--http-content-type <CONTENT_TYPE>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  return value.toLocaleLowerCase();
+}
+
+export const parseHttpContentEncoding = (value: string) => {
+  if (!value) {
+    Logger.logError("required option '--http-content-encoding <CONTENT_ENCODING>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  return value.toLocaleLowerCase();
+}
+
 export const parseDeliveryMode = (value: any) => {
   if (!['DIRECT', 'PERSISTENT'].includes(value.toUpperCase())) {
     Logger.logError(`only 'DIRECT' or 'PERSISTENT' are supported.`)

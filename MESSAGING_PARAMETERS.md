@@ -96,6 +96,10 @@ Options:
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>                [advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")
 
+  /* HTTP CONTENT TYPE & ENCODING */
+  --http-content-type <CONTENT_TYPE>          [advanced] specify the media type (MIME type) of the message content
+  --http-content-encoding <CONTENT_ENCODING>  [advanced] specify the encoding or compression applied to the message content
+
   /* PUBLISH SESSION SETTINGS */
   -cn, --client-name <CLIENT_NAME>            [advanced] the client name (default: an auto-generated client name)
   --description <DESCRIPTION>                 [advanced] the application description (default: "Publish application created via Solace Try-Me CLI")
@@ -231,6 +235,7 @@ Options:
 
   /* MULTI-MESSAGE SETTINGS */
   --count <COUNT>                               the number of requests to send (default: 1)
+  --interval <MILLISECONDS>                     the time to wait between requests (default: 1000)
 
   /* MESSAGE OUTPUT SETTINGS */
   --output-mode <MODE>                          [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
@@ -269,6 +274,10 @@ Options:
   --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode: DIRECT or PERSISTENT (default: "PERSISTENT")
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>                [advanced] the user properties as space-separated values if listing more than one (e.g., "name1: value1" "name2: value2")
+
+  /* HTTP CONTENT TYPE & ENCODING */
+  --http-content-type <CONTENT_TYPE>          [advanced] specify the media type (MIME type) of the message content
+  --http-content-encoding <CONTENT_ENCODING>  [advanced] specify the encoding or compression applied to the message content
 
   /* REQUEST SESSION SETTINGS */
   -cn, --client-name <CLIENT_NAME>            [advanced] the client name (default: an auto-generated client name)
@@ -380,6 +389,10 @@ Options:
   --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode: DIRECT or PERSISTENT (default: "PERSISTENT")
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>                [advanced] the user properties space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")
+
+  /* HTTP CONTENT TYPE & ENCODING */
+  --http-content-type <CONTENT_TYPE>          [advanced] specify the media type (MIME type) of the message content
+  --http-content-encoding <CONTENT_ENCODING>  [advanced] specify the encoding or compression applied to the message content
 
   /* CONFIGURATION SETTINGS */
   --name <COMMAND_NAME>                       the command name (default: "reply")

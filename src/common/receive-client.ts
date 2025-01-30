@@ -3,6 +3,8 @@ import { Logger } from '../utils/logger'
 import { STM_CLIENT_CONNECTED, STM_CLIENT_DISCONNECTED, STM_EVENT_PUBLISHED, STM_EVENT_RECEIVED } from "../utils/controlevents";
 import { getDefaultClientName, getDefaultTopic, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
+import chalk from "chalk";
+import { chalkEventCounterLabel } from "../utils/chalkUtils";
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -31,7 +33,8 @@ export class SolaceClient extends VisualizeClient {
   session:any = null;
   active:boolean = false;
   receiver:any = {};
-  clientName:string = ""
+  clientName:string = "";
+  count:number = 0;
 
   constructor(options:any) {
     super();
@@ -158,7 +161,7 @@ export class SolaceClient extends VisualizeClient {
 
         //Message callback function
         this.session.on(solace.SessionEventCode.MESSAGE, (message:any) => {
-          Logger.await(`receiving message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`)
+          Logger.await(`${chalkEventCounterLabel(++this.count)} receiving message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`)
           Logger.logSuccess(`received ${getType(message)} message on topic ${message.getDestination()}`)
           //Get the topic name from the message's destination
           let topicName: string = message.getDestination().getName();

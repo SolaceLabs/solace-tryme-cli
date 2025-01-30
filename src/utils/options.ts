@@ -9,7 +9,9 @@ import {
   parseFeedType,
   parseFeedView,
   parseRate,
-  parseFrequency
+  parseFrequency,
+  parseHttpContentEncoding,
+  parseHttpContentType
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -95,11 +97,11 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // message body options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE BODY SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default message') .hideHelp(advanced))
-    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default message') .hideHelp(advanced))
+    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('MULTI-MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
@@ -125,6 +127,11 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+
+    // content type & encoding
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] specify the media type (MIME type) of the message content')) .argParser(parseHttpContentType) .default(defaultMessageConfig.httpContentType) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-encoding <CONTENT_ENCODING>', chalk.whiteBright('[advanced] specify the encoding or compression applied to the message content')) .argParser(parseHttpContentEncoding) .default(defaultMessageConfig.httpContentEncoding) .hideHelp(!advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SESSION SETTINGS')} */`) .hideHelp(!advanced))
@@ -237,14 +244,15 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     
     // message body options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE BODY SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('MULTI-MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of requests to send')) .argParser(parseNumber) .default(defaultMessageRequestConfig.count) .hideHelp(advanced))
+    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between requests')) .argParser(parseNumber) .default(defaultMessageRequestConfig.interval) .hideHelp(advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
@@ -263,6 +271,11 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated values if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+
+    // content type & encoding
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] specify the media type (MIME type) of the message content')) .argParser(parseHttpContentType) .default(defaultMessageConfig.httpContentType) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-encoding <CONTENT_ENCODING>', chalk.whiteBright('[advanced] specify the encoding or compression applied to the message content')) .argParser(parseHttpContentEncoding) .default(defaultMessageConfig.httpContentEncoding) .hideHelp(!advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SESSION SETTINGS')} */`) .hideHelp(!advanced))
@@ -319,11 +332,11 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic subscriptions as space-separated values if listing more than one (e.g., test/1 "user/>" "profile/*")')) .default([ getDefaultTopic('request') ]) .argParser(parseRequestTopic) .hideHelp(advanced))
     
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE BODY SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
-    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
-    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
-    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'text'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
-    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'text'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
+    .addOption(new Option('-m, --message <MESSAGE>', chalk.whiteBright('the message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('stdin') .conflicts('file') .hideHelp(advanced))
+    .addOption(new Option('-f, --file <FILENAME>', chalk.whiteBright('filename containing the message content')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('stdin') .hideHelp(advanced))
+    .addOption(new Option('-default, --default-message', chalk.whiteBright('use default message body')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('a default payload') .hideHelp(advanced))
+    .addOption(new Option('-empty, --empty-message', chalk.whiteBright('use an empty message body')) .implies({payloadType: 'TEXT'}) .conflicts('defaultMessage') .conflicts('message') .conflicts('stdin') .conflicts('file') .default('') .hideHelp(advanced))
+    .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
@@ -367,6 +380,11 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+
+    // content type & encoding
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] specify the media type (MIME type) of the message content')) .argParser(parseHttpContentType) .default(defaultMessageConfig.httpContentType) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-encoding <CONTENT_ENCODING>', chalk.whiteBright('[advanced] specify the encoding or compression applied to the message content')) .argParser(parseHttpContentEncoding) .default(defaultMessageConfig.httpContentEncoding) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
@@ -705,6 +723,11 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
     .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+
+    // content type & encoding
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-type <CONTENT_TYPE>', chalk.whiteBright('[advanced] specify the media type (MIME type) of the message content')) .argParser(parseHttpContentType) .default(defaultMessageConfig.httpContentType) .hideHelp(!advanced))
+    .addOption(new Option('--http-content-encoding <CONTENT_ENCODING>', chalk.whiteBright('[advanced] specify the encoding or compression applied to the message content')) .argParser(parseHttpContentEncoding) .default(defaultMessageConfig.httpContentEncoding) .hideHelp(!advanced))
 
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SESSION SETTINGS')} */`) .hideHelp(!advanced))

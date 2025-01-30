@@ -1,14 +1,14 @@
-import { checkConnectionParamsExists, checkFeedRunOptions, checkForFeedSettings } from '../utils/checkparams';
+import { checkConnectionParamsExists, checkFeedRunOptions } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultConfigFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultMessagePublishConfig } from '../utils/defaults';
+import { defaultFeedInfoFile, defaultFeedRulesFile, defaultMessagePublishConfig } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
-import { fakeEventGenerator } from './feed-datahelper';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkEventCounterValue, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
 import { getLocalEventFeeds, getGitEventFeeds, getFeedEvents, getGitFeedEvents } from '../utils/listfeeds';
 import sleep from 'sleep-promise';
 import feedRunApi from './feed-run-api';
-
+// @ts-ignore
+import { generateEvent } from '@solace-labs/solace-data-generator';
 const selectedMessages: any[] = [];
 const eventFeedTimers: any[] = [];
 const publishStats:any = {};
@@ -366,23 +366,21 @@ async function publishFeed(publisher:any, msg:any) {
   if (publisher.exited) {
     return;
   }
-  
-  var events = await fakeEventGenerator({rule: msg.rule, count: 1});  
-  events.forEach((event, index) => {
-    publisher.publish(event.topic, event.payload, msg.options.payloadType, msg.published++);
-    publishStats[`${msg.message}-${msg.topic}`]++;
-    Logger.info(chalkEventCounterValue(publishStats[`${msg.message}-${msg.topic}`]) + ' ' +  chalkEventCounterLabel(msg.message ? msg.message : 
-      msg.rule.eventName ? msg.rule.eventName : msg.ruleMessageName));
-    if (msg.count > 0 && publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
-      var index = eventFeedTimers.findIndex((t) => t.name === msg.message && t.topic === msg.topic);
-      if (index < 0) {
-        console.error('Hmm... could not find the timer');
-        return;
-      }
-      clearInterval(eventFeedTimers[index].timer);
-      eventFeedTimers[index].completed = true;
+  var {topic, payload} = generateEvent(msg.rule);
+  publisher.publish(topic, payload, msg.options.payloadType, msg.published++);
+  publishStats[`${msg.message}-${msg.topic}`]++;
+  Logger.success(`published ` +  
+                chalkEventCounterLabel(msg.message ? msg.message : 
+                  msg.rule.eventName ? msg.rule.eventName : msg.ruleMessageName));
+  if (msg.count > 0 && publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
+    var index = eventFeedTimers.findIndex((t) => t.name === msg.message && t.topic === msg.topic);
+    if (index < 0) {
+      console.error('Hmm... could not find the timer');
+      return;
     }
-  });
+    clearInterval(eventFeedTimers[index].timer);
+    eventFeedTimers[index].completed = true;
+  }
 }
 
 function addEventFeedTimer(msg: any, publisher: any) {

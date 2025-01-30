@@ -4,6 +4,8 @@ import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator, fakeEventGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
+// @ts-ignore
+import { generateEvent } from '@solace-labs/solace-data-generator';
 
 const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
@@ -123,9 +125,13 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
 
   app.post('/fakeevent', async (req:any, res:any) => {
     var data = req.body;
+    var result = [];
     try {
-      var fakedData = await fakeEventGenerator(data);
-      res.status(200).json(fakedData)
+      for (var i=0; i<data.count; i++) {
+        var {topic, payload} = generateEvent(data.rule);
+        result.push({ topic, payload });
+      }
+      res.status(200).json(result)
     } catch (error: any) {
       res.status(201).json({error: error.toString() });
     }

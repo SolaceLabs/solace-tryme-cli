@@ -3,7 +3,7 @@ import { Logger } from '../utils/logger'
 import { checkConnectionParamsExists, checkForCliTopics } from '../utils/checkparams'
 import { SolaceClient } from '../common/request-client'
 import { displayHelpExamplesForRequest } from '../utils/examples';
-import { getDefaultMessage } from '../utils/defaults';
+import { delay, getDefaultMessage } from '../utils/defaults';
 import { fileExists, saveOrUpdateCommandSettings } from '../utils/config';
 import { StdinRead } from '../utils/stdinread'
 
@@ -11,7 +11,7 @@ const request = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
-  const { count } = options;
+  const { count, interval } = options;
   const requestor = new SolaceClient(options);
   var interrupted = false;
 
@@ -71,11 +71,23 @@ const request = async (
     //   requestor.subscribe(options.replyToTopic)
     var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
     if (count === 1) {
-      requestor.request(topicName, message, payloadType);
+      requestor.request(topicName, message, payloadType, 1);
     } else {
       for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
-        requestor.request(topicName, message, payloadType);
+        requestor.request(topicName, message, payloadType, n);
+        if (interval) await delay(interval)        
       }
+    }
+
+    if (options.waitBeforeExit) {
+      setTimeout(function exit() {
+        Logger.logWarn(`exiting session (wait-before-exit set for ${options.waitBeforeExit})...`);
+        requestor.exit();
+      }, options.waitBeforeExit * 1000);
+    } else {
+      setTimeout(function exit() {
+        requestor.exit();
+      }, 1500);
     }
   } catch (error:any) {
     Logger.logError('exiting...')
