@@ -219,11 +219,11 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     options.eventNames = eventChoices;
     optionsSource.eventNames = 'cli';
   } else {
-    var feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
     if (feedInfo.type === 'restapi_feed')
       return feedRunApi(options, optionsSource);
 
-    var events = getFeedEvents(feedName);
+    var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
     if (events.length === 0) {
       Logger.logDetailedError(`No events found in the feed`, feedName);
       Logger.error('exiting...')
