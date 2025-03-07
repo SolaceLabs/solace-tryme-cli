@@ -1609,8 +1609,7 @@ function addBrokers(brokers, type) {
   for (var i=0; i<brokers.length; i++) {
     var brokerType = brokers[i].config.url.indexOf('localhost') > 0 ? 'swbroker' : 'clbroker';
     var brokerName = brokers[i].broker.substring(0, brokers[i].broker.lastIndexOf('.'));
-    var brokerHtml = type === 'asyncapi_feed' ? 'broker.html' : 
-                        type === 'restapi_feed' ? 'apibroker.html' : 'custombroker.html'
+    var brokerHtml = 'broker.html';
     var brokerTpl = `
       <a id="m_${decodeURIComponent(brokerName)}" href="${brokerHtml}#${brokerName}" class="nav-link" style="display: flex; align-items: center;"
         onclick="window.location.href='${brokerHtml}#${brokerName}'; window.location.reload();">
@@ -1888,13 +1887,6 @@ function loadPage() {
     $('#sidebar-server-root')[0].classList.remove('menu-open');
     $('#sidebar-message-root')[0].classList.remove('menu-open');
     $('#sidebar-schema-root')[0].classList.remove('menu-open');
-    $('#sidebar-broker-root')[0].classList.add('menu-open');
-    if (feed) {
-      var brokerName = loadBroker(feed, page);
-      menuSelection = document.getElementById(`m_${brokerName}`);
-    }
-  } else if (page.startsWith('apibroker.html')) {
-    $('#sidebar-application-root')[0].classList.remove('menu-open');
     $('#sidebar-broker-root')[0].classList.add('menu-open');
     if (feed) {
       var brokerName = loadBroker(feed, page);
