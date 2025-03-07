@@ -72,7 +72,6 @@ Options:
   -community, --community-feed [BOOLEAN]  a community feed (default: false)
 
   /* HELP OPTIONS */
-  -he, --help-examples                    show feed preview command examples
   -h, --help                              display help for command
 ```
 
@@ -102,7 +101,6 @@ Options:
                                           generates feed for subscribe operations and vice versa (default: "publisher")
 
   /* HELP OPTIONS */
-  -he, --help-examples                show feed generate command examples
   -h, --help                          display help for command
 ```
 
@@ -197,7 +195,6 @@ Options:
 
   /* HELP OPTIONS */
   -hm, --help-more                          display more help for command with options not shown in basic help
-  -he, --help-examples                      show feed run command examples
   -h, --help                                display help for command
   ```
   
@@ -233,7 +230,6 @@ Options:
   -v, --verbose [BOOLEAN]                 list feed details (default: false)
 
   /* HELP OPTIONS */
-  -he, --help-examples                    show feed list command examples
   -h, --help                              display help for command
 ```
 Step| Video
@@ -264,7 +260,6 @@ Options:
   -archive, --archive-file <ARCHIVE_NAME>  the feed archive name
 
   /* HELP OPTIONS */
-  -he, --help-examples                     show feed copy command examples
   -h, --help                               display help for command
 ```
 
@@ -286,7 +281,6 @@ Options:
   -archive, --archive-file <ARCHIVE_NAME>  the feed archive name (default: "feed-export.zip")
 
   /* HELP OPTIONS */
-  -he, --help-examples                     show feed copy command examples
   -h, --help                               display help for command
 ```
 
@@ -308,7 +302,6 @@ Options:
   -feed, --feed-name <FEED_NAME>  the feed name
 
   /* HELP OPTIONS */
-  -he, --help-examples            show feed contribute command examples
   -h, --help                      display help for command
 ```
 

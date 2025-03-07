@@ -123,7 +123,7 @@ function loadSchema(feed, page) {
     return;
   }
 
-  var schemaName = page.split('#').pop();
+  var schemaName = window.location.href.split('#').pop();
   if (!schemaName) {
     console.log(`Missing schema name in URL`);
     return;
@@ -171,13 +171,16 @@ function loadSchema(feed, page) {
     })
   } 
 
+  schema && Object.keys(schema).forEach(prop => {
+    prop.startsWith('x-') && delete schema[prop];
+  });
   parent = document.getElementById('schema_definition');
   el = document.createElement('pre');
-  el.innerHTML = `<code>${prettyPrint(schema.properties)}</code>`;
+  el.innerHTML = `<code>${prettyPrint(schema)}</code>`;
   parent.appendChild(el);
 
   $('#copyToClipboard').click(async function writeDataToClipboard () {
-    await navigator.clipboard.writeText(JSON.stringify(schema.properties, null, 2));
+    await navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
     toastr.success('Copied to clipboard.')
   });
 
@@ -218,7 +221,6 @@ function loadMessage(feed, page) {
     return;
   }
 
-  // var messageName = page.split('#').pop();
   var messageName = window.location.href.split('#').pop();
   if (!messageName) {
     console.log(`Missing message name in URL`);
@@ -1226,7 +1228,6 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
         parent.innerHTML = '';
         parent.style.width = 'auto';
 
-        var page = window.location.href.split('/').pop();
         var messageName = window.location.href.split('#').pop();
         var feed = JSON.parse(localStorage.getItem('currentFeed'));
         var topicRules = feed.rules.filter((r) => r.messageName === messageName);
@@ -1602,31 +1603,6 @@ function addServers(config) {
   }
 }
 
-function addBrokers(brokers, type) {
-  var parent = document.getElementById('feed-config-list');
-  if (!parent) return;
-
-  for (var i=0; i<brokers.length; i++) {
-    var brokerType = brokers[i].config.url.indexOf('localhost') > 0 ? 'swbroker' : 'clbroker';
-    var brokerName = brokers[i].broker.substring(0, brokers[i].broker.lastIndexOf('.'));
-    var brokerHtml = 'broker.html';
-    var brokerTpl = `
-      <a id="m_${decodeURIComponent(brokerName)}" href="${brokerHtml}#${brokerName}" class="nav-link" style="display: flex; align-items: center;"
-        onclick="window.location.href='${brokerHtml}#${brokerName}'; window.location.reload();">
-        <i class="nav-icon"><img width=24 src="images/${brokerType}.png"/></i>
-        <p style="margin-left: 8px;word-break: break-word;">${brokerName.trim()}</p>
-      </a>
-    `;
-    var el = document.createElement('li');
-    el.classList.add('nav-item');
-    el.classList.add('nav-item-child');
-    el.innerHTML = brokerTpl;
-  
-    parent.appendChild(el);
-  }  
-}
-// FEEDS PAGE
-
 // HOME PAGE
 const explore = async (btn) => {
   var feedName = btn.dataset.feedname;
@@ -1834,7 +1810,6 @@ function loadPage() {
 
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   if (feed) {
-    addBrokers(feed.brokers, feed.type)
     if (feed.type === 'asyncapi_feed') {
       addMessages(feed.config);
       addSchemas(feed.config);
@@ -1846,7 +1821,6 @@ function loadPage() {
     $('#sidebar-server-root')[0].classList.remove('menu-open');
     $('#sidebar-message-root')[0].classList.remove('menu-open');
     $('#sidebar-schema-root')[0].classList.remove('menu-open');
-    $('#sidebar-broker-root')[0].classList.remove('menu-open');
     document.getElementById('event-feed-name').innerHTML = feed.name;
     menuSelection = document.getElementById('m_info');  
   } else if (page.startsWith('message.html')) {
@@ -1854,7 +1828,6 @@ function loadPage() {
     $('#sidebar-server-root')[0].classList.remove('menu-open');
     $('#sidebar-message-root')[0].classList.add('menu-open');
     $('#sidebar-schema-root')[0].classList.remove('menu-open');
-    $('#sidebar-broker-root')[0].classList.remove('menu-open');
     menuSelection = document.getElementById('m_messages');
     if (feed) {
       var msgName = loadMessage(feed, page);
@@ -1867,7 +1840,6 @@ function loadPage() {
     $('#sidebar-server-root')[0].classList.remove('menu-open');
     $('#sidebar-message-root')[0].classList.remove('menu-open');
     $('#sidebar-schema-root')[0].classList.add('menu-open');
-    $('#sidebar-broker-root')[0].classList.remove('menu-open');
     if (feed) {
       var schemaName = loadSchema(feed, page);
       menuSelection = document.getElementById(`m_${schemaName}`);
@@ -1877,20 +1849,9 @@ function loadPage() {
     $('#sidebar-server-root')[0].classList.add('menu-open');
     $('#sidebar-message-root')[0].classList.remove('menu-open');
     $('#sidebar-schema-root')[0].classList.remove('menu-open');
-    $('#sidebar-broker-root')[0].classList.remove('menu-open');
     if (feed) {
       var serverName = loadServer(feed, page);
       menuSelection = document.getElementById(`m_${serverName}`);
-    }
-  } else if (page.startsWith('broker.html')) {
-    $('#sidebar-application-root')[0].classList.remove('menu-open');
-    $('#sidebar-server-root')[0].classList.remove('menu-open');
-    $('#sidebar-message-root')[0].classList.remove('menu-open');
-    $('#sidebar-schema-root')[0].classList.remove('menu-open');
-    $('#sidebar-broker-root')[0].classList.add('menu-open');
-    if (feed) {
-      var brokerName = loadBroker(feed, page);
-      menuSelection = document.getElementById(`m_${brokerName}`);
     }
   } else if (page.startsWith('apifeed.html')) {
     configureApiPlaceHolderRules(feed.rules);
