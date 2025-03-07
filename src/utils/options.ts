@@ -783,6 +783,17 @@ export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
 }
 
+export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+  .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
+  .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
+  .addOption(new Option('-logs, --show-logs [BOOLEAN]', chalk.whiteBright('show export log')) .default(false))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
+}
+
 export const addFeedArchiveOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )

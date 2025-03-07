@@ -183,12 +183,12 @@ const feedArchive = async (options: ManageFeedClientOptions, optionsSource: any)
     fs.rmdirSync(exportPath, { recursive: true });
   }, function (err:any) {
     fs.rmdirSync(exportPath, { recursive: true });
-    Logger.logDetailedError('feed export failed...', err)
+    Logger.logDetailedError('feed archival failed...', err)
     Logger.error('exiting...');
     process.exit(1);
   });
 
-  Logger.success(`Feed ${feedName} exported successfully!`);
+  Logger.success(`Feed ${feedName} archived successfully!`);
   Logger.success('exiting...');
   process.exit(0);
 }

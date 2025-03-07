@@ -210,6 +210,7 @@ declare global {
     feedType: string
     feedView: string
     communityFeed: boolean
+    showLogs: boolean
 
     // use defaults
     useDefaults: boolean

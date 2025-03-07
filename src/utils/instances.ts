@@ -274,6 +274,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
   outputName: string
   feedType: string
   feedView: string
+  showLogs: boolean
   feedName: string
   useDefaults: boolean
   communityFeed: boolean
@@ -293,6 +294,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
     this.feedName = "";
     this.feedType = "";
     this.feedView = "default";
+    this.showLogs = false;
     this.useDefaults = false;
     this.communityFeed = false;
     this.eventNames = [];

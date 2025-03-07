@@ -11,11 +11,8 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
         addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, 
         addManageHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
-        addFeedRunOptions, addFeedListOptions,
-        addFeedContributeOptions,
-        addFeedImportOptions,
-        addFeedValidateOptions,
-        addFeedArchiveOptions,
+        addFeedRunOptions, addFeedListOptions, addFeedContributeOptions, addFeedImportOptions, addFeedValidateOptions, 
+        addFeedArchiveOptions, addFeedExportOptions
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -39,6 +36,7 @@ import feedRun from './lib/feed-run'
 import feedContribute from './lib/feed-contribute';
 import feedList from './lib/feed-list';
 import feedImport from './lib/feed-import';
+import feedExport from './lib/feed-export';
 import feedArchive from './lib/feed-archive';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
@@ -675,6 +673,22 @@ if (process.env.SHOW_VISUALIZATION) {
       }
 
       feedImport(options, optionsSource);
+    })
+
+    // stm feed export to event portal
+    const feedExportCmd = feedCmd
+      .command('export')
+      .description(chalk.whiteBright('Export an event feed to Event Portal'))
+      .allowUnknownOption(false)
+    addFeedExportOptions(feedExportCmd, this.advanced);
+    feedExportCmd.action((options: ManageFeedPublishOptions) => {
+      const optionsSource:any = {};
+      const defaultFeedKeys = Object.keys(defaultFeedConfig);
+      for (var i=0; i<defaultFeedKeys.length; i++) {
+        optionsSource[defaultFeedKeys[i]] = feedExportCmd.getOptionValueSource(defaultFeedKeys[i]);
+      }
+
+      feedExport(options, optionsSource);
     })
 
     // stm feed export

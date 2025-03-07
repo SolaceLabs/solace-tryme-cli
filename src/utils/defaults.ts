@@ -24,7 +24,7 @@ export const getDefaultMessage = () => {
     osType: os.type(),
     freeMem: os.freemem(),
     totalMem: os.totalmem(),
-    dateTime: (new Date()).toISOString()
+    dateTime: (new Date()).toLocaleString()
   }
 }
 
@@ -366,6 +366,7 @@ export const defaultFeedConfig:any = {
   feedName: "stm-asyncapi_feed",
   feedType: "asyncapi",
   feedView: "default",
+  showLogs: false,
   communityFeed: false,
   fileName: "",
   useDefaults: false,
