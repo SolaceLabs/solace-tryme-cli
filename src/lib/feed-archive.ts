@@ -4,8 +4,9 @@ import { chalkBoldWhite, chalkBoldLabel, chalkBoldVariable, chalkBoldTopicSepara
 import { fileExists, loadGitFeedFile, loadLocalFeedFile, processPlainPath, readFile, writeJsonFile } from '../utils/config';
 import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
+import Fuse from 'fuse.js';
 
-const feedExport = async (options: ManageFeedClientOptions, optionsSource: any) => {
+const feedArchive = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var feedName = '';
   var gitFeed = false;
   var info = null;
@@ -42,39 +43,87 @@ const feedExport = async (options: ManageFeedClientOptions, optionsSource: any) 
       Logger.logError('no local feeds found...')
       process.exit(1);
     }
-    const pPickFeed = new Select({
-      name: 'localFeed',
-      message: `Pick the event feed \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-      choices: feeds
+
+    const { select } = require('inquirer-select-pro');
+    const choices = feeds.map((feed) => {
+      return {
+        value: feed,
+        name: feed
+      }
     });
 
-    await pPickFeed.run()
-      .then((answer:any) => feedName = answer, gitFeed = false)
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
+    try {
+      let fuse = new Fuse(choices, {
+        keys: ['name'],
+        includeScore: true,
       });
+              
+      const answer = await select({
+        message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+        `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
+        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+        required: true,
+        multiple: false,
+        options: async (input = '') => {
+          if (!input) return choices;
+          if (fuse) {
+            const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
+            return result;
+          }
+          return [];
+        }
+      });
+      
+      feedName = answer;
+      gitFeed = false;
+    } catch(error:any) {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    } 
   } else if (gitFeed && !feedName) {
-    var gitFeeds = await getGitEventFeeds();
-    if (!gitFeeds || !gitFeeds.length) {
+    var feeds = await getGitEventFeeds();
+    if (!feeds || !feeds.length) {
       Logger.logError('no feeds found in the repository...')
       process.exit(1);
     }
-
-    const pPickFeed = new Select({
-      name: 'gitFeed',
-      message: `Pick the event feed (↑↓ keys to ${chalkBoldVariable('move')} and ↵ to ${chalkBoldVariable('submit')})`,
-      choices: gitFeeds
+    const { select } = require('inquirer-select-pro');
+    const choices = feeds.map((feed) => {
+      return {
+        value: feed.name,
+        name: feed.name
+      }
     });
 
-    await pPickFeed.run()
-      .then((answer:any) => feedName = answer)
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
-      });        
+    try {
+      let fuse = new Fuse(choices, {
+        keys: ['name'],
+        includeScore: true,
+      });
+              
+      const answer = await select({
+        message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+        `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
+        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+        required: true,
+        multiple: false,
+        options: async (input = '') => {
+          if (!input) return choices;
+          if (fuse) {
+            const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
+            return result;
+          }
+          return [];
+        }
+      });
+      
+      feedName = answer;
+      gitFeed = true;
+    } catch(error:any) {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    } 
   }
 
   if (!options.archiveFile) {
@@ -144,4 +193,4 @@ const feedExport = async (options: ManageFeedClientOptions, optionsSource: any) 
   process.exit(0);
 }
 
-export default feedExport;
+export default feedArchive;

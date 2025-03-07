@@ -8,8 +8,6 @@ import {
   parsePartitionKeysCount,
   parseFeedType,
   parseFeedView,
-  parseRate,
-  parseFrequency,
   parseHttpContentEncoding,
   parseHttpContentType
 } from './parse';
@@ -694,12 +692,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish\n[a value of 0 would stream events continuously]')) 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
-    // .addOption(new Option('--rate <RATE>', chalk.whiteBright('the publish rate')) 
-    //   .conflicts('interval') .argParser(parseRate) .default(defaultMessagePublishConfig.rate) .hideHelp(advanced))
-    // .addOption(new Option('--frequency <OPTION>', chalk.whiteBright('the publish frequency: msg/s, msg/m or msg/h')) 
-    //   .conflicts('interval') .argParser(parseFrequency) .default(defaultMessagePublishConfig.frequency) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) 
-      // .conflicts('rate') .conflicts('frequency') 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) 
       .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
@@ -790,7 +783,7 @@ export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
 }
 
-export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
+export const addFeedArchiveOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(false))

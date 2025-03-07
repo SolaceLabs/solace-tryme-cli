@@ -10,27 +10,56 @@ import { prettyJSON } from '../utils/prettify';
 import axios, { AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import yaml from 'js-yaml';
+import Fuse from 'fuse.js';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  const { Select, Confirm, Input, List } = require('enquirer');
+  const { Confirm, Input, List } = require('enquirer');
   var { feedName } = options;
   var userEmail, contributionChanges = ''
 
   if (!feedName) {
-    const pPickFeed = new Select({
-      name: 'localFeed',
-      message: `Pick a local event feed \n\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-      choices: getLocalEventFeeds()
+    var feeds = getLocalEventFeeds();
+    if (!feeds || !feeds.length) {
+      Logger.logError('no local feeds found...')
+      process.exit(1);
+    }
+
+    const { select } = require('inquirer-select-pro');
+    const choices = feeds.map((feed) => {
+      return {
+        value: feed,
+        name: feed
+      }
     });
 
-    await pPickFeed.run()
-      .then((answer:any) => feedName = answer)
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
+    try {
+      let fuse = new Fuse(choices, {
+        keys: ['name'],
+        includeScore: true,
       });
+              
+      const answer = await select({
+        message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+        `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
+        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+        required: true,
+        multiple: false,
+        options: async (input = '') => {
+          if (!input) return choices;
+          if (fuse) {
+            const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
+            return result;
+          }
+          return [];
+        }
+      });
+      
+      feedName = answer;
+    } catch(error:any) {
+      Logger.logDetailedError('interrupted...', error)
+      process.exit(1);
+    } 
   }
   const feedLocalPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
 

@@ -13,28 +13,34 @@ import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFe
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
   var feed:any = {};
-  const { Input, Select } = require('enquirer');
+  const { Input } = require('enquirer');
 
   checkFeedGenerateOptions(options, optionsSource);
 
   if (optionsSource.feedType !== 'cli') {
-    const pFeedType = new Select({
-      message: `${chalkBoldWhite('Pick a feed type')} \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-      choices: supportedFeedTypes
-    });
+    feed.feedType = 'asyncapi_feed';
+    feed.type = 'asyncapi_feed';
 
-    await pFeedType.run()
-      .then((answer:any) => {
-        feed.type = answer;
-        optionsSource.feedType = 'cli';
-        options.feedType = feed.type;
-      })
-      .catch((error:any) => {
-        Logger.logDetailedError('interrupted...', error)
-        process.exit(1);
-      });
+    // Defer API Feed support for later: Mar 7, 2025
+
+    // const { Select } = require('enquirer');
+    // const pFeedType = new Select({
+    //   message: `${chalkBoldWhite('Pick a feed type')} \n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+    //   `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+    //   `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+    //   choices: supportedFeedTypes
+    // });
+
+    // await pFeedType.run()
+    //   .then((answer:any) => {
+    //     feed.type = answer;
+    //     optionsSource.feedType = 'cli';
+    //     options.feedType = feed.type;
+    //   })
+    //   .catch((error:any) => {
+    //     Logger.logDetailedError('interrupted...', error)
+    //     process.exit(1);
+    //   });
   } else {
     feed.feedType = options.feedType;
   }
@@ -213,7 +219,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       message: `${chalkBoldWhite('Feed keywords (as a comma-separated values)')}\n` +
       `${chalkBoldLabel('Hint')}: Keywords that the feed's scope and purpose can be identified with\n`,
       initial: '',
-      validate: (value: string) => {  return !!value; }
+      // validate: (value: string) => {  return !!value; }
     });
 
     await pFeedTags.run()

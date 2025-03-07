@@ -14,8 +14,8 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addFeedRunOptions, addFeedListOptions,
         addFeedContributeOptions,
         addFeedImportOptions,
-        addFeedExportOptions,
         addFeedValidateOptions,
+        addFeedArchiveOptions,
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -39,7 +39,7 @@ import feedRun from './lib/feed-run'
 import feedContribute from './lib/feed-contribute';
 import feedList from './lib/feed-list';
 import feedImport from './lib/feed-import';
-import feedExport from './lib/feed-export';
+import feedArchive from './lib/feed-archive';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
 import feedPortal from './lib/feed-portal';
@@ -664,7 +664,7 @@ if (process.env.SHOW_VISUALIZATION) {
     // stm feed import
     const feedImportCmd = feedCmd
       .command('import')
-      .description(chalk.whiteBright('Import an event feed'))
+      .description(chalk.whiteBright('Import an event feed from archive file'))
       .allowUnknownOption(false)
     addFeedImportOptions(feedImportCmd, this.advanced);
     feedImportCmd.action((options: ManageFeedPublishOptions) => {
@@ -678,19 +678,19 @@ if (process.env.SHOW_VISUALIZATION) {
     })
 
     // stm feed export
-    const feedExportCmd = feedCmd
-      .command('export')
-      .description(chalk.whiteBright('Export an event feed'))
+    const feedArchiveCmd = feedCmd
+      .command('archive')
+      .description(chalk.whiteBright('Archive an event feed'))
       .allowUnknownOption(false)
-    addFeedExportOptions(feedExportCmd, this.advanced);
-    feedExportCmd.action((options: ManageFeedPublishOptions) => {
+    addFeedArchiveOptions(feedArchiveCmd, this.advanced);
+    feedArchiveCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
       for (var i=0; i<defaultFeedKeys.length; i++) {
-        optionsSource[defaultFeedKeys[i]] = feedExportCmd.getOptionValueSource(defaultFeedKeys[i]);
+        optionsSource[defaultFeedKeys[i]] = feedArchiveCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
-      feedExport(options, optionsSource);
+      feedArchive(options, optionsSource);
     })
 
     // stm feed contribute
