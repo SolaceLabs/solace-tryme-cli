@@ -24,7 +24,7 @@ export const getDefaultMessage = () => {
     osType: os.type(),
     freeMem: os.freemem(),
     totalMem: os.totalmem(),
-    dateTime: (new Date()).toLocaleString()
+    dateTime: (new Date()).toLocaleString('en-US', { hour12: false }) + ':' + (new Date()).getMilliseconds()
   }
 }
 
@@ -450,6 +450,8 @@ export const defaultStmFeedsHome = `${defaultStmHome}/feeds`
 export const defaultStmTempFeedsHome = `${defaultStmHome}/feeds/tmp`
 export const defaultFeedAnalysisFile = 'analysis.json'
 export const defaultFakerRulesFile = 'fakerrules.json'
+export const defaultFeedMajorVersion = 1
+export const defaultFeedMinorVersion = 0
 export const defaultFeedInfoFile = 'feedinfo.json'
 export const defaultFeedRulesFile = 'feedrules.json'
 export const defaultFeedSchemasFile = 'feedschemas.json'

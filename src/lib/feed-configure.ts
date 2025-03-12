@@ -2,11 +2,10 @@ import { getAllFeeds, getFeed, loadLocalFeedFile, updateRules } from '../utils/c
 import { defaultFakerRulesFile, defaultFeedInfoFile, defaultProjectName } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
-import { fakeDataObjectGenerator, fakeDataValueGenerator, fakeEventGenerator } from './feed-datahelper';
+import { fakeDataObjectGenerator, fakeDataValueGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
-import Fuse from 'fuse.js';
 
 const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
@@ -25,44 +24,32 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
       process.exit(1);
     }
 
-    const { select } = require('inquirer-select-pro');
-    const choices = [{ value: 'All Event Feeds', name: 'All Event Feeds'}];
-    feeds.map((feed) => {
-      choices.push({
-        value: feed,
-        name: feed
-      })
+    const { AutoComplete } = require('enquirer');
+    const choices = [ 'All Event Feeds' ];
+    feeds.map((feed) => choices.push(feed));
+
+    const pFeedSelection = new AutoComplete({
+      name: 'feed',
+      message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
+      `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
+      `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
+      `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
+      required: true,
+      limit: 10,
+      multiple: false,
+      choices: choices,
+      validate: (value: string) => {  return !!value; }
     });
-
-    try {
-      let fuse = new Fuse(choices, {
-        keys: ['name'],
-        includeScore: true,
+    
+    await pFeedSelection.run()
+      .then((answer:any) => {
+        feedName = answer;
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
       });
-              
-      const answer = await select({
-        message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
-        `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
-        `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
-        `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
-        required: true,
-        multiple: false,
-        options: async (input = '') => {
-          if (!input) return choices;
-          if (fuse) {
-            const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
-            return result;
-          }
-          return [];
-        }
-      });
-      
-      feedName = answer;
-    } catch(error:any) {
-      Logger.logDetailedError('interrupted...', error)
-      process.exit(1);
-    } 
-
+    
     if (feedName === 'All Event Feeds') {
       feedName = undefined;
       Logger.success(`will explore all available feeds`)

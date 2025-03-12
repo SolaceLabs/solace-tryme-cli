@@ -10,10 +10,9 @@ import { prettyJSON } from '../utils/prettify';
 import axios, { AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import yaml from 'js-yaml';
-import Fuse from 'fuse.js';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  const { Confirm, Input, List } = require('enquirer');
+  const { Confirm, Input, List, AutoComplete } = require('enquirer');
   var { feedName } = options;
   var userEmail, contributionChanges = ''
 
@@ -24,42 +23,33 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     }
 
-    const { select } = require('inquirer-select-pro');
-    const choices = feeds.map((feed) => {
-      return {
-        value: feed,
-        name: feed
-      }
-    });
-
+    const choices = feeds.map((feed) => feed);
     try {
-      let fuse = new Fuse(choices, {
-        keys: ['name'],
-        includeScore: true,
-      });
-              
-      const answer = await select({
+      const pFeedSelection = new AutoComplete({
+        name: 'feed',
         message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
         `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
         `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
         `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
         required: true,
+        limit: 10,
         multiple: false,
-        options: async (input = '') => {
-          if (!input) return choices;
-          if (fuse) {
-            const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
-            return result;
-          }
-          return [];
-        }
+        choices: choices,
+        validate: (value: string) => {  return !!value; }
       });
       
-      feedName = answer;
+      await pFeedSelection.run()
+        .then((answer:any) => {
+          feedName = answer;
+        })
+        .catch((error:any) => {
+          Logger.logDetailedError('interrupted...', error)
+          process.exit(1);
+        });
     } catch(error:any) {
       Logger.logDetailedError('interrupted...', error)
       process.exit(1);
-    } 
+    }
   }
   const feedLocalPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
 

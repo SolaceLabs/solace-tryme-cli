@@ -186,8 +186,15 @@ function buildMapTree(json, parent) {
   } else if (json.items) {
     buildMapTree(json.items, parent);
   }
+
+  if (['type', 'properties'].every(f => fields.includes(f))) {
+    fields = fields.filter(f => f !== 'type');
+  }
+  if (['required', 'properties'].every(f => fields.includes(f))) {
+    fields = fields.filter(f => f !== 'required');
+  }
   fields.forEach(field => {
-    if (field === 'type' || field === 'properties') return;
+    // if (field === 'type' || field === 'properties') return;
     // if (field === 'type') return;
     var isArray = json[field].type === 'array';
     var node = { text: isArray ? `${field}[]` : field, 

@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.75",
+  "version": "0.0.76",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "@asyncapi/parser": "^3.2.1",
     "@base2/pretty-print-object": "^1.0.2",
     "@faker-js/faker": "^8.4.1",
-    "@solace-labs/solace-data-generator": "^1.0.13",
+    "@solace-labs/solace-data-generator": "^1.0.15",
     "@stoplight/spectral-core": "^1.19.4",
     "@stoplight/spectral-functions": "^1.9.3",
     "@types/long": "^5.0.0",
@@ -47,10 +47,8 @@
     "enquirer": "^2.4.1",
     "express": "^4.19.2",
     "form-data": "^4.0.0",
-    "fuse.js": "^7.1.0",
     "hexdump-nodejs": "^0.1.0",
     "http": "^0.0.1-security",
-    "inquirer-select-pro": "^1.0.0-alpha.9",
     "js-yaml": "^4.1.0",
     "json-schema-library": "^10.0.0-rc1",
     "node-localstorage": "^3.0.5",
@@ -85,7 +83,7 @@
       "node18-linux-x64",
       "node18-macos-x64",
       "node18-win-x64",
-      "node18-alpine-x64"
+      "node18-alpine-x64"    
     ],
     "outputPath": "release",
     "assets": [

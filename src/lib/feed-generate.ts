@@ -1,9 +1,9 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { createApiFeed, createFeed, fileExists, updateAndLoadFeedInfo, loadGitFeedFile, loadLocalFeedFile, processPlainPath, writeConfig, writeJsonFile, readAsyncAPIFile } from '../utils/config';
+import { createFeed, fileExists, updateAndLoadFeedInfo, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
 import { prettyJSON } from '../utils/prettify';
-import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultStmFeedsHome, supportedFeedTypes } from '../utils/defaults';
-import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkFeedRestAPIValue } from '../utils/chalkUtils';
+import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedMajorVersion, defaultFeedMinorVersion, defaultFeedRulesFile, defaultStmFeedsHome } from '../utils/defaults';
+import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { fakerRulesJson } from '../utils/fakerrules';
 import chalk from 'chalk';
 import { analyze, analyzeV2, analyzeEP, formulateRules, formulateSchemas, load } from './feed-analyze';
@@ -12,7 +12,9 @@ import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFe
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
-  var feed:any = {};
+  var feed:any = {
+    version: `${defaultFeedMajorVersion}.${defaultFeedMinorVersion}`,
+  };
   const { Input } = require('enquirer');
 
   checkFeedGenerateOptions(options, optionsSource);

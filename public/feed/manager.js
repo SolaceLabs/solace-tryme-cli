@@ -817,7 +817,7 @@ function getFieldRule(obj, path) {
   let field = path.substring(0, path.indexOf('.'));
   var remaining = path.substring(path.indexOf('.')+1);
   if (obj[field].type === 'array' && obj[field].subType === 'object')
-    obj[field] = obj[field].items;
+    return getFieldRule(obj[field].items, remaining);
   return getFieldRule(obj[field], remaining);
 }
 
@@ -899,8 +899,7 @@ const swapElements = (array, index1, index2) => {
 };
 
 async function deleteMappingRule(el) {
-  var page = window.location.href.split('/').pop();
-  var messageName = page.split('#').pop();
+  var messageName = window.location.href.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topicRules = feed.rules.filter((r) => r.messageName === messageName);
   var ruleIndex = localStorage.getItem('currentRuleIndex');
@@ -928,8 +927,7 @@ async function deleteMappingRule(el) {
 }
   
 async function pushDownMappingRule(el) {
-  var page = window.location.href.split('/').pop();
-  var messageName = page.split('#').pop();
+  var messageName = window.location.href.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   
   var topicRules = feed.rules.filter((r) => r.messageName === messageName);
@@ -960,8 +958,7 @@ async function pushDownMappingRule(el) {
 }
   
 async function pushUpMappingRule(el) {
-  var page = window.location.href.split('/').pop();
-  var messageName = page.split('#').pop();
+  var messageName = window.location.href.split('#').pop();
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topicRules = feed.rules.filter((r) => r.messageName === messageName);
   var ruleIndex = localStorage.getItem('currentRuleIndex');

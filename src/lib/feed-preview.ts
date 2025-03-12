@@ -1,11 +1,10 @@
 import { Logger } from '../utils/logger'
-import { chalkBoldWhite, chalkBoldLabel, chalkBoldVariable, chalkBoldTopicSeparator, chalkWhite, colorizeTopic, wrapContent } from '../utils/chalkUtils'
-import { loadLocalFeedFile, loadGitFeedFile, processPlainPath, readFile, readAsyncAPIFile } from '../utils/config';
-import { defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultGitRepo, defaultStmFeedsHome } from '../utils/defaults';
+import { chalkBoldWhite, chalkBoldLabel, chalkBoldVariable, chalkWhite, colorizeTopic, wrapContent } from '../utils/chalkUtils'
+import { loadLocalFeedFile, loadGitFeedFile, readAsyncAPIFile } from '../utils/config';
+import { defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 import { analyze, analyzeEP, analyzeV2, load } from './feed-analyze';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import Fuse from 'fuse.js';
 
 const preview = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var feedName, fileName, feedView, gitFeed = undefined;
@@ -37,7 +36,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         process.exit(1);
       });
     
-    const { Input } = require('enquirer');
+    const { Input, AutoComplete } = require('enquirer');
     if (choice === 'AsyncAPI File') {
       const pFilename = new Input({
         message: 'Enter AsyncAPI file',
@@ -58,39 +57,30 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         process.exit(1);
       }
 
-      const { select } = require('inquirer-select-pro');
-      const choices = feeds.map((feed) => {
-        return {
-          value: feed,
-          name: feed
-        }
-      });
-  
+      const choices = feeds.map((feed) => feed);
       try {
-        let fuse = new Fuse(choices, {
-          keys: ['name'],
-          includeScore: true,
-        });
-                
-        const answer = await select({
+        const pFeedSelection = new AutoComplete({
+          name: 'feed',
           message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
           `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
           `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
           `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
           required: true,
+          limit: 10,
           multiple: false,
-          options: async (input = '') => {
-            if (!input) return choices;
-            if (fuse) {
-              const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
-              return result;
-            }
-            return [];
-          }
+          choices: choices,
+          validate: (value: string) => {  return !!value; }
         });
         
-        feedName = answer;
-        gitFeed = false;
+        await pFeedSelection.run()
+          .then((answer:any) => {
+            gitFeed = false;
+            feedName = answer;
+          })
+          .catch((error:any) => {
+            Logger.logDetailedError('interrupted...', error)
+            process.exit(1);
+          });
       } catch(error:any) {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
@@ -101,43 +91,34 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         Logger.logError('no feeds found in the repository...')
         process.exit(1);
       }
-      const { select } = require('inquirer-select-pro');
-      const choices = feeds.map((feed) => {
-        return {
-          value: feed.name,
-          name: feed.name
-        }
-      });
-  
+      const choices = feeds.map((feed) => feed.name);
       try {
-        let fuse = new Fuse(choices, {
-          keys: ['name'],
-          includeScore: true,
-        });
-                
-        const answer = await select({
+        const pFeedSelection = new AutoComplete({
+          name: 'feed',
           message: `Pick the feed [Found ${choices.length}, displaying ${choices.length > 10 ? 10 : choices.length}]\n${chalkBoldLabel('Hint')}: Shortcut keys for navigation and selection\n` +
           `    ${chalkBoldLabel('<char>>')} enter search string to refine the list\n` +
           `    ${chalkBoldLabel('↑↓')} keys to ${chalkBoldVariable('move')}\n` +
           `    ${chalkBoldLabel('↵')} to ${chalkBoldVariable('submit')}\n`,
           required: true,
+          limit: 10,
           multiple: false,
-          options: async (input = '') => {
-            if (!input) return choices;
-            if (fuse) {
-              const result = fuse.search(input).map(({ item }: { item: { name: string; value: string } }) => item);
-              return result;
-            }
-            return [];
-          }
+          choices: choices,
+          validate: (value: string) => {  return !!value; }
         });
         
-        feedName = answer;
-        gitFeed = true;
+        await pFeedSelection.run()
+          .then((answer:any) => {
+            gitFeed = true;
+            feedName = answer;
+          })
+          .catch((error:any) => {
+            Logger.logDetailedError('interrupted...', error)
+            process.exit(1);
+          });
       } catch(error:any) {
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
-      } 
+      }   
     }
   }
 
