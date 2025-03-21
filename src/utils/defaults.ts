@@ -133,7 +133,8 @@ export const defaultMessageConfig:any = {
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
   dmqEligible: false,
   partitionKeysCount: undefined,
-  partitionKeys: [],
+  partitionKeysList: undefined,
+  partitionKeys: undefined,
   elidingEligible: false,
   priority: undefined,
   replyToTopic: undefined,
@@ -144,7 +145,7 @@ export const defaultMessageConfig:any = {
   timeToLive: undefined,
   // userCos: NOT CONSIDERED
   // userData: NOT CONSIDERED
-  userPropertyMap: undefined,
+  userProperties: undefined,
   payloadType: "TEXT",
   httpContentType: undefined,
   httpContentEncoding: undefined,

@@ -561,7 +561,7 @@ if (process.env.SHOW_VISUALIZATION) {
     // stm feed preview
     const feedPreviewCmd = feedCmd
       .command('preview')
-      .description(chalk.whiteBright('preview an AsyncAPI document'))
+      .description(chalk.whiteBright('Preview an AsyncAPI document'))
       .allowUnknownOption(false)
     addFeedPreviewOptions(feedPreviewCmd, this.advanced)
 

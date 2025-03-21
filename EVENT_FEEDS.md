@@ -9,16 +9,16 @@ To invoke feed commands of the `stm` tool, you issue a sub-command `feed` follow
 stm
 ├── -v, --version                   /* output the version number                      */
 ├── -h, --help                      /* display help for command                       */
-├── -he, --help-examples            /* display examples                               */
 └── feed                            /* manage event feeds                             */
     ├── -h, --help                  /* display help for command                       */
-    ├── preview                     /* Validate and preview an AsyncAPI document      */
+    ├── preview                     /* Preview an AsyncAPI document                   */
     ├── generate                    /* Generate event feed from an AsyncAPI document  */
     ├── configure                   /* Configure event feed rules                     */
     ├── run                         /* Run event feed                                 */
     ├── list                        /* List event feeds                               */
-    ├── import                      /* Import an event feed                           */
-    ├── export                      /* Export an event feed                           */
+    ├── import                      /* Import an event feed from archive file         */
+    ├── export                      /* Export an event feed to Event Portal           */
+    ├── archive                     /* Archive an event feed                          */
     └── contribute                  /* Contribute to community event feeds            */
 ```
 
@@ -53,14 +53,14 @@ Interactive Mode| CLI Parameters
 
 ## Preview an Event Feed
 
-The `preview` sub-command allows you to preview an AsyncAPI document to gain a quick visual preview of the Application/API details around send/receive events and details of schema referred by these events.
+The `preview` sub-command allows you to preview an AsyncAPI document to gain a quick visual of the Application/API details around send/receive events and details of schema referred by these events.
 
 You can also preview an existing local or community feed.
 
 ```
  Usage: stm feed preview [options]
 
-preview an AsyncAPI document
+Preview an AsyncAPI document
 
 Options:
   -file, --file-name <ASYNCAPI_FILE>      the asyncapi document
@@ -138,6 +138,13 @@ An Event Feed configuration exposes feed operations — send and receive events 
   - Payload attribute → Another payload attribute
   - Topic parameter → Payload attribute
 >*NOTE:* Mismatched attribute types are blocked by a data type compatibility check.
+- **Session Settings:** Configure session settings:
+  - Settings to manage session connect, reconnect, retry attempts, keep-alive and timeout parameters
+  - Flags to generate additional information: senderId, send and receive timestamps and sequence number
+  - Client settings for client name, application description
+- **Message Settings:** Configure message settings:
+  - Settings to manage message properties: payload type, app message type & id, delivery mode, correlation key, dmq & eliding eligibility, ttl, user-properties
+  - Partition key settings
 - **Publish Settings:** Configure runtime settings for streaming events:
   - Number of events to publish (default is 0 for continuous streaming).
   - Interval between publish operations (in milliseconds).
@@ -237,17 +244,17 @@ Step| Video
 List Feeds (Simple)|![](./docrefs/feed-list-simple.gif)|
 List Feeds (Verbos)|![](./docrefs/feed-list-verbose.gif)
 
-## Export & Import an Event Feed
+## Archive & Import an Event Feed
 
-Export and import commands for event feeds provide critical functionality for managing and sharing configurations effectively. The export command allows you to package an event feed's settings, rules, and mappings into a portable format. This is particularly useful for backup, version control, or sharing feeds across teams and environments.
+Archive and import commands for event feeds provide critical functionality for managing and sharing configurations effectively. The archive command allows you to package an event feed's settings, rules, and mappings into a portable format. This is particularly useful for backup, version control, or sharing feeds across teams and environments.
 
 The import command enables seamless integration of exported feeds into another `stm` setup, and avoids the need to recreate feeds manually. Together, these commands simplify collaboration, improve portability, and ensure consistency across development, testing, and production environments.
 
-### Exporting a Feed
+### Archiving a Feed
 
-The `export` sub-command creates an archive (ZIP) file of an event feed, making it easy to store and share with team members. This feature saves time and effort by preserving the feed configuration and data generation rules, eliminating the need to recreate them manually. Both local and community feeds can be exported.
+The `archive` sub-command creates an archive (ZIP) file of an event feed, making it easy to store and share with team members. This feature saves time and effort by preserving the feed configuration and data generation rules, eliminating the need to recreate them manually. Both local and community feeds can be exported.
 
-The resulting archive is named `feed-export.zip` and is ready for distribution or backup.
+The resulting archive is named `feed-archive.zip` and is ready for distribution or backup.
 
 ```
 Usage: stm feed export [options]
@@ -265,7 +272,7 @@ Options:
 
 Step| Video
 --|--
-Export a Community Feed|![](./docrefs/feed-export.gif)
+Archive a Community Feed|![](./docrefs/feed-export.gif)
 
 
 ### Importing a Feed
@@ -278,7 +285,7 @@ Usage: stm feed import [options]
 Import an event feed
 
 Options:
-  -archive, --archive-file <ARCHIVE_NAME>  the feed archive name (default: "feed-export.zip")
+  -archive, --archive-file <ARCHIVE_NAME>  the feed archive name (default: "feed-archive.zip")
 
   /* HELP OPTIONS */
   -h, --help                               display help for command
@@ -287,6 +294,28 @@ Options:
 Step| Video
 --|--
 Import a Feed from Archive File|![](./docrefs/feed-import.gif)|
+
+## Export an Event Feed to Event Portal
+
+The `export` sub-command displays a list of both local and community event feeds available in your environment. Once a feed is selected, this command will guide you through the steps to export the application to Event Portal.
+
+```
+Usage: stm feed export [options]
+
+List event feeds
+
+Options:
+  -local, --local-only [BOOLEAN]          list local event feeds (default: true)
+  -community, --community-only [BOOLEAN]  list community event feeds (default: true)
+  -logs, --show-logs [BOOLEAN]            show export log (default: false)
+
+  /* HELP OPTIONS */
+  -h, --help                              display help for command
+```
+Step| Video
+--|--
+Export Feed|![](./docrefs/feed-export-to-ep.gif)
+
 
 
 ## Contribute Event Feed to Community

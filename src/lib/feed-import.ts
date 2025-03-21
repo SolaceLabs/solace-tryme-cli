@@ -12,7 +12,7 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
     const { Input } = require('enquirer');
     const pFilename = new Input({
       message: 'Feed Archive file',
-      initial: 'feed-export.zip',
+      initial: 'feed-archive.zip',
       validate: (value: string) => {  return !!value; }
     });
     

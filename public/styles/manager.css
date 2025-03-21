@@ -116,7 +116,12 @@ p {
 .glyphicon-minus:before {
   content: "\2212";
 }
-
+/* .glyphicon-ok:before {
+  content: "\e007";
+} */
+.glyphicon-check:before {
+  content:"\e067";
+}
 .rules-toolbar {
   display: flex;
   justify-content: space-between;
@@ -171,4 +176,36 @@ p {
   left: 50%;
   margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
 
+}
+
+/* Tree */
+.treeview .key-selected {
+  color: #f0f0f0; /* Change to your desired background color */
+  background-color: rgb(27, 27, 61); /* Change to your desired text color */
+}
+
+/* Table Ribbon */
+.sash td{
+  position: relative;
+  overflow: hidden;
+  width: 200px;
+  height: 100px;
+  
+}
+.sash td.prova:after {
+  font-size: smaller;
+  font-weight: 600;
+  padding-top: 10px;
+  content: attr(data-ribbon);
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  background: #00c895;
+  color: white;
+  top: -5px;
+  text-align: center ;
+  line-height: 30px;
+  right: -20px;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

@@ -75,10 +75,18 @@ function prettyJSON(str: string) {
   }
 }
 
+function padString(lPad: number, str: string, length: number) {
+  if (str.length >= length) return str;
+  const leftPadded = stringTimesN(lPad, ' ') + str;
+  const totalPadding = length - leftPadded.length;
+  const rightPadded = leftPadded + stringTimesN(totalPadding, ' ');
+  return rightPadded;
+}
 
 // For non-es2015 usage
 export {
   prettyXML,
   prettyJSON,
-  prettifyXml
+  prettifyXml,
+  padString
 }

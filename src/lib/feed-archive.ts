@@ -110,7 +110,7 @@ const feedArchive = async (options: ManageFeedClientOptions, optionsSource: any)
   if (!options.archiveFile) {
     const pArchiveFile = new Input({
       message: 'Enter Archive file',
-      initial: 'feed-export.zip',
+      initial: 'feed-archive.zip',
       validate: (value: string) => {  return !!value; }
     });
     

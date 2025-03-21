@@ -9,6 +9,7 @@ import sleep from 'sleep-promise';
 import feedRunApi from './feed-run-api';
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
+import { get } from 'http';
 const selectedMessages: any[] = [];
 const eventFeedTimers: any[] = [];
 const publishStats:any = {};
@@ -270,6 +271,29 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   // check connection params found
   checkConnectionParamsExists(options.url, options.vpn, options.username, options.password);
 
+  // load feed rules
+  var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
+
+  // populate feed settings (session and message)
+  var sessionSettings:any = getSessionSettings(feed);
+  if (sessionSettings) {
+    if (sessionSettings.connectRetriesPerHost !== undefined) options.reconnectRetries = sessionSettings.connectRetriesPerHost;
+    if (sessionSettings.connectRetries !== undefined) options.connectRetries = sessionSettings.connectRetries;
+    if (sessionSettings.connectTimeoutInMsecs !== undefined) options.connectTimeoutInMsecs = sessionSettings.connectTimeoutInMsecs;
+    if (sessionSettings.reconnectRetries !== undefined) options.reconnectRetries = sessionSettings.reconnectRetries;
+    if (sessionSettings.reconnectRetryWaitInMsecs !== undefined) options.reconnectRetryWaitInMsecs = sessionSettings.reconnectRetryWaitInMsecs;
+    if (sessionSettings.readTimeoutInMsecs !== undefined) options.readTimeoutInMsecs = sessionSettings.readTimeoutInMsecs;
+    if (sessionSettings.includeSenderId !== undefined) options.includeSenderId = sessionSettings.includeSenderId;
+    if (sessionSettings.clientName !== undefined) options.clientName = sessionSettings.clientName;
+    if (sessionSettings.applicationDescription !== undefined) options.description = sessionSettings.applicationDescription;
+    if (sessionSettings.generateReceiveTimestamps !== undefined) options.generateReceiveTimestamps = sessionSettings.generateReceiveTimestamps;
+    if (sessionSettings.generateSendTimestamps !== undefined) options.generateSendTimestamps = sessionSettings.generateSendTimestamps;
+    if (sessionSettings.generateSequenceNumber !== undefined) options.generateSequenceNumber = sessionSettings.generateSequenceNumber;
+    if (sessionSettings.sendBufferMaxSize !== undefined) options.sendBufferMaxSize = sessionSettings.sendBufferMaxSize;
+    if (sessionSettings.keepAliveIntervalInMsecs !== undefined) options.keepAliveIntervalInMsecs = sessionSettings.keepAliveIntervalInMsecs;
+    if (sessionSettings.keepAliveIntervalsLimit !== undefined) options.keepAliveIntervalsLimit = sessionSettings.keepAliveIntervalsLimit;
+  }  
+
   const publisher = new SolaceClient(options);
   var interrupted = false;
   try {
@@ -294,8 +318,6 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       publisher.exit();
     }, options.exitAfter * 1000);
   }
-
-  var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
 
   options.readyForExit = options.eventNames.length;
   options.eventNames.forEach((eventName:any) => {
@@ -336,11 +358,15 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       publishInterval = rate > 1.0 ? freq / rate : freq * rate;
     }
 
+    var settings:any = getMessageSettings(feed, feedRule.messageName, feedRule.topic);
     selectedMessages.push({
       message: feedRule.messageName, 
       topic: feedRule.topic,
       rule: feedRule,
-      options: options,
+      options: {
+        ...options,
+        ...settings
+      },
       optionsSource: optionsSource,
       count: optionsSource.count === 'cli' ? options.count : 
               feedRule.publishSettings?.hasOwnProperty('count') ? 
@@ -393,12 +419,34 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }, 2000);
 }
 
+const getSessionSettings = (feed: any) => {
+  var settings = {};
+  if (feed.length === 0)
+    return settings;
+
+  return feed[0].sessionSettings;
+}
+
+const getMessageSettings = (feed: any, messageName: string, topic: string) => {
+  var settings = {};
+  if (feed.length === 0)
+    return settings;
+
+  feed.forEach((rule:any) => {
+    if (rule.messageName === messageName && rule.topic === topic) {
+      settings = rule.messageSettings;
+    }
+  });
+
+  return settings;
+}
+
 async function publishFeed(publisher:any, msg:any) {
   if (publisher.exited) {
     return;
   }
   var {topic, payload} = generateEvent(msg.rule);
-  publisher.publish(topic, payload, msg.options.payloadType, msg.published++);
+  publisher.publish(topic, payload, msg.options, msg.published++);
   publishStats[`${msg.message}-${msg.topic}`]++;
   Logger.success(`published ` +  
                 chalkEventCounterLabel(msg.message ? msg.message : 

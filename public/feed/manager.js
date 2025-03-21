@@ -790,7 +790,7 @@ function buildTree(name, json, parent) {
         (field === 'properties' && !doNotIgnoreFields.properties)) 
       return;
 
-    var node = { text: field, type: json[field].type, path: parent.path ?`${parent.path}.properties.${field}` : field};
+    var node = { text: field, type: json[field].type, icon: '', path: parent.path ?`${parent.path}.properties.${field}` : field};
     if (json[field].type === 'object' && json[field].properties) {
       node.nodes = [];
       buildTree(field, json[field].properties, node);
@@ -872,19 +872,28 @@ async function refreshMappingRules(rule) {
           </span>
           <ul class="navbar-nav ml-auto float-right" style="display:flex; flex-direction: row;">
             <li class="nav-item" style="padding: 5px;">
-              <a class="nav-link" data-map-index="${index}" role="button" onclick="pushUpMappingRule(this)">
-                <i class="fas fa-arrow-up"></i>
-              </a>
+              <span class='jstooltip' style="margin-left: 10px;border:none;">
+                <a class="nav-link" data-map-index="${index}" role="button" onclick="pushUpMappingRule(this)">
+                  <i class="fas fa-arrow-up"></i>
+                </a>
+                <span class="jstooltiptext jstooltip-top">Move Up</span>
+              </span>
             </li>
             <li class="nav-item" style="padding: 5px;">
-              <a class="nav-link" data-map-index="${index}" role="button" onclick="pushDownMappingRule(this)">
-                <i class="fas fa-arrow-down"></i>
-              </a>
+              <span class='jstooltip' style="border:none;">
+                <a class="nav-link" data-map-index="${index}" role="button" onclick="pushDownMappingRule(this)">
+                  <i class="fas fa-arrow-down"></i>
+                </a>
+                <span class="jstooltiptext jstooltip-top">Move Down</span>
+              </span>
             </li>
             <li class="nav-item" style="padding: 5px;">
-              <a class="nav-link" data-map-index="${index}" role="button" onclick="deleteMappingRule(this)">
-                <i class="fas fa-trash"></i>
-              </a>
+              <span class='jstooltip' style="border:none;">
+                <a class="nav-link" data-map-index="${index}" role="button" onclick="deleteMappingRule(this)">
+                  <i class="fas fa-trash"></i>
+                </a>
+                <span class="jstooltiptext jstooltip-top">Delete Mapping</span>
+              </span>                
             </li>
           </ul>
         </div>
@@ -1097,6 +1106,9 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
   var topicRules = rules.filter((r) => r.messageName === messageName);
   if (!topicRules || !topicRules.length) return;
 
+  const messageProps = await getDefaultMessageProperties();
+  const sessionProps = await getDefaultSessionProperties();
+
   $('#p_send_topics').empty();
   localStorage.setItem('currentRuleIndex', ruleIndex);
   topicRules.forEach((rule, index) => {
@@ -1251,6 +1263,55 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
     });
   }
 
+  // SESSION SETTINGS
+  el = document.getElementById('session_settings');
+  el.innerHTML = `    
+    ${getSessionProperties(sessionProps, rule?.sessionSettings)}    
+  `;
+
+  // PARTITION KEY & MESSAGE SETTINGS
+  el = document.getElementById('message_settings');
+  el.innerHTML = `
+    <div class="card-body">
+      <div class="row">
+        <div class="col-11">
+          <span style="text-align: left; font-size: 0.75rem; font-weight: 600;">
+            Partition Key<br/>
+            <i>Keys will be concatenated when multiple fields are selected</i>
+          </span>
+          <textarea id="pkey-value" class="form-control" rows="3" readonly>
+            ${rule.messageSettings?.partitionKeys ? rule.messageSettings?.partitionKeys : ''}
+          </textarea>
+        </div>
+        <div class="col-1">
+          <div class="navbar-nav ml-auto float-right" style="display:flex; flex-direction: row;">
+            <span class='jstooltip' style="margin-left: 10px;border:none;">
+              <div id="pick-pkey" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#pkey_selection_form" 
+                  data-backdrop="static" data-keyboard="false" onclick="managePartitionKey()">
+                  <i class="fas fa-sitemap" aria-hidden="true"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-top">Set Partition Keys</span>
+            </span>
+
+            <span class='jstooltip' style="border:none;">
+              <div id="reset-pkey" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#pkey-delete-confirm">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-top">Reset Partition Key</span>
+            </span>
+          </div>        
+        </div>
+      </div>
+    </div>
+    ${getMessageProperties(messageProps, rule?.messageSettings)}    
+  `;
+
+  el = document.getElementById('pkeyFields');
+  el.value = rule.messageSettings?.partitionKeys ? rule.messageSettings?.partitionKeys : '';
 
   // PUBLISH SETTINGS
   el = document.getElementById('publish_settings');
@@ -1289,6 +1350,231 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
   manageFieldMap();
 
   refreshMappingRules(rule);  
+}
+
+function getSessionProperties(props, currentSettings) {
+  if (!currentSettings) currentSettings = {};
+  var tbody = '';
+  props.forEach((prop) => {
+    tbody += `
+      <tr class="sash">
+        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+        ${currentSettings[prop.key] !== undefined ? 
+          `<td>${currentSettings[prop.key]}</td>` : 
+          `<td class="prova" data-ribbon="default"></td>`}
+      </tr>
+    `;
+  })
+
+  return `
+    <div class="card-body">
+      <div class="row">
+        <div class="col-11" style="overflow-y: auto; height: 300px;">
+          <span style="text-align: left; font-size: 0.75rem; font-weight: 600;">
+            Session Properties
+          </span>
+          <table class="table table-bordered table-hover">
+            <thead class="sticky-top">
+              <tr>
+                <th style="position: sticky;top: 0; background-color: #f2f2f2;">Property</th>
+                <th style="position: sticky;top: 0; background-color: #f2f2f2;">Current Value</th>
+              </tr>
+            </thead>
+            <tbody id="session_props_table">
+              ${tbody}
+            </tbody>
+          </table>
+        </div>
+        <div class="col-1">
+          <div class="navbar-nav ml-auto float-right" style="display:flex; flex-direction: row;">
+            <span class='jstooltip' style="margin-left: 10px;border:none;">
+              <div id="pick-pkey" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#session_settings_form" 
+                  data-rule-settings='${JSON.stringify(currentSettings)}'
+                  data-backdrop="static" onclick="loadEditableSessionProperties(this)">
+                  <i class="fas fa-cogs"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-bottom">Edit Properties</span>
+            </span>
+  
+            <span class='jstooltip' style="border:none;">
+              <div id="reset-session-props" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#session-properties-reset-confirm">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-bottom">Rest to Default</span>
+            </span>
+
+          </div>        
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getMessageProperties(props, currentSettings) {
+  if (!currentSettings) currentSettings = {};
+
+  var tbody = '';
+  props.forEach((prop) => {
+    tbody += `
+      <tr class="sash">
+        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+        ${currentSettings[prop.key] !== undefined ? 
+          `<td>${currentSettings[prop.key]}</td>` : 
+          `<td class="prova" data-ribbon="default"></td>`}
+      </tr>    
+    `;
+  })
+
+  return `
+    <div class="card-body">
+      <div class="row">
+        <div class="col-11" style="overflow-y: auto; height: 300px;">
+          <span style="text-align: left; font-size: 0.75rem; font-weight: 600;">
+            Message Properties
+          </span>
+          <table class="table table-bordered table-hover">
+            <thead class="sticky-top">
+              <tr>
+                <th style="position: sticky;top: 0; background-color: #f2f2f2;">Property</th>
+                <th style="position: sticky;top: 0; background-color: #f2f2f2;">Current Value</th>
+              </tr>
+            </thead>
+            <tbody id="message_props_table">
+              ${tbody}
+            </tbody>
+          </table>
+        </div>
+        <div class="col-1">
+          <div class="navbar-nav ml-auto float-right" style="display:flex; flex-direction: row;">
+            <span class='jstooltip' style="margin-left: 10px;border:none;">
+              <div id="pick-pkey" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#msg_settings_form" 
+                  data-rule-settings='${JSON.stringify(currentSettings)}'
+                  data-backdrop="static" onclick="loadEditableMessageProperties(this)">
+                  <i class="fas fa-cogs"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-bottom">Edit Properties</span>
+            </span>
+  
+            <span class='jstooltip' style="border:none;">
+              <div id="reset-message-props" class="nav-item" style="padding: 5px;">
+                <a class="nav-link" role="button" data-toggle="modal" data-target="#message-properties-reset-confirm">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+              <span class="jstooltiptext jstooltip-bottom">Rest to Default</span>
+            </span>
+
+          </div>        
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadEditableSessionProperties(event) {
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var topic = $('#topic_name').text();
+  var message = $('#message-feed-name').text();
+  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
+  console.log('rule-session-settings - ', rule.sessionSettings);
+  
+  const currentSettings = rule.sessionSettings ? rule.sessionSettings : {};
+  const props = await getDefaultSessionProperties();
+  var el = document.getElementById('editableSessionSettings');
+  el.innerHTML = '';
+  props.forEach((prop) => {
+    const tr = document.createElement('tr');
+    tr.id = `tr_prop_${prop.key}`;
+    tr.dataset.prop_name = prop.name;
+    tr.dataset.new_value = '';
+    tr.dataset.deleted = 'no';
+    tr.innerHTML = `
+      <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+      <td>
+      ${prop.type === 'select' ? `
+      <select class="form-control" onchange="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      ${prop.values.map(value => 
+        `<option value="${value}" ${value === currentSettings[prop.key] || 
+                                    value === ''+currentSettings[prop.key] ? 'selected' : ''} onclick>
+          ${value}
+        </option>`).join('')}
+      </select>
+      ` : `
+      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${currentSettings[prop.key] !== undefined ? currentSettings[prop.key] : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      `}
+      </td>
+      <td>
+        ${currentSettings[prop.key] !== undefined ? `
+        <span class='jstooltip' style="border:none;">
+          <span class="btn" onclick="${prop.type === 'select' ? `
+            document.getElementById('tr_prop_${prop.key}').querySelector('select').value = ''; 
+            document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';` : `
+            document.getElementById('td_value_${prop.key}').value = ''; 
+            document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';`}">
+            <i class="fa fa-bolt" aria-hidden="true"></i>
+          </span>
+          <span class="jstooltiptext jstooltip-top">Reset to Default</span>
+        </span>` : ''}
+      </td>
+    `;
+    el.appendChild(tr);
+  });
+}
+
+async function loadEditableMessageProperties(event) {
+  var feed = JSON.parse(localStorage.getItem('currentFeed'));
+  var topic = $('#topic_name').text();
+  var message = $('#message-feed-name').text();
+  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
+  console.log('rule-message-settings - ', rule.messageSettings);
+  
+  const currentSettings = rule.messageSettings;
+  const props = await getDefaultMessageProperties();
+  var el = document.getElementById('editableMessageSettings');
+  el.innerHTML = '';
+  props.forEach((prop) => {
+    const tr = document.createElement('tr');
+    tr.id = `tr_prop_${prop.key}`;
+    tr.dataset.prop_name = prop.name;
+    tr.dataset.new_value = '';
+    tr.dataset.deleted = 'no';
+    tr.innerHTML = `
+      <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+      <td>
+      ${prop.type === 'select' ? `
+      <select class="form-control" onchange="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      ${prop.values.map(value => 
+        `<option value="${value}" ${value === currentSettings[prop.key] || 
+                                    value === ''+currentSettings[prop.key] ? 'selected' : ''}>
+          ${value}
+        </option>`).join('')}
+      </select>
+      ` : `
+      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${currentSettings[prop.key] !== undefined ? currentSettings[prop.key] : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      `}
+      </td>
+      <td>
+        ${currentSettings[prop.key] !== undefined ? `
+        <span class='jstooltip' style="border:none;">
+          <span class="btn" onclick="${prop.type === 'select' ? `
+            document.getElementById('tr_prop_${prop.key}').querySelector('select').value = ''; 
+            document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';` : `
+            document.getElementById('td_value_${prop.key}').value = ''; 
+            document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';`}">
+            <i class="fa fa-bolt" aria-hidden="true"></i>
+          </span>
+          <span class="jstooltiptext jstooltip-top">Reset to Default</span>
+        </span>` : ''}
+      </td>
+    `;
+    el.appendChild(tr);
+  });
 }
 
 async function configureMessageReceiveTopics(messageName, rules, ruleIndex = 0, refresh = false) {
@@ -1889,6 +2175,22 @@ async function getFakerRules(feedName) {
   const response = await fetch(path + `/fakerrules?feed=${feedName}`);
   const rules = await response.json();
   return rules;
+}
+
+async function getDefaultMessageProperties() {
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
+  const response = await fetch(path + `/messageproperties`);
+  const properties = await response.json();
+  return properties;
+}
+
+async function getDefaultSessionProperties() {
+  // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  const path = window.location.origin;
+  const response = await fetch(path + `/sessionproperties`);
+  const properties = await response.json();
+  return properties;
 }
 
 function prettyPrint(jsonObject) {

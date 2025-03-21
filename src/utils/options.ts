@@ -9,7 +9,8 @@ import {
   parseFeedType,
   parseFeedView,
   parseHttpContentEncoding,
-  parseHttpContentType
+  parseHttpContentType,
+  parsePartitionKeysList
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -111,8 +112,9 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // partition key settings
     .addOption(new Option(`\n/* ${chalk.whiteBright('PARTITION KEY SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--partition-keys-count <NUMBER>', chalk.whiteBright('[advanced] the partition keys count for generating simulated keys (min: 2)')) .argParser(parsePartitionKeysCount) .conflicts('partitionKeys') .hideHelp(!advanced))
-    .addOption(new Option('--partition-keys <KEY...>', chalk.whiteBright('[advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)')) .argParser(parsePartitionKeys) .conflicts('partitionKeysCount') .hideHelp(!advanced))
+    .addOption(new Option('--partition-keys-count <NUMBER>', chalk.whiteBright('[advanced] the partition keys count for generating simulated keys (min: 2)')) .argParser(parsePartitionKeysCount) .conflicts('partitionKeys') .conflicts('partitionKeysList').hideHelp(!advanced))
+    .addOption(new Option('--partition-keys-list <KEY...>', chalk.whiteBright('[advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)')) .argParser(parsePartitionKeysList) .conflicts('partitionKeysCount') .conflicts('partitionKeys').hideHelp(!advanced))
+    .addOption(new Option('--partition-keys <FIELD1 | FIELD2 | .. | FIELD-n>', chalk.whiteBright('[advanced] the partition key(s) in quotes as pipe (|) separated payload attributes if listing more than one (e.g., "firstName | address.city")')) .argParser(parsePartitionKeys) .conflicts('partitionKeysCount') .conflicts('partitionKeysList').hideHelp(!advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
@@ -124,7 +126,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     // .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
-    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., name1:value1 name2:value2 name3:"Hello World")')) .argParser(parseUserProperties) .hideHelp(!advanced))
 
     // content type & encoding
     .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
@@ -268,7 +270,7 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--correlation-id <CORRELATION_ID>', chalk.whiteBright('[advanced] the application provided message correlation id for acknowledgement management')) .default( 'current timestamp') .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
-    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated values if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated values if listing more than one (e.g., "key1:1st Value" key2:"2nd Value" key3:3rdValue)')) .argParser(parseUserProperties) .hideHelp(!advanced))
 
     // content type & encoding
     .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
@@ -377,7 +379,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     // .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
-    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated values if listing more than one (e.g., "key1:1st Value" key2:"2nd Value" key3:3rdValue)')) .argParser(parseUserProperties) .hideHelp(!advanced))
 
     // content type & encoding
     .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
@@ -628,10 +630,6 @@ export const addFeedValidateOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // feed options
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed preview command examples')))
 }
 
 export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
@@ -646,10 +644,6 @@ export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
                   .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider') 
                   .conflicts('feedName'))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed preview command examples')))
 }
 
 export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
@@ -664,20 +658,12 @@ export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
                   .conflicts('feedName'))
     // hidden option to use defaults 
     .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults for feed name and feed type')) .hideHelp(true) .default(false))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed generate command examples')))
 }
 
 export const addFeedConfigureOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
     .addOption(new Option('-port, --manage-port [PORT]', chalk.whiteBright('the port for the manager')) .argParser(parseNumber) .default(0))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed configure command examples')))
 }
 
 export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
@@ -703,8 +689,9 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     
     // partition key settings
     .addOption(new Option(`\n/* ${chalk.whiteBright('PARTITION KEY SETTINGS')} */`) .hideHelp(!advanced))
-    .addOption(new Option('--partition-keys-count <NUMBER>', chalk.whiteBright('[advanced] the partition keys count for generating simulated keys (min: 2)')) .argParser(parsePartitionKeysCount) .conflicts('partitionKeys') .hideHelp(!advanced))
-    .addOption(new Option('--partition-keys <KEY...>', chalk.whiteBright('[advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)')) .argParser(parsePartitionKeys) .conflicts('partitionKeysCount') .hideHelp(!advanced))
+    .addOption(new Option('--partition-keys-count <NUMBER>', chalk.whiteBright('[advanced] the partition keys count for generating simulated keys (min: 2)')) .argParser(parsePartitionKeysCount) .conflicts('partitionKeys') .conflicts('partitionKeysList').hideHelp(!advanced))
+    .addOption(new Option('--partition-keys-list <KEY...>', chalk.whiteBright('[advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)')) .argParser(parsePartitionKeysList) .conflicts('partitionKeysCount') .conflicts('partitionKeys').hideHelp(!advanced))
+    .addOption(new Option('--partition-keys <FIELD1 | FIELD2 | .. | FIELD-n>', chalk.whiteBright('[advanced] the partition key(s) in quotes as pipe (|) separated payload attributes if listing more than one (e.g., "firstName | address.city")')) .argParser(parsePartitionKeys) .conflicts('partitionKeysCount') .conflicts('partitionKeysList').hideHelp(!advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
@@ -715,7 +702,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the user-defined application message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
-    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")')) .argParser(parseUserProperties) .hideHelp(!advanced))
+    .addOption(new Option('--user-properties <PROPS...>', chalk.whiteBright('[advanced] the user properties as space-separated pairs if listing more than one (e.g., name1:value1 name2:value2 name3:"Hello World")')) .argParser(parseUserProperties) .hideHelp(!advanced))
 
     // content type & encoding
     .addOption(new Option(`\n/* ${chalk.whiteBright('HTTP CONTENT TYPE & ENCODING')} */`) .hideHelp(!advanced))
@@ -750,7 +737,6 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help for command with options not shown in basic help')))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed run command examples')))
 }
 
 
@@ -768,30 +754,18 @@ export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-local, --local-only [BOOLEAN]', chalk.whiteBright('list local event feeds')) .argParser(parseBoolean) .default(true))
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(true))
     .addOption(new Option('-v, --verbose [BOOLEAN]', chalk.whiteBright('list feed details')) .argParser(parseBoolean) .default(false))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed list command examples')))
 }
 
 export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
   cmd
-    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feed-export.zip'))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
+    .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feed-archive.zip'))
 }
 
 export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
   cmd
-  .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
-  .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
-  .addOption(new Option('-logs, --show-logs [BOOLEAN]', chalk.whiteBright('show export log')) .default(false))
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
+    .addOption(new Option('-logs, --show-logs [BOOLEAN]', chalk.whiteBright('show export log')) .default(false))
 }
 
 export const addFeedArchiveOptions = (cmd: Command, advanced: boolean) => {
@@ -799,8 +773,4 @@ export const addFeedArchiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(false))
     .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) )
-
-    // help options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
-    .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed copy command examples')))
 }

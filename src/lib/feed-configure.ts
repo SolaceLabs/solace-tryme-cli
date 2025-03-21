@@ -4,6 +4,9 @@ import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
+import { messagePropertiesJson } from '../utils/msgprops';
+import { sessionPropertiesJson } from '../utils/sessionprops';
+
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
 
@@ -142,6 +145,14 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     } catch (error: any) {
       res.status(201).json({error: error.toString() });
     }
+  })
+
+  app.get('/messageproperties', async (req:any, res:any) => {
+    res.status(200).json(messagePropertiesJson)
+  })
+
+  app.get('/sessionproperties', async (req:any, res:any) => {
+    res.status(200).json(sessionPropertiesJson)
   })
 
   app.post('/exit', (req:any, res:any) => {

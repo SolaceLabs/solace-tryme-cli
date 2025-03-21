@@ -125,9 +125,25 @@ export const parseDeliveryMode = (value: any) => {
   return value.toUpperCase();
 }
 
-export const parsePartitionKeys = (value: string, previous: string[] | undefined) => {
+export const parsePartitionKeys = (value: string) => {
   if (!value) {
-    Logger.logError("required option '--partition-keys <KEY...>' not specified")
+    Logger.logError("required option '--partition-keys <FIELD1 | FIELD2 | .. | FIELD-n>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof value !== 'string' && typeof value !== 'object') {
+    Logger.logError("invalid key specified, one or more key is expected")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  return value;
+}
+
+export const parsePartitionKeysList = (value: string, previous: string[] | undefined) => {
+  if (!value) {
+    Logger.logError("required option '--partition-keys-list <KEY...>' not specified")
     Logger.logError('exiting...')
     process.exit(1)
   }

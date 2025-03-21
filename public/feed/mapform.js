@@ -1,28 +1,3 @@
-async function XXXsetupMappingToolbar() {
-  $('#mapping_rules_bar').empty();
-  var toolbar = $('#mapping_rules_bar');
-  var mapHtml = `
-    <div class="rules-toolbar">
-      <span style="text-align: left; font-size: 0.75rem; font-weight: 600;">
-        Define mapping rules to map fields:<br/>
-        <ul style="margin-bottom: unset;">
-          <li>Topic Variable ⇒ Payload Field</li>
-          <li>Payload Field ⇒ Payload Field</li>
-        </ul>
-      </span>
-      <span class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#field_map_form"
-          data-backdrop="static" data-keyboard="false" onclick="manageFieldMap()">
-        <i class="fa fa-plus" aria-hidden="true"></i>
-      </span>
-    </div>
-    `;
-  $('#sourceField').val('');
-  $('#targetField').val('');
-  
-  toolbar.append(mapHtml); 
-}
-
-
 async function manageFieldMap() {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
   var topic = $('#topic_name').text();
@@ -169,6 +144,7 @@ function getMapTree(topicVars, payload) {
     var node = { text: v, class: 'Topic Parameter', 
                   type: topicVars[v]?.schema?.type ? topicVars[v]?.schema?.type : 
                           topicVars[v]?.rule?.type ? topicVars[v]?.rule?.type : 'string',
+                  icon: '',
                   path: v, fullPath: v};
     vars.nodes.push(node)
   })
@@ -200,6 +176,7 @@ function buildMapTree(json, parent) {
     var node = { text: isArray ? `${field}[]` : field, 
                   class: 'Payload Parameter', 
                   type: json[field].type, 
+                  icon: '',
                   path: parent.path ? `${parent.path}.${field}` : field}
     node.fullPath = parent.fullPath ? `${parent.fullPath}.${isArray ? `${field}[]` : field}` : isArray ? `${field}[]` : field;
     if (json[field].type === 'object' && json[field].properties) {

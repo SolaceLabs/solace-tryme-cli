@@ -83,8 +83,10 @@ Execute a send command
 Options:
 
   /* PARTITION KEY SETTINGS */
-  --partition-keys-count <NUMBER>             [advanced] the partition keys count for generating simulated keys (min: 2)
-  --partition-keys <KEY...>                   [advanced] the partition key(s) as space-separated values if listing more than one (e.g., RED GREEN BLUE)
+  --partition-keys-count <NUMBER>             [advanced] the partition keys count for generatingsimulated keys (min: 2)
+  --partition-keys-list <KEY...>              [advanced] the partition key(s) as space-separated values if listing more than one (e.g.,RED GREEN BLUE)
+  --partition-keys <FIELD1 | FIELD2 | .. | FIELD-n>  
+                                              [advanced] the partition key(s) in quotes as pipe (|) separated payload attributes if listing more than one (e.g., "firstName | address.city")
 
   /* ADVANCED MESSAGE SETTINGS */
   --payload-type <PAYLOAD_TYPE>               [advanced] payload type: TEXT or BYTES (default: "text")
@@ -388,7 +390,7 @@ Options:
   --application-message-type <MESSAGE_TYPE>   [advanced] the application provided message type
   --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode: DIRECT or PERSISTENT (default: "PERSISTENT")
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
-  --user-properties <PROPS...>                [advanced] the user properties space-separated pairs if listing more than one (e.g., "name1: value1" "name2: value2")
+  --user-properties <PROPS...>                [advanced] the user properties as space-separated pairs if listing more than one (e.g., name1:value1 name2:value2 name3:"Hello World")
 
   /* HTTP CONTENT TYPE & ENCODING */
   --http-content-type <CONTENT_TYPE>          [advanced] specify the media type (MIME type) of the message content

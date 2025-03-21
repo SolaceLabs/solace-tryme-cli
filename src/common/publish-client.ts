@@ -166,6 +166,17 @@ export class SolaceClient extends VisualizeClient {
     });
   }
 
+  // get field value from the payload
+  getSourceFieldValue (obj:any, path:string):any {
+    if (path.indexOf('.') < 0)
+      return obj[path];
+  
+    let field = path.substring(0, path.indexOf('.'));
+    let fieldName = field.replaceAll('[0]', '');
+    var remaining = path.substring(path.indexOf('.')+1);
+    return this.getSourceFieldValue(field.includes('[0]') ? obj[fieldName][0] : obj[field], remaining);
+  }
+  
   // Publish a message on a topic
   publish(topicName: string, payload: string | Buffer | undefined, payloadType: string, iter: number = 0) {
     if (this.exited) return;
@@ -182,8 +193,14 @@ export class SolaceClient extends VisualizeClient {
       }
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
-      this.options.httpContentEncoding && message.setHttpContentEncoding(this.options.httpContentEncoding);
-      this.options.httpContentType && message.setHttpContentType(this.options.httpContentType);
+      this.options.httpContentEncoding !== undefined && message.setHttpContentEncoding(this.options.httpContentEncoding);
+      this.options.httpContentType !== undefined && message.setHttpContentType(this.options.httpContentType);
+      if (this.options.correlationId) {
+        if (this.options.correlationId === 'uuid')
+          message.setCorrelationId(uuid());
+        else
+          message.setCorrelationId(this.options.correlationId);
+      }
       if (payload) {
         if (payloadType.toLocaleLowerCase() === 'text') {
           payload = payload === "{}" ? "" : payload;
@@ -214,16 +231,21 @@ export class SolaceClient extends VisualizeClient {
         message.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, ""));
       }
 
-      this.options.acknowledgeImmediately && message.setAcknowledgeImmediately(true);
-      this.options.correlationKey  && message.setCorrelationKey(this.options.correlationKey);
-      !this.options.correlationKey && this.options.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);
-      this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
-      this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
-      this.options.dmqEligible && message.setDMQEligible(true);
-      this.options.appMessageId && message.setApplicationMessageId(this.options.appMessageId);
+      this.options.acknowledgeImmediately !== undefined && message.setAcknowledgeImmediately(this.options.acknowledgeImmediately);
+      if (this.options.correlationKey) {
+        if (this.options.correlationKey === 'uuid')
+          message.setCorrelationKey(uuid());
+        else
+          message.setCorrelationKey(this.options.correlationKey);
+      }
+      !this.options.correlationKey && this.options.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);      
+      this.options.deliveryMode !== undefined && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
+      this.options.timeToLive !== undefined && message.setTimeToLive(this.options.timeToLive);
+      this.options.dmqEligible !== undefined && message.setDMQEligible(this.options.dmqEligible);
+      this.options.appMessageId !== undefined && message.setApplicationMessageId(this.options.appMessageId);
       if (this.options.visualization === 'on' && !this.options.appMessageId) message.setApplicationMessageId(randomUUID());
-      this.options.appMessageType && message.setApplicationMessageType(this.options.appMessageType);
-      this.options.replyToTopic && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
+      this.options.appMessageType !== undefined && message.setApplicationMessageType(this.options.appMessageType);
+      this.options.replyToTopic !== undefined && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
       if (this.options.userProperties) {
         let propertyMap = new solace.SDTMapContainer();
         let props:Record<string, string | string[]> = this.options.userProperties;
@@ -233,20 +255,43 @@ export class SolaceClient extends VisualizeClient {
         message.setUserPropertyMap(propertyMap);    
       }
 
-      if (this.options.partitionKeys && this.options.partitionKeys.length) {
-        let propertyMap = message.getUserPropertyMap();
-        if (!propertyMap) propertyMap = new solace.SDTMapContainer();
-        
-        var pKey1 = this.options.partitionKeys[iter % this.options.partitionKeys.length];
-        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
-        message.setUserPropertyMap(propertyMap);    
-      } else if (this.options.partitionKeysCount) {
+      if (this.options.partitionKeysCount) {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
         var pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);    
+      } else if (this.options.partitionKeysList && this.options.partitionKeysList.length) {
+        let propertyMap = message.getUserPropertyMap();
+        if (!propertyMap) propertyMap = new solace.SDTMapContainer();
+        
+        var pKey1 = this.options.partitionKeysList[iter % this.options.partitionKeysList.length];
+        propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
+        message.setUserPropertyMap(propertyMap);    
+      } else if (this.options.partitionKeys) {
+        if (Array.isArray(this.options.partitionKeys) && !this.options.partitionKeys.length) {
+          this.options.partitionKeys = '';
+        }
+        
+        var fields = this.options.partitionKeys.split('|').map((field:string) => field.trim());
+        if (fields.length) {
+          let propertyMap = message.getUserPropertyMap();
+          if (!propertyMap) propertyMap = new solace.SDTMapContainer();
+          
+          var values:string[] = [];
+          fields.forEach((field:string) => {
+            try {
+              let val:string = this.getSourceFieldValue(payload, field);
+              values.push(val);
+            } catch (error:any) {
+              Logger.logError(`failed to get field value for ${field} - ${error.toString()}`)
+            }
+          });
+          var pKey1:any = values.join('-');            
+          propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
+          message.setUserPropertyMap(propertyMap);    
+        }
       }
       
       Logger.logSuccess(`published ${getType(message)} message to topic - ${message.getDestination()} }`)

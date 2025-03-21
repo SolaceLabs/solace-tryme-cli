@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import chalk from 'chalk';
 import { Signale } from 'signale'
-import { prettyXML, prettyJSON } from '../utils/prettify'
+import { prettyXML, prettyJSON, padString } from '../utils/prettify'
 
 const options = {
   types: {
@@ -144,7 +144,7 @@ const Logger = {
       if  (userProperties) {
         let keys = userProperties.getKeys();
         keys.forEach((key: any, idx: number) => {
-          userProps += `\t${key}:\t\t\t\t${userProperties.getField(key).getValue()}`;
+          userProps += padString(4, `${key}:`, 40) + userProperties.getField(key).getValue();          
           if (idx < keys.length-1) userProps += `\r\n`;
         });
       }
@@ -186,13 +186,11 @@ const Logger = {
     } else if (outputMode?.toUpperCase() === 'PROPS') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
       let userProps = '';
-      if  (userProperties) {
-        let keys = userProperties.getKeys();
-        keys.forEach((key: any, idx: number) => {
-          userProps += `\t${key}:\t\t\t\t${userProperties.getField(key).getValue()}`;
-          if (idx < keys.length-1) userProps += `\r\n`;
-        });
-      }
+      let keys = userProperties.getKeys();
+      keys.forEach((key: any, idx: number) => {
+        userProps += padString(4, `${key}:`, 40) + userProperties.getField(key).getValue();          
+        if (idx < keys.length-1) userProps += `\r\n`;
+      });
       if (userProps) 
         Logger.logMessage(`Properties\r\n${properties}\r\n${chalk.italic('User Properties:')}\r\n${userProps}`);
       else 

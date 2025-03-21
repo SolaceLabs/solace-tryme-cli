@@ -282,14 +282,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapsePayloadVariables">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Message Payload
-
-                                              <span style="float:right">
-                                                <span class="fa-lg">
-                                                  <i class="fa fa-angle-double-down" aria-hidden="true"></i>
-                                                  <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-                                                </span>                        
-                                              </span>
+                                              <div class="row">
+                                                <div class="col-5">
+                                                  Message Payload
+                                                </div>
+                                                <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                  Set data generation rules for payload (schema) fields.
+                                                </div>
+                                                <div class="col-1" style="text-align:right">
+                                                  <span class="fa-lg">
+                                                    <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                                                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                                                  </span>                        
+                                                </div>
+                                              </div>                                                                                          
                                           </div>
                                         </div>
                                       </a>
@@ -310,13 +316,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseTopicVariables">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Topic Parameters <span id="topic_variable_count"></span>
-                                              <span style="float:right">
-                                                <span class="fa-lg">
-                                                  <i class="fa fa-angle-double-down" aria-hidden="true"></i>
-                                                  <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-                                                </span>                        
-                                              </span>
+                                              <div class="row">
+                                                <div class="col-5">
+                                                  Topic Parameters <span id="topic_variable_count"></span>                                              
+                                                </div>
+                                                <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                  Set data generation rules for topic parameters.
+                                                </div>
+                                                <div class="col-1" style="text-align:right">
+                                                  <span class="fa-lg">
+                                                    <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                                                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                                                  </span>                        
+                                                </div>
+                                              </div>
                                           </div>
                                         </div>
                                       </a>
@@ -334,14 +347,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseMessageMapping">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Attribute Mapping <span id="attribute_mapping_count"></span>
-                                              <!-- : <i style="color: #343a40">Topic Variable ⇒ Payload</i> -->
-                                              <span style="float:right">
-                                                <span class="fa-lg">
-                                                  <i class="fa fa-angle-double-down" aria-hidden="true"></i>
-                                                  <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-                                                </span>                        
-                                              </span>
+                                              <div class="row">
+                                                <div class="col-5">
+                                                  Attribute Mapping <span id="attribute_mapping_count"></span>
+                                                </div>
+                                                <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                  Dynamically map topic parameters from payload fields and vice versa.
+                                                </div>
+                                                
+                                                <div class="col-1" style="text-align:right">
+                                                  <span class="fa-lg">
+                                                    <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                                                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                                                  </span>                        
+                                                </div>
+                                              </div>
                                           </div>
                                         </div>
                                       </a>
@@ -357,9 +377,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                               <li>Payload Field ⇒ Payload Field</li>
                                             </ul>
                                           </span>
-                                          <span class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#field_map_form"
-                                              data-backdrop="static" data-keyboard="false" onclick="manageFieldMap()">
-                                            <i class="fa fa-plus" aria-hidden="true"></i>
+                                          <span class='jstooltip' style="margin-left: 10px;border:none;">
+                                            <span class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#field_map_form"
+                                                data-backdrop="static" data-keyboard="false" onclick="manageFieldMap()">
+                                              <i class="fa fa-plus" aria-hidden="true"></i>
+                                            </span>
+                                            <span class="jstooltiptext jstooltip-top">New Mapping</span>
                                           </span>
                                         </div>            
                                       </div>
@@ -369,17 +392,94 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
                                   <div class="card card-primary">
                                     <div class="d-none d-sm-inline shadow-sm callout callout-info"  style="border-left-color:#00c895;margin-bottom: unset; padding: unset" >
-                                      <a class="float-left w-100" data-toggle="collapse" href="#collapsePublishSettings">
+                                      <a class="float-left w-100" data-toggle="collapse" href="#collapseSessionSettings">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Publish Settings
-                                              <!-- : <i style="color: #343a40">Topic Variable ⇒ Payload</i> -->
-                                              <span style="float:right">
+                                            <div class="row">
+                                              <div class="col-5">
+                                                <i class="fa fa-exclamation-circle fa-lg" style="color: orange;" aria-hidden="true"></i>
+                                                Session Settings
+                                              </div>
+                                              <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                Settings that define how a client connects and interacts with a Solace event broker.<br/>
+                                              </div>
+                                              <div class="col-1" style="text-align:right">
                                                 <span class="fa-lg">
                                                   <i class="fa fa-angle-double-down" aria-hidden="true"></i>
                                                   <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                                                 </span>                        
-                                              </span>
+                                              </div>
+                                            </div>
+                                            <div class="row" style="margin-top: 5px;">
+                                              <div class="col-5"></div>
+                                              <div class="col-6 text-right">
+                                                <div class="badge badge-pill badge-warning" style="font-size: 0.75rem;">
+                                                These global settings define the client session configuration for publishing events in the feed.</div> 
+                                              </div>
+                                              <div class="col-1"></div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </a>
+                                    </div>
+
+                                    <div id="collapseSessionSettings" class="collapse" data-parent="#accordion">
+                                      <div class="card-body" style="padding: 3px">
+                                        <div id="session_settings"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="card card-primary">
+                                    <div class="d-none d-sm-inline shadow-sm callout callout-info"  style="border-left-color:#00c895;margin-bottom: unset; padding: unset" >
+                                      <a class="float-left w-100" data-toggle="collapse" href="#collapseMessageSettings">
+                                        <div class="card-header">
+                                          <div class="card-title w-100">
+                                              <div class="row">
+                                                <div class="col-5">
+                                                  Message Settings
+                                                </div>
+                                                <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                  Properties that control how individual messages are handled and routed
+                                                </div>
+                                                <div class="col-1" style="text-align:right">
+                                                  <span class="fa-lg">
+                                                    <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                                                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                                                  </span>                        
+                                                </div>
+                                              </div>
+                                          </div>
+                                        </div>
+                                      </a>
+                                    </div>
+
+                                    <div id="collapseMessageSettings" class="collapse" data-parent="#accordion">
+                                      <div class="card-body" style="padding: 3px">
+                                        <div id="message_settings"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="card card-primary">
+                                    <div class="d-none d-sm-inline shadow-sm callout callout-info"  style="border-left-color:#00c895;margin-bottom: unset; padding: unset" >
+                                      <a class="float-left w-100" data-toggle="collapse" href="#collapsePublishSettings">
+                                        <div class="card-header">
+                                          <div class="card-title w-100">
+                                              <div class="row">
+                                                <div class="col-5">
+                                                  Publish Settings
+                                                </div>
+                                                <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                  Settings that control the number of events to be published, the interval between publishes, and the initial delay.
+                                                </div>
+                                                <div class="col-1" style="text-align:right">
+                                                  <span class="fa-lg">
+                                                    <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                                                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                                                  </span>                        
+                                                </div>
+                                              </div>
                                           </div>
                                         </div>
                                       </a>
@@ -391,6 +491,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       </div>
                                     </div>
                                   </div>
+
                                 </div>
 
                                 <button type="button" class="btn btn-block btn-gradient-primary btn-lg" 
@@ -423,14 +524,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseReceivePayloadVariables">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Message Payload
-                            
-                                              <span style="float:right">
+                                            <div class="row">
+                                              <div class="col-5">
+                                                Message Payload
+                                              </div>
+                                              <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                Settings that control the number of events to be published, the interval between publishes, and the initial delay.
+                                              </div>                                                                        
+                                              <div class="col-1" style="text-align:right">
                                                 <span class="fa-lg">
                                                   <i class="fa fa-angle-double-down" aria-hidden="true"></i>
                                                   <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                                                 </span>                        
-                                              </span>
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       </a>
@@ -451,13 +558,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseReceiveTopicVariables">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Topic Parameters <span id="recv_topic_variable_count"></span>
-                                              <span style="float:right">
+                                            <div class="row">
+                                              <div class="col-5">
+                                                Topic Parameters <span id="recv_topic_variable_count"></span>
+                                              </div>
+                                              <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                Settings that control the number of events to be published, the interval between publishes, and the initial delay.
+                                              </div>                                            
+                                              
+                                              <div class="col-1" style="text-align:right">
                                                 <span class="fa-lg">
                                                   <i class="fa fa-angle-double-down" aria-hidden="true"></i>
                                                   <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                                                 </span>                        
-                                              </span>
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       </a>
@@ -475,13 +590,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseReceiveConsumers">
                                         <div class="card-header">
                                           <div class="card-title w-100">
-                                              Consumers <span id="recv_consumer_count"></span>
-                                              <span style="float:right">
+                                            <div class="row">
+                                              <div class="col-5">
+                                                Consumers <span id="recv_consumer_count"></span>
+                                              </div>
+                                              <div class="col-6 card-body-title" style="text-align: right; font-size: 0.95rem; font-weight: 600;">
+                                                Settings that control the number of events to be published, the interval between publishes, and the initial delay.
+                                              </div>                                            
+                                              
+                                              <div class="col-1" style="text-align:right">
                                                 <span class="fa-lg">
                                                   <i class="fa fa-angle-double-down" aria-hidden="true"></i>
                                                   <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                                                 </span>                        
-                                              </span>
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       </a>
@@ -531,7 +654,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </footer>    
   </div>
   <!-- ./wrapper -->
-  <!-- <div data-include="fieldmodal"></div> -->
+  <!-- Field Rules Form -->
   <div class="modal fade" id="field_rules_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -598,7 +721,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
     </div>
   </div>  
-  <!-- <div data-include="mapmodal"></div> -->
+  <!-- Field Map Form -->
   <div class="modal fade" id="field_map_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -647,7 +770,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
     </div>
   </div>
-  <!-- <div data-include="instancecountmodal"></div> -->
+  <!-- Field Instance Count Form -->
   <div class="modal fade" id="field_instance_count_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -687,9 +810,188 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
     </div>
   </div>  
+  <!-- Partition Key Selection Form -->
+  <div class="modal fade" id="pkey_selection_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Pick Partition Key(s)</h5>
+        </div>
+        <form id="pkeySelectionForm" class="needs-validation" novalidate>
+          <div id="srcType" hidden></div>
+          <div id="srcSubType" hidden></div>
+          <div id="srcFullPath" hidden></div>
+          <div class="modal-body" style="padding:unset;">
+            <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
+              <h4 class="card-title float-left ">Payload Attribute</h4>
+              <h4 class="card-title float-right ">Attribute Info</h4>
+            </div>
   
-  <!-- <div data-include="savechanges"></div> -->
-  <!-- <div data-include="sampleview"></div> -->
+            <div id="parameterRulesFormBody" class="modal-body" style="padding:unset;">
+              <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
+                <div id="field_pkey_info">
+                  <div id="pkey-source-pane"></div>
+                  <div id="pkey-source-info"></div>
+                </div>
+                <div class="form-group" style="padding-top: 10px;">
+                  <textarea class="form-control" id="pkeyFields" data-width="80%" placeholder="Keys:" rows="3" readonly></textarea>                  
+                  <div id="pkeyFormError" class="feedback" style="font-size: 12px;color: red"></div>
+                </div>
+              </div>
+            </div>
+    
+            <div class="modal-footer" style="display: flex; justify-content: space-between;">
+              <div id="mismatchConfirm" class="float-left"></div>
+    
+              <div>
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Partition Key Reset Dialog -->
+  <div class="modal fade" id="pkey-delete-confirm" data-backdrop="static" 
+      tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure, you want to reset the current partition key settings?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetPartitionKey()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Message Properties Form -->
+  <div class="modal fade" id="msg_settings_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Message Properties</h5>
+        </div>
+        <form id="msgSettingsForm" class="needs-validation" novalidate>
+          <div class="modal-body" style="padding:unset;">
+            <div id="parameterRulesFormBody" class="modal-body" style="padding:unset;height:400px; overflow-y: scroll;">
+              <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
+                <div class="form-group" style="padding-top: 10px;">
+                  <table class="table table-bordered table-hover" >
+                    <thead class="sticky-top">
+                      <tr>
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Property</th>
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Value</th>                        
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;"></th>                        
+                      </tr>
+                    </thead>
+                    <tbody id="editableMessageSettings">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="msgSettingsFormError" class="feedback" style="font-size: 12px;color: red"></div>
+            </div>
+    
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+              <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Message Properties Reset Dialog -->
+  <div class="modal fade" id="message-properties-reset-confirm" data-backdrop="static" 
+      tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure, you want to reset the current message settings to default?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetMessageSettings()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Session Properties Form -->
+  <div class="modal fade" id="session_settings_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Session Properties</h5>
+        </div>
+        <form id="sessionSettingsForm" class="needs-validation" novalidate>
+          <div class="modal-body" style="padding:unset;">
+            <div id="parameterRulesFormBody" class="modal-body" style="padding:unset;height:400px; overflow-y: scroll;">
+              <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
+                <div class="form-group" style="padding-top: 10px;">
+                  <table class="table table-bordered table-hover" >
+                    <thead class="sticky-top">
+                      <tr>
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Property</th>
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Value</th>                        
+                        <th style="position: sticky;top: 0; background-color: #f2f2f2;"></th>                        
+                      </tr>
+                    </thead>
+                    <tbody id="editableSessionSettings">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="sessionSettingsFormError" class="feedback" style="font-size: 12px;color: red"></div>
+            </div>
+    
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+              <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Session Properties Reset Dialog -->
+  <div class="modal fade" id="session-properties-reset-confirm" data-backdrop="static" 
+      tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure, you want to reset the current session settings to default?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetSessionSettings()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sample Data View -->
   <div class="modal fade" id="sample_data_view" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" style="margin: unset;">
       <div class="modal-content" style="width: 100vw;height: 100vh; ">
@@ -728,6 +1030,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script type="text/javascript" src="plugins/jquery.json-viewer/jquery.json-viewer.js"></script>
   <script type="text/javascript" src="feed/mapform.js"></script>
   <script type="text/javascript" src="feed/ruleform.js"></script>
+  <script type="text/javascript" src="feed/pkeyform.js"></script>
+  <script type="text/javascript" src="feed/sessionsettingsform.js"></script>
+  <script type="text/javascript" src="feed/msgsettingsform.js"></script>
   <script type="text/javascript" src="feed/rulleform-settings.js"></script>
   <script type="text/javascript" src="feed/ruleform-validation.js"></script>
   <script type="text/javascript" src="feed/countform.js"></script>
@@ -737,6 +1042,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     window.onload = function () {
       setTimeout(function() {
           document.getElementById("body").style.display = "block";
+          sessionSettingsSubmit();
+          messageSettingsSubmit();
+          pkeySelectionSubmit();
           mapAssignSubmit();
           ruleAssignSubmit();
           arrayInstanceCountAssignSubmit();
@@ -754,6 +1062,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
       position: 250, // if there is no percentage it interpret it as pixels
     });
     var mapSplitter = $('#field_map_info').height(400).split({
+      orientation: 'vertical',
+      limit: 250,
+      position: 250 // if there is no percentage it interpret it as pixels
+    });
+    var pkeySplitter = $('#field_pkey_info').height(400).split({
       orientation: 'vertical',
       limit: 250,
       position: 250 // if there is no percentage it interpret it as pixels

@@ -53,7 +53,8 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   timeToLive?: number | undefined
   dmqEligible?: boolean | undefined
   partitionKeysCount?: number | undefined
-  partitionKeys?: any
+  partitionKeysList?: any | undefined
+  partitionKeys?: string
   appMessageId?: string | undefined
   appMessageType?: string | undefined
   correlationId?: string | undefined
@@ -126,8 +127,6 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.stdin = false
     this.timeToLive = 1
     this.dmqEligible = false
-    this.partitionKeysCount = 2;
-    this.partitionKeys = []
     this.appMessageId = ""
     this.appMessageType = ""
     this.correlationKey = ""

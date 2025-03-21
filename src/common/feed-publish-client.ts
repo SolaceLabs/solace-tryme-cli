@@ -6,6 +6,7 @@ import { getDefaultClientName, getType } from "../utils/defaults";
 import { VisualizeClient } from "./visualize-client";
 import { randomUUID } from "crypto";
 import { chalkEventCounterValue } from '../utils/chalkUtils';
+import { parse } from 'path';
 const { uuid } = require('uuidv4');
 
 const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
@@ -164,8 +165,45 @@ export class SolaceClient extends VisualizeClient {
     });
   }
 
+  // get field value from the payload
+  getSourceFieldValue (obj:any, path:string):any {
+    if (path.indexOf('.') < 0)
+      return obj[path];
+  
+    let field = path.substring(0, path.indexOf('.'));
+    let fieldName = field.replaceAll('[0]', '');
+    var remaining = path.substring(path.indexOf('.')+1);
+    return this.getSourceFieldValue(field.includes('[0]') ? obj[fieldName][0] : obj[field], remaining);
+  }
+
+  // parser user properties
+  prepareUserPropertiesFromSettings = (value: string) => {
+    // const result = value.replace(/"([^"]*)"/g, (match) => {
+    //   return '"' + match.slice(1, -1).replace(/ /g, '$') + '"';
+    // });
+
+    const result = value.replace(/(['"])(.*?)\1/g, (match, quote, content) => {
+      return quote + content.replace(/ /g, '$') + quote;
+    });    
+    
+    var props = result.split(' ');
+    var propsMap:any = {};
+    props.forEach((prop) => {
+      const [key, val] = prop.split(':')
+      if (key && val) {
+        var _key = key.trim().replace(/\$/g, ' ');
+        _key = _key.replace(/^['"]|['"]$/g, '');
+        var _val = val.trim().replace(/\$/g, ' ');
+        _val = _val.replace(/^['"]|['"]$/g, '');
+        propsMap[_key] = _val;
+      }
+    })
+
+    return propsMap
+  }  
+
   // Publish a message on a topic
-  publish(topicName: string, payload: string | Buffer | undefined, payloadType: string, iter: number = 0) {
+  publish(topicName: string, payload: string | Buffer | undefined, settings: any, iter: number = 0) {
     if (this.exited) return;
     
     if (!this.session) {
@@ -173,15 +211,23 @@ export class SolaceClient extends VisualizeClient {
       return;
     }
     try {
+      var payloadType = settings.payloadType as string;
       if (!topicName.startsWith('@STM')) {
-        this.options.publishConfirmation ?
-                  Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
-                  Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
+        settings.publishConfirmation ?
+                  Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${settings.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
+                  Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${settings.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
       }
       let message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
-      this.options.httpContentEncoding && message.setHttpContentEncoding(this.options.httpContentEncoding);
-      this.options.httpContentType && message.setHttpContentType(this.options.httpContentType);
+      settings.httpContentEncoding !== undefined && message.setHttpContentEncoding(settings.httpContentEncoding);
+      settings.httpContentType !== undefined && message.setHttpContentType(settings.httpContentType);
+      if (settings.correlationId) {
+        if (settings.correlationId === 'uuid')
+          message.setCorrelationId(uuid());
+        else
+          message.setCorrelationId(settings.correlationId);
+      }
+
       if (payload) {
         if (payloadType.toLocaleLowerCase() === 'text') {
           payload = payload === "{}" ? "" : payload;
@@ -221,16 +267,27 @@ export class SolaceClient extends VisualizeClient {
         }
       }
 
-      this.options.acknowledgeImmediately && message.setAcknowledgeImmediately(true);
-      this.options.correlationKey  && message.setCorrelationKey(this.options.correlationKey);
-      !this.options.correlationKey && this.options.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);
-      this.options.deliveryMode && message.setDeliveryMode(deliveryModeMap.get(this.options.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
-      this.options.timeToLive && message.setTimeToLive(this.options.timeToLive);
-      this.options.dmqEligible && message.setDMQEligible(true);
-      this.options.appMessageId && message.setApplicationMessageId(this.options.appMessageId);
-      if (this.options.visualization === 'on' && !this.options.appMessageId) message.setApplicationMessageId(randomUUID());
-      this.options.appMessageType && message.setApplicationMessageType(this.options.appMessageType);
-      this.options.replyToTopic && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
+      settings.acknowledgeImmediately !== undefined && message.setAcknowledgeImmediately(settings.acknowledgeImmediately);
+      if (settings.correlationKey) {
+        if (settings.correlationKey === 'uuid')
+          message.setCorrelationKey(uuid());
+        else
+          message.setCorrelationKey(settings.correlationKey);
+      }
+      !settings.correlationKey && settings.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);      
+      settings.deliveryMode !== undefined && message.setDeliveryMode(deliveryModeMap.get(settings.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
+      settings.timeToLive !== undefined && message.setTimeToLive(settings.timeToLive);
+      settings.dmqEligible !== undefined && message.setDMQEligible(settings.dmqEligible);
+      settings.elidingEligible !== undefined && message.setElidingEligible(settings.elidingEligible);
+      if (settings.appMessageId) {
+        if (settings.appMessageId === 'uuid')
+          message.setApplicationMessageId(uuid());
+        else
+          message.setApplicationMessageId(settings.appMessageId);
+      }      
+      if (settings.visualization === 'on' && !settings.appMessageId) message.setApplicationMessageId(randomUUID());
+      settings.appMessageType !== undefined && message.setApplicationMessageType(settings.appMessageType);
+      settings.replyToTopic !== undefined && message.setReplyTo(solace.SolclientFactory.createTopicDestination(settings.replyToTopic))
       if (this.options.userProperties) {
         let propertyMap = new solace.SDTMapContainer();
         let props:Record<string, string | string[]> = this.options.userProperties;
@@ -238,26 +295,56 @@ export class SolaceClient extends VisualizeClient {
           propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
         });
         message.setUserPropertyMap(propertyMap);    
+      } else if (settings.userProperties) {
+        var userProperties = this.prepareUserPropertiesFromSettings(settings.userProperties);
+        let propertyMap = new solace.SDTMapContainer();
+        Object.entries(userProperties).forEach((entry) => {
+          propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
+        });
+        message.setUserPropertyMap(propertyMap);
       }
 
-      if (this.options.partitionKeysCount) {
+      if (settings.partitionKeysCount) {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
+        var pKey2 = 'pkey-' + Date.now() % settings.partitionKeysCount;
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);    
-      } else if (this.options.partitionKeys && this.options.partitionKeys.length) {
+      } else if (settings.partitionKeysList && settings.partitionKeysList.length) {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey1 = this.options.partitionKeys[iter % this.options.partitionKeys.length];
+        var pKey1 = settings.partitionKeysList[iter % settings.partitionKeysList.length];
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
         message.setUserPropertyMap(propertyMap);    
+      } else if (settings.partitionKeys) {
+        if (Array.isArray(settings.partitionKeys) && !settings.partitionKeys.length) {
+          settings.partitionKeys = '';
+        }
+
+        var fields = settings.partitionKeys.split('|').map((field:string) => field.trim());
+        if (fields.length) {
+          let propertyMap = message.getUserPropertyMap();
+          if (!propertyMap) propertyMap = new solace.SDTMapContainer();
+          
+          var values:string[] = [];
+          fields.forEach((field:string) => {
+            try {
+              let val:string = this.getSourceFieldValue(payload, field);
+              values.push(val);
+            } catch (error:any) {
+              Logger.logError(`failed to get field value for ${field} - ${error.toString()}`)
+            }
+          });
+          var pKey1:any = values.join('-');            
+          propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey1));
+          message.setUserPropertyMap(propertyMap);    
+        }
       }
       
       Logger.logSuccess(`published ${getType(message)} message to topic - ${message.getDestination()} }`)
-      Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
+      Logger.dumpMessage(message, settings.outputMode, settings.pretty);
       this.session.send(message);
       this.publishVisualizationEvent(this.session, this.options, STM_EVENT_PUBLISHED, { 
         type: 'sender', deliveryMode: message.getDeliveryMode(), topicName, clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId()
