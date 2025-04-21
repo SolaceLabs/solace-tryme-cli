@@ -231,6 +231,32 @@ export const parsePublishTopic = (value: string, previous: string[] | undefined)
   return previous;
 }
   
+export const parsePublishQueue = (value: string, previous: string[] | undefined) => {
+  if (!value) {
+    Logger.logError("required option '--queue <QUEUE...>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof value !== 'string' && typeof value !== 'object') {
+    Logger.logError("invalid queue specified, one or more queue name is expected")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof value === 'string') {
+    if (/[<>\?&;\*]/.test(value)) {
+      Logger.error(`invalid queue name '${value}' contain invalid characters *, >, <, ?, &, ;`)
+      Logger.error('exiting...')
+      process.exit(1)
+    }
+  }
+
+  previous ? previous.push(value.toString()) : previous = [ value ];
+  
+  return previous;
+}
+  
 export const parseReceiveTopic = (value: string, previous: string[] | undefined) => {
   if (!value) {
     Logger.logError("required option '--topic <TOPIC...>' not specified")

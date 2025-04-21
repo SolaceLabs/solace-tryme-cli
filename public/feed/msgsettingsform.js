@@ -1,17 +1,21 @@
 function validateMessageSetting(props, current, key, error) {
   let value = current[key];
-  let defaultProp = props.find(p => p.key === key);
-  if (defaultProp === undefined) {
-    error += `Unknown message setting: ${key}\n`;
+  if (props[key] === undefined) {
+    error += `Unknown session setting: ${key}\n`;
     return false;
   }
 
-  if (defaultProp.type === 'select' && !defaultProp.values.includes(value)) {
+  if (props[key].type === 'select' && !props[key].values.includes(value)) {
     error += `Invalid value for ${key}: ${value}\n`;
     return false;
   }
 
-  if (key === 'userProperties' && value) {
+  if (key === 'userProperties') {
+    if (!value) {
+      error += `Invalid value for ${key}: ${value}\n`;
+      return false;
+    }
+
     let pairs = value.split(',');
     if (pairs.length === 0) {
       error += `Invalid value for ${key}: ${value}\n`;
@@ -24,19 +28,26 @@ function validateMessageSetting(props, current, key, error) {
         return false;
       }
     });
-  }
-
-  if (defaultProp.datatype === 'boolean' && current[key]) {
-    current[key] = value === 'true';
-  } else if (defaultProp.datatype === 'number' && current[key]) {
-    try {
-      current[key] = parseInt(value);
-    } catch (e) {
-      error += `Invalid value for ${key}: ${value}\n`;
-      return false;
-    }
   } else {
-    current[key] = value;
+    if (props[key].datatype === 'boolean') {
+      let val = '';
+      if (typeof value === 'string')
+        val = value === 'true' ? 'true' : 'false';
+      else if (typeof value === 'boolean')
+        val = value ? 'true' : 'false';
+      props[key].value = val;
+      current[key] = val;
+    } else if (props[key].datatype === 'number' && props[key]) {
+      if (parseInt(value) === NaN) {
+        error += `Invalid value for ${key}: ${value}\n`;
+        return false;
+      }
+      props[key].value = parseInt(value);
+      current[key] = parseInt(value);
+    } else {
+      props[key].value = value;
+      current[key] = value;
+    }
   }
 
   return true;
@@ -57,29 +68,38 @@ function messageSettingsSubmit() {
         event.stopPropagation();
       }
 
+      const defaultMsgSettings = await getDefaultMessageProperties();
+
       var els = form.querySelectorAll('tbody tr[id^="tr_prop"]');
       var settings = {};
+      var changed = 0;
       var deleted = [];
       els.forEach((el) => {
         var key = el.id.split('_').pop();
         if (el.dataset.deleted === 'yes') {
-          delete settings[key];
+          changed++;
           deleted.push(key);
-        } else if (el.dataset.new_value !== "") {
+        } else if (el.dataset.new_value !== '') {
+          changed++;
           settings[key] = el.dataset.new_value;
         }
       });
 
-      if (Object.keys(settings).length === 0) {
+      if (changed === 0) {
         form.classList.add('was-validated');
         $('#msgSettingsFormError').hide();
-        $('#msg_settings_form').modal('toggle');        
+        $('#msg_settings_form').modal('toggle');  
+        return false;      
       }
       
-      var defaultProps = await getDefaultMessageProperties();
+      var feed = JSON.parse(localStorage.getItem('currentFeed'));
+      var topic = $('#topic_name').text();
+      var message = $('#message-feed-name').text();
+      var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
+
       var error = '';
       Object.keys(settings).forEach((key) => {
-        validateMessageSetting(defaultProps, settings, key, error);
+        validateMessageSetting(defaultMsgSettings, settings, key, error);
       });
 
       if (error) {
@@ -93,10 +113,6 @@ function messageSettingsSubmit() {
         $('#msgSettingsFormError').hide();
         $('#msg_settings_form').modal('toggle');
 
-        var feed = JSON.parse(localStorage.getItem('currentFeed'));
-        var topic = $('#topic_name').text();
-        var message = $('#message-feed-name').text();
-        var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
         rule.messageSettings = {
           ...rule?.messageSettings,
           ...settings
@@ -115,24 +131,30 @@ function messageSettingsSubmit() {
           headers: {
             'Content-Type': 'application/json;charset=UTF-8'
           },
-          body: localStorage.getItem('currentFeed')
+          body: JSON.stringify(feed)
         });
 
         toastr.success('Message Settings updated successfully.')
+
+        Object.values(defaultMsgSettings).filter(prop => prop.exposed).forEach((prop) => {
+          if (rule.messageSettings[prop.key] !== undefined) {
+            prop.value = rule.messageSettings[prop.key];
+          }
+        });
+
         var tbody = '';
-        defaultProps.forEach((prop) => {
-          let value = rule.messageSettings[prop.key];
+        Object.values(defaultMsgSettings).filter(prop => prop.exposed).forEach((prop) => {
           tbody += `
             <tr class="sash">
-              <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-              ${value !== undefined ? 
-                `<td>${value}</td>` : 
-                `<td class="prova" data-ribbon="default"></td>`}
+              <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+              ${prop.value !== undefined ? 
+                `<td>${prop.value}</td>` : 
+                `<td class="prova" data-ribbon="default">${prop.default}</td>`}
             </tr>    
           `;
         })
       
-        $('#message_props_table').html(tbody);    
+        $('#message_props_table').html(tbody);
       }
       return false;
     });
@@ -162,15 +184,14 @@ async function resetMessageSettings() {
   var defaultProps = await getDefaultMessageProperties();
 
   var tbody = '';
-  defaultProps.forEach((prop) => {
-    let value = rule.messageSettings[prop.key];
+  Object.values(defaultProps).filter(prop => prop.exposed).forEach((prop) => {
     tbody += `
       <tr class="sash">
-        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-        ${value !== undefined ? 
-          `<td>${value}</td>` : 
-          `<td class="prova" data-ribbon="default"></td>`}
-      </tr>    
+        <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+        ${prop.value !== undefined ? 
+          `<td>${prop.value}</td>` : 
+          `<td class="prova" data-ribbon="default">${prop.default}</td>`}
+      </tr>        
     `;
   })
 

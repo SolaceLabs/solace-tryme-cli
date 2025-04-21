@@ -69,7 +69,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </p>
               </a>
               <ul class="nav nav-treeview">
-                <li id="sidebar-info-root" class="nav-item">
+                <li id="sidebar-info-root" class="nav-item" style="margin-left: 24px;">
                   <a id="m_info" href="feed.html" class="nav-link">
                     <i class="nav-icon">
                       <img width=32 src="images/asyncapi.png"/></i>
@@ -78,7 +78,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </p>
                   </a>
                 </li>
-                <li id="sidebar-message-root" class="nav-item">
+                <li id="sidebar-message-root" class="nav-item" style="margin-left: 24px;">
                   <a id="m_messages" href="message.html" class="nav-link">
                     <i class="nav-icon"><img width=32 src="images/message.png"/></i>
                     <p>
@@ -90,7 +90,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </ul>
                 </li>
     
-                <li id="sidebar-schema-root" class="nav-item">
+                <li id="sidebar-schema-root" class="nav-item" style="margin-left: 24px;">
                   <a id="m_schemas" href="schema.html" class="nav-link">
                     <i class="nav-icon"><img width=32 src="images/schema.png"/></i>
                     <p>
@@ -102,7 +102,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </ul>
                 </li>
         
-                <li id="sidebar-server-root" class="nav-item">
+                <li id="sidebar-server-root" class="nav-item" style="margin-left: 24px;">
                   <a id="m_servers" href="server.html" class="nav-link">
                     <i class="nav-icon"><img width=32 src="images/server.png"/></i>
                     <p>
@@ -112,9 +112,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </a>
                   <ul id="sidebar-server" class="nav nav-treeview">
                   </ul>
-                </li>
-    
+                </li>    
               </ul>
+            </li>
+            <li id="sidebar-session-root" class="nav-item">
+              <a id="m_session" href="session.html" class="nav-link">
+                <i class="nav-icon">
+                  <img width=32 src="images/session.png"/></i>
+                <p>
+                  Session Settings
+                </p>
+              </a>
             </li>
           </ul>
         </nav>
@@ -390,7 +398,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     </div>
                                   </div>
 
-                                  <div class="card card-primary">
+                                  <!-- <div class="card card-primary">
                                     <div class="d-none d-sm-inline shadow-sm callout callout-info"  style="border-left-color:#00c895;margin-bottom: unset; padding: unset" >
                                       <a class="float-left w-100" data-toggle="collapse" href="#collapseSessionSettings">
                                         <div class="card-header">
@@ -428,7 +436,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                         <div id="session_settings"></div>
                                       </div>
                                     </div>
-                                  </div>
+                                  </div> -->
 
                                   <div class="card card-primary">
                                     <div class="d-none d-sm-inline shadow-sm callout callout-info"  style="border-left-color:#00c895;margin-bottom: unset; padding: unset" >
@@ -932,67 +940,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
     </div>
   </div>
-  <!-- Session Properties Form -->
-  <div class="modal fade" id="session_settings_form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Session Properties</h5>
-        </div>
-        <form id="sessionSettingsForm" class="needs-validation" novalidate>
-          <div class="modal-body" style="padding:unset;">
-            <div id="parameterRulesFormBody" class="modal-body" style="padding:unset;height:400px; overflow-y: scroll;">
-              <div class="card-body" style="padding-top:unset;padding-bottom:unset;">
-                <div class="form-group" style="padding-top: 10px;">
-                  <table class="table table-bordered table-hover" >
-                    <thead class="sticky-top">
-                      <tr>
-                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Property</th>
-                        <th style="position: sticky;top: 0; background-color: #f2f2f2;">Value</th>                        
-                        <th style="position: sticky;top: 0; background-color: #f2f2f2;"></th>                        
-                      </tr>
-                    </thead>
-                    <tbody id="editableSessionSettings">
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div id="sessionSettingsFormError" class="feedback" style="font-size: 12px;color: red"></div>
-            </div>
-    
-            <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-              <button class="btn btn-primary" type="submit">Submit</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  <!-- Session Properties Reset Dialog -->
-  <div class="modal fade" id="session-properties-reset-confirm" data-backdrop="static" 
-      tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          Are you sure, you want to reset the current session settings to default?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetSessionSettings()">Yes</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
   <!-- Sample Data View -->
-  <div class="modal fade" id="sample_data_view" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="sample_data_view" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
     <div class="modal-dialog" role="document" style="margin: unset;">
       <div class="modal-content" style="width: 100vw;height: 100vh; ">
         <div class="modal-header">
@@ -1031,7 +980,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script type="text/javascript" src="feed/mapform.js"></script>
   <script type="text/javascript" src="feed/ruleform.js"></script>
   <script type="text/javascript" src="feed/pkeyform.js"></script>
-  <script type="text/javascript" src="feed/sessionsettingsform.js"></script>
   <script type="text/javascript" src="feed/msgsettingsform.js"></script>
   <script type="text/javascript" src="feed/rulleform-settings.js"></script>
   <script type="text/javascript" src="feed/ruleform-validation.js"></script>
@@ -1042,7 +990,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
     window.onload = function () {
       setTimeout(function() {
           document.getElementById("body").style.display = "block";
-          sessionSettingsSubmit();
           messageSettingsSubmit();
           pkeySelectionSubmit();
           mapAssignSubmit();

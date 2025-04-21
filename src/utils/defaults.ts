@@ -157,8 +157,6 @@ export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
   count: 0,
   interval: 1000,
-  rate: 1.0,
-  frequency: 'msg/s',
   initialDelay: 0,
   clientName: undefined,
   description: 'Publish application created via Solace Try-Me CLI',
@@ -455,6 +453,7 @@ export const defaultFeedMajorVersion = 1
 export const defaultFeedMinorVersion = 0
 export const defaultFeedInfoFile = 'feedinfo.json'
 export const defaultFeedRulesFile = 'feedrules.json'
+export const defaultFeedSessionFile = 'feedsession.json'
 export const defaultFeedSchemasFile = 'feedschemas.json'
 export const defaultEventFeedsFile = 'EVENT_FEEDS.json'
 export const defaultFeedApiEndpointFile = 'feedapi.json'

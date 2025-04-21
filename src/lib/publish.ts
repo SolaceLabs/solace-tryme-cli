@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists } from '../utils/checkparams'
+import { checkConnectionParamsExists, checkForCliTopics, checkPubTopicExists, checkPubQueueExists } from '../utils/checkparams'
 import { SolaceClient } from '../common/publish-client'
 import { Logger } from '../utils/logger'
 import { getDefaultMessage, delay } from '../utils/defaults';
@@ -72,12 +72,21 @@ const publish = async (
   }
 
   if (count === 1) {
-    for (var i=0; i<options.topic.length; i++) {
-      if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
-        message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
-    
-      publisher.publish(options.topic[i], message, payloadType, 0);
-    } 
+    if (options.queue) {
+      for (var i=0; i<options.queue.length; i++) {
+        if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+          message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+      
+        publisher.deliver(options.queue[i], message, payloadType, 0);
+      } 
+    } else {
+      for (var i=0; i<options.topic.length; i++) {
+        if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+          message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+      
+        publisher.publish(options.topic[i], message, payloadType, 0);
+      } 
+    }    
     if (options.waitBeforeExit) {
       setTimeout(function exit() {
         Logger.logWarn(`exiting session (wait-before-exit set for ${options.waitBeforeExit})...`);
@@ -90,10 +99,18 @@ const publish = async (
     }
   } else {
     for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
-      for (var i=0; i<options.topic.length; i++) {
-        if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
-          message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
-        publisher.publish(options.topic[i], message, payloadType, n-1);
+      if (options.queue) {
+        for (var i=0; i<options.queue.length; i++) {
+          if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+            message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+          publisher.deliver(options.queue[i], message, payloadType, n-1);
+        }
+      } else {
+        for (var i=0; i<options.topic.length; i++) {
+          if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')
+            message = optionsSource.emptyMessage === 'cli' ? "" : getDefaultMessage();
+          publisher.publish(options.topic[i], message, payloadType, n-1);
+        }
       }
       if (interval) await delay(interval)
     }

@@ -3,7 +3,7 @@ import http from 'http'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome, defaultFeedApiEndpointFile } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome, defaultFeedApiEndpointFile, defaultFeedSessionFile } from './defaults'
 import { buildMessageConfig } from './init'
 import { parseNumber } from './parse'
 import { fakerRulesJson } from './fakerrules';
@@ -574,7 +574,7 @@ export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) =>
   }
 }
 
-export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object, overWrite: boolean = false) => {
+export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object, sessionJson: object, overWrite: boolean = false) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   try {
     if (fileExists(feedPath)) {
@@ -600,6 +600,7 @@ export const createFeed = (fileName: string, feedName: string, apiJson: object, 
     fs.copyFileSync(fileName, `${feedPath}/${path.parse(fileName).base}`);
     writeJsonFile(`${feedPath}/${defaultFeedAnalysisFile}`, apiJson)
     writeJsonFile(`${feedPath}/${defaultFeedRulesFile}`, rulesJson)
+    writeJsonFile(`${feedPath}/${defaultFeedSessionFile}`, sessionJson)
     writeJsonFile(`${feedPath}/${defaultFeedSchemasFile}`, schemaJson)
     writeJsonFile(`${feedPath}/${defaultFakerRulesFile}`, fakerRulesJson)
   } catch (error: any) {
@@ -667,6 +668,38 @@ export const updateAndLoadFeedInfo = (feed: any) => {
     if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
     Logger.logError('exiting...')
     process.exit(1)
+  }
+}
+
+export const loadLocalFeedSessionSettingsFile =(feedName: string, fileName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath) || !fileExists(`${feedPath}/${fileName}`)) {
+      return false;
+    }
+
+    var session = readFile(`${feedPath}/${fileName}`);
+    return session;
+  } catch (error: any) {
+    Logger.logDetailedError(`failed to fetch ${fileName}, check whether the feed exists!`, error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+}
+
+export const loadLocalFeedSessionFile = (feedName: string, fileName: string) => {
+  const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
+  try {
+    if (!fileExists(feedPath) || !fileExists(`${feedPath}/${fileName}`)) {
+      throw new TypeError(`Feed session file not found!`);
+    }
+
+    var analysis = readFile(`${feedPath}/${fileName}`);
+    return analysis;
+  } catch (error: any) {
+    throw new TypeError(`Feed session file not found!`);
   }
 }
 
@@ -775,11 +808,13 @@ export const getFeed = (feedName: string, info: any = null) => {
     feed.info = info
     feed.config = loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
     feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
+    feed.session = fileExists(`${feedPath}/${defaultFeedSessionFile}`) ? loadLocalFeedFile(feedName, defaultFeedSessionFile) : null;
     feed.brokers = brokers
   } else if (info.type === 'asyncapi_feed') { 
     feed.name = feedName;
     feed.config = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
     feed.rules = fileExists(`${feedPath}/${defaultFeedRulesFile}`) ? loadLocalFeedFile(feedName, defaultFeedRulesFile) : null;
+    feed.session = fileExists(`${feedPath}/${defaultFeedSessionFile}`) ? loadLocalFeedFile(feedName, defaultFeedSessionFile) : null;
     feed.schemas = fileExists(`${feedPath}/${defaultFeedSchemasFile}`) ? loadLocalFeedFile(feedName, defaultFeedSchemasFile) : null;
     feed.brokers = brokers
   } else if (info.type === 'custom_feed') {
@@ -798,6 +833,28 @@ export const getFeed = (feedName: string, info: any = null) => {
   }
 
   return feed;
+}
+
+export const updateSession = async (feedName: string, sessionJson: any) => {
+  const feedPath = `${defaultStmFeedsHome}/${feedName}`;
+  const sessionFile = processPath(`${defaultStmFeedsHome}/${feedName}/${defaultFeedSessionFile}`);
+  try {
+    if (!fileExists(feedPath)) {
+      Logger.logWarn(`feed ${feedName} not found!`)
+      return false;
+    }
+
+    writeFile(`${sessionFile}`, sessionJson)
+
+    var info = loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    info.lastUpdated = new Date().toISOString();
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, info, true);
+    return true;
+  } catch (error: any) {
+    Logger.logDetailedError('update feed session settings failed', error.toString())
+    if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+    return false;
+  }
 }
 
 export const updateRules = async (feedName: string, rulesJson: any) => {
@@ -880,6 +937,27 @@ export const validURL = (url:any) => {
 	} catch (_e) {
 		return null
 	}
+}
+
+export const loadGitFeedSessionFile = async (feedName: string, fileName: string) => {
+  try {
+    var feedUrl = `${defaultGitRepo}/${feedName}`;
+    var validFeedUrl = await urlExists(encodeURI(`${feedUrl}/${fileName}`));
+    if (!validFeedUrl) {
+      throw new TypeError(`Feed session file not found!`);
+    }
+
+    return await fetch(`${feedUrl}/${fileName}`)
+      .then(async (response) => {
+        const data = await response.json();
+        return data;
+      })
+      .catch((error:any) => {
+        throw new TypeError(`Feed session file not found!`);
+      })
+  } catch (error:any) {
+    throw new TypeError(`Feed session file not found!`);
+  }
 }
 
 export const loadGitFeedFile = async (feedName: string, fileName: string) => {

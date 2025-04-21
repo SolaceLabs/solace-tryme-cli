@@ -246,6 +246,18 @@ function loadMessage(feed, page) {
   return messageName;
 }
 
+async function loadSessionSettings(feed, page) {
+  if (!feed.session || !Object.keys(feed.session).length) {
+    const path = window.location.origin;
+    const response = await fetch(path + `/feedsession?feed=${feed.name}`);
+    const session = await response.json();
+    feed.session = session;
+    localStorage.setItem('currentFeed', JSON.stringify(feed));
+  }
+
+  return feed.session;
+}
+
 function configureMessageInfo(messageName, message, config) {
   el = document.getElementById('message-feed-name');
   if (el) el.innerHTML = messageName;
@@ -1107,7 +1119,6 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
   if (!topicRules || !topicRules.length) return;
 
   const messageProps = await getDefaultMessageProperties();
-  const sessionProps = await getDefaultSessionProperties();
 
   $('#p_send_topics').empty();
   localStorage.setItem('currentRuleIndex', ruleIndex);
@@ -1263,12 +1274,6 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
     });
   }
 
-  // SESSION SETTINGS
-  el = document.getElementById('session_settings');
-  el.innerHTML = `    
-    ${getSessionProperties(sessionProps, rule?.sessionSettings)}    
-  `;
-
   // PARTITION KEY & MESSAGE SETTINGS
   el = document.getElementById('message_settings');
   el.innerHTML = `
@@ -1355,13 +1360,17 @@ async function configureMessageSendTopics(messageName, rules, ruleIndex = 0, ref
 function getSessionProperties(props, currentSettings) {
   if (!currentSettings) currentSettings = {};
   var tbody = '';
-  props.forEach((prop) => {
+  Object.values(props).filter(prop => prop.exposed).forEach((prop) => {
     tbody += `
       <tr class="sash">
-        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-        ${currentSettings[prop.key] !== undefined ? 
-          `<td>${currentSettings[prop.key]}</td>` : 
-          `<td class="prova" data-ribbon="default"></td>`}
+        <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: 
+          <b>${typeof prop.default !== 'boolean' ? 
+                  (prop.default.length ? prop.default : 'not set') :
+                  prop.default}</b>
+        </td>
+        ${prop.value !== undefined ? 
+          `<td>${prop.value}</td>` : 
+          `<td class="prova" data-ribbon="default">${prop.default}</td>`}
       </tr>
     `;
   })
@@ -1369,7 +1378,7 @@ function getSessionProperties(props, currentSettings) {
   return `
     <div class="card-body">
       <div class="row">
-        <div class="col-11" style="overflow-y: auto; height: 300px;">
+        <div class="col-11" style="overflow-y: auto; height: 600px;">
           <span style="text-align: left; font-size: 0.75rem; font-weight: 600;">
             Session Properties
           </span>
@@ -1416,16 +1425,26 @@ function getSessionProperties(props, currentSettings) {
 
 function getMessageProperties(props, currentSettings) {
   if (!currentSettings) currentSettings = {};
+  if (Object.keys(currentSettings).length > 0) {
+    Object.keys(currentSettings).forEach((key) => {
+      if (key !== 'partitionKeys')
+        props[key].value = currentSettings[key];
+    })
+  }
 
   var tbody = '';
-  props.forEach((prop) => {
+  Object.values(props).filter(prop => prop.exposed).forEach((prop) => {
     tbody += `
       <tr class="sash">
-        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-        ${currentSettings[prop.key] !== undefined ? 
-          `<td>${currentSettings[prop.key]}</td>` : 
-          `<td class="prova" data-ribbon="default"></td>`}
-      </tr>    
+        <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: 
+          <b>${typeof prop.default !== 'boolean' ? 
+                  (prop.default.length ? prop.default : 'not set') :
+                  prop.default}</b>
+        </td>
+        ${prop.value !== undefined ? 
+          `<td>${prop.value}</td>` : 
+          `<td class="prova" data-ribbon="default">${prop.default}</td>`}
+      </tr>
     `;
   })
 
@@ -1453,7 +1472,7 @@ function getMessageProperties(props, currentSettings) {
             <span class='jstooltip' style="margin-left: 10px;border:none;">
               <div id="pick-pkey" class="nav-item" style="padding: 5px;">
                 <a class="nav-link" role="button" data-toggle="modal" data-target="#msg_settings_form" 
-                  data-rule-settings='${JSON.stringify(currentSettings)}'
+                  data-rule-settings='${JSON.stringify(props)}'
                   data-backdrop="static" onclick="loadEditableMessageProperties(this)">
                   <i class="fas fa-cogs"></i>
                 </a>
@@ -1479,48 +1498,49 @@ function getMessageProperties(props, currentSettings) {
 
 async function loadEditableSessionProperties(event) {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var topic = $('#topic_name').text();
-  var message = $('#message-feed-name').text();
-  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
-  console.log('rule-session-settings - ', rule.sessionSettings);
+  console.log('session-settings - ', feed.session);
   
-  const currentSettings = rule.sessionSettings ? rule.sessionSettings : {};
-  const props = await getDefaultSessionProperties();
+  const currentSettings = feed.session ? feed.session : loadSessionSettings();
   var el = document.getElementById('editableSessionSettings');
   el.innerHTML = '';
-  props.forEach((prop) => {
+  Object.values(currentSettings).filter(prop => prop.exposed).forEach((prop) => {
     const tr = document.createElement('tr');
     tr.id = `tr_prop_${prop.key}`;
-    tr.dataset.prop_name = prop.name;
+    tr.dataset.prop_name = prop.property;
     tr.dataset.new_value = '';
     tr.dataset.deleted = 'no';
     tr.innerHTML = `
-      <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+      <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: 
+        <b>${typeof prop.default !== 'boolean' ? 
+                (prop.default.length ? prop.default : 'not set') :
+                prop.default}</b>
+      </td>
       <td>
       ${prop.type === 'select' ? `
       <select class="form-control" onchange="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
       ${prop.values.map(value => 
-        `<option value="${value}" ${value === currentSettings[prop.key] || 
-                                    value === ''+currentSettings[prop.key] ? 'selected' : ''} onclick>
+        `<option value="${value}" ${(prop.value !== undefined && value === prop.value) || 
+                                    (prop.value === undefined && value === prop.default) ? 'selected' : ''} onclick>
           ${value}
         </option>`).join('')}
       </select>
       ` : `
-      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${currentSettings[prop.key] !== undefined ? currentSettings[prop.key] : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${prop.value !== undefined ? prop.value : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
       `}
       </td>
       <td>
-        ${currentSettings[prop.key] !== undefined ? `
+      ${`
         <span class='jstooltip' style="border:none;">
           <span class="btn" onclick="${prop.type === 'select' ? `
             document.getElementById('tr_prop_${prop.key}').querySelector('select').value = ''; 
             document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';` : `
             document.getElementById('td_value_${prop.key}').value = ''; 
             document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';`}">
-            <i class="fa fa-bolt" aria-hidden="true"></i>
+            <i class="fa fa-bolt"></i>
           </span>
           <span class="jstooltiptext jstooltip-top">Reset to Default</span>
-        </span>` : ''}
+        </span>
+        `}      
       </td>
     `;
     el.appendChild(tr);
@@ -1534,44 +1554,57 @@ async function loadEditableMessageProperties(event) {
   var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
   console.log('rule-message-settings - ', rule.messageSettings);
   
-  const currentSettings = rule.messageSettings;
+  const currentSettings = rule.messageSettings ? rule.messageSettings : {};
   const props = await getDefaultMessageProperties();
+  if (Object.keys(currentSettings).length > 0) {
+    Object.keys(currentSettings).forEach((key) => {
+      if (key !== 'partitionKeys')
+        props[key].value = currentSettings[key];
+    })
+  }
+
   var el = document.getElementById('editableMessageSettings');
   el.innerHTML = '';
-  props.forEach((prop) => {
+  Object.values(props).filter(prop => prop.exposed).forEach((prop) => {
     const tr = document.createElement('tr');
     tr.id = `tr_prop_${prop.key}`;
-    tr.dataset.prop_name = prop.name;
+    tr.dataset.prop_name = prop.property;
     tr.dataset.new_value = '';
     tr.dataset.deleted = 'no';
+    
     tr.innerHTML = `
-      <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+      <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: 
+        <b>${typeof prop.default !== 'boolean' ? 
+                (prop.default.length ? prop.default : 'not set') :
+                prop.default}</b>
+      </td>
       <td>
       ${prop.type === 'select' ? `
       <select class="form-control" onchange="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
       ${prop.values.map(value => 
-        `<option value="${value}" ${value === currentSettings[prop.key] || 
-                                    value === ''+currentSettings[prop.key] ? 'selected' : ''}>
+        `<option value="${value}" ${(prop.value !== undefined && value === prop.value) || 
+                                    (prop.value === undefined && value === prop.default) ? 'selected' : ''} onclick>
           ${value}
         </option>`).join('')}
       </select>
       ` : `
-      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${currentSettings[prop.key] !== undefined ? currentSettings[prop.key] : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${prop.value !== undefined ? prop.value : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
       `}
       </td>
       <td>
-        ${currentSettings[prop.key] !== undefined ? `
+        ${`
         <span class='jstooltip' style="border:none;">
           <span class="btn" onclick="${prop.type === 'select' ? `
             document.getElementById('tr_prop_${prop.key}').querySelector('select').value = ''; 
             document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';` : `
             document.getElementById('td_value_${prop.key}').value = ''; 
             document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';`}">
-            <i class="fa fa-bolt" aria-hidden="true"></i>
+            <i class="fa fa-bolt"></i>
           </span>
           <span class="jstooltiptext jstooltip-top">Reset to Default</span>
-        </span>` : ''}
-      </td>
+        </span>
+        `}
+      </td>      
     `;
     el.appendChild(tr);
   });
@@ -2077,7 +2110,7 @@ $(window).bind("load", function () {
   loadPage();
 });
 
-function loadPage() {
+async function loadPage() {
   // var page = window.location.href.split('/').pop();
   var page = window.location.pathname.split('/').pop();
   var menuSelection = undefined;
@@ -2136,6 +2169,19 @@ function loadPage() {
       var serverName = loadServer(feed, page);
       menuSelection = document.getElementById(`m_${serverName}`);
     }
+  } else if (page.startsWith('session.html')) {
+    $('#sidebar-application-root')[0].classList.remove('menu-open');
+    $('#sidebar-server-root')[0].classList.remove('menu-open');
+    $('#sidebar-message-root')[0].classList.remove('menu-open');
+    $('#sidebar-schema-root')[0].classList.remove('menu-open');
+    menuSelection = document.getElementById('m_session');
+    // SESSION SETTINGS
+    let sessionProps = await loadSessionSettings(feed, page);
+    el = document.getElementById('session_settings');
+    el.innerHTML = `    
+      ${getSessionProperties(sessionProps, feed?.session)}    
+    `;
+
   } else if (page.startsWith('apifeed.html')) {
     configureApiPlaceHolderRules(feed.rules);
   }

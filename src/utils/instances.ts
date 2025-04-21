@@ -37,8 +37,6 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   operation: OperationType
   count?: number | undefined
   interval?: number | undefined
-  rate?: number | undefined
-  frequency?: string | undefined
   initialDelay?: number | undefined
   clientName?: string | undefined
   description?: string | undefined
@@ -112,8 +110,6 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.operation = "CREATE"
     this.count = 1
     this.interval = 1
-    this.rate = 1.0
-    this.frequency = "msg/s"
     this.initialDelay = 0
     this.clientName = ""
     this.description = ""

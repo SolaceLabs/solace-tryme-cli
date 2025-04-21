@@ -3,7 +3,8 @@ import * as fs from 'fs'
 import { processPlainPath, readFile, writeJsonFile, loadLoadFeedInfo } from '../utils/config';
 import { defaultEventFeedsFile, defaultFakerRulesFile, defaultFeedAnalysisFile, 
         defaultFeedApiEndpointFile, 
-        defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome, defaultGitRepo } from '../utils/defaults';
+        defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultStmFeedsHome, defaultGitRepo, 
+        defaultFeedSessionFile} from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { prettyJSON } from '../utils/prettify';
@@ -287,6 +288,7 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`)), defaultFeedAnalysisFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`)), defaultFeedSchemasFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSessionFile}`)), defaultFeedSessionFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`)), defaultFakerRulesFile);
       
       let analysisContent = fs.readFileSync(`${feedLocalPath}/${analysis.fileName}`, 'utf-8')
@@ -306,6 +308,7 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
       let formData = new FormData();
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`)), defaultFeedApiEndpointFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
+      formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSessionFile}`)), defaultFeedSessionFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFakerRulesFile}`)), defaultFakerRulesFile);
       formData.append('files', JSON.stringify(info), defaultFeedInfoFile);
       formData.append('files', JSON.stringify(communityFeeds), 'EVENT_FEEDS.json');

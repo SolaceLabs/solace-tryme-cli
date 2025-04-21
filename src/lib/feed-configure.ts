@@ -1,5 +1,5 @@
-import { getAllFeeds, getFeed, loadLocalFeedFile, updateRules } from '../utils/config';
-import { defaultFakerRulesFile, defaultFeedInfoFile, defaultProjectName } from '../utils/defaults';
+import { getAllFeeds, getFeed, loadLocalFeedFile, loadLocalFeedSessionSettingsFile, processPlainPath, updateRules, updateSession } from '../utils/config';
+import { defaultFakerRulesFile, defaultFeedInfoFile, defaultFeedSessionFile, defaultProjectName, defaultStmFeedsHome } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator } from './feed-datahelper';
@@ -103,6 +103,28 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
       res.status(201).json({error: 'unknown feed'})
   })
 
+  app.post('/feedsession', async (req:any, res:any) => {
+    var feed = req.body;
+    var result = await updateSession(feed.name, feed.session);
+    if (result) 
+      res.status(200).json({success: 'updated feed session successfully'});
+    else
+      res.status(201).json({error: 'unknown feed'})
+  })
+
+  app.get('/feedsession', async (req:any, res:any) => {
+    if (!req.query.feed) {
+      res.status(201).json({error: 'missing feed name'})
+    }
+
+    let sessionProps = loadLocalFeedSessionSettingsFile(req.query.feed, defaultFeedSessionFile);
+    if (!sessionProps) {
+      sessionProps = { ...sessionPropertiesJson };
+      await updateSession(req.query.feed, sessionProps);
+    }
+    res.json(sessionProps);    
+  })
+
   app.post('/fakedata', (req:any, res:any) => {
     var data = req.body;
     try {
@@ -148,11 +170,13 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.get('/messageproperties', async (req:any, res:any) => {
-    res.status(200).json(messagePropertiesJson)
+    const json = messagePropertiesJson;
+    res.status(200).json(json)
   })
 
   app.get('/sessionproperties', async (req:any, res:any) => {
-    res.status(200).json(sessionPropertiesJson)
+    const json = sessionPropertiesJson;
+    res.status(200).json(json)
   })
 
   app.post('/exit', (req:any, res:any) => {

@@ -1,26 +1,30 @@
 function validateSessionSetting(props, current, key, error) {
   let value = current[key];
-  let defaultProp = props.find(p => p.key === key);
-  if (defaultProp === undefined) {
+  if (props[key] === undefined) {
     error += `Unknown session setting: ${key}\n`;
     return false;
   }
 
-  if (defaultProp.type === 'select' && !defaultProp.values.includes(value)) {
+  if (props[key].type === 'select' && !props[key].values.includes(value)) {
     error += `Invalid value for ${key}: ${value}\n`;
     return false;
   }
 
-  if (defaultProp.datatype === 'boolean' && current[key]) {
-    current[key] = value === 'true';
-  } else if (defaultProp.datatype === 'number' && current[key]) {
+  if (props[key].datatype === 'boolean') {
+    let val = '';
+    if (typeof value === 'string')
+      val = value === 'true' ? 'true' : 'false';
+    else if (typeof value === 'boolean')
+      val = value ? 'true' : 'false';
+    props[key].value = val;
+  } else if (props[key].datatype === 'number' && props[key]) {
     if (parseInt(value) === NaN) {
       error += `Invalid value for ${key}: ${value}\n`;
       return false;
     }
-    current[key] = parseInt(value);
+    props[key].value = parseInt(value);
   } else {
-    current[key] = value;
+    props[key].value = value;
   }
 
   return true;
@@ -54,10 +58,12 @@ function sessionSettingsSubmit() {
         }
       });
 
-      var defaultProps = await getDefaultSessionProperties();
+      var feed = JSON.parse(localStorage.getItem('currentFeed'));      
+      const currentSettings = feed.session ? feed.session : loadSessionSettings();
+    
       var error = '';
       Object.keys(settings).forEach((key) => {
-        validateSessionSetting(defaultProps, settings, key, error);
+        validateSessionSetting(currentSettings, settings, key, error);
       });
 
       if (error) {
@@ -72,47 +78,37 @@ function sessionSettingsSubmit() {
         $('#session_settings_form').modal('toggle');
 
         var feed = JSON.parse(localStorage.getItem('currentFeed'));
-        var topic = $('#topic_name').text();
-        var message = $('#message-feed-name').text();
-        var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
-        rule.sessionSettings = {
-          ...rule?.sessionSettings,
-          ...settings
+        feed.session = {
+          ...feed.session,
+          ...currentSettings
         };
 
         deleted.forEach((key) => {
-          delete rule.sessionSettings[key];
-        });
-
-        feed.rules.forEach((r) => {
-          r.sessionSettings = {
-            ...rule.sessionSettings,
-          };
+          delete feed.session[key]?.value;;
         });
 
         localStorage.setItem('currentFeed', JSON.stringify(feed));
 
         // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
         const path = window.location.origin;
-        await fetch(path + `/feedrules`, {
+        await fetch(path + `/feedsession`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json;charset=UTF-8'
           },
-          body: localStorage.getItem('currentFeed')
+          body: JSON.stringify(feed)
         });
 
         toastr.success('Session Settings updated successfully.')
 
         var tbody = '';
-        defaultProps.forEach((prop) => {
-          let value = rule.sessionSettings[prop.key];
+        Object.values(feed.session).filter(prop => prop.exposed).forEach((prop) => {
           tbody += `
             <tr class="sash">
-              <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-              ${value !== undefined ? 
-                `<td>${value}</td>` : 
-                `<td class="prova" data-ribbon="default"></td>`}
+              <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+              ${prop.value !== undefined ? 
+                `<td>${prop.value}</td>` : 
+                `<td class="prova" data-ribbon="default">${prop.default}</td>`}
             </tr>    
           `;
         })
@@ -126,35 +122,34 @@ function sessionSettingsSubmit() {
 
 async function resetSessionSettings() {
   var feed = JSON.parse(localStorage.getItem('currentFeed'));
-  var topic = $('#topic_name').text();
-  var message = $('#message-feed-name').text();
-  var rule = feed.rules.find(r => r.topic === topic && r.messageName === message);
-  rule.sessionSettings = {};
+  Object.keys(feed.session).forEach((key) => {
+    if (feed.session[key].value !== undefined) {
+      delete feed.session[key].value;
+    }
+  });
   localStorage.setItem('currentFeed', JSON.stringify(feed));
 
   // const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
   const path = window.location.origin;
-  await fetch(path + `/feedrules`, {
+  await fetch(path + `/feedsession`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
     },
-    body: localStorage.getItem('currentFeed')
+    body: JSON.stringify(feed)
   });
 
   toastr.success('Session settings updated successfully.');
-  var defaultProps = await getDefaultSessionProperties();
 
   var tbody = '';
-  defaultProps.forEach((prop) => {
-    let value = rule.sessionSettings[prop.key];
+  Object.values(feed.session).filter(prop => prop.exposed).forEach((prop) => {
     tbody += `
       <tr class="sash">
-        <td>${prop.name}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
-        ${value !== undefined ? 
-          `<td>${value}</td>` : 
-          `<td class="prova" data-ribbon="default"></td>`}
-      </tr>    
+        <td>${prop.property}<br/><i>${prop.description}</i><br/>Default: <b>${prop.default ? prop.default : 'not set'}</b></td>
+        ${prop.value !== undefined ? 
+          `<td>${prop.value}</td>` : 
+          `<td class="prova" data-ribbon="default">${prop.default}</td>`}
+      </tr>        
     `;
   })
 

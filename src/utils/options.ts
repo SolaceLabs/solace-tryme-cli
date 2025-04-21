@@ -10,7 +10,8 @@ import {
   parseFeedView,
   parseHttpContentEncoding,
   parseHttpContentType,
-  parsePartitionKeysList
+  parsePartitionKeysList,
+  parsePublishQueue
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -91,8 +92,9 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
 
     // message options
-    .addOption(new Option(`\n/* ${chalk.whiteBright('TOPIC SUBSCRIPTION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .hideHelp(advanced))
+    .addOption(new Option(`\n/* ${chalk.whiteBright('TOPIC/QUEUE SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .conflicts('queue') .hideHelp(advanced))
+    .addOption(new Option('-q, --queue <QUEUE...>', chalk.whiteBright('the queue(s) to deliver the message(s) as space-separated values (e.g., myQueue "order_queue")')) .argParser(parsePublishQueue) .conflicts('topic') .hideHelp(advanced))
 
     // message body options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE BODY SETTINGS')} */`) .hideHelp(advanced))

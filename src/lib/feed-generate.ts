@@ -2,13 +2,14 @@ import * as fs from 'fs'
 import { Logger } from '../utils/logger'
 import { createFeed, fileExists, updateAndLoadFeedInfo, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
 import { prettyJSON } from '../utils/prettify';
-import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedMajorVersion, defaultFeedMinorVersion, defaultFeedRulesFile, defaultStmFeedsHome } from '../utils/defaults';
+import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedMajorVersion, defaultFeedMinorVersion, defaultFeedRulesFile, defaultFeedSessionFile, defaultStmFeedsHome } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
 import { fakerRulesJson } from '../utils/fakerrules';
 import chalk from 'chalk';
 import { analyze, analyzeV2, analyzeEP, formulateRules, formulateSchemas, load } from './feed-analyze';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFeedName } from '../utils/checkparams';
+import { sessionPropertiesJson } from '../utils/sessionprops';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
@@ -234,7 +235,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
-  createFeed(fileName, feedName, data, rules, schemas, options.useDefaults ? true : false);
+  createFeed(fileName, feedName, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
   feed.lastUpdated = new Date().toISOString();
   updateAndLoadFeedInfo(feed);
 
@@ -257,6 +258,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
       "delay": 0
     }
   }
+
+  var apiSession:any = sessionPropertiesJson;
 
   var apiEndpoint:any = {};
   var localFeedPath = '';
@@ -287,13 +290,14 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
         process.exit(1);
       });
 
-      feed = await loadLocalFeedFile(feedName, defaultFeedInfoFile);
-      if (feed && feed.type !== 'restapi_feed') {
-        Logger.logError(`the existing feed is not of 'restapi_feed' type, try creating a new feed`);
-        process.exit(1);
-      }
-      apiEndpoint = await loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
-      apiRules = await loadLocalFeedFile(feedName, defaultFeedRulesFile);
+    feed = await loadLocalFeedFile(feedName, defaultFeedInfoFile);
+    if (feed && feed.type !== 'restapi_feed') {
+      Logger.logError(`the existing feed is not of 'restapi_feed' type, try creating a new feed`);
+      process.exit(1);
+    }
+    apiEndpoint = await loadLocalFeedFile(feedName, defaultFeedApiEndpointFile);
+    apiRules = await loadLocalFeedFile(feedName, defaultFeedRulesFile);
+    apiSession = await loadLocalFeedFile(feedName, defaultFeedSessionFile);
   }
 
   const pApiUrl = new Input({
@@ -757,6 +761,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   }
 
   writeJsonFile(`${feedPath}/${defaultFeedRulesFile}`, feedRule, true);
+  writeJsonFile(`${feedPath}/${defaultFeedSessionFile}`, apiSession, true);
 
   Logger.success(`Successfully created event feed ${feedName}`);
   Logger.hint(`What's next?\n` +

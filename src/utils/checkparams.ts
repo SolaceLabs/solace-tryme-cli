@@ -16,6 +16,20 @@ export const checkPubTopicExists = (topic: string) => {
   }
 }
 
+export const checkPubQueueExists = (queue: string) => {
+  if (!queue) {
+    Logger.logError("required option '--queue <QUEUE...>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof queue !== 'object') {
+    Logger.logError("invalid queue(s) specified, one or more queue name is expected")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
 export const checkSubTopicExists = (options: MessageClientOptions) => {
   if (!options.topic && !options.queue) {
     Logger.logError("required option '--topic <TOPIC...>' not specified")
@@ -451,26 +465,6 @@ export const checkFeedGenerateOptions = (options: ManageFeedClientOptions, optio
 export const checkFeedRunOptions = (options: ManageFeedPublishOptions, optionsSource: any) => {
   if (options.useDefaults && !options.feedName) {
     Logger.logError(`Feed name is required when using --use-defaults option`)
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-
-  if ((optionsSource.rate === 'cli' && optionsSource.frequency !== 'cli') ||
-      (optionsSource.frequency === 'cli' && optionsSource.rate !== 'cli')) {
-    Logger.logError(`Invalid rate or frequency option, both rate and frequency must be specified`)
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-
-  if (optionsSource.rate === 'cli' && options.rate && (options.rate < 0.5 || options.rate > 10.0)) {
-    Logger.logError(`Invalid rate value, rate must be between 0.5 and 10.0`)
-    Logger.logError('exiting...')
-    process.exit(1)
-  }
-
-  if (optionsSource.frequency === 'cli' && options.frequency && 
-      ['msg/s', 'msg/m', 'msg/h'].indexOf(options.frequency.toLowerCase()) === -1) {
-    Logger.logError(`Invalid frequency value, frequency must be one of 'msg/s', 'msg/m' or 'msg/h'`)
     Logger.logError('exiting...')
     process.exit(1)
   }

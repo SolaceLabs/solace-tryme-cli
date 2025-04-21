@@ -1,11 +1,12 @@
 import { checkConnectionParamsExists } from '../utils/checkparams';
 import { loadLocalFeedFile, loadGitFeedFile, loadGitApiFeedRuleFile, loadLocalApiFeedRuleFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultFeedApiEndpointFile, defaultFeedRulesFile, defaultFeedInfoFile } from '../utils/defaults';
+import { defaultFeedApiEndpointFile, defaultFeedRulesFile, defaultFeedInfoFile, defaultFeedSessionFile } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
 import { chalkEventCounterLabel, chalkEventCounterValue, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
 import sleep from 'sleep-promise';
 import { fakeDataValueGenerator } from './feed-datahelper';
+import { sessionPropertiesJson } from '../utils/sessionprops';
 
 const selectedEndpoints: any[] = [];
 const eventFeedTimers: any[] = [];
@@ -43,6 +44,7 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
   var apiFeed = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedApiEndpointFile) : await loadLocalFeedFile(options.feedName, defaultFeedApiEndpointFile);
   var apiFeedInfo = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedInfoFile) : await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
   var apiFeedRule = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedRulesFile) : await loadLocalFeedFile(options.feedName, defaultFeedRulesFile);
+  var apiFeedSession = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedSessionFile) : await loadLocalFeedFile(options.feedName, defaultFeedSessionFile);
   
   if (apiFeed.apiUrl.includes('$') && !apiFeedRule) {
     Logger.logError('api endpoint contains placeholders, please configure parameter rules...')

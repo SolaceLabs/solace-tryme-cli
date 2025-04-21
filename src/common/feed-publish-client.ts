@@ -137,7 +137,7 @@ export class SolaceClient extends VisualizeClient {
             if (sessionEvent.correlationKey) 
               Logger.await(`publish confirmation received for message with correlation key ${sessionEvent.correlationKey} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
             else
-              Logger.await(`publish confirmation received for message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);            
+              Logger.await(`publish confirmation received for message [${new Date().toLocaleString('en-US', dateFormatOptions)}`);            
           });
 
           //REJECTED_MESSAGE implies that the vpn has rejected the message
@@ -213,7 +213,7 @@ export class SolaceClient extends VisualizeClient {
     try {
       var payloadType = settings.payloadType as string;
       if (!topicName.startsWith('@STM')) {
-        settings.publishConfirmation ?
+        settings.publishConfirmation && settings.deliveryMode === 'PERSISTENT' ?
                   Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${settings.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
                   Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${settings.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
       }
@@ -273,8 +273,10 @@ export class SolaceClient extends VisualizeClient {
           message.setCorrelationKey(uuid());
         else
           message.setCorrelationKey(settings.correlationKey);
+      } else if (settings.publishConfirmation && settings.deliveryMode === 'PERSISTENT') {
+        message.setCorrelationKey('' + this.pubConfirmationId++);
       }
-      !settings.correlationKey && settings.publishConfirmation && message.setCorrelationKey('' + this.pubConfirmationId++);      
+
       settings.deliveryMode !== undefined && message.setDeliveryMode(deliveryModeMap.get(settings.deliveryMode.toUpperCase()) as MessageDeliveryModeType);
       settings.timeToLive !== undefined && message.setTimeToLive(settings.timeToLive);
       settings.dmqEligible !== undefined && message.setDMQEligible(settings.dmqEligible);
@@ -334,7 +336,7 @@ export class SolaceClient extends VisualizeClient {
               let val:string = this.getSourceFieldValue(payload, field);
               values.push(val);
             } catch (error:any) {
-              Logger.logError(`failed to get field value for ${field} - ${error.toString()}`)
+              Logger.logWarn(`failed to get field value for ${field} - ${error.toString()}`)
             }
           });
           var pKey1:any = values.join('-');            

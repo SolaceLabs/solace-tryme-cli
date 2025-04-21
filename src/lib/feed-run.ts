@@ -1,7 +1,7 @@
 import { checkConnectionParamsExists, checkFeedRunOptions } from '../utils/checkparams';
-import { loadLocalFeedFile, loadGitFeedFile } from '../utils/config';
+import { loadLocalFeedFile, loadGitFeedFile, loadGitFeedSessionFile, loadLocalFeedSessionFile } from '../utils/config';
 import { Logger } from '../utils/logger';
-import { defaultFeedInfoFile, defaultFeedRulesFile, defaultMessagePublishConfig } from '../utils/defaults';
+import { defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSessionFile, defaultMessagePublishConfig } from '../utils/defaults';
 import { SolaceClient } from '../common/feed-publish-client';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite, chalkEventCounterLabel, chalkItalic, colorizeTopic } from '../utils/chalkUtils';
 import { getLocalEventFeeds, getGitEventFeeds, getFeedEvents, getGitFeedEvents } from '../utils/listfeeds';
@@ -9,7 +9,9 @@ import sleep from 'sleep-promise';
 import feedRunApi from './feed-run-api';
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
-import { get } from 'http';
+import { messagePropertiesJson } from '../utils/msgprops';
+import { sessionPropertiesJson } from '../utils/sessionprops';
+
 const selectedMessages: any[] = [];
 const eventFeedTimers: any[] = [];
 const publishStats:any = {};
@@ -67,7 +69,8 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       var eventsList:any = events.map((event:any) => {
         return {
           message: chalkBoldWhite(event.name) + ' - ' + chalkItalic(colorizeTopic(event.topic)),
-          name: event.name,
+          // name: event.name,
+          name: event.name + '      ' + event.topic
         }
       })
 
@@ -274,25 +277,97 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   // load feed rules
   var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
 
+  function fixSessionSettings(sessionSettings: any, property: string, options: any, optionName: any = null) {
+    if (sessionSettings[property] !== undefined && sessionSettings[property].exposed && sessionSettings[property].value !== undefined) {
+      let optionProperty = optionName ? optionName : property;
+      options[optionProperty] = sessionSettings[property].value !== undefined ? 
+                                  sessionSettings[property].value : sessionSettings[property].default;
+      if (sessionSettings[property].datatype === 'number') {
+        options[optionProperty] = parseInt(options[optionProperty]);
+      } else if (sessionSettings[property].datatype === 'boolean') {
+        options[optionProperty] = options[optionProperty] === 'true' ? true : false;
+      }
+    }
+  }
+
   // populate feed settings (session and message)
-  var sessionSettings:any = getSessionSettings(feed);
+  var sessionSettings:any = null;
+  try {
+    sessionSettings = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : 
+                              loadLocalFeedSessionFile(feedName, defaultFeedSessionFile);
+  } catch (error:any) {
+    sessionSettings = { ...sessionPropertiesJson };
+  }
+
   if (sessionSettings) {
-    if (sessionSettings.connectRetriesPerHost !== undefined) options.reconnectRetries = sessionSettings.connectRetriesPerHost;
-    if (sessionSettings.connectRetries !== undefined) options.connectRetries = sessionSettings.connectRetries;
-    if (sessionSettings.connectTimeoutInMsecs !== undefined) options.connectTimeoutInMsecs = sessionSettings.connectTimeoutInMsecs;
-    if (sessionSettings.reconnectRetries !== undefined) options.reconnectRetries = sessionSettings.reconnectRetries;
-    if (sessionSettings.reconnectRetryWaitInMsecs !== undefined) options.reconnectRetryWaitInMsecs = sessionSettings.reconnectRetryWaitInMsecs;
-    if (sessionSettings.readTimeoutInMsecs !== undefined) options.readTimeoutInMsecs = sessionSettings.readTimeoutInMsecs;
-    if (sessionSettings.includeSenderId !== undefined) options.includeSenderId = sessionSettings.includeSenderId;
-    if (sessionSettings.clientName !== undefined) options.clientName = sessionSettings.clientName;
-    if (sessionSettings.applicationDescription !== undefined) options.description = sessionSettings.applicationDescription;
-    if (sessionSettings.generateReceiveTimestamps !== undefined) options.generateReceiveTimestamps = sessionSettings.generateReceiveTimestamps;
-    if (sessionSettings.generateSendTimestamps !== undefined) options.generateSendTimestamps = sessionSettings.generateSendTimestamps;
-    if (sessionSettings.generateSequenceNumber !== undefined) options.generateSequenceNumber = sessionSettings.generateSequenceNumber;
-    if (sessionSettings.sendBufferMaxSize !== undefined) options.sendBufferMaxSize = sessionSettings.sendBufferMaxSize;
-    if (sessionSettings.keepAliveIntervalInMsecs !== undefined) options.keepAliveIntervalInMsecs = sessionSettings.keepAliveIntervalInMsecs;
-    if (sessionSettings.keepAliveIntervalsLimit !== undefined) options.keepAliveIntervalsLimit = sessionSettings.keepAliveIntervalsLimit;
-  }  
+    fixSessionSettings(sessionSettings, 'connectRetriesPerHost', options);
+    fixSessionSettings(sessionSettings, 'connectRetries', options, 'connectionRetries');
+    fixSessionSettings(sessionSettings, 'connectTimeoutInMsecs', options, 'connectTimeout');
+    fixSessionSettings(sessionSettings, 'reconnectRetries', options);
+    fixSessionSettings(sessionSettings, 'reconnectRetryWaitInMsecs', options, 'reconnectRetryWait');
+    fixSessionSettings(sessionSettings, 'readTimeoutInMsecs', options, 'readTimeout');
+    fixSessionSettings(sessionSettings, 'includeSenderId', options);
+    fixSessionSettings(sessionSettings, 'clientName', options);
+    fixSessionSettings(sessionSettings, 'applicationDescription', options, 'description');
+    fixSessionSettings(sessionSettings, 'generateReceiveTimestamps', options, 'receiveTimestamps');
+    fixSessionSettings(sessionSettings, 'generateSendTimestamps', options, 'sendTimestamps');
+    fixSessionSettings(sessionSettings, 'generateSequenceNumber', options);
+    fixSessionSettings(sessionSettings, 'sendBufferMaxSize', options);
+    fixSessionSettings(sessionSettings, 'keepAliveIntervalInMsecs', options, 'keepAlive');
+    fixSessionSettings(sessionSettings, 'keepAliveIntervalsLimit', options, 'keepAliveIntervalLimit');
+  }
+
+  options.readyForExit = options.eventNames.length;
+  options.eventNames.forEach((eventName:any) => {
+    var feedRule:any = undefined;
+    var name = eventName.split('      ')[0];
+    var topic = eventName.split('      ')[1];
+    feed.forEach((rule:any) => {
+      if (rule.messageName === name && rule.topic === topic) {
+        feedRule = rule;
+      }
+    })
+
+    if (!feedRule) {
+      Logger.logWarn(`No feed rule found for name '${name}' in the feed '${feedName}'`)
+      return;
+    }
+
+    let publishInterval = optionsSource.interval === 'cli' ? options.interval :
+                            feedRule.publishSettings?.hasOwnProperty('interval') ? 
+                              parseInt(feedRule.publishSettings?.interval) : defaultMessagePublishConfig.interval;
+
+    const msgOptions = { ...options };
+    if (feedRule.messageSettings && Object.keys(feedRule.messageSettings).length > 0) {
+      const defaultMessageSettings = messagePropertiesJson;
+      getMessageSettings(defaultMessageSettings, feedRule.messageSettings, msgOptions);
+    }  
+  
+    selectedMessages.push({
+      message: feedRule.messageName, 
+      topic: feedRule.topic,
+      rule: feedRule,
+      options: {
+        ...msgOptions
+      },
+      optionsSource: optionsSource,
+      count: optionsSource.count === 'cli' ? options.count : 
+              feedRule.publishSettings?.hasOwnProperty('count') ? 
+                parseInt(feedRule.publishSettings?.count) : defaultMessagePublishConfig.count,
+      interval: publishInterval,
+      delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
+              feedRule.publishSettings?.hasOwnProperty('delay') ? 
+                parseInt(feedRule.publishSettings?.delay) : defaultMessagePublishConfig.initialDelay,
+      published: 0
+    });
+  });
+
+  // fix publishConfirmation
+  selectedMessages.forEach((msg:any) => {
+    if (msg.options?.publishConfirmation === true) {
+      options.publishConfirmation = true;
+    }
+  });
 
   const publisher = new SolaceClient(options);
   var interrupted = false;
@@ -318,72 +393,6 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       publisher.exit();
     }, options.exitAfter * 1000);
   }
-
-  options.readyForExit = options.eventNames.length;
-  options.eventNames.forEach((eventName:any) => {
-    var feedRule:any = undefined;
-    var name = eventName.split('      ')[0];
-    var topic = eventName.split('      ')[1];
-    feed.forEach((rule:any) => {
-      if (rule.messageName === name && rule.topic === topic) {
-        feedRule = rule;
-      }
-    })
-
-    if (!feedRule) {
-      Logger.logWarn(`No feed rule found for name '${name}' in the feed '${feedName}'`)
-      return;
-    }
-
-    let publishInterval = optionsSource.interval === 'cli' ? options.interval :
-                            feedRule.publishSettings?.hasOwnProperty('interval') ? 
-                              parseInt(feedRule.publishSettings?.interval) : defaultMessagePublishConfig.interval;
-    if (optionsSource.rate === 'cli' && optionsSource.frequency === 'cli') {
-      let rate = options.rate ? options.rate : 1.0;
-      let freq = 1000;
-      switch (options.frequency) {
-        case 'msg/s':
-          freq = 1000;
-          break;
-        case 'msg/m':
-          freq = 60000;
-          break;
-        case 'msg/h':
-          freq = 3600000;
-          break;
-        default:
-          freq = 1000; // Default to 1 second if undefined
-      }
-
-      publishInterval = rate > 1.0 ? freq / rate : freq * rate;
-    }
-
-    var settings:any = getMessageSettings(feed, feedRule.messageName, feedRule.topic);
-    selectedMessages.push({
-      message: feedRule.messageName, 
-      topic: feedRule.topic,
-      rule: feedRule,
-      options: {
-        ...options,
-        ...settings
-      },
-      optionsSource: optionsSource,
-      count: optionsSource.count === 'cli' ? options.count : 
-              feedRule.publishSettings?.hasOwnProperty('count') ? 
-                parseInt(feedRule.publishSettings?.count) : defaultMessagePublishConfig.count,
-      interval: publishInterval,
-      rate: optionsSource.rate === 'cli' ? options.rate :
-              feedRule.publishSettings?.hasOwnProperty('rate') ? 
-                parseInt(feedRule.publishSettings?.rate) : defaultMessagePublishConfig.rate,
-      frequency: optionsSource.frequency === 'cli' ? options.frequency :
-              feedRule.publishSettings?.hasOwnProperty('frequency') ? 
-                parseInt(feedRule.publishSettings?.frequency) : defaultMessagePublishConfig.frequency,
-      delay: optionsSource.initialDelay === 'cli'? options.initialDelay :
-              feedRule.publishSettings?.hasOwnProperty('delay') ? 
-                parseInt(feedRule.publishSettings?.delay) : defaultMessagePublishConfig.initialDelay,
-      published: 0
-    });
-  });
 
   for (var i=0; i<selectedMessages.length; i++) {
     var msg = selectedMessages[i];
@@ -419,26 +428,40 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }, 2000);
 }
 
-const getSessionSettings = (feed: any) => {
-  var settings = {};
-  if (feed.length === 0)
-    return settings;
+function fixMessageSettings(defaultSettings: any, messageSettings: any, property: string, options: any, optionName: any = null) {
+  if (defaultSettings[property] !== undefined && defaultSettings[property].exposed && messageSettings[property] !== undefined) {
+    let optionProperty = optionName ? optionName : property;
+    options[optionProperty] = messageSettings[optionProperty];
+    if (defaultSettings[property].datatype === 'number') {
+      options[optionProperty] = parseInt(options[optionProperty]);
+    } else if (defaultSettings[property].datatype === 'boolean') {
+      options[optionProperty] = options[optionProperty] === 'true' ? true : false;
+    }      
+  }
 
-  return feed[0].sessionSettings;
+  return;
 }
 
-const getMessageSettings = (feed: any, messageName: string, topic: string) => {
-  var settings = {};
-  if (feed.length === 0)
-    return settings;
-
-  feed.forEach((rule:any) => {
-    if (rule.messageName === messageName && rule.topic === topic) {
-      settings = rule.messageSettings;
-    }
-  });
-
-  return settings;
+const getMessageSettings = (defaultSettings: any, settings: any, msgOptions: any) => {
+  if (settings && Object.keys(settings).length > 0) {
+    fixMessageSettings(defaultSettings, settings, 'payloadType', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'publishConfirmation', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'appMessageId', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'appMessageType', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'correlationId', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'correlationKey', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'deliveryMode', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'dmqEligible', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'elidingEligible', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'replyToTopic', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'sequenceNumber', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'timeToLive', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'userProperties', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'httpContentType', msgOptions);
+    fixMessageSettings(defaultSettings, settings, 'httpContentEncoding', msgOptions);
+    if (settings.partitionKeys)
+      msgOptions.partitionKeys = settings.partitionKeys;
+  }
 }
 
 async function publishFeed(publisher:any, msg:any) {
