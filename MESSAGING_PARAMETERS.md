@@ -1,3 +1,21 @@
+# Table Of Contents
+
+- [Table Of Contents](#table-of-contents)
+- [Solace Try-Me CLI - Commands](#solace-try-me-cli---commands)
+- [Messaging Commands](#messaging-commands)
+  - [Publish Events](#publish-events)
+  - [Receive Events](#receive-events)
+  - [Send Request Events](#send-request-events)
+  - [Receive Reply Events](#receive-reply-events)
+- [Manage Commands](#manage-commands)
+  - [Manage Broker Connection](#manage-broker-connection)
+  - [Manage Broker SEMP Connection](#manage-broker-semp-connection)
+  - [Manage Queue](#manage-queue)
+  - [Manage Client Profile](#manage-client-profile)
+  - [Manage ACL Profile](#manage-acl-profile)
+  - [Manage Client Username](#manage-client-username)
+- [Manage CLI Configuration Commands](#manage-cli-configuration-commands)
+
 # Solace Try-Me CLI - Commands
 
 ---
@@ -46,7 +64,8 @@ Options:
   -p, --password <PASSWORD>                     the password (default: "default")
 
   /* TOPIC SUBSCRIPTION SETTINGS */
-  -t, --topic <TOPIC...>                        the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3") (default: ["solace/try/me"])
+  -t, --topic <TOPIC...>                        the topic(s) to publish the message(s) as space-separated values (e.g., test/1 "user/2" "profile/3") (default: ["solace/try/me"])
+  -q, --queue <QUEUE...>                        the queue(s) to deliver the message(s) as space-separated values (e.g., myQueue "order_queue")
 
   /* MESSAGE BODY SETTINGS */
   -m, --message <MESSAGE>                       the message body

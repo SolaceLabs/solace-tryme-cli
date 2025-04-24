@@ -93,7 +93,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('TOPIC/QUEUE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic(s) to publish the message(s) on as space-separated values (e.g., test/1 "user/2" "profile/3")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .conflicts('queue') .hideHelp(advanced))
+    .addOption(new Option('-t, --topic <TOPIC...>', chalk.whiteBright('the topic(s) to publish the message(s) as space-separated values (e.g., test/1 "user/2" "profile/3")')) .default([ getDefaultTopic('send') ]) .argParser(parsePublishTopic) .conflicts('queue') .hideHelp(advanced))
     .addOption(new Option('-q, --queue <QUEUE...>', chalk.whiteBright('the queue(s) to deliver the message(s) as space-separated values (e.g., myQueue "order_queue")')) .argParser(parsePublishQueue) .conflicts('topic') .hideHelp(advanced))
 
     // message body options
@@ -770,7 +770,7 @@ export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-logs, --show-logs [BOOLEAN]', chalk.whiteBright('show export log')) .default(false))
 }
 
-export const addFeedArchiveOptions = (cmd: Command, advanced: boolean) => {
+export const addFeedDownloadOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(false))

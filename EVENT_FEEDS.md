@@ -1,3 +1,25 @@
+# Table Of Contents
+- [Table Of Contents](#table-of-contents)
+- [`stm` Event Feeds](#stm-event-feeds)
+  - [Local vs Community (also referred to as Contributed) feeds](#local-vs-community-also-referred-to-as-contributed-feeds)
+  - [AsyncAPI Feed](#asyncapi-feed)
+- [`stm feed` tool Interactivity](#stm-feed-tool-interactivity)
+- [`stm feed` Commands](#stm-feed-commands)
+  - [Preview an Event Feed](#preview-an-event-feed)
+  - [Generate an Event Feed](#generate-an-event-feed)
+  - [Configure Data Generation Rules for an Event Feed](#configure-data-generation-rules-for-an-event-feed)
+    - [Actions Available in the Send Topics Tab:](#actions-available-in-the-send-topics-tab)
+  - [Run an Event Feed to stream events](#run-an-event-feed-to-stream-events)
+  - [From Command-line](#from-command-line)
+    - [Streaming via Command-line](#streaming-via-command-line)
+    - [Streaming via UI](#streaming-via-ui)
+  - [List Event Feeds](#list-event-feeds)
+  - [Download \& Import an Event Feed](#download--import-an-event-feed)
+    - [Download a Feed](#download-a-feed)
+    - [Importing a Feed](#importing-a-feed)
+  - [Export an Event Feed to Event Portal](#export-an-event-feed-to-event-portal)
+  - [Contribute Event Feed to Community](#contribute-event-feed-to-community)
+
 # `stm` Event Feeds
 
 `stm` event feeds are configurations that represents an event streaming service built on an AsyncAPI document of an Event Portal Application or Event API. While any valid AsyncAPI document can be used, exceptions include unsupported cases or edge scenarios in JSON payload schema representation.
@@ -244,22 +266,22 @@ Step| Video
 List Feeds (Simple)|![](./docrefs/feed-list-simple.gif)|
 List Feeds (Verbos)|![](./docrefs/feed-list-verbose.gif)
 
-## Archive & Import an Event Feed
+## Download & Import an Event Feed
 
-Archive and import commands for event feeds provide critical functionality for managing and sharing configurations effectively. The archive command allows you to package an event feed's settings, rules, and mappings into a portable format. This is particularly useful for backup, version control, or sharing feeds across teams and environments.
+Download and import commands for event feeds provide critical functionality for managing and sharing configurations effectively. The download command allows you to package an event feed's settings, rules, and mappings into a portable format. This is particularly useful for backup, version control, or sharing feeds across teams and environments.
 
 The import command enables seamless integration of exported feeds into another `stm` setup, and avoids the need to recreate feeds manually. Together, these commands simplify collaboration, improve portability, and ensure consistency across development, testing, and production environments.
 
-### Archiving a Feed
+### Download a Feed
 
-The `archive` sub-command creates an archive (ZIP) file of an event feed, making it easy to store and share with team members. This feature saves time and effort by preserving the feed configuration and data generation rules, eliminating the need to recreate them manually. Both local and community feeds can be exported.
+The `download` sub-command creates an archive (ZIP) file of an event feed, making it easy to store and share with team members. This feature saves time and effort by preserving the feed configuration and data generation rules, eliminating the need to recreate them manually. Both local and community feeds can be downloaded.
 
 The resulting archive is named `feed-archive.zip` and is ready for distribution or backup.
 
 ```
-Usage: stm feed export [options]
+Usage: stm feed download [options]
 
-Export an event feed
+Download an event feed
 
 Options:
   -feed, --feed-name <FEED_NAME>           the community feed name
@@ -272,12 +294,12 @@ Options:
 
 Step| Video
 --|--
-Archive a Community Feed|![](./docrefs/feed-export.gif)
+Download a Community Feed|![](./docrefs/feed-export.gif)
 
 
 ### Importing a Feed
 
-The `import` sub-command allows you to integrate an event feed from an exported archive (ZIP file) into your environment. This simplifies collaboration and ensures consistency by avoiding the need to manually recreate feed configurations and data generation rules. Both local and community feeds can be imported seamlessly, ensuring quick setup and use.
+The `import` sub-command allows you to integrate an event feed from a downloaded archive (ZIP file) into your environment (local stm setup). This simplifies collaboration and ensures consistency by avoiding the need to manually recreate feed configurations and data generation rules.
 
 ```
 Usage: stm feed import [options]
@@ -293,7 +315,7 @@ Options:
 
 Step| Video
 --|--
-Import a Feed from Archive File|![](./docrefs/feed-import.gif)|
+Import a Feed from a Downloaded Archive File|![](./docrefs/feed-import.gif)|
 
 ## Export an Event Feed to Event Portal
 

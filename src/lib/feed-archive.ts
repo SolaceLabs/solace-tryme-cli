@@ -5,7 +5,7 @@ import { fileExists, loadGitFeedFile, loadLocalFeedFile, writeJsonFile } from '.
 import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultFeedSessionFile } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 
-const feedArchive = async (options: ManageFeedClientOptions, optionsSource: any) => {
+const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var feedName = '';
   var gitFeed = false;
   var info = null;
@@ -178,4 +178,4 @@ const feedArchive = async (options: ManageFeedClientOptions, optionsSource: any)
   process.exit(0);
 }
 
-export default feedArchive;
+export default feedDownload;

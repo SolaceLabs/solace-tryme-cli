@@ -1,3 +1,9 @@
+# Table Of Contents
+- [Table Of Contents](#table-of-contents)
+- [Messaging Commands](#messaging-commands)
+- [Manage Commands](#manage-commands)
+- [Configuration Commands](#configuration-commands)
+
 # Messaging Commands
 
 <details>
@@ -36,7 +42,7 @@ stm send --topic solace/try/me -f OrderCreated.json
 
 stm send --topic solace/try/me --stdin
 
-// publish events to multiple events in a specified interval(ms)
+// publish multiple events in a specified interval(ms)
 
 stm send --topic solace/try/me --count 100 --interval 5000
 
@@ -44,6 +50,13 @@ stm send --topic solace/try/me --count 100 --interval 5000
 
 stm send --topic "stm/logistics/shipped" "stm/inventory/check"
 
+// deliver event with a default payload to queue
+
+stm send --queue MyQueue 
+
+// deliver multiple events in a specified interval(ms)
+
+stm send --queue MyQueue --count 100 --interval 5000
 
 You can override any of the publish parameters
 and they are applied only for this instance of execution!

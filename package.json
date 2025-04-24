@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -13,8 +13,9 @@
     "pub/sub",
     "pub/recv",
     "publish/subscribe",
-    "publish/receive",
+    "send/receive",
     "publish",
+    "send",
     "subscribe"
   ],
   "scripts": {

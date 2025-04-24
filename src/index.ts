@@ -12,7 +12,7 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
         addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, 
         addManageHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
         addFeedRunOptions, addFeedListOptions, addFeedContributeOptions, addFeedImportOptions, addFeedValidateOptions, 
-        addFeedArchiveOptions, addFeedExportOptions
+        addFeedDownloadOptions, addFeedExportOptions
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
@@ -37,7 +37,7 @@ import feedContribute from './lib/feed-contribute';
 import feedList from './lib/feed-list';
 import feedImport from './lib/feed-import';
 import feedExport from './lib/feed-export';
-import feedArchive from './lib/feed-archive';
+import feedDownload from './lib/feed-archive';
 import { Logger } from './utils/logger';
 import { chalkBoldWhite } from './utils/chalkUtils';
 import feedPortal from './lib/feed-portal';
@@ -662,7 +662,7 @@ if (process.env.SHOW_VISUALIZATION) {
     // stm feed import
     const feedImportCmd = feedCmd
       .command('import')
-      .description(chalk.whiteBright('Import an event feed from archive file'))
+      .description(chalk.whiteBright('Import an event feed from downloaded archive'))
       .allowUnknownOption(false)
     addFeedImportOptions(feedImportCmd, this.advanced);
     feedImportCmd.action((options: ManageFeedPublishOptions) => {
@@ -692,19 +692,19 @@ if (process.env.SHOW_VISUALIZATION) {
     })
 
     // stm feed export
-    const feedArchiveCmd = feedCmd
-      .command('archive')
-      .description(chalk.whiteBright('Archive an event feed'))
+    const feedDownloadCmd = feedCmd
+      .command('download')
+      .description(chalk.whiteBright('Download an event feed'))
       .allowUnknownOption(false)
-    addFeedArchiveOptions(feedArchiveCmd, this.advanced);
-    feedArchiveCmd.action((options: ManageFeedPublishOptions) => {
+    addFeedDownloadOptions(feedDownloadCmd, this.advanced);
+    feedDownloadCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
       for (var i=0; i<defaultFeedKeys.length; i++) {
-        optionsSource[defaultFeedKeys[i]] = feedArchiveCmd.getOptionValueSource(defaultFeedKeys[i]);
+        optionsSource[defaultFeedKeys[i]] = feedDownloadCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
-      feedArchive(options, optionsSource);
+      feedDownload(options, optionsSource);
     })
 
     // stm feed contribute
