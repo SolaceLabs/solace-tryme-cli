@@ -15,7 +15,7 @@ _**stm**_ provides a feature to generate event feeds directly from AsyncAPI docu
 
 `stm` supports a set of operations to generate, configure and run an event feed from an AsyncAPI document corresponding to an asynchronous application or an API (from Event Portal). The goal is to help you quickly set up an event feed on your local machine, configure data generation rules, and run to stream events to a broker. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds shared on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
 
-> **For more details on working with event feeds, please review the [EVENT_FEEDS](EVENT_FEEDS.md) documentation.**
+> **For more details on working with event feeds, please review the [EVENT_FEEDS](./documentation/EVENT_FEEDS.md) documentation.**
 
 ----
 # `stm` Messaging
@@ -165,7 +165,7 @@ stm
 
 ### Command Parameters
 
-For details on CLI parameters, refer to the [parameters](MESSAGING_PARAMETERS.md) guide.
+For details on CLI parameters, refer to the [parameters](./documentation/MESSAGING_PARAMETERS.md) guide.
 
 You can also use:
 - _-h_ or _--help_ option on the command to see basic parameters.
@@ -174,7 +174,7 @@ You can also use:
 
 ### Command Examples
 
-Refer to the [examples](MESSAGING_EXAMPLES.md) guide for sample commands. 
+Refer to the [examples](./documentation/MESSAGING_EXAMPLES.md) guide for sample commands. 
 
 You can use:
 - _-he_ or _--help-examples_ option on the command to see corresponding examples.
@@ -183,7 +183,7 @@ You can use:
 
 The __stm__ utility supports persisting command settings to a file, that can be referenced by name. In fact, the default configuration file present is populated with messaging and manage comments with default settings.
 
-To know more about configuration file and how to create and manage commands, refer to [configuration](STM_CONFIGURATION.md) guide.
+To know more about configuration file and how to create and manage commands, refer to [configuration](./documentation/CONFIGURATION.md) guide.
 
 ## Setup `stm` configuration
 
@@ -405,7 +405,7 @@ stm manage queue --create my-queue --semp-url http://localhost:8080/SEMP/v2/conf
 ....
 ```
 
-Refer to the [examples](MESSAGING_EXAMPLES.md) guide for more details.
+Refer to the [examples](./documentation/MESSAGING_EXAMPLES.md) guide for more details.
 
 ## Contributing
 
