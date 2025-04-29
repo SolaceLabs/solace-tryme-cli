@@ -162,6 +162,8 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   }
 
   var result:any = [];
+  let noOfSendEvents = 0;
+  let noOfReceiveEvents = 0;
   if (type === 'file' || type === 'asyncapi_feed') {
     data.info['x-ep-application-domain-name'] && result.push(chalkBoldLabel('├──Application Domain: ') + chalkBoldWhite(data.info['x-ep-application-domain-name']))
     data.info['title'] && result.push(chalkBoldLabel('├──Application: ') + chalkBoldWhite(data.info['title']))
@@ -173,6 +175,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     let sendAdded = false;
     Object.keys(data.messages).forEach((messageName) => {
       var sendEvents = data.messages[messageName].send;
+      noOfSendEvents += sendEvents.length;
       if (sendEvents.length) {
         if (!sendAdded) {
           result.push(chalkBoldLabel('│   ├──Send Events'));
@@ -209,6 +212,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     let receiveAdded = false;
     Object.keys(data.messages).forEach((messageName) => {
       var receiveEvents = data.messages[messageName].receive;
+      noOfReceiveEvents += receiveEvents.length;
       if (receiveEvents.length) {
         if (!receiveAdded) {
           result.push(chalkBoldLabel('│   ├──Receive Events'));
@@ -298,6 +302,14 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
 
   Logger.logDetailedSuccess('Summary: \n', result.join('\n'), false);
 
+  if (type === 'file' || type === 'asyncapi_feed') {
+    if (!noOfReceiveEvents && !noOfSendEvents) {
+      Logger.logWarn('No Events Found');
+    }
+    if (noOfReceiveEvents && !noOfSendEvents) {
+      Logger.logWarn('No Publishable Events Found');
+    }
+  }
 }
 
 export default preview

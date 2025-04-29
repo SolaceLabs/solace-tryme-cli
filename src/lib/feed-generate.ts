@@ -131,6 +131,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   const rules = await formulateRules(document, reverseView); // Uses original unmodified document
   const schemas = await formulateSchemas(document); // Uses original unmodified document
 
+  await checkEventValidity(data);
+
   if (options.useDefaults) {
     feed.type = 'asyncapi_feed';
     feed.name = feedName;
@@ -770,6 +772,43 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   process.exit(0);
 }
   
+const checkEventValidity = async (data:any) => {
+  let noOfSendEvents = 0;
+  let noOfReceiveEvents = 0;
+
+  Object.keys(data.messages).forEach((messageName) => {
+    var sendEvents = data.messages[messageName].send;
+    noOfSendEvents += sendEvents.length;
+    var receiveEvents = data.messages[messageName].receive;
+    noOfReceiveEvents += receiveEvents.length;
+  });
+
+  if (noOfSendEvents === 0 && noOfReceiveEvents === 0) {
+    Logger.logError('No events found in the AsyncAPI document');
+    Logger.success('exiting...');
+    process.exit(1);
+  } else if (noOfReceiveEvents && !noOfSendEvents) {
+    Logger.logWarn('No publishable found in the AsyncAPI document');
+    const { Confirm } = require('enquirer');
+    const pProceed = new Confirm({
+      message: chalkBoldWhite(`Do you still want to proceed?`)
+    });
+    
+    await pProceed.run()
+      .then((answer:any) => {
+        if (!answer) {
+          Logger.success('exiting...');
+          process.exit(1)
+        }
+      })
+      .catch((error:any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+
+    return;
+  }
+}
 export default generate
 
 export { generate }
