@@ -7,7 +7,7 @@ async function managePartitionKey() {
   console.log('RULE', rule);
   if (!rule) return;
 
-  let sampleKey = rule.messageSettings?.partitionKeys.split(' | ').map(m => `<${m}>`).join('-');
+  let sampleKey = rule.messageSettings?.partitionKeys?.split(' | ').map(m => `<${m}>`).join('-');
   if (sampleKey && sampleKey.length > 0) {
     $('#msgSettingsSampleKey').text(sampleKey);
   } else {

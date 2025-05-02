@@ -237,7 +237,7 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
-  createFeed(fileName, feedName, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
+  createFeed(fileName, feedName, feed, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
   feed.lastUpdated = new Date().toISOString();
   updateAndLoadFeedInfo(feed);
 

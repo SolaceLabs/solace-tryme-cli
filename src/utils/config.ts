@@ -574,7 +574,7 @@ export const readAsyncAPIFile = (configFile: string, jsonify: boolean = true) =>
   }
 }
 
-export const createFeed = (fileName: string, feedName: string, apiJson: object, rulesJson: object, schemaJson: object, sessionJson: object, overWrite: boolean = false) => {
+export const createFeed = (fileName: string, feedName: string, feedJson: object, apiJson: object, rulesJson: object, schemaJson: object, sessionJson: object, overWrite: boolean = false) => {
   const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
   try {
     if (fileExists(feedPath)) {
@@ -598,6 +598,7 @@ export const createFeed = (fileName: string, feedName: string, apiJson: object, 
 
     fs.mkdirSync(feedPath, { recursive: true })
     fs.copyFileSync(fileName, `${feedPath}/${path.parse(fileName).base}`);
+    writeJsonFile(`${feedPath}/${defaultFeedInfoFile}`, feedJson, true);
     writeJsonFile(`${feedPath}/${defaultFeedAnalysisFile}`, apiJson)
     writeJsonFile(`${feedPath}/${defaultFeedRulesFile}`, rulesJson)
     writeJsonFile(`${feedPath}/${defaultFeedSessionFile}`, sessionJson)

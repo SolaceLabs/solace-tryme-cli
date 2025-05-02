@@ -1588,7 +1588,7 @@ async function loadEditableMessageProperties(event) {
         </option>`).join('')}
       </select>
       ` : `
-      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${prop.value !== undefined ? prop.value : prop.default}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
+      <input id="td_value_${prop.key}" type="${prop.datatype === 'number' ? 'number' : 'text'}" class="form-control" value="${String(prop.value !== undefined ? prop.value : prop.default).replace(/"/g, '&quot;')}" oninput="document.getElementById('tr_prop_${prop.key}').dataset.new_value = this.value; if (this.value === '') document.getElementById('tr_prop_${prop.key}').dataset.deleted = 'yes';">
       `}
       </td>
       <td>
