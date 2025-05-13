@@ -131,7 +131,7 @@ export const defaultMessageConfig:any = {
   correlationKey: undefined,
   deliveryMode: 'PERSISTENT',
   // destination:  NOT CONSIDERED, as we want o support only Message to TOPICS
-  dmqEligible: false,
+  dmqEligible: true,
   partitionKeysCount: undefined,
   partitionKeysList: undefined,
   partitionKeys: undefined,
