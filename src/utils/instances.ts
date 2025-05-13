@@ -122,7 +122,7 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.file = ""
     this.stdin = false
     this.timeToLive = 1
-    this.dmqEligible = false
+    this.dmqEligible = true
     this.appMessageId = ""
     this.appMessageType = ""
     this.correlationKey = ""
