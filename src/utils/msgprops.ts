@@ -56,7 +56,7 @@ export const messagePropertiesJson = {
 		],
 		"type": "select",
 		"datatype": "boolean",
-		"default": "false"
+		"default": "true"
 	},
 	"elidingEligible": {
 		"exposed": false,
@@ -131,7 +131,7 @@ export const messagePropertiesJson = {
 		"description": "Message expiration time in milliseconds",
 		"type": "input",
 		"datatype": "number",
-		"default": ""
+		"default": 0
 	},
 	"userProperties": {
 		"exposed": true,

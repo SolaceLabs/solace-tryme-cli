@@ -406,7 +406,8 @@ export class SolaceClient extends VisualizeClient {
           });
           // Define message received event listener
           this.receiver.messageReceiver.on(solace.MessageConsumerEventName.MESSAGE, (message: any) => {
-            Logger.logSuccess(`message Received - ${message.getDestination()}, type - ${getType(message)}`)
+            Logger.await(`${chalkEventCounterLabel(++this.count)} receiving message [${new Date().toLocaleString('en-US', dateFormatOptions)}`)
+            Logger.logSuccess(`received ${getType(message)} message on topic ${message.getDestination()}`)
             Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, { 
               type: 'receiver', deliveryMode: message.getDeliveryMode(), queue: this.receiver.queue, topicName: message.getDestination().getName(), 

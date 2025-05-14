@@ -338,11 +338,12 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
                               parseInt(feedRule.publishSettings?.interval) : defaultMessagePublishConfig.interval;
 
     const msgOptions = { ...options };
+    const defaultMessageSettings = messagePropertiesJson;
+    getDefaultMessageSettings(defaultMessageSettings, msgOptions);
     if (feedRule.messageSettings && Object.keys(feedRule.messageSettings).length > 0) {
-      const defaultMessageSettings = messagePropertiesJson;
       getMessageSettings(defaultMessageSettings, feedRule.messageSettings, msgOptions);
-    }  
-  
+    }
+    
     selectedMessages.push({
       message: feedRule.messageName, 
       topic: feedRule.topic,
@@ -428,6 +429,20 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }, 2000);
 }
 
+function fixDefaultMessageSettings(defaultSettings: any, property: string, options: any, optionName: any = null) {
+  if (defaultSettings[property] !== undefined && defaultSettings[property].exposed) {
+    let optionProperty = optionName ? optionName : property;
+    options[optionProperty] = defaultSettings[optionProperty].default;
+    if (defaultSettings[property].datatype === 'number') {
+      options[optionProperty] = parseInt(options[optionProperty]);
+    } else if (defaultSettings[property].datatype === 'boolean') {
+      options[optionProperty] = options[optionProperty] === 'true' ? true : false;
+    }      
+  }
+
+  return;
+}
+
 function fixMessageSettings(defaultSettings: any, messageSettings: any, property: string, options: any, optionName: any = null) {
   if (defaultSettings[property] !== undefined && defaultSettings[property].exposed && messageSettings[property] !== undefined) {
     let optionProperty = optionName ? optionName : property;
@@ -462,6 +477,24 @@ const getMessageSettings = (defaultSettings: any, settings: any, msgOptions: any
     if (settings.partitionKeys)
       msgOptions.partitionKeys = settings.partitionKeys;
   }
+}
+
+const getDefaultMessageSettings = (defaultSettings: any, msgOptions: any) => {
+  fixDefaultMessageSettings(defaultSettings, 'payloadType', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'publishConfirmation', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'appMessageId', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'appMessageType', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'correlationId', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'correlationKey', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'deliveryMode', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'dmqEligible', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'elidingEligible', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'replyToTopic', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'sequenceNumber', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'timeToLive', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'userProperties', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'httpContentType', msgOptions);
+  fixDefaultMessageSettings(defaultSettings, 'httpContentEncoding', msgOptions);
 }
 
 async function publishFeed(publisher:any, msg:any) {
