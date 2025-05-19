@@ -281,13 +281,10 @@ export class SolaceClient extends VisualizeClient {
       settings.timeToLive !== undefined && message.setTimeToLive(settings.timeToLive);
       settings.dmqEligible !== undefined && message.setDMQEligible(settings.dmqEligible);
       settings.elidingEligible !== undefined && message.setElidingEligible(settings.elidingEligible);
-      if (settings.appMessageId) {
-        if (settings.appMessageId === 'uuid')
+      if (settings.appMessageId && settings.appMessageId === 'uuid')
           message.setApplicationMessageId(uuid());
-        else
-          message.setApplicationMessageId(settings.appMessageId);
-      }      
-      if (settings.visualization === 'on' && !settings.appMessageId) message.setApplicationMessageId(randomUUID());
+      if (settings.visualization === 'on' && !settings.appMessageId) 
+        message.setApplicationMessageId(randomUUID());
       settings.appMessageType !== undefined && message.setApplicationMessageType(settings.appMessageType);
       settings.replyToTopic !== undefined && message.setReplyTo(solace.SolclientFactory.createTopicDestination(settings.replyToTopic))
       if (this.options.userProperties) {
