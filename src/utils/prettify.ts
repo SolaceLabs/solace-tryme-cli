@@ -2,6 +2,7 @@
 
 import { prettyPrint } from '@base2/pretty-print-object';
 import { Logger } from './logger';
+import chalk from 'chalk';
 var _os = require('os');
 
 var stringTimesN = function stringTimesN(n:number, char:string) {
@@ -65,15 +66,38 @@ function prettyJSON(str: string) {
     let isNum = /^\d+$/.test(str);
 
       var obj = isNum ? str : JSON.parse(str);
-      return prettyPrint(obj, {
-        indent: '  ',
-        singleQuotes: false
-      });
+      // var output = chalk.green(JSON.stringify(obj, null, 2));
+      // return prettyPrint(obj, {
+      //   indent: '  ',
+      //   singleQuotes: false
+      // });
+      var output = colorizeJSON(obj, 2);
+      return output
   } catch (error: any) {
     // Logger.warn(`not a valid json payload`)
     return str;
   }
 }
+
+function colorizeJSON(json: any, indent = 2) {
+  const stringified = JSON.stringify(json, null, indent);
+  return stringified.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = chalk.magentaBright;
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = chalk.cyanBright;
+      } else {
+        cls = chalk.greenBright;
+      }
+    } else if (/true|false/.test(match)) {
+      cls = chalk.yellow;
+    } else if (/null/.test(match)) {
+      cls = chalk.redBright;
+    }
+    return cls(match);
+  });
+}
+
 
 function padString(lPad: number, str: string, length: number) {
   if (str.length >= length) return str;
