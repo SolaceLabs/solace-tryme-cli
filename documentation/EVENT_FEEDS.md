@@ -342,6 +342,9 @@ Export Feed|![](./docrefs/feed-export-to-ep.gif)
 
 ## Contribute Event Feed to Community
 
+> NOTE: Please checkout the feed contribution guidelines before you start [Community Feed Contribution Guidelines](./CONTRIBUTION_GUIDELINES.md)
+
+
 Locally created event feeds can be contributed for community use, allowing you to share your configurations, data generation rules, and event structures with others. By contributing to the community, you help build a collaborative environment where others can benefit from your work, streamline their own setups, and enhance overall knowledge sharing. This fosters a collective approach to improving event-driven architectures and accelerates development across teams and organizations.
 
 ```
