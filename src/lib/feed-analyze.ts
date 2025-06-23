@@ -212,6 +212,18 @@ const setDefaultTopicVariableRules = (obj: any) => {
 
 const processObjectPayload = async (payload: any) => {
   for(const prop in payload) {
+    // process allOf, anyOf, oneOf that appears as the only element
+    if (Object.keys(payload[prop]).length === 1 &&
+        ['allOf', 'anyOf', 'oneOf'].includes(Object.keys(payload[prop])[0])) {
+      payload[prop] = payload[prop][Object.keys(payload[prop])[0]][0];
+    }
+
+    // process const values (string with enum type)
+    if (payload[prop].const) {
+      payload[prop].type = 'string';
+      payload[prop].enum = [payload[prop].const];
+    }
+
     if (payload[prop].type === undefined)
       continue;
 
@@ -246,6 +258,10 @@ const processObjectPayload = async (payload: any) => {
       payload[prop].name = prop;
 
       var schema = payload[prop].items;
+      if (!schema.type) {
+        console.warn(chalkBoldWarning(`Missing type for property ${prop}, setting default type to 'string'`));
+      }
+
       if (schema.type.toLowerCase() === 'object') {
         payload[prop].rule = { name: prop, type: 'object'};
         enhanceRuleWithValidatorsAndFormats(schema, payload[prop].rule);
@@ -291,6 +307,10 @@ const processObjectPayload = async (payload: any) => {
 
     var schema = payload[prop];
     var schemaType = schema.type;
+    if (!schemaType) {
+      console.warn(chalkBoldWarning(`Missing type for property ${prop}, setting default type to 'string'`));
+    }
+
     if (Array.isArray(schemaType)) {
       schemaType.forEach((type) => type.toLowerCase());
       schema.type = schemaType.find((type: string) => type.toLowerCase() !== 'null') || schemaType[0];
