@@ -215,6 +215,11 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       process.exit(1);
     });
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   // Add the contributionChanges and userEmail to an TESTazureFunctionInfo object
   const azureFunctionInfo = {
     contributionChanges,

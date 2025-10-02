@@ -34,6 +34,8 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
   acknowledgeImmediately?: boolean | undefined
   logLevel?: string | undefined
   command: CommandType
+  quite?: boolean | undefined
+  lint?: boolean | undefined
   operation: OperationType
   count?: number | undefined
   interval?: number | undefined
@@ -84,6 +86,8 @@ export class MessageClientOptionsEmpty implements StmConfigOptions, MessageConne
     this.name = ""
     this.save = false
     this.helpExamples = false
+    this.quite = false
+    this.lint = false
     this.connectionTimeout = 1
     this.connectionRetries = 1
     this.reconnectRetries = 1

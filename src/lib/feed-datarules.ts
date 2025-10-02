@@ -487,9 +487,9 @@ export const processFinanceRules = (rule:any, count:number) => {
     for (var i=0; i<count; i++) {
       data.push(faker.finance.bic());
     }
-  } else if (rule.rule === 'creditCardNumber') {
+  } else if (rule.rule === 'creditCardIssuer') {
     for (var i=0; i<count; i++) {
-      data.push(faker.finance.creditCardNumber());
+      data.push(faker.finance.creditCardIssuer());
     }
   } else if (rule.rule === 'creditCardNumber') {
     for (var i=0; i<count; i++) {

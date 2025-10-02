@@ -20,6 +20,11 @@ const wordwrap = (str:any, width:any, brk:any, cut:any ) => {
 const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var communityOnly, localOnly = false;
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   if (optionsSource.localOnly === 'cli' || optionsSource.communityOnly === 'cli') {
     communityOnly = optionsSource.communityOnly === 'cli' ? options.communityOnly : communityOnly;
     localOnly = optionsSource.localOnly === 'cli' ? options.localOnly : localOnly;

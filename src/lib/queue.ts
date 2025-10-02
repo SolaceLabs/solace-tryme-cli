@@ -59,6 +59,11 @@ const queue = (options: ManageClientOptions, optionsSource: any) => {
     })
   }
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   invoke(options, optionsSource)
 }
 

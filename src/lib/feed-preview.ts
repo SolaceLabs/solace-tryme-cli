@@ -128,6 +128,11 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     feedView = 'default';
   }
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   const reverseView = feedView === 'provider';
   var data:any = undefined;
   var info:any = undefined;

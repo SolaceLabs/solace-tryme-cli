@@ -59,9 +59,9 @@
 |     | _**country**_  <br>Returns a random country name. |
 |     | _**countryCode**_  <br>Returns a random ISO\_3166-1 country code. |
 |     | _**latitude**_  <br>Generates a random latitude. | minimum \[default: -90\]  <br>maximum \[default: 90\]  <br>precision \[default: 4\] |
-|     | _**longitude**_  <br>Generates a random longitude. | minimum \[default: -90\]  <br>maximum \[default: 90\]  <br>precision \[default: 4\] |
-|     | _**timeZon**_  <br>Returns a random time zone. |
-| **InternetRules**  <br>Module to generate internet related entries | _**domainNam**_  <br>Generates a random domain name. | casing \[default: lower\] |
+|     | _**longitude**_  <br>Generates a random longitude. | minimum \[default: -180\]  <br>maximum \[default: 180\]  <br>precision \[default: 4\] |
+|     | _**timeZone**_  <br>Returns a random time zone. |
+| **InternetRules**  <br>Module to generate internet related entries | _**domainName**_  <br>Generates a random domain name. | casing \[default: lower\] |
 |     | _**domainWord**_ |     |
 |     | _**email**_  <br>Generates a random email address. | casing \[default: lower\]  <br>emoji  <br>Generates a random emoji. |
 |     | _**emoji**_ |
@@ -94,7 +94,7 @@
 |     | _**price**_  <br>Generates a random price between min and max. | minimum \[default: 1\]  <br>maximum \[default: 999\] |
 |     | _**product**_  <br>Returns a random short product name. |
 |     | _**productDescription**_  <br>Returns a random product description. |
-|     | _**productNam**_  <br>Generates a random descriptive product name. |     |
+|     | _**productName**_  <br>Generates a random descriptive product name. |     |
 
 ## Supported Regular Expression
 

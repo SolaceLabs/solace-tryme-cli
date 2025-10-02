@@ -17,7 +17,7 @@ const eventFeedTimers: any[] = [];
 const publishStats:any = {};
 
 const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) => {
-  const { helpExamples } = options
+  const { helpExamples, quite } = options
   var feedName: string = '';
   var eventNames: string[] = [];
   var gitFeed = false;
@@ -53,7 +53,43 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     options.initialDelay = 0;
     optionsSource.initialDelay = 'cli';
     optionsSource.eventNames = 'cli';    
-  } else {
+  } else if (quite && !options.lint) {
+    if (optionsSource.feedName !== 'cli' || !options.feedName) {
+      Logger.logError(`Missing event feed name...`)
+      Logger.logError('exiting...')
+      process.exit(1);
+    }
+
+    feedName = options.feedName;
+    gitFeed = options.communityFeed;
+    var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);    
+
+    var events = gitFeed ? await getGitFeedEvents(feedName) : getFeedEvents(feedName);
+    if (events.length === 0) {
+      Logger.logDetailedError(`No events found in the feed`, feedName);
+      Logger.error('exiting...')
+      process.exit(1)
+    }
+    
+    if (optionsSource.eventNames === 'cli') {
+      var missingEvents = eventNames.filter((e:any) => !events.find((el:any) => el.name === e));
+      if (missingEvents.length) {
+        Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
+        Logger.logError('exiting...')
+        process.exit(1);
+      }        
+    } else {
+      eventNames = options.eventNames = events.map((event:any) => event.name);
+      options.eventNames = eventNames;
+      optionsSource.eventNames = 'cli';      
+    }
+  
+    options.count = (optionsSource.count === 'cli' ? options.count : 1);
+    optionsSource.count = 'cli';
+    options.interval = (optionsSource.interval === 'cli' ? options.interval : 1000);
+    optionsSource.interval = 'cli';
+    options.initialDelay = (optionsSource.initialDelay === 'cli' ? options.initialDelay : 0);
+  } else if (!options.lint) {
     if (optionsSource.feedName === 'cli') {
       cmdLine = true;
       feedName = options.feedName;
@@ -74,7 +110,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         }
       })
 
-      if (optionsSource.eventNames !== 'cli') {
+      if (optionsSource.eventNames !== 'cli' && !quite) {
         const { MultiSelect } = require('enquirer');
         const pPickEvent = new MultiSelect({
           name: 'localEvent',
@@ -98,6 +134,16 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         
         options.eventNames = eventChoices;
         optionsSource.eventNames = 'cli';
+      } else if (optionsSource.eventNames === 'cli') {
+        var missingEvents = eventNames.filter((e:any) => !events.find((el:any) => el.name === e));
+        if (missingEvents.length) {
+          Logger.logError(`${missingEvents.join(', ')}: Events not defined in the feed...`)
+          Logger.logError('exiting...')
+          process.exit(1);
+        }
+        
+        options.eventNames = eventNames;
+        optionsSource.eventNames = 'cli';
       } else {
         var missingEvents = eventNames.filter((e:any) => !eventsList.find((el:any) => el.name === e));
         if (missingEvents.length) {
@@ -117,7 +163,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   // check for event in the feed
-  if (!cmdLine) {
+  if (!cmdLine && !quite && !options.lint) {
     const { Select, AutoComplete, MultiSelect } = require('enquirer');
     const pFeedSource = new Select({
       name: 'source',
@@ -253,7 +299,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     
     options.eventNames = eventChoices;
     optionsSource.eventNames = 'cli';
-  } else {
+  } else if (!options.lint) {
     var feedInfo = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
     if (feedInfo.type === 'restapi_feed')
       return feedRunApi(options, optionsSource);
@@ -265,14 +311,27 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       process.exit(1)
     }
     
-    options.eventNames = [];
-    events.map((event:any) => {
-      options.eventNames.push(event.name + '      ' + event.topic);
-    })
+    if (optionsSource.eventNames === 'cli') {
+      var foundEvents = events.filter((el:any) => options.eventNames.find((e:any) => el.name === e));
+
+      options.eventNames = [];
+      foundEvents.map((event:any) => {
+        options.eventNames.push(event.name + '      ' + event.topic);
+      })
+      optionsSource.eventNames = 'cli';      
+    } else {
+      options.eventNames = events.map((event:any) => event.name + '      ' + event.topic);
+      optionsSource.eventNames = 'cli';      
+    }
   }
 
   // check connection params found
   checkConnectionParamsExists(options.url, options.vpn, options.username, options.password);
+
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
 
   // load feed rules
   var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);

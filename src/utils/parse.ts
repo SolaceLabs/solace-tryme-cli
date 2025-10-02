@@ -31,6 +31,152 @@ export const parseNumber = (value: string) => {
   return parsedValue
 }
 
+export const parsePositiveNumber = (value: string, paramName?: string) => {
+  const parsedValue = Number(value)
+  if (isNaN(parsedValue)) {
+    const errorMsg = paramName ? `${paramName} '${value}' is not a number.` : `${value} is not a number.`
+    Logger.logError(errorMsg)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  if (parsedValue < 0) {
+    const errorMsg = paramName ? `${paramName} '${value}' must be a non-negative number.` : `${value} must be a non-negative number.`
+    Logger.logError(errorMsg)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  if (!Number.isInteger(parsedValue)) {
+    const errorMsg = paramName ? `${paramName} '${value}' must be a whole number (no decimals).` : `${value} must be a whole number (no decimals).`
+    Logger.logError(errorMsg)
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+  return parsedValue
+}
+
+export const parseCount = (value: string) => {
+  return parsePositiveNumber(value, 'count')
+}
+
+export const parseInterval = (value: string) => {
+  return parsePositiveNumber(value, 'interval')
+}
+
+// Timeout and connection related parameters
+export const parseTimeToLive = (value: string) => {
+  return parsePositiveNumber(value, 'time-to-live')
+}
+
+export const parseReadTimeout = (value: string) => {
+  return parsePositiveNumber(value, 'read-timeout')
+}
+
+export const parseConnectionTimeout = (value: string) => {
+  return parsePositiveNumber(value, 'connection-timeout')
+}
+
+export const parseConnectionRetries = (value: string) => {
+  return parsePositiveNumber(value, 'connection-retries')
+}
+
+export const parseReconnectRetries = (value: string) => {
+  return parsePositiveNumber(value, 'reconnect-retries')
+}
+
+export const parseReconnectRetryWait = (value: string) => {
+  return parsePositiveNumber(value, 'reconnect-retry-wait')
+}
+
+export const parseWaitBeforeExit = (value: string) => {
+  return parsePositiveNumber(value, 'wait-before-exit')
+}
+
+export const parseExitAfter = (value: string) => {
+  return parsePositiveNumber(value, 'exit-after')
+}
+
+export const parseSendBufferMaxSize = (value: string) => {
+  return parsePositiveNumber(value, 'send-buffer-max-size')
+}
+
+export const parseWindowSize = (value: string) => {
+  return parsePositiveNumber(value, 'window-size')
+}
+
+export const parseTimeout = (value: string) => {
+  return parsePositiveNumber(value, 'timeout')
+}
+
+export const parseInitialDelay = (value: string) => {
+  return parsePositiveNumber(value, 'initial-delay')
+}
+
+
+
+// Queue management parameters
+export const parseDeliveryDelay = (value: string) => {
+  return parsePositiveNumber(value, 'delivery-delay')
+}
+
+export const parseMaxMsgSize = (value: string) => {
+  return parsePositiveNumber(value, 'max-msg-size')
+}
+
+export const parseMaxMsgSpoolUsage = (value: string) => {
+  return parsePositiveNumber(value, 'max-msg-spool-usage')
+}
+
+export const parseMaxRedeliveryCount = (value: string) => {
+  return parsePositiveNumber(value, 'max-redelivery-count')
+}
+
+export const parsePartitionCount = (value: string) => {
+  return parsePositiveNumber(value, 'partition-count')
+}
+
+export const parsePartitionRebalanceDelay = (value: string) => {
+  return parsePositiveNumber(value, 'partition-rebalance-delay')
+}
+
+export const parsePartitionRebalanceMaxHandoffTime = (value: string) => {
+  return parsePositiveNumber(value, 'partition-rebalance-max-handoff-time')
+}
+
+// Client profile parameters
+export const parseMaxEgressFlowCount = (value: string) => {
+  return parsePositiveNumber(value, 'max-egress-flow-count')
+}
+
+export const parseMaxIngressFlowCount = (value: string) => {
+  return parsePositiveNumber(value, 'max-ingress-flow-count')
+}
+
+export const parseMaxSubscriptionCount = (value: string) => {
+  return parsePositiveNumber(value, 'max-subscription-count')
+}
+
+// Port parameters
+export const parseVisualizationPort = (value: string) => {
+  return parsePositiveNumber(value, 'visualization-port')
+}
+
+export const parseManagePort = (value: string) => {
+  return parsePositiveNumber(value, 'manage-port')
+}
+
+// Keepalive and acknowledge timeout parameters (for commented code)
+export const parseKeepalive = (value: string) => {
+  return parsePositiveNumber(value, 'keepalive')
+}
+
+export const parseKeepaliveIntervalLimit = (value: string) => {
+  return parsePositiveNumber(value, 'keepalive-interval-limit')
+}
+
+export const parseAcknowledgeTimeout = (value: string) => {
+  return parsePositiveNumber(value, 'acknowledge-timeout')
+}
+
 export const parsePartitionKeysCount = (value: string) => {
   const parsedValue = Number(value)
   if (isNaN(parsedValue)) {
@@ -53,7 +199,7 @@ export const parseMessageProtocol = (value: string) => {
     Logger.logError('exiting...')
     process.exit(1)
   }
-  return value;
+  return value.toLowerCase();
 }
 
 export const parseManageProtocol = (value: string) => {
@@ -63,7 +209,7 @@ export const parseManageProtocol = (value: string) => {
     Logger.logError('exiting...')
     process.exit(1)
   }
-  return value;
+  return value.toLowerCase();
 }
 
 export const parseLogLevel = (value: string) => {
@@ -399,13 +545,13 @@ export const parseSempEndpointCreateDurability = (value: string) => {
 }
 
 export const parseFeedType = (value: string) => {
-  if (!['STM', 'API', 'CUSTOM'].includes(value.toUpperCase())) {
-    Logger.logError(`only 'STM', 'API', 'CUSTOM' are supported, and if not specified a STM mode is used.`)
+  if (!['asyncapi', 'restapi', 'custom'].includes(value.toLowerCase())) {
+    Logger.logError(`only 'asyncapi', 'restapi', 'custom' are supported, and if not specified a asyncapi mode is used.`)
     Logger.logError('exiting...')
     process.exit(1)
   }
 
-  return `${value.toLowerCase()}feed`;
+  return `${value.toLowerCase()}_feed`;
 }
 
 export const parseFeedView = (value: string) => {

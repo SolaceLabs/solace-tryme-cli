@@ -11,6 +11,11 @@ const publish = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
   var interrupted = false;
@@ -43,7 +48,7 @@ const publish = async (
   var file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
-      Logger.logSuccess(`missing file '${file}'`);
+      Logger.logError(`missing file '${file}'`);
       Logger.logError('exiting...')
       process.exit(1)
     }

@@ -245,8 +245,8 @@ export const fakerRulesJson = {
         "description": "Generates a random latitude." 
       },
       "longitude": { 
-        "minimum": -90,
-        "maximum": 90,
+        "minimum": -180,
+        "maximum": 180,
         "precision": 4,
         "description": "Generates a random longitude." 
       },

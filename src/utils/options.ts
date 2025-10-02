@@ -1,17 +1,18 @@
 import { Command, Option, program } from 'commander'
 import {
-  parseBoolean, parseNumber, parseDeliveryMode, parseLogLevel, parseManageProtocol,
-  parseMessageProtocol, parseOutputMode, parsePayloadType, parseSingleTopic, parsePublishTopic,
-  parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, parseSempOperation, parseSempQueueAccessType, 
-  parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, parseSempAllowDefaultAction, 
-  parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKeys,
-  parsePartitionKeysCount,
-  parseFeedType,
-  parseFeedView,
-  parseHttpContentEncoding,
-  parseHttpContentType,
-  parsePartitionKeysList,
-  parsePublishQueue
+  parseBoolean, parseNumber, parsePositiveNumber, parseCount, parseInterval, parseTimeToLive, parseReadTimeout,
+  parseConnectionTimeout, parseConnectionRetries, parseReconnectRetries, parseReconnectRetryWait,
+  parseWaitBeforeExit, parseExitAfter, parseSendBufferMaxSize, parseWindowSize, parseTimeout, parseInitialDelay,
+  parseDeliveryDelay, parseMaxMsgSize, parseMaxMsgSpoolUsage, parseMaxRedeliveryCount, parsePartitionCount, 
+  parsePartitionRebalanceDelay, parsePartitionRebalanceMaxHandoffTime, parseMaxEgressFlowCount, 
+  parseMaxIngressFlowCount, parseMaxSubscriptionCount, parseVisualizationPort, parseManagePort,
+  parseKeepalive, parseKeepaliveIntervalLimit, parseAcknowledgeTimeout,
+  parseDeliveryMode, parseLogLevel, parseManageProtocol, parseMessageProtocol, parseOutputMode, parsePayloadType, 
+  parseSingleTopic, parsePublishTopic, parseReceiveTopic, parseUserProperties, parseSempQueueNonOwnerPermission, 
+  parseSempOperation, parseSempQueueAccessType, parsePublishAcknowledgeMode, parseReceiverAcknowledgeMode, 
+  parseSempAllowDefaultAction, parseSempEndpointCreateDurability, parseRequestTopic, parsePartitionKeys,
+  parsePartitionKeysCount, parseFeedType, parseFeedView, parseHttpContentEncoding, parseHttpContentType,
+  parsePartitionKeysList, parsePublishQueue
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
@@ -39,47 +40,57 @@ export const addConfigDeleteOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // delete options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli delete command examples')))
+
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addConfigViewOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // view options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli view command examples')))
+
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addConfigListOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // list options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli list commands examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addConfigInitOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // init options
     .addOption(new Option(`/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show cli init commands examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addSendOptions = (cmd: Command, advanced: boolean) => {
@@ -105,8 +116,8 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('MULTI-MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
-    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
+    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish')) .argParser(parseCount) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
+    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) .argParser(parseInterval) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
 
     // message print options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
@@ -121,7 +132,7 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--payload-type <PAYLOAD_TYPE>', chalk.whiteBright('[advanced] payload type: TEXT or BYTES')) .argParser(parsePayloadType) .default(defaultMessageConfig.payloadType) .hideHelp(!advanced))
-    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
+    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseTimeToLive) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
     .addOption(new Option('-dmq, --dmq-eligible [BOOLEAN]', chalk.whiteBright('[advanced] the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(!advanced))
     .addOption(new Option('--app-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the user-defined application message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
     .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the user-defined application message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
@@ -139,17 +150,17 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseKeepalive) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseKeepaliveIntervalLimit) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
-    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
-    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseWaitBeforeExit) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
@@ -157,17 +168,17 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--publish-confirmation [BOOLEAN]', chalk.whiteBright('[advanced] generate publish confirmation')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .default(false) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseSendBufferMaxSize) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed publisher options
-    .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessagePublishConfig.windowSize) .hideHelp(!advanced))
-    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseNumber) .default(defaultMessagePublishConfig.acknowledgeTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseWindowSize) .default(defaultMessagePublishConfig.windowSize) .hideHelp(!advanced))
+    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseAcknowledgeTimeout) .default(defaultMessagePublishConfig.acknowledgeTimeout) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement receive mode: PER_MESSAGE or WINDOWED')) .argParser( parsePublishAcknowledgeMode) .default(defaultMessagePublishConfig.acknowledgeMode) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-immediately [BOOLEAN]', chalk.whiteBright('[advanced] the broker to acknowledge message immediately')) .conflicts('windowSize') .conflicts('acknowledgeMode')  .argParser( parseBoolean) .default(defaultMessagePublishConfig.acknowledgeImmediately) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandSend))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -175,6 +186,8 @@ export const addSendOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli publish examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -203,12 +216,13 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('RECEIVE SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('recv'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageReceiveConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <NUMBER>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <NUMBER>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseKeepalive) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseKeepaliveIntervalLimit) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
     .addOption(new Option('--receive-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a receive timestamp on received messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateReceiveTimestamps) .hideHelp(!advanced))
     .addOption(new Option('--reapply-subscriptions [BOOLEAN]', chalk.whiteBright('[advanced] reapply subscriptions upon calling on a disconnected session')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))  
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement mode: AUTO or CLIENT')) .argParser( parseReceiverAcknowledgeMode) .default(defaultMessageReceiveConfig.acknowledgeMode) .hideHelp(!advanced))
@@ -216,11 +230,11 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // consumer options
-    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandReceive))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -228,6 +242,8 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli receive examples')) )
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -253,8 +269,8 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--stdin', chalk.whiteBright('read the message body from stdin')) .implies({payloadType: 'TEXT'}) .conflicts('emptyMessage') .conflicts('message') .conflicts('defaultMessage') .conflicts('file') .default(false) .hideHelp(advanced))
 
     .addOption(new Option(`\n/* ${chalk.whiteBright('MULTI-MESSAGE SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of requests to send')) .argParser(parseNumber) .default(defaultMessageRequestConfig.count) .hideHelp(advanced))
-    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between requests')) .argParser(parseNumber) .default(defaultMessageRequestConfig.interval) .hideHelp(advanced))
+    .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of requests to send')) .argParser(parseCount) .default(defaultMessageRequestConfig.count) .hideHelp(advanced))
+    .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between requests')) .argParser(parseInterval) .default(defaultMessageRequestConfig.interval) .hideHelp(advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
@@ -263,11 +279,11 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--payload-type <PAYLOAD_TYPE>', chalk.whiteBright('[advanced] payload type: TEXT or BYTES')) .argParser(parsePayloadType) .default(defaultMessageConfig.payloadType) .hideHelp(!advanced))
     // .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
-    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
+    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseTimeToLive) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
     .addOption(new Option('-dmq, --dmq-eligible [BOOLEAN]', chalk.whiteBright('[advanced] the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(!advanced))
-    .addOption(new Option('--timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout value')) .argParser(parseNumber) .default(defaultMessageConfig.timeout) .hideHelp(!advanced))
-    .addOption(new Option('--application-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application provided message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
-    .addOption(new Option('--application-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application provided message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
+    .addOption(new Option('--timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout value')) .argParser(parseTimeout) .default(defaultMessageConfig.timeout) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application provided message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application provided message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
     // .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
     .addOption(new Option('--correlation-id <CORRELATION_ID>', chalk.whiteBright('[advanced] the application provided message correlation id for acknowledgement management')) .default( 'current timestamp') .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
@@ -283,33 +299,33 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('req'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageRequestConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseKeepalive) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseKeepaliveIntervalLimit) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
-    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
-    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseWaitBeforeExit) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // request options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REQUEST SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseSendBufferMaxSize) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed requestor options
-    .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessageRequestConfig.windowSize) .hideHelp(!advanced))
-    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseNumber) .default(defaultMessageRequestConfig.acknowledgeTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseWindowSize) .default(defaultMessageRequestConfig.windowSize) .hideHelp(!advanced))
+    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseAcknowledgeTimeout) .default(defaultMessageRequestConfig.acknowledgeTimeout) .hideHelp(!advanced))
     .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement receive mode: PER_MESSAGE or WINDOWED')) .default(defaultMessageRequestConfig.acknowledgeMode) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandRequest))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -317,6 +333,8 @@ export const addRequestOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli request examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -348,36 +366,36 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('REPLY SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('rep'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageReplyConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseKeepalive) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseKeepaliveIntervalLimit) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
-    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
     // publish options
     .addOption(new Option(`\n/* ${chalk.whiteBright('REPLY SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseSendBufferMaxSize) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // guaranteed publisher options
-    // .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseNumber) .default(defaultMessageReplyConfig.windowSize) .hideHelp(!advanced))
-    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseNumber) .default(defaultMessageReplyConfig.acknowledgeTimeout) .hideHelp(!advanced))
+    // .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages that can be published without acknowledgment')) .argParser(parseWindowSize) .default(defaultMessageReplyConfig.windowSize) .hideHelp(!advanced))
+    // .addOption(new Option('--acknowledge-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the time to wait for an acknowledgement, before retransmitting unacknowledged messages')) .argParser(parseAcknowledgeTimeout) .default(defaultMessageReplyConfig.acknowledgeTimeout) .hideHelp(!advanced))
     // .addOption(new Option('--acknowledge-mode <MODE>', chalk.whiteBright('[advanced] the acknowledgement receive mode: PER_MESSAGE or WINDOWED')) .default(defaultMessageReplyConfig.acknowledgeMode) .hideHelp(!advanced))
 
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--payload-type <PAYLOAD_TYPE>', chalk.whiteBright('[advanced] payload type: TEXT or BYTES')) .argParser(parsePayloadType) .default(defaultMessageConfig.payloadType) .hideHelp(!advanced))
-    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
+    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseTimeToLive) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
     .addOption(new Option('-dmq, --dmq-eligible [BOOLEAN]', chalk.whiteBright('[advanced] the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(!advanced))
-    .addOption(new Option('--application-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application provided message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
-    .addOption(new Option('--application-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application provided message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the application provided message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
+    .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the application provided message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
     // .addOption(new Option('--correlation-key <CORRELATION_KEY>', chalk.whiteBright('[advanced] the application provided message correlation key for acknowledgement management')) .default(defaultMessageConfig.correlationKey) .hideHelp(!advanced))
     .addOption(new Option('--delivery-mode <MODE>', chalk.whiteBright(`[advanced] the application-requested message delivery mode: DIRECT or PERSISTENT`)) .default(defaultMessageConfig.deliveryMode) .argParser(parseDeliveryMode) .hideHelp(!advanced))
     .addOption(new Option('--reply-to-topic <TOPIC>', chalk.whiteBright('[advanced] string which is used as the topic name for a response message')) .argParser(parseSingleTopic) .default(defaultMessageConfig.replyTo) .hideHelp(!advanced))
@@ -390,7 +408,7 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandReply))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -398,6 +416,8 @@ export const addReplyOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli reply examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -427,22 +447,22 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--list-subscriptions [BOOLEAN]', chalk.whiteBright('the topic subscriptions on the queue')) .default( defaultManageQueueConfig.listSubscriptions ) .hideHelp(advanced))
     .addOption(new Option('--dead-message-queue <DMQ>', chalk.whiteBright('[advanced] name of the Dead Message queue (DMQ)')) .default(defaultManageQueueConfig.deadMessageQueue) .hideHelp(!advanced))
     .addOption(new Option('--delivery-count-enabled [BOOLEAN]', chalk.whiteBright('[advanced] enable message delivery count on received messages')) .default(defaultManageQueueConfig.deliveryCountEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
-    .addOption(new Option('--delivery-delay <NUMBER>', chalk.whiteBright('[advanced] the delay in seconds, to apply to messages arriving on the queue before they are eligible for delivery')) .argParser(parseNumber) .default(defaultManageQueueConfig.deliveryDelay) .hideHelp(!advanced))
+    .addOption(new Option('--delivery-delay <NUMBER>', chalk.whiteBright('[advanced] the delay in seconds, to apply to messages arriving on the queue before they are eligible for delivery')) .argParser(parseDeliveryDelay) .default(defaultManageQueueConfig.deliveryDelay) .hideHelp(!advanced))
     .addOption(new Option('--egress-enabled [BOOLEAN]', chalk.whiteBright('[advanced] enable transmission of messages from the queue')) .default(defaultManageQueueConfig.egressEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--ingress-enabled [BOOLEAN]', chalk.whiteBright('[advanced] enable reception of messages to the queue')) .argParser(parseBoolean) .default(defaultManageQueueConfig.ingressEnabled) .hideHelp(!advanced))
-    .addOption(new Option('--max-msg-size <NUMBER>', chalk.whiteBright('[advanced] the maximum message size allowed in the Queue, in bytes (B)')) .argParser(parseNumber) .default(defaultManageQueueConfig.maxMsgSize) .hideHelp(!advanced))
-    .addOption(new Option('--max-msg-spool-usage <NUMBER>', chalk.whiteBright('[advanced] the maximum message spool usage allowed by the Queue, in megabytes (MB)')) .argParser(parseNumber) .default(defaultManageQueueConfig.maxMsgSpoolUsage) .hideHelp(!advanced))
-    .addOption(new Option('--max-redelivery-count <NUMBER>', chalk.whiteBright('[advanced] maximum number of times the queue will attempt redelivery')) .argParser(parseNumber) .default(defaultManageQueueConfig.maxRedeliveryCount) .hideHelp(!advanced))
-    .addOption(new Option('--partition-count <NUMBER>', chalk.whiteBright('[advanced] the count of partitions of the queue')) .argParser(parseNumber) .default(defaultManageQueueConfig.partitionCount) .hideHelp(!advanced))
-    .addOption(new Option('--partition-rebalance-delay <NUMBER>', chalk.whiteBright('[advanced] the delay (in seconds) before a partition rebalance is started once needed')) .argParser(parseNumber) .default(defaultManageQueueConfig.partitionRebalanceDelay) .hideHelp(!advanced))
-    .addOption(new Option('--partition-rebalance-max-handoff-time <NUMBER>', chalk.whiteBright('[advanced] the maximum time (in seconds) to wait before handing off a partition while rebalancing')) .argParser(parseNumber) .default(defaultManageQueueConfig.partitionRebalanceMaxHandoffTime) .hideHelp(!advanced))
+    .addOption(new Option('--max-msg-size <NUMBER>', chalk.whiteBright('[advanced] the maximum message size allowed in the Queue, in bytes (B)')) .argParser(parseMaxMsgSize) .default(defaultManageQueueConfig.maxMsgSize) .hideHelp(!advanced))
+    .addOption(new Option('--max-msg-spool-usage <NUMBER>', chalk.whiteBright('[advanced] the maximum message spool usage allowed by the Queue, in megabytes (MB)')) .argParser(parseMaxMsgSpoolUsage) .default(defaultManageQueueConfig.maxMsgSpoolUsage) .hideHelp(!advanced))
+    .addOption(new Option('--max-redelivery-count <NUMBER>', chalk.whiteBright('[advanced] maximum number of times the queue will attempt redelivery')) .argParser(parseMaxRedeliveryCount) .default(defaultManageQueueConfig.maxRedeliveryCount) .hideHelp(!advanced))
+    .addOption(new Option('--partition-count <NUMBER>', chalk.whiteBright('[advanced] the count of partitions of the queue')) .argParser(parsePartitionCount) .default(defaultManageQueueConfig.partitionCount) .hideHelp(!advanced))
+    .addOption(new Option('--partition-rebalance-delay <NUMBER>', chalk.whiteBright('[advanced] the delay (in seconds) before a partition rebalance is started once needed')) .argParser(parsePartitionRebalanceDelay) .default(defaultManageQueueConfig.partitionRebalanceDelay) .hideHelp(!advanced))
+    .addOption(new Option('--partition-rebalance-max-handoff-time <NUMBER>', chalk.whiteBright('[advanced] the maximum time (in seconds) to wait before handing off a partition while rebalancing')) .argParser(parsePartitionRebalanceMaxHandoffTime) .default(defaultManageQueueConfig.partitionRebalanceMaxHandoffTime) .hideHelp(!advanced))
     .addOption(new Option('--permission <PERMISSION>', chalk.whiteBright('[advanced] permission level for all consumers of the queue: no-access, read-only, consume, modify-topic or delete')) .argParser(parseSempQueueNonOwnerPermission) .default(defaultManageQueueConfig.permission) .hideHelp(!advanced))      
     .addOption(new Option('--redelivery-enabled [BOOLEAN]', chalk.whiteBright('[advanced] enable message redelivery')) .default(defaultManageQueueConfig.redeliveryEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--respect-ttl-enabled [BOOLEAN]', chalk.whiteBright('[advanced] enable respecting of the TTL for messages in the queue')) .argParser(parseBoolean) .default(defaultManageQueueConfig.respectTtlEnabled) .hideHelp(!advanced))
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandQueue))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
 
@@ -450,6 +470,8 @@ export const addManageQueueOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli queue examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -477,13 +499,15 @@ export const addManageAclProfileOptions = (cmd: Command, advanced: boolean) => {
   
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandAclProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli acl-profile examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -511,15 +535,15 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
     .addOption(new Option('--allow-guaranteed-msg-receive-enabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable allowing clients to receive guaranteed messages.')) .default( defaultManageClientProfileConfig.allowGuaranteedMsgReceiveEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--allow-guaranteed-msg-send-enabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable allowing clients to send guaranteed messages')) .default( defaultManageClientProfileConfig.allowGuaranteedMsgSendEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
     .addOption(new Option('--compression-enabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable allowing clients to use compression.')) .default( defaultManageClientProfileConfig.compressionEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
-    .addOption(new Option('--elidingEnabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable message eliding')) .default( defaultManageClientProfileConfig.elidingEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
-    .addOption(new Option('--max-egress-flow-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of transmit flows that can be created')) .default( defaultManageClientProfileConfig.maxEgressFlowCount) .argParser(parseNumber) .hideHelp(!advanced))
-    .addOption(new Option('--max-ingress-flow-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of receive flows that can be created by one client ')) .default( defaultManageClientProfileConfig.maxIngressFlowCount) .argParser(parseNumber) .hideHelp(!advanced))
-    .addOption(new Option('--max-subscription-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of subscriptions per client ')) .default( defaultManageClientProfileConfig.maxSubscriptionCount) .argParser(parseNumber) .hideHelp(!advanced))
+    .addOption(new Option('--eliding-enabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable message eliding')) .default( defaultManageClientProfileConfig.elidingEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
+    .addOption(new Option('--max-egress-flow-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of transmit flows that can be created')) .default( defaultManageClientProfileConfig.maxEgressFlowCount) .argParser(parseMaxEgressFlowCount) .hideHelp(!advanced))
+    .addOption(new Option('--max-ingress-flow-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of receive flows that can be created by one client ')) .default( defaultManageClientProfileConfig.maxIngressFlowCount) .argParser(parseMaxIngressFlowCount) .hideHelp(!advanced))
+    .addOption(new Option('--max-subscription-count <NUMBER>', chalk.whiteBright('[advanced] the maximum number of subscriptions per client ')) .default( defaultManageClientProfileConfig.maxSubscriptionCount) .argParser(parseMaxSubscriptionCount) .hideHelp(!advanced))
     .addOption(new Option('--reject-msg-to-sender-on-no-subscription-match-enabled <BOOLEAN>', chalk.whiteBright('[advanced] enable or disable the sending of a NACK when no matching subscription found')) .default( defaultManageClientProfileConfig.rejectMsgToSenderOnNoSubscriptionMatchEnabled) .argParser(parseBoolean) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandClientProfile))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
@@ -527,6 +551,8 @@ export const addManageClientProfileOptions = (cmd: Command, advanced: boolean) =
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli client-profile examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -555,13 +581,15 @@ export const addManageClientUsernameOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
     .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandClientUsername))
     .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
       
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli client-username examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)
 }
 
@@ -576,24 +604,26 @@ export const addManageConnectionOptions = (cmd: Command, advanced: boolean) => {
     // session options
     .addOption(new Option(`\n/* ${chalk.whiteBright('SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultManageConnectionConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
-    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time to wait between sending out keep-alive messages to the VPN')) .argParser(parseKeepalive) .default(defaultMessageConnectionConfig.keepAliveInterval) .hideHelp(!advanced))
+    // .addOption(new Option('--keepalive-interval-limit <NUMBER>', chalk.whiteBright('[advanced] the maximum number of consecutive Keep-Alive messages that can be sent without receiving a response before the session is declared down')) .argParser(parseKeepaliveIntervalLimit) .default(defaultMessageConnectionConfig.keepAliveIntervalLimit) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`) .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli connection examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) => {
@@ -607,45 +637,55 @@ export const addManageSempConnectionOptions = (cmd: Command, advanced: boolean) 
 
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli semp-connection examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addVisualizeOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
     .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addVisualizeLaunchOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // config options
-    .addOption(new Option('-port, --visualization-port [PORT]', chalk.whiteBright('the port for the visualizer')) .argParser(parseNumber) .default(0))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    .addOption(new Option('-port, --visualization-port [PORT]', chalk.whiteBright('the port for the visualizer')) .argParser(parseVisualizationPort) .default(0))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedValidateOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // feed options
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedPreviewOptions = (cmd: Command, advanced: boolean) => {
   cmd
     // feed options
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')))
-    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
-    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
+    .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) .conflicts('fileName') .conflicts('feedView') .conflicts('feedType') .conflicts('feedView'))
+    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type'))
       .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
     .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa')) 
                   .argParser(parseFeedView) 
-                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider') 
-                  .conflicts('feedName'))
-    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
+                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider'))
+                  // .conflicts('feedName')) // INVALID CONFLICT CONDITION
+    .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .conflicts('fileName') .conflicts('feedType') .default(false))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
@@ -656,34 +696,51 @@ export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
       .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
     .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa')) 
                   .argParser(parseFeedView) 
-                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider') 
-                  .conflicts('feedName'))
+                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider')) 
+                  // .conflicts('feedName')) // INVALID CONFLICT CONDITION
     // hidden option to use defaults 
     .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults for feed name and feed type')) .hideHelp(true) .default(false))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedConfigureOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
-    .addOption(new Option('-port, --manage-port [PORT]', chalk.whiteBright('the port for the manager')) .argParser(parseNumber) .default(0))
+    .addOption(new Option('-port, --manage-port [PORT]', chalk.whiteBright('the port for the manager')) .argParser(parseManagePort) .default(0))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
   cmd
+    .addOption(new Option(`\n/* ${chalk.whiteBright('LAUNCH SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-ui, --ui-portal [BOOLEAN]', chalk.whiteBright('launch feeds portal')) .default(false)  .hideHelp(advanced))
+    // quite options
+    .addOption(new Option('--quite [BOOLEAN]', chalk.whiteBright('don\'t prompt, run in unattended mode with default settings')) .argParser(parseBoolean) .default(false) .hideHelp(advanced) .conflicts('useDefaults'))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
+
+    .addOption(new Option(`\n/* ${chalk.whiteBright('FEED SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) .hideHelp(advanced))
     .addOption(new Option('-events, --event-names <EVENT_NAME...>', chalk.whiteBright('the event name(s) as space-separated values if listing more than one (e.g., "Loan_Applied" "Loan_Approved" )'))  .hideHelp(advanced))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false)  .hideHelp(advanced))
-    .addOption(new Option('-c, --config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
+
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced)) 
+    .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced)) 
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced)) 
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .default(defaultConfigFile) .hideHelp(advanced))
 
     // message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('--count <COUNT>', chalk.whiteBright('the number of events to publish\n[a value of 0 would stream events continuously]')) 
-      .argParser(parseNumber) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
+      .argParser(parseCount) .default(defaultMessagePublishConfig.count) .hideHelp(advanced))
     .addOption(new Option('--interval <MILLISECONDS>', chalk.whiteBright('the time to wait between publish')) 
-      .argParser(parseNumber) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
+      .argParser(parseInterval) .default(defaultMessagePublishConfig.interval) .hideHelp(advanced))
     .addOption(new Option('--initial-delay <MILLISECONDS>', chalk.whiteBright('the time to wait before starting the event publish')) 
-      .argParser(parseNumber) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
+      .argParser(parseInitialDelay) .default(defaultMessagePublishConfig.initialDelay) .hideHelp(advanced))
     
     // message print options
     .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
@@ -698,7 +755,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     // advanced message options
     .addOption(new Option(`\n/* ${chalk.whiteBright('ADVANCED MESSAGE SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--payload-type <PAYLOAD_TYPE>', chalk.whiteBright('[advanced] payload type: TEXT or BYTES')) .argParser(parsePayloadType) .default(defaultMessageConfig.payloadType) .hideHelp(!advanced))
-    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseNumber) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
+    .addOption(new Option('-ttl, --time-to-live <MILLISECONDS>', chalk.whiteBright('[advanced] the time before a message is discarded or moved to a DMQ')) .argParser(parseTimeToLive) .default(defaultMessageConfig.timeToLive) .hideHelp(!advanced))
     .addOption(new Option('-dmq, --dmq-eligible [BOOLEAN]', chalk.whiteBright('[advanced] the DMQ eligible flag')) .argParser(parseBoolean) .default(defaultMessageConfig.dmqEligible) .hideHelp(!advanced))
     .addOption(new Option('--app-message-id <MESSAGE_ID>', chalk.whiteBright('[advanced] the user-defined application message ID')) .default(defaultMessageConfig.appMessageId) .hideHelp(!advanced))
     .addOption(new Option('--app-message-type <MESSAGE_TYPE>', chalk.whiteBright('[advanced] the user-defined application message type')) .default(defaultMessageConfig.appMessageType) .hideHelp(!advanced))
@@ -715,15 +772,15 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SESSION SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('pub'), 'an auto-generated client name') .hideHelp(!advanced))
     .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessagePublishConfig.description) .hideHelp(!advanced))
-    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
-    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
-    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <MILLISECONDS>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
     .addOption(new Option('--include-sender-id [BOOLEAN]', chalk.whiteBright('[advanced] include a sender ID on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.includeSenderId) .hideHelp(!advanced))
     .addOption(new Option('--generate-sequence-number [BOOLEAN]', chalk.whiteBright('[advanced] include sequence number on messages sent')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSequenceNumber) .hideHelp(!advanced))
-    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseNumber) .hideHelp(true))
-    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseNumber) .hideHelp(true))
+    .addOption(new Option('--wait-before-exit <NUMBER>', chalk.whiteBright('[advanced] wait for the specified number of seconds before exiting')) .argParser(parseWaitBeforeExit) .hideHelp(true))
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
     .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
     .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
 
@@ -731,14 +788,16 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('PUBLISH SETTINGS')} */`) .hideHelp(!advanced))
     .addOption(new Option('--publish-confirmation [BOOLEAN]', chalk.whiteBright('[advanced] generate publish confirmation')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .default(false) .hideHelp(!advanced))
     .addOption(new Option('--send-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a send timestamp on sent messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateSendTimestamps) .hideHelp(!advanced))
-    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseNumber) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
+    .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseSendBufferMaxSize) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // hidden option to use defaults 
-    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults feed run settings')) .hideHelp(true) .default(false))
+    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults feed run settings')) .hideHelp(true) .default(false) .conflicts('quite'))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help for command with options not shown in basic help')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 
@@ -749,6 +808,8 @@ export const addFeedContributeOptions = (cmd: Command, advanced: boolean) => {
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-he, --help-examples',  chalk.whiteBright('show feed contribute command examples')))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
@@ -756,11 +817,15 @@ export const addFeedListOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-local, --local-only [BOOLEAN]', chalk.whiteBright('list local event feeds')) .argParser(parseBoolean) .default(true))
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(true))
     .addOption(new Option('-v, --verbose [BOOLEAN]', chalk.whiteBright('list feed details')) .argParser(parseBoolean) .default(false))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedImportOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) .default('feed-archive.zip'))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
@@ -768,6 +833,8 @@ export const addFeedExportOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')))
     .addOption(new Option('-community, --community-feed [BOOLEAN]', chalk.whiteBright('a community feed')) .default(false))
     .addOption(new Option('-logs, --show-logs [BOOLEAN]', chalk.whiteBright('show export log')) .default(false))
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }
 
 export const addFeedDownloadOptions = (cmd: Command, advanced: boolean) => {
@@ -775,4 +842,6 @@ export const addFeedDownloadOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the community feed name')) )
     .addOption(new Option('-community, --community-only [BOOLEAN]', chalk.whiteBright('list community event feeds')) .argParser(parseBoolean) .default(false))
     .addOption(new Option('-archive, --archive-file <ARCHIVE_NAME>', chalk.whiteBright('the feed archive name')) )
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }

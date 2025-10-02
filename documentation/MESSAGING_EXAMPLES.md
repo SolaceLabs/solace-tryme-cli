@@ -50,6 +50,10 @@ stm send --topic solace/try/me --count 100 --interval 5000
 
 stm send --topic "stm/logistics/shipped" "stm/inventory/check"
 
+// publish to queue with user properties (important for message routing and metadata)
+
+stm send --queue order-queue --message "Order 123 processed" --user-properties "orderId:123" "priority:high"
+
 // deliver event with a default payload to queue
 
 stm send --queue MyQueue 
@@ -126,6 +130,10 @@ stm receive --queue my-queue
 
 stm receive --queue my-queue -t "stm/logistics/shipped"
 
+// receive with detailed output mode (useful for debugging and message inspection)
+
+stm receive --topic "orders/*" --output-mode FULL
+
 NOTE: You can override any of the receive parameters
 that are applied only for this instance of execution!
 
@@ -197,6 +205,10 @@ stm request --topic solace/try/me/request -f OrderCreated.json
 
 stm request --topic solace/try/me/request --stdin
 
+// request with timeout and multiple requests (essential for request-reply patterns)
+
+stm request --topic "api/status" --message "Check status" --timeout 10000 --count 3 --interval 2000
+
 NOTE: You can override any of the request parameters
 that are applied only for this instance of execution!
 
@@ -224,7 +236,7 @@ stm request  --name request --config cloud-broker --save request2
 
 // Duplicate the command setting with the specified command-line parameters
 
-stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker --save request4
+stm request --topic "stm/logistics/shipped" --name request2 --config cloud-broker --save request4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
 ```
@@ -268,6 +280,10 @@ stm reply --topic solace/try/me/request -f OrderCreated.json
 
 stm reply --topic solace/try/me/request --stdin
 
+// reply with user properties (important for response metadata and correlation)
+
+stm reply --topic "api/response" --message "Success" --user-properties "status:200" "responseTime:150ms"
+
 NOTE: You can override any of the reply parameters
 that are applied only for this instance of execution!
 
@@ -295,7 +311,7 @@ stm reply  --name reply --config cloud-broker --save reply2
 
 // Duplicate the command setting with the specified command-line parameters
 
-stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker --save reply4
+stm reply --topic "stm/logistics/shipped" --name reply2 --config cloud-broker --save reply4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
 ```
@@ -361,7 +377,7 @@ stm manage queue --name queue --config cloud-broker --save queue2
 
 // Duplicate the command setting with the specified command-line parameters
 
-stm manage queue --add-subscriptions "stm/logistics/sipped" --name queue2 --config cloud-broker --save queue4
+stm manage queue --add-subscriptions "stm/logistics/shipped" --name queue2 --config cloud-broker --save queue4
 
 HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
 ```

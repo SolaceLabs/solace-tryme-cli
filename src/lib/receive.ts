@@ -8,6 +8,11 @@ const receive = async (
   options: MessageClientOptions,
   optionsSource: any
 ) => {
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   const receiver = new SolaceClient(options);
   var interrupted = false;
   try {
