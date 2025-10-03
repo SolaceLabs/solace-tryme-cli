@@ -73,7 +73,7 @@ run_test() {
         # Result matches expectation
         if [ $exit_code -eq 0 ]; then
             record_test_result "$test_name" "PASS" "Command executed successfully as expected" "$duration" ""
-        echo -e "${GREEN}✓ $test_name PASSED${NC}"
+            echo -e "${GREEN}✓ $test_name PASSED${NC}"
         else
             # Expected failure - extract error message
             local clean_error=$(echo "$output" | grep -E "^(error:|✖.*error:)" | sed 's/^[[:space:]]*✖[[:space:]]*error:[[:space:]]*//' | sed 's/^[[:space:]]*error:[[:space:]]*//' | head -1)
