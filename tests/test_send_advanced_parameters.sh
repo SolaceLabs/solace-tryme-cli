@@ -65,8 +65,8 @@ run_test() {
     # Use a subshell to properly capture exit code
     output=$(bash -c "$test_command" 2>&1)
     exit_code=$?
-        local end_time=$(date +%s.%N)
-        local duration=$(echo "$end_time - $start_time" | bc)
+    local end_time=$(date +%s.%N)
+    local duration=$(echo "$end_time - $start_time" | bc)
     
     # Compare actual result with expected result
     if [ $exit_code -eq $expected_result ]; then
