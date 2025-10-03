@@ -229,41 +229,41 @@ run_test_if_enabled 1 "Basic help command (short form)" "node $CLI_PATH feed run
 run_test_if_enabled 2 "Basic help command (long form)" "node $CLI_PATH feed run $LINT_OPTION --help" 0
 
 # Test 3: Basic parameters validation (short forms)
-run_test_if_enabled 3 "Basic parameters (short forms)" "node $CLI_PATH feed run $LINT_OPTION -feed 'Core Banking' --quite true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 3 "Basic parameters (short forms)" "node $CLI_PATH feed run $LINT_OPTION -feed 'Core Banking' --quiet true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 4: Basic parameters validation (long forms)
-run_test_if_enabled 4 "Basic parameters (long forms)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 4 "Basic parameters (long forms)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 5: Feed name parameter
 if [ "${STM_TEST_EXECUTION:-0}" = "1" ]; then
-    run_test_if_enabled 5 "Feed name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'sample-feed' --quite true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 1
+    run_test_if_enabled 5 "Feed name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'sample-feed' --quiet true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 1
 else
-    run_test_if_enabled 5 "Feed name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'sample-feed' --quite true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+    run_test_if_enabled 5 "Feed name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'sample-feed' --quiet true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 fi
 
 # Test 6: Count parameter
-run_test_if_enabled 6 "Count parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 5 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 6 "Count parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 5 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 7: Interval parameter
-run_test_if_enabled 7 "Interval parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 2 --interval 1000 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 7 "Interval parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 2 --interval 1000 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 8: Initial delay parameter
-run_test_if_enabled 8 "Initial delay parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 1 --initial-delay 500 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 8 "Initial delay parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 1 --initial-delay 500 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 9: Output mode parameter
-run_test_if_enabled 9 "Output mode parameter (DEFAULT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 1 --output-mode DEFAULT --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 9 "Output mode parameter (DEFAULT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 1 --output-mode DEFAULT --url ws://localhost:8008 --vpn default --username default --password default" 0
 
-run_test_if_enabled 9 "Output mode parameter (PROPS)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 1 --output-mode PROPS --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 9 "Output mode parameter (PROPS)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 1 --output-mode PROPS --url ws://localhost:8008 --vpn default --username default --password default" 0
 
-run_test_if_enabled 9 "Output mode parameter (FULL)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --count 1 --output-mode FULL --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 9 "Output mode parameter (FULL)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --count 1 --output-mode FULL --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 11: Community feed parameter
-run_test_if_enabled 11 "Community feed parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --community-feed true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 11 "Community feed parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --community-feed true --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
-run_test_if_enabled 11 "Community feed parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --community-feed false --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 11 "Community feed parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --community-feed false --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 12: Event names parameter
-run_test_if_enabled 12 "Event names parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quite true --event-names 'Deposit' 'Transfer' --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
+run_test_if_enabled 12 "Event names parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --quiet true --event-names 'Deposit' 'Transfer' --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 0
 
 # Test 13: Config parameter
 run_test_if_enabled 13 "Config parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --config 'test-config.json' --count 1 --url ws://localhost:8008 --vpn default --username default --password default" 1

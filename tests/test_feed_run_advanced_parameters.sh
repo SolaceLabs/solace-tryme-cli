@@ -225,108 +225,108 @@ run_test_if_enabled() {
 # Test 1: Advanced help output
 run_test_if_enabled 1 "Advanced help command" "node $CLI_PATH feed run $LINT_OPTION -hm" 0
 
-# Test 2: Advanced partition key parameters (w/ --quite to publish all events )
-run_test_if_enabled 2 "Partition keys count parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+# Test 2: Advanced partition key parameters (w/ --quiet to publish all events )
+run_test_if_enabled 2 "Partition keys count parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 2 "Partition keys list parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-list 'KEY1' 'KEY2' 'KEY3' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 2 "Partition keys list parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-list 'KEY1' 'KEY2' 'KEY3' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 2 "Partition keys parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --event-names 'Event1' 'Event2' --partition-keys 'field1 | field2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 2 "Partition keys parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --event-names 'Event1' 'Event2' --partition-keys 'field1 | field2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-# Test 3: Advanced message parameters (w/ --quite to publish all events )
-run_test_if_enabled 3 "Payload type parameter (TEXT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type TEXT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+# Test 3: Advanced message parameters (w/ --quiet to publish all events )
+run_test_if_enabled 3 "Payload type parameter (TEXT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type TEXT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 3 "Payload type parameter (BYTES)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type BYTES --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 3 "Payload type parameter (BYTES)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type BYTES --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 3 "Time to live parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --time-to-live 30000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 3 "Time to live parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --time-to-live 30000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 3 "DMQ eligible parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --dmq-eligible true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 3 "DMQ eligible parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --dmq-eligible true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 3 "DMQ eligible parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --dmq-eligible false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 3 "DMQ eligible parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --dmq-eligible false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 4: Advanced message ID and type parameters
-run_test_if_enabled 4 "App message ID parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --app-message-id 'test-message-id' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 4 "App message ID parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --app-message-id 'test-message-id' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 4 "App message type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --app-message-type 'test-message-type' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 4 "App message type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --app-message-type 'test-message-type' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 5: Advanced delivery mode parameter
-run_test_if_enabled 5 "Delivery mode parameter (DIRECT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode DIRECT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 5 "Delivery mode parameter (DIRECT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode DIRECT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 5 "Delivery mode parameter (PERSISTENT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode PERSISTENT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 5 "Delivery mode parameter (PERSISTENT)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode PERSISTENT --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 6: Advanced reply and user properties
-run_test_if_enabled 6 "Reply to topic parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reply-to-topic 'reply/topic' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 6 "Reply to topic parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reply-to-topic 'reply/topic' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 6 "User properties parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --user-properties 'key1:value1' 'key2:value2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 6 "User properties parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --user-properties 'key1:value1' 'key2:value2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 7: Advanced HTTP content parameters
-run_test_if_enabled 7 "HTTP content type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --http-content-type 'application/json' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 7 "HTTP content type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --http-content-type 'application/json' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 7 "HTTP content encoding parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --http-content-encoding 'gzip' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 7 "HTTP content encoding parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --http-content-encoding 'gzip' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 8: Advanced session parameters
-run_test_if_enabled 8 "Client name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --client-name 'advanced-client' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 8 "Client name parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --client-name 'advanced-client' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 8 "Description parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --description 'Advanced test application' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 8 "Description parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --description 'Advanced test application' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 8 "Read timeout parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --read-timeout 15000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 8 "Read timeout parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --read-timeout 15000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 8 "Connection timeout parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --connection-timeout 5000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 8 "Connection timeout parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --connection-timeout 5000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 9: Advanced connection parameters
-run_test_if_enabled 9 "Connection retries parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --connection-retries 5 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 9 "Connection retries parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --connection-retries 5 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 9 "Reconnect retries parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reconnect-retries 3 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 9 "Reconnect retries parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reconnect-retries 3 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 9 "Reconnect retry wait parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reconnect-retry-wait 5000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 9 "Reconnect retry wait parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --reconnect-retry-wait 5000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 10: Advanced message features
-run_test_if_enabled 10 "Include sender ID parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --include-sender-id true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 10 "Include sender ID parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --include-sender-id true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 10 "Include sender ID parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --include-sender-id false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 10 "Include sender ID parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --include-sender-id false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 10 "Generate sequence number parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --generate-sequence-number true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 10 "Generate sequence number parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --generate-sequence-number true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 10 "Generate sequence number parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --generate-sequence-number false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 10 "Generate sequence number parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --generate-sequence-number false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 11: Advanced logging and tracing
-run_test_if_enabled 11 "Log level parameter (INFO)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level INFO --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 11 "Log level parameter (INFO)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level INFO --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 11 "Log level parameter (DEBUG)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level DEBUG --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 11 "Log level parameter (DEBUG)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level DEBUG --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 11 "Trace visualization parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --trace-visualization true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 11 "Trace visualization parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --trace-visualization true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 11 "Trace visualization parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --trace-visualization false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 11 "Trace visualization parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --trace-visualization false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 12: Advanced publish parameters
-run_test_if_enabled 12 "Publish confirmation parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --publish-confirmation true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 12 "Publish confirmation parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --publish-confirmation true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 12 "Publish confirmation parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --publish-confirmation false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 12 "Publish confirmation parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --publish-confirmation false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 12 "Send timestamps parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 12 "Send timestamps parameter (true)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 12 "Send timestamps parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-timestamps false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 12 "Send timestamps parameter (false)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-timestamps false --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
-run_test_if_enabled 12 "Send buffer max size parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-buffer-max-size 131072 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+run_test_if_enabled 12 "Send buffer max size parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --send-buffer-max-size 131072 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 
 # Test 13: Invalid advanced parameters
-run_test_if_enabled 13 "Invalid payload type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 13 "Invalid payload type parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --payload-type INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
-run_test_if_enabled 13 "Invalid delivery mode parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 13 "Invalid delivery mode parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --delivery-mode INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
-run_test_if_enabled 13 "Invalid log level parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 13 "Invalid log level parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --log-level INVALID --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
-run_test_if_enabled 13 "Invalid time to live parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --time-to-live -1000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 13 "Invalid time to live parameter" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --time-to-live -1000 --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
 # Test 14: Parameter conflicts
-run_test_if_enabled 14 "Parameter conflict (partition keys count with partition keys list)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --partition-keys-list 'KEY1' 'KEY2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 14 "Parameter conflict (partition keys count with partition keys list)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --partition-keys-list 'KEY1' 'KEY2' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
-run_test_if_enabled 14 "Parameter conflict (partition keys count with partition keys)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --partition-keys 'field1' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+run_test_if_enabled 14 "Parameter conflict (partition keys count with partition keys)" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'Core Banking' --partition-keys-count 5 --partition-keys 'field1' --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 
 # Test 15: Comprehensive advanced parameters combination
 if [ "${STM_TEST_EXECUTION:-0}" = "1" ]; then
-    run_test_if_enabled 15 "Comprehensive advanced parameters combination" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'advanced-feed' --payload-type TEXT --time-to-live 30000 --dmq-eligible true --delivery-mode PERSISTENT --client-name 'advanced-client' --log-level INFO --publish-confirmation true --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 1
+    run_test_if_enabled 15 "Comprehensive advanced parameters combination" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'advanced-feed' --payload-type TEXT --time-to-live 30000 --dmq-eligible true --delivery-mode PERSISTENT --client-name 'advanced-client' --log-level INFO --publish-confirmation true --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 1
 else
-    run_test_if_enabled 15 "Comprehensive advanced parameters combination" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'advanced-feed' --payload-type TEXT --time-to-live 30000 --dmq-eligible true --delivery-mode PERSISTENT --client-name 'advanced-client' --log-level INFO --publish-confirmation true --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quite" 0
+    run_test_if_enabled 15 "Comprehensive advanced parameters combination" "node $CLI_PATH feed run $LINT_OPTION --feed-name 'advanced-feed' --payload-type TEXT --time-to-live 30000 --dmq-eligible true --delivery-mode PERSISTENT --client-name 'advanced-client' --log-level INFO --publish-confirmation true --send-timestamps true --count 1 --url ws://localhost:8008 --vpn default --username default --password default --quiet" 0
 fi
 
 # Generate test summary

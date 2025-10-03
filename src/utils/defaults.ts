@@ -155,7 +155,7 @@ export const defaultMessageConfig:any = {
 
 export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
-  quite: false,
+  quiet: false,
   lint: false,
   count: 0,
   interval: 1000,

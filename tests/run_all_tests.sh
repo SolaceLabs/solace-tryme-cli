@@ -14,7 +14,11 @@ WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
 # Log file for capturing all output
-LOG_FILE="$1" || "all_feed_tests.log"
+if [ "${STM_TEST_EXECUTION:-0}" = "1" ]; then
+    LOG_FILE="all_messaging_tests_exec.log"
+else
+    LOG_FILE="all_messaging_tests_lint.log"
+fi
 
 # Function to log and display output
 log_and_display() {
@@ -97,26 +101,27 @@ run_test_script() {
 
 log_and_display_colored "${CYAN}=== Running Messaging Command Tests ===${NC}"
 
-Run messaging command tests
+# Run messaging command tests
 for command in "${MESSAGING_COMMANDS[@]}"; do
     log_and_display ""
     log_and_display_colored "${WHITE}Testing $command command:${NC}"
     for test_type in "${TEST_TYPES[@]}"; do
         script_name="test_${command}_${test_type}.sh"
-        run_test_script "$script_name" "$test_type" "$command"
+        if [ -f "$script_name" ]; then
+            run_test_script "$script_name" "$test_type" "$command"
+        fi
     done
 done
 
-log_and_display ""
-log_and_display_colored "${CYAN}=== Running Feed Command Tests ===${NC}"
-
-Run feed command tests
+# Run feed command tests
 for command in "${FEED_COMMANDS[@]}"; do
     log_and_display ""
     log_and_display_colored "${WHITE}Testing feed $command command:${NC}"
     for test_type in "${TEST_TYPES[@]}"; do
         script_name="test_feed_${command}_${test_type}.sh"
-        run_test_script "$script_name" "$test_type" "feed $command"
+        if [ -f "$script_name" ]; then
+            run_test_script "$script_name" "$test_type" "feed $command"
+        fi
     done
 done
 

@@ -17,7 +17,7 @@ const eventFeedTimers: any[] = [];
 const publishStats:any = {};
 
 const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) => {
-  const { helpExamples, quite } = options
+  const { helpExamples, quiet } = options
   var feedName: string = '';
   var eventNames: string[] = [];
   var gitFeed = false;
@@ -53,7 +53,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     options.initialDelay = 0;
     optionsSource.initialDelay = 'cli';
     optionsSource.eventNames = 'cli';    
-  } else if (quite && !options.lint) {
+  } else if (quiet && !options.lint) {
     if (optionsSource.feedName !== 'cli' || !options.feedName) {
       Logger.logError(`Missing event feed name...`)
       Logger.logError('exiting...')
@@ -110,7 +110,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
         }
       })
 
-      if (optionsSource.eventNames !== 'cli' && !quite) {
+      if (optionsSource.eventNames !== 'cli' && !quiet) {
         const { MultiSelect } = require('enquirer');
         const pPickEvent = new MultiSelect({
           name: 'localEvent',
@@ -163,7 +163,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   // check for event in the feed
-  if (!cmdLine && !quite && !options.lint) {
+  if (!cmdLine && !quiet && !options.lint) {
     const { Select, AutoComplete, MultiSelect } = require('enquirer');
     const pFeedSource = new Select({
       name: 'source',

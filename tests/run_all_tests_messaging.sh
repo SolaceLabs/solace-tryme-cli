@@ -103,22 +103,14 @@ for command in "${MESSAGING_COMMANDS[@]}"; do
     log_and_display_colored "${WHITE}Testing $command command:${NC}"
     for test_type in "${TEST_TYPES[@]}"; do
         script_name="test_${command}_${test_type}.sh"
-        run_test_script "$script_name" "$test_type" "$command"
+        if [ -f "$script_name" ]; then
+            run_test_script "$script_name" "$test_type" "$command"
+        fi
     done
 done
 
 log_and_display ""
 log_and_display_colored "${CYAN}=== Running Feed Command Tests ===${NC}"
-
-# Run feed command tests
-# for command in "${FEED_COMMANDS[@]}"; do
-#     log_and_display ""
-#     log_and_display_colored "${WHITE}Testing feed $command command:${NC}"
-#     for test_type in "${TEST_TYPES[@]}"; do
-#         script_name="test_feed_${command}_${test_type}.sh"
-#         run_test_script "$script_name" "$test_type" "feed $command"
-#     done
-# done
 
 # Generate final summary
 log_and_display ""

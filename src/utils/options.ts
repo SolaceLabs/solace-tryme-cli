@@ -716,8 +716,8 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option(`\n/* ${chalk.whiteBright('LAUNCH SETTINGS')} */`) .hideHelp(advanced))
     .addOption(new Option('-ui, --ui-portal [BOOLEAN]', chalk.whiteBright('launch feeds portal')) .default(false)  .hideHelp(advanced))
-    // quite options
-    .addOption(new Option('--quite [BOOLEAN]', chalk.whiteBright('don\'t prompt, run in unattended mode with default settings')) .argParser(parseBoolean) .default(false) .hideHelp(advanced) .conflicts('useDefaults'))
+    // quiet options
+    .addOption(new Option('--quiet [BOOLEAN]', chalk.whiteBright('don\'t prompt, run in unattended mode with default settings')) .argParser(parseBoolean) .default(false) .hideHelp(advanced) .conflicts('useDefaults'))
     // lint options - validate CLI arguments quitely (without executing the command)
     .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 
@@ -791,7 +791,7 @@ export const addFeedRunOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option('--send-buffer-max-size <NUMBER>', chalk.whiteBright('[advanced] the maximum buffer size for the transport session.')) .argParser(parseSendBufferMaxSize) .default(defaultMessageConnectionConfig.sendBufferMaxSize) .hideHelp(!advanced))
 
     // hidden option to use defaults 
-    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults feed run settings')) .hideHelp(true) .default(false) .conflicts('quite'))
+    .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults feed run settings')) .hideHelp(true) .default(false) .conflicts('quiet'))
 
     // help options
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))

@@ -152,6 +152,9 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     data.fileName = fileName.lastIndexOf('/') >= 0 ? fileName.substring(fileName.lastIndexOf('/')+1) : fileName;
     type = "file";
   } else if (feedName) {
+    if (optionsSource.feedView === 'cli' && options.feedView) {
+      Logger.logWarn("'-view, --feed-view' option is not applicable on generated feeds, ignored...")
+    }
     options.feedName = feedName;
     info = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
     if (info.type === 'asyncapi_feed') 

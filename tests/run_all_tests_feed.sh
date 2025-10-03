@@ -44,7 +44,7 @@ log_and_display ""
 
 # Test categories
 MESSAGING_COMMANDS=("send" "receive" "request" "reply")
-FEED_COMMANDS=("preview" "generate" "configure" "run" "list" "import" "export" "contribute" "download")
+FEED_COMMANDS=("preview" "generate" "configure" "run" "list" )
 TEST_TYPES=("basic_parameters" "advanced_parameters")
 
 # Test execution summary
@@ -97,26 +97,18 @@ run_test_script() {
 
 log_and_display_colored "${CYAN}=== Running Messaging Command Tests ===${NC}"
 
-# Run messaging command tests
-# for command in "${MESSAGING_COMMANDS[@]}"; do
-#     log_and_display ""
-#     log_and_display_colored "${WHITE}Testing $command command:${NC}"
-#     for test_type in "${TEST_TYPES[@]}"; do
-#         script_name="test_${command}_${test_type}.sh"
-#         run_test_script "$script_name" "$test_type" "$command"
-#     done
-# done
-
 log_and_display ""
 log_and_display_colored "${CYAN}=== Running Feed Command Tests ===${NC}"
 
-Run feed command tests
+# Run feed command tests
 for command in "${FEED_COMMANDS[@]}"; do
     log_and_display ""
     log_and_display_colored "${WHITE}Testing feed $command command:${NC}"
     for test_type in "${TEST_TYPES[@]}"; do
         script_name="test_feed_${command}_${test_type}.sh"
-        run_test_script "$script_name" "$test_type" "feed $command"
+        if [ -f "$script_name" ]; then
+            run_test_script "$script_name" "$test_type" "feed $command"
+        fi
     done
 done
 

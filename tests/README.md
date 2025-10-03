@@ -2,11 +2,11 @@
 
 ## Overview
 
-This directory contains a comprehensive test suite for the Solace Try-Me CLI (`stm`) with **21 test scripts** covering CLI commands and sub-commands. The test suite provides complete parameter validation and comprehensive result tracking.
+This directory contains a comprehensive test suite for the Solace Try-Me CLI (`stm`) with **20 test scripts** covering CLI commands and sub-commands. The test suite provides complete parameter validation and comprehensive result tracking.
 
 ## Test Suite Structure
 
-### Commands Tested (13 total)
+### Commands Tested (9 total - Currently Implemented)
 
 #### Messaging Commands (4)
 - `send` - Send messages to topics
@@ -14,16 +14,12 @@ This directory contains a comprehensive test suite for the Solace Try-Me CLI (`s
 - `request` - Send request messages
 - `reply` - Send reply messages
 
-#### Feed Commands (9)
+#### Feed Commands (5 - Currently Implemented)
 - `feed preview` - Preview feed configurations
 - `feed generate` - Generate events from feeds
 - `feed configure` - Configure feed settings
 - `feed run` - Run feeds with message publishing
 - `feed list` - List available feeds
-- `feed import` - Import feed configurations
-- `feed export` - Export feed configurations
-- `feed contribute` - Contribute feeds to community
-- `feed download` - Download community feeds
 
 ### Test Types (Currently Implemented)
 
@@ -38,10 +34,6 @@ This directory contains a comprehensive test suite for the Solace Try-Me CLI (`s
 - **Scope**: Advanced parameter parsing, conflict detection, edge cases
 - **Broker Required**: No
 - **Files**: `test_{command}_{subcommand}_advanced_parameters.sh`
-
-#### Integration Tests
-- **Status**: Not yet implemented
-- **Planned**: End-to-end functionality testing with message validation
 
 ## Test Features
 
@@ -75,10 +67,13 @@ export STM_TEST_EXECUTION=0
 
 ### Run All Tests
 ```bash
-# Run all feed command tests
+# Run all tests (feed + messaging commands)
+./run_all_tests.sh
+
+# Run all feed command tests only
 ./run_all_tests_feed.sh
 
-# Run all messaging command tests  
+# Run all messaging command tests only
 ./run_all_tests_messaging.sh
 ```
 
@@ -109,9 +104,6 @@ STM_TEST_EXECUTION=0 ./test_send_basic_parameters.sh
 ./test_receive_advanced_parameters.sh
 ./test_feed_run_advanced_parameters.sh
 
-# Integration tests only
-./test_request_integration.sh
-./test_feed_generate_integration.sh
 ```
 
 ### Run by Command Type
@@ -166,54 +158,62 @@ Invalid count parameter                          FAIL      0.015        Expected
 - **Lint Mode**: Fast parameter validation without full execution (default behavior)
 - **Execution Mode**: Full functionality testing with actual broker connections
 
-## Test Plan Documentation
+## Test Logs
 
-For detailed testing strategy and implementation details, see:
-- `TEST_PLAN.md` - Comprehensive testing documentation
-- Individual test scripts for specific implementation details
+Test execution logs are automatically generated:
+- `all_feed_tests.log` - Complete log of all feed command test executions
+- `all_messaging_tests.log` - Complete log of all messaging command test executions
+
+These logs contain detailed test results, execution times, and error information for comprehensive test analysis.
 
 ## File Structure
 
 ```
 tests/
 ├── README.md                              # This file
-├── TEST_PLAN.md                          # Detailed test plan
-├── run_all_tests_feed.sh                 # Feed command test runner
-├── run_all_tests_messaging.sh            # Messaging command test runner
-├── test_send_basic_parameters.sh         # Send command basic tests
-├── test_send_advanced_parameters.sh      # Send command advanced tests
-├── test_receive_basic_parameters.sh      # Receive command basic tests
-├── test_receive_advanced_parameters.sh   # Receive command advanced tests
-├── test_request_basic_parameters.sh      # Request command basic tests
-├── test_request_advanced_parameters.sh   # Request command advanced tests
-├── test_reply_basic_parameters.sh        # Reply command basic tests
-├── test_reply_advanced_parameters.sh     # Reply command advanced tests
-├── test_feed_preview_basic_parameters.sh # Feed preview basic tests
+├── run_all_tests.sh                       # Master test runner (all commands)
+├── run_all_tests_feed.sh                  # Feed command test runner
+├── run_all_tests_messaging.sh             # Messaging command test runner
+├── test_send_basic_parameters.sh          # Send command basic tests
+├── test_send_advanced_parameters.sh       # Send command advanced tests
+├── test_receive_basic_parameters.sh       # Receive command basic tests
+├── test_receive_advanced_parameters.sh    # Receive command advanced tests
+├── test_request_basic_parameters.sh       # Request command basic tests
+├── test_request_advanced_parameters.sh    # Request command advanced tests
+├── test_reply_basic_parameters.sh         # Reply command basic tests
+├── test_reply_advanced_parameters.sh      # Reply command advanced tests
+├── test_feed_preview_basic_parameters.sh  # Feed preview basic tests
 ├── test_feed_preview_advanced_parameters.sh # Feed preview advanced tests
 ├── test_feed_generate_basic_parameters.sh # Feed generate basic tests
 ├── test_feed_generate_advanced_parameters.sh # Feed generate advanced tests
 ├── test_feed_configure_basic_parameters.sh # Feed configure basic tests
 ├── test_feed_configure_advanced_parameters.sh # Feed configure advanced tests
-├── test_feed_run_basic_parameters.sh     # Feed run basic tests
-├── test_feed_run_advanced_parameters.sh  # Feed run advanced tests
-├── test_feed_list_basic_parameters.sh    # Feed list basic tests
-└── update_test_scripts.sh                # Test script maintenance utility
+├── test_feed_run_basic_parameters.sh      # Feed run basic tests
+├── test_feed_run_advanced_parameters.sh   # Feed run advanced tests
+├── test_feed_list_basic_parameters.sh     # Feed list basic tests
+├── all_feed_tests.log                     # Feed test execution log
+└── all_messaging_tests.log                # Messaging test execution log
 ```
 
-**Note**: Integration tests and some advanced parameter tests are not yet implemented. The current test suite focuses on basic and advanced parameter validation for existing commands.
+**Note**: 
+- Feed commands `import`, `export`, `contribute`, and `download` tests are not implemented as it is more aligned towards manual execution (not automation)
+- The current test suite focuses on basic and advanced parameter validation for 9 implemented commands
 
 ## Quick Start
 
 ### Basic Usage
 ```bash
-# Run all feed command tests
+# Run all tests (feed + messaging commands)
+./run_all_tests.sh
+
+# Run all feed command tests only
 ./run_all_tests_feed.sh
 
-# Run all messaging command tests
+# Run all messaging command tests only
 ./run_all_tests_messaging.sh
 
 # Run with execution mode (full broker connections)
-STM_TEST_EXECUTION=1 ./run_all_tests_feed.sh
+STM_TEST_EXECUTION=1 ./run_all_tests.sh
 
 # Run specific command tests (default: lint mode)
 ./test_send_basic_parameters.sh
@@ -232,11 +232,12 @@ export STM_TEST_EXECUTION=0
 ## Summary
 
 This comprehensive test suite provides:
-- **Partial Command Coverage**: 13 CLI commands planned, currently testing basic and advanced parameters
+- **Current Command Coverage**: 9 CLI commands implemented (4 messaging + 5 feed commands)
 - **Parameter Validation**: Complete CLI parameter parsing and validation for implemented tests
 - **Environment Flexibility**: Configurable execution modes (lint vs full execution)
 - **Detailed Reporting**: Comprehensive test results with execution time and analytics
 - **Multiple Execution Modes**: Lint mode (default) and execution mode for different use cases
-- **Easy Execution**: Separate test runners for feed and messaging commands
+- **Easy Execution**: Master test runner plus separate runners for feed and messaging commands
+- **Test Logging**: Comprehensive log files for test execution tracking
 
-The test suite provides reliable parameter validation for the Solace Try-Me CLI, with comprehensive coverage of implemented test scenarios and robust error handling.
+The test suite provides reliable parameter validation for the Solace Try-Me CLI, with comprehensive coverage of 9 implemented commands and robust error handling.
