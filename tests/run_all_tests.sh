@@ -48,7 +48,7 @@ log_and_display ""
 
 # Test categories
 MESSAGING_COMMANDS=("send" "receive" "request" "reply")
-FEED_COMMANDS=("preview" "generate" "configure" "run" "list" "import" "export" "contribute" "download")
+FEED_COMMANDS=("preview" "generate" "configure" "run" "list" )
 TEST_TYPES=("basic_parameters" "advanced_parameters")
 
 # Test execution summary

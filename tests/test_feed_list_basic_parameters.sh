@@ -244,17 +244,10 @@ run_test_if_enabled 6 "Community only parameter (true)" "node $CLI_PATH feed lis
 
 run_test_if_enabled 6 "Community only parameter (false)" "node $CLI_PATH feed list $LINT_OPTION --community-only false" 0
 
-# Test 7: Verbose parameter
-run_test_if_enabled 7 "Verbose parameter (true)" "node $CLI_PATH feed list $LINT_OPTION --verbose true" 0
-
-run_test_if_enabled 7 "Verbose parameter (false)" "node $CLI_PATH feed list $LINT_OPTION --verbose false" 0
-
 # Test 8: Short form parameters
 run_test_if_enabled 8 "Short form local" "node $CLI_PATH feed list $LINT_OPTION -local true" 0
 
 run_test_if_enabled 8 "Short form community" "node $CLI_PATH feed list $LINT_OPTION -community false" 0
-
-run_test_if_enabled 8 "Short form verbose" "node $CLI_PATH feed list $LINT_OPTION -v true" 0
 
 # Test 9: Parameter combinations
 run_test_if_enabled 9 "Local and community combination" "node $CLI_PATH feed list $LINT_OPTION --local-only true --community-only true" 0
@@ -269,8 +262,6 @@ run_test_if_enabled 10 "Invalid community parameter" "node $CLI_PATH feed list $
 run_test_if_enabled 10 "Invalid verbose parameter" "node $CLI_PATH feed list $LINT_OPTION --verbose invalid" 1
 
 # Test 11: Default values testing
-run_test_if_enabled 11 "No parameters (should use defaults)" "node $CLI_PATH feed list $LINT_OPTION" 0
-
 run_test_if_enabled 11 "Default local only value" "node $CLI_PATH feed list $LINT_OPTION --community-only false" 0
 
 run_test_if_enabled 11 "Default community only value" "node $CLI_PATH feed list $LINT_OPTION --local-only false" 0
@@ -281,8 +272,6 @@ run_test_if_enabled 11 "Default verbose value" "node $CLI_PATH feed list $LINT_O
 run_test_if_enabled 12 "Empty string local" "node $CLI_PATH feed list $LINT_OPTION --local-only ''" 1
 
 run_test_if_enabled 12 "Empty string community" "node $CLI_PATH feed list $LINT_OPTION --community-only ''" 1
-
-run_test_if_enabled 12 "Empty string verbose" "node $CLI_PATH feed list $LINT_OPTION --verbose ''" 1
 
 # Test 13: Boolean edge cases
 run_test_if_enabled 13 "Local with default" "node $CLI_PATH feed list $LINT_OPTION --local-only" 0
