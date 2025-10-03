@@ -228,8 +228,8 @@ run_test_if_enabled 2 "Basic help command (long form)" "node $CLI_PATH send $LIN
 # Test 3: Invalid parameter (should fail immediately)
 run_test_if_enabled 3 "Invalid parameter test" "node $CLI_PATH send $LINT_OPTION --topic 'test/topic' --invalid-parameter 'test'" 1
 
-# Test 4: Payload via message parameter  should succeed
-run_test_if_enabled 4 "Payload via message parameter" "node $CLI_PATH send $LINT_OPTION --message 'test'" 0
+# Test 4: Send payload using --message parameter (should succeed)
+run_test_if_enabled 4 "Send payload using --message parameter" "node $CLI_PATH send $LINT_OPTION --message 'test'" 0
 
 # Test 5: Invalid count parameter (should fail immediately)
 run_test_if_enabled 5 "Invalid count parameter" "node $CLI_PATH send $LINT_OPTION --topic 'test/topic' --message 'test' --count -1" 1
