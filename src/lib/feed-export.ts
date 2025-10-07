@@ -365,6 +365,11 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
     process.exit(1);
   } 
   
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+  
   // Export the feed
   try {
     await exportFeed(cloudSettings.spec);

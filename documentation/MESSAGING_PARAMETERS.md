@@ -82,7 +82,7 @@ Options:
   --output-mode <MODE>                          [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                              display more help with options not shown in basic help
@@ -134,6 +134,7 @@ Options:
   --log-level <LEVEL>                         [advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE (default: "ERROR")
 
   /* PUBLISH SETTINGS */
+  --publish-confirmation [BOOLEAN]            [advanced] generate publish confirmation (default: false)
   --send-timestamps [BOOLEAN]                 [advanced] include a send timestamp on sent messages (default: false)
   --send-buffer-max-size <NUMBER>             [advanced] the maximum buffer size for the transport session. (default: 65536)
   --window-size <NUMBER>                      [advanced] the maximum number of messages that can be published without acknowledgment (default: 50)
@@ -180,7 +181,7 @@ Options:
   --output-mode <MODE>                      [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                          display more help with options not shown in basic help
@@ -262,7 +263,7 @@ Options:
   --output-mode <MODE>                          [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                              display more help with options not shown in basic help
@@ -289,8 +290,8 @@ Options:
   -ttl, --time-to-live <MILLISECONDS>         [advanced] the time before a message is discarded or moved to a DMQ
   -dmq, --dmq-eligible [BOOLEAN]              [advanced] the DMQ eligible flag (default: true)
   --timeout <MILLISECONDS>                    [advanced] the timeout value (default: 5000)
-  --application-message-id <MESSAGE_ID>       [advanced] the application provided message ID
-  --application-message-type <MESSAGE_TYPE>   [advanced] the application provided message type
+  --app-message-id <MESSAGE_ID>       [advanced] the application provided message ID
+  --app-message-type <MESSAGE_TYPE>   [advanced] the application provided message type
   --correlation-id <CORRELATION_ID>           [advanced] the application provided message correlation id for acknowledgement management (default: "current timestamp")
   --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode: DIRECT or PERSISTENT (default: "PERSISTENT")
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
@@ -363,7 +364,7 @@ Options:
   --output-mode <MODE>                          [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                    the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                              display more help with options not shown in basic help
@@ -405,8 +406,8 @@ Options:
   --payload-type <PAYLOAD_TYPE>               [advanced] payload type: TEXT or BYTES (default: "text")
   -ttl, --time-to-live <MILLISECONDS>         [advanced] the time before a message is discarded or moved to a DMQ
   -dmq, --dmq-eligible [BOOLEAN]              [advanced] the DMQ eligible flag (default: true)
-  --application-message-id <MESSAGE_ID>       [advanced] the application provided message ID
-  --application-message-type <MESSAGE_TYPE>   [advanced] the application provided message type
+  --app-message-id <MESSAGE_ID>       [advanced] the application provided message ID
+  --app-message-type <MESSAGE_TYPE>   [advanced] the application provided message type
   --delivery-mode <MODE>                      [advanced] the application-requested message delivery mode: DIRECT or PERSISTENT (default: "PERSISTENT")
   --reply-to-topic <TOPIC>                    [advanced] string which is used as the topic name for a response message
   --user-properties <PROPS...>                [advanced] the user properties as space-separated pairs if listing more than one (e.g., name1:value1 name2:value2 name3:"Hello World")
@@ -451,7 +452,7 @@ Options:
   -p, --password <PASSWORD>                the password (default: "default")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>               the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                         display more help with options not shown in basic help
@@ -510,7 +511,7 @@ Options:
   --semp-password <PASSWORD>                 the password (default: "admin")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                 the configuration file (default:
+  --config <CONFIG_FILE>                 the configuration file (default:
                                              "stm-cli-config.json")
 
   /* HELP OPTIONS */
@@ -538,7 +539,7 @@ Options:
   --semp-password <PASSWORD>                 the password (default: "admin")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                 the configuration file (default:
+  --config <CONFIG_FILE>                 the configuration file (default:
                                              "stm-cli-config.json")
 
   /* HELP OPTIONS */
@@ -579,7 +580,7 @@ Options:
   --list-subscriptions [BOOLEAN]             the topic subscriptions on the queue (default: false)
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                           display more help with options not shown in basic help
@@ -653,7 +654,7 @@ Options:
   --delete [CLIENT_PROFILE]                  delete a client-profile
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -hm, --help-more                           display more help with options not shown in basic help
@@ -729,7 +730,7 @@ Options:
   --subscribe-topic-default-action <ACCESS_TYPE>  the default action to take when a client using the ACL Profile subscribes to a topic: allow or disallow (default: "allow")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                      the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                      the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -he, --help-examples                            show cli acl-profile examples
@@ -791,7 +792,7 @@ Options:
   --client-password <VPN_NAME>               the password for the Client Username (default: "")
 
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                 the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -he, --help-examples                       show cli client-username examples
@@ -835,7 +836,7 @@ Initialize command samples
 
 Options:
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
 
   /* HELP OPTIONS */
   -he, --help-examples                    show cli init commands examples
@@ -854,7 +855,7 @@ List command samples
 
 Options:
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
   --name <COMMAND_NAME>                   the command name
 
   /* HELP OPTIONS */
@@ -874,7 +875,7 @@ Delete command sample
 
 Options:
   /* CONFIGURATION SETTINGS */
-  -c, --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>              the configuration file (default: "stm-cli-config.json")
   --name <COMMAND_NAME>                   the command name
 
   /* HELP OPTIONS */

@@ -310,6 +310,10 @@ ${chalk.greenBright('stm send -t ' + getDefaultTopic('send') + ' --count 100 --i
 
 ${chalk.greenBright('stm send -t "stm/logistics/shipped" "stm/inventory/check"')}
 
+// publish to queue with user properties (important for message routing and metadata)
+
+${chalk.greenBright('stm send --queue order-queue --message "Order 123 processed" --user-properties "orderId:123" "priority:high"')}
+
 
 ${chalk.yellowBright('You can override any of the publish parameters \n' +
 'and they are applied only for this instance of execution!')}
@@ -380,6 +384,10 @@ ${chalk.greenBright('stm receive --queue my-queue')}
 
 ${chalk.greenBright('stm receive --queue my-queue -t "stm/logistics/shipped"')}
 
+// receive with detailed output mode (useful for debugging and message inspection)
+
+${chalk.greenBright('stm receive --topic "orders/*" --output-mode FULL')}
+
 ${chalk.yellowBright('NOTE: You can override any of the receive parameters \n' +
 'that are applied only for this instance of execution!')}
 
@@ -445,6 +453,10 @@ ${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' -f O
 
 ${chalk.greenBright('stm request --topic ' + getDefaultTopic('request') + ' --stdin')}
 
+// request with timeout and multiple requests (essential for request-reply patterns)
+
+${chalk.greenBright('stm request --topic "api/status" --message "Check status" --timeout 10000 --count 3 --interval 2000')}
+
 ${chalk.yellowBright('NOTE: You can override any of the request parameters \n' +
 'that are applied only for this instance of execution!')}
 
@@ -472,7 +484,7 @@ ${chalk.greenBright('stm request  --name request --config cloud-broker --save re
 
 // Duplicate the command setting with the specified command-line parameters
 
-${chalk.greenBright('stm request --topic "stm/logistics/sipped" --name request2 --config cloud-broker --save request4')}
+${chalk.greenBright('stm request --topic "stm/logistics/shipped" --name request2 --config cloud-broker --save request4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
     `)
@@ -510,6 +522,10 @@ ${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' -f Order
 
 ${chalk.greenBright('stm reply --topic ' + getDefaultTopic('reply') + ' --stdin')}
 
+// reply with user properties (important for response metadata and correlation)
+
+${chalk.greenBright('stm reply --topic "api/response" --message "Success" --user-properties "status:200" "responseTime:150ms"')}
+
 ${chalk.yellowBright('NOTE: You can override any of the reply parameters \n' +
 'that are applied only for this instance of execution!')}
 
@@ -537,7 +553,7 @@ ${chalk.greenBright('stm reply  --name reply --config cloud-broker --save reply2
 
 // Duplicate the command setting with the specified command-line parameters
 
-${chalk.greenBright('stm reply --topic "stm/logistics/sipped" --name reply2 --config cloud-broker --save reply4')}
+${chalk.greenBright('stm reply --topic "stm/logistics/shipped" --name reply2 --config cloud-broker --save reply4')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)

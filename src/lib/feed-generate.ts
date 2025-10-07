@@ -106,6 +106,11 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   } 
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   if (optionsSource.feedType === 'cli' && options.feedType === 'restapi_feed') {
     return generateAPIFeed(options, optionsSource);
   }

@@ -15,6 +15,10 @@ const publishStats:any = {};
 const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any) => {
   // check connection params found
   checkConnectionParamsExists(options.url, options.vpn, options.username, options.password);
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
 
   const publisher = new SolaceClient(options);
   var interrupted = false;

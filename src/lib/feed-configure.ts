@@ -16,6 +16,11 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
   var feedInfo: any = undefined;
   
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   if (feedName) {
     Logger.success(`loading broker feed info ${feedName}`)
     feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);

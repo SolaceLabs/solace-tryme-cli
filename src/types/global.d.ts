@@ -71,6 +71,8 @@ declare global {
   interface MessageOperationOptions {
     // operation
     command: CommandType
+    quiet?: boolean
+    lint?: boolean
 
     // misc.
     count?: number

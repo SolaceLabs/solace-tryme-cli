@@ -89,7 +89,7 @@ apt-get install --only-upgrade stm
 
 
 #### Download the Archive
-For manual installation of the tool directly from archives, navigate to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (approprietly named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
+For manual installation of the tool directly from archives, navigate to [Git Releases](https://github.com/SolaceLabs/solace-tryme-cli/releases), locate the latest release and review the zip files (appropriately named with the target OS name) under **Assets**. Download the right bundle based on your OS and extract the binary/executable. Move the binary/executable file to a folder that is in the *PATH* or update the path to contain the folder where the file is present.
 
 | **For Windows**                                                                                                                                                                                                                                                                                                                        | **For Linux**                                                                                                                                                                                                                                                                                                                                    | **For Mac**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -140,9 +140,9 @@ stm
 │   ├── -he, --help-examples        /* display examples                               */
 │   ├── init                        /* initialize command configuration               */
 │   ├── list                        /* list command configurations                    */
-│   └── delete                      /* delete command configuratio                    */
-└── manage                          /* manage connection and resources                */
-│   └── -h, --help                  /* display help for command                       */
+│   └── delete                      /* delete command configuration                   */
+├── manage                          /* manage connection and resources                */
+│   ├── -h, --help                  /* display help for command                       */
 │   ├── -he, --help-examples        /* display examples                               */
 │   ├── connection                  /* manage VPN connection                          */
 │   ├── semp-connection             /* manage VPN SEMP connection                     */
@@ -159,6 +159,7 @@ stm
     ├── list                        /* List event feeds                               */
     ├── import                      /* Import an event feed                           */
     ├── export                      /* Export an event feed                           */
+    ├── download                    /* Download an event feed                         */
     └── contribute                  /* Contribute to community event feeds            */
 
 ```

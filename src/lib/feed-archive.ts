@@ -128,6 +128,11 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
     process.exit(1);
   }
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   const zlib = require("zip-lib");
 
   var exportPath = `${process.cwd()}/export`;

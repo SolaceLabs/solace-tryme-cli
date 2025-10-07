@@ -79,6 +79,11 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
       fs.rmSync(localFeedPath, { recursive: true, force: true });
   }
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   await moveFiles(`${importPath}/${feedName}`, localFeedPath);
   fs.rmSync(importPath, { recursive: true, force: true });
 

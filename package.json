@@ -1,6 +1,6 @@
 {
   "name": "@solace-community/stm",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "description": "Solace Try-Me Command Line Tool",
   "repository": {
     "type": "git",
@@ -84,7 +84,7 @@
       "node18-linux-x64",
       "node18-macos-x64",
       "node18-win-x64",
-      "node18-alpine-x64"    
+      "node18-alpine-x64"
     ],
     "outputPath": "release",
     "assets": [
@@ -92,5 +92,6 @@
       "public/**/*",
       "node_modules/axios/**/*.js"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

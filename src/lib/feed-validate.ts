@@ -23,6 +23,11 @@ const validate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
+  if (options.lint) {
+    Logger.logSuccess('linting successful...')
+    process.exit(0);
+  }
+
   const asyncApiSchema = readAsyncAPIFile(fileName!);
   await validateAsyncAPI(asyncApiSchema);
 }

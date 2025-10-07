@@ -40,7 +40,7 @@ stm
     ├── list                        /* List event feeds                               */
     ├── import                      /* Import an event feed from archive file         */
     ├── export                      /* Export an event feed to Event Portal           */
-    ├── archive                     /* Archive an event feed                          */
+    ├── download                    /* Download an event feed as archive              */
     └── contribute                  /* Contribute to community event feeds            */
 ```
 
@@ -140,6 +140,19 @@ Generate a Feed| Validate the Feed
 
 The `configure` sub-command enables setting up data generation rules for *topic* and *payload* parameters. It also allows optional mapping of attributes (e.g., `topic parameter → payload attribute, payload attribute → another attribute`).
 
+```
+Usage: stm feed configure [options]
+
+Configure event feed rules
+
+Options:
+  -feed, --feed-name <FEED_NAME>      the feed name
+  -port, --manage-port [PORT]         the port for the manager (default: 0)
+
+  /* HELP OPTIONS */
+  -h, --help                          display help for command
+```
+
 To learn about supported data generation rules, refer to the documentation: [Data Generation Rules](./DATAGENERATION_RULES.md)
 
 An Event Feed configuration exposes feed operations — send and receive events and their schemas. Under the *Messages* group, you can explore all exposed `messages` (events). Selecting a message reveals its details, including `name, schema`, and the `topics` it uses for send and receive operations.
@@ -212,7 +225,7 @@ Options:
   -feed, --feed-name <FEED_NAME>            the feed name
   -events, --event-names <EVENT_NAME...>    the event name(s) as space-separated values if listing more than one (e.g., "Loan_Applied" "Loan_Approved" )
   -community, --community-feed [BOOLEAN]    a community feed (default: false)
-  -c, --config <CONFIG_FILE>                the configuration file (default: "stm-cli-config.json")
+  --config <CONFIG_FILE>                the configuration file (default: "stm-cli-config.json")
 
   /* MESSAGE SETTINGS */
   --count <COUNT>                           the number of events to publish (default: 1)
@@ -226,6 +239,8 @@ Options:
   -hm, --help-more                          display more help for command with options not shown in basic help
   -h, --help                                display help for command
   ```
+
+> **NOTE**: The `stm feed run` command supports all the messaging parameters available in the `stm send` command, including advanced connection settings, message properties, session settings, and publish settings. For a complete list of all available options (including advanced ones), use the `--help-more` flag or refer to the [Messaging Parameters documentation](./MESSAGING_PARAMETERS.md).
   
   ### Streaming via Command-line
 

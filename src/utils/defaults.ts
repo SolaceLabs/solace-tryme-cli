@@ -155,6 +155,8 @@ export const defaultMessageConfig:any = {
 
 export const defaultMessagePublishConfig:any = {
   ...defaultMessageConfig,
+  quiet: false,
+  lint: false,
   count: 0,
   interval: 1000,
   initialDelay: 0,
@@ -363,7 +365,7 @@ export const defaultManageClientUsernameConfig:any = {
 
 export const defaultFeedConfig:any = {
   feedName: "stm-asyncapi_feed",
-  feedType: "asyncapi",
+  feedType: "asyncapi_feed",
   feedView: "default",
   showLogs: false,
   communityFeed: false,
