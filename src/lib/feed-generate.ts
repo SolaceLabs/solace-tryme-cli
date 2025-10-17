@@ -10,6 +10,7 @@ import { analyze, analyzeV2, analyzeEP, formulateRules, formulateSchemas, load }
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFeedName } from '../utils/checkparams';
 import { sessionPropertiesJson } from '../utils/sessionprops';
+import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
@@ -133,8 +134,27 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
                   await analyzeV2(documentCopy, reverseView) : await analyze(documentCopy, reverseView);
   data.fileName = fileName.lastIndexOf('/') >= 0 ? fileName.substring(fileName.lastIndexOf('/')+1) : fileName;
 
-  const rules = await formulateRules(document, reverseView); // Uses original unmodified document
+  let rules = await formulateRules(document, reverseView); // Uses original unmodified document
   const schemas = await formulateSchemas(document); // Uses original unmodified document
+
+  // AI Enhancement: Optionally enhance feedrules with intelligent field mappings
+  if (options.aiEnhance) {
+    Logger.info('AI enhancement enabled - enhancing field mappings...');
+    // Parse the AsyncAPI schema string to an object for the Lambda
+    const asyncApiObject = typeof asyncApiSchema === 'string' ? JSON.parse(asyncApiSchema) : asyncApiSchema;
+    const enhancedRules = await enhanceFeedrulesWithAI(
+      rules,
+      asyncApiObject,
+      options.aiMapperEndpoint
+    );
+
+    if (enhancedRules && enhancedRules.length > 0) {
+      Logger.logSuccess('Successfully enhanced feedrules with AI mappings');
+      rules = enhancedRules;
+    } else {
+      Logger.logWarn('AI enhancement failed or returned no results, using original rules');
+    }
+  }
 
   await checkEventValidity(data);
 

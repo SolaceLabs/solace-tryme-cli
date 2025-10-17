@@ -692,13 +692,16 @@ export const addFeedGenerateOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-file, --file-name <ASYNCAPI_FILE>', chalk.whiteBright('the asyncapi document')) )
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
-    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type')) 
+    .addOption(new Option('-type, --feed-type <FEED_TYPE>', chalk.whiteBright('the feed type'))
       .argParser(parseFeedType) .default(defaultFeedConfig.feedType) )
-    .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa')) 
-                  .argParser(parseFeedView) 
-                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider')) 
+    .addOption(new Option('-view, --feed-view <FEED_VIEW>', chalk.whiteBright('the feed view: publisher, provider;\n    generates feed for subscribe operations and vice versa'))
+                  .argParser(parseFeedView)
+                  .default(defaultFeedConfig.feedView === 'default' ? 'publisher' : 'provider'))
                   // .conflicts('feedName')) // INVALID CONFLICT CONDITION
-    // hidden option to use defaults 
+    // AI enhancement options
+    .addOption(new Option('-ai, --ai-enhance [BOOLEAN]', chalk.whiteBright('use AI to intelligently enhance field mappings')) .argParser(parseBoolean) .default(false) .hideHelp(advanced))
+    .addOption(new Option('--ai-mapper-endpoint <URL>', chalk.whiteBright('[advanced] the AI field mapper endpoint URL')) .hideHelp(!advanced))
+    // hidden option to use defaults
     .addOption(new Option('-defaults, --use-defaults', chalk.whiteBright('use defaults for feed name and feed type')) .hideHelp(true) .default(false))
     // lint options - validate CLI arguments quitely (without executing the command)
     .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
