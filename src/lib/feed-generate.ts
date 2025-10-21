@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { createFeed, fileExists, updateAndLoadFeedInfo, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
+import { createFeed, fileExists, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
 import { prettyJSON } from '../utils/prettify';
 import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedMajorVersion, defaultFeedMinorVersion, defaultFeedRulesFile, defaultFeedSessionFile, defaultStmFeedsHome } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
@@ -85,7 +85,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
     feedName = options.feedName;
     fileName = options.fileName;
-  } 
+    feed.name = feedName;
+  }
   if (!feedName) {
     const pFeedName = new Input({
       message: `${chalkBoldWhite('Enter feed name')}\n` +
@@ -262,9 +263,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
-  createFeed(fileName, feedName, feed, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
   feed.lastUpdated = new Date().toISOString();
-  updateAndLoadFeedInfo(feed);
+  createFeed(fileName, feedName, feed, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
 
   Logger.success(`Successfully created event feed ${feedName}`);
 

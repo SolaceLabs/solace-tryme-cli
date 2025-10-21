@@ -100,17 +100,28 @@ The `stm feed generate` command supports AI-enhanced field mapping via the `--ai
 ### Usage
 
 ```bash
-# Generate feed with AI field mapping enhancement
+# Generate feed with AI field mapping enhancement (uses built-in default endpoint)
+stm feed generate \
+  --file-name asyncapi.yaml \
+  --feed-name "MyFeed" \
+  --ai-enhance
+
+# Or override the default endpoint with custom Lambda
 stm feed generate \
   --file-name asyncapi.yaml \
   --feed-name "MyFeed" \
   --ai-enhance \
   --ai-mapper-endpoint "https://your-lambda-url.amazonaws.com/field-mapper"
 
-# Or set endpoint via environment variable
+# Or set endpoint via environment variable to override default
 export STM_FIELD_MAPPER_ENDPOINT="https://your-lambda-url.amazonaws.com/field-mapper"
 stm feed generate --file-name asyncapi.yaml --ai-enhance
 ```
+
+**Default Endpoint**: The CLI includes a built-in default endpoint (https://b0hv9uf5m8.execute-api.us-east-2.amazonaws.com/Prod/fieldmap) that is used when `--ai-enhance` is specified without additional configuration. You can override this with:
+1. The `--ai-mapper-endpoint` flag (highest priority)
+2. The `STM_FIELD_MAPPER_ENDPOINT` environment variable (medium priority)
+3. Built-in default endpoint (fallback)
 
 ### What It Does
 

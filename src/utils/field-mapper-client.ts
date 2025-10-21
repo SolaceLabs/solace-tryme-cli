@@ -1,8 +1,9 @@
 import { Logger } from './logger';
 import chalk from 'chalk';
 
-// Default endpoint - can be overridden via environment variable
-const DEFAULT_FIELD_MAPPER_ENDPOINT = process.env.STM_FIELD_MAPPER_ENDPOINT || '';
+// Default endpoint - can be overridden via environment variable or command line flag
+const DEFAULT_FIELD_MAPPER_ENDPOINT = process.env.STM_FIELD_MAPPER_ENDPOINT ||
+  'https://b0hv9uf5m8.execute-api.us-east-2.amazonaws.com/Prod/fieldmap';
 
 /**
  * Mapping between topic parameters and payload parameters
@@ -61,7 +62,7 @@ export interface FieldMapperError {
  *
  * @param feedrules - The vanilla/generic feedrules to enhance with mappings array
  * @param asyncApiSpec - The AsyncAPI specification containing topic and payload schemas
- * @param endpoint - Optional custom endpoint URL (defaults to STM_FIELD_MAPPER_ENDPOINT env var)
+ * @param endpoint - Optional custom endpoint URL (defaults to hard-coded endpoint or STM_FIELD_MAPPER_ENDPOINT env var)
  * @returns Enhanced feedrules with mappings array populated, or null on failure
  *
  * @example
@@ -87,6 +88,7 @@ export async function enhanceFeedrulesWithAI(
   const apiEndpoint = endpoint || DEFAULT_FIELD_MAPPER_ENDPOINT;
 
   if (!apiEndpoint) {
+    // This should not happen since we have a hard-coded default, but keep as safety check
     Logger.logError('No field mapper endpoint configured');
     Logger.logWarn('Set STM_FIELD_MAPPER_ENDPOINT environment variable or use --ai-mapper-endpoint flag');
     return null;
