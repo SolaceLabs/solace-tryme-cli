@@ -711,6 +711,9 @@ export const addFeedConfigureOptions = (cmd: Command, advanced: boolean) => {
   cmd
     .addOption(new Option('-feed, --feed-name <FEED_NAME>', chalk.whiteBright('the feed name')) )
     .addOption(new Option('-port, --manage-port [PORT]', chalk.whiteBright('the port for the manager')) .argParser(parseManagePort) .default(0))
+    // AI enhancement options
+    .addOption(new Option('-ai, --ai-enhance [BOOLEAN]', chalk.whiteBright('use AI to intelligently enhance field mappings')) .argParser(parseBoolean) .default(false) .hideHelp(advanced))
+    .addOption(new Option('--ai-mapper-endpoint <URL>', chalk.whiteBright('[advanced] the AI field mapper endpoint URL')) .hideHelp(!advanced))
     // lint options - validate CLI arguments quitely (without executing the command)
     .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
 }

@@ -11,6 +11,7 @@ import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFeedName } from '../utils/checkparams';
 import { sessionPropertiesJson } from '../utils/sessionprops';
 import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
+import { hasAcceptedAiDisclaimer, showAiDisclaimer, recordAiDisclaimerAcceptance } from '../utils/ai-disclaimer';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
@@ -106,7 +107,27 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
-  } 
+  }
+
+  // AI Enhancement prompt (only in interactive mode when not specified via CLI)
+  if (optionsSource.aiEnhance !== 'cli') {
+    const { Confirm } = require('enquirer');
+    const pAiEnhance = new Confirm({
+      message: `${chalkBoldWhite('Use AI to enhance field mappings?')}\n` +
+        `${chalkBoldLabel('Hint')}: AI can automatically generate realistic data rules and topic mappings\n`,
+      initial: false
+    });
+
+    await pAiEnhance.run()
+      .then((answer: boolean) => {
+        options.aiEnhance = answer;
+        optionsSource.aiEnhance = 'interactive';
+      })
+      .catch((error: any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  }
 
   if (options.lint) {
     Logger.logSuccess('linting successful...')
@@ -140,20 +161,35 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
 
   // AI Enhancement: Optionally enhance feedrules with intelligent field mappings
   if (options.aiEnhance) {
-    Logger.info('AI enhancement enabled - enhancing field mappings...');
-    // Parse the AsyncAPI schema string to an object for the Lambda
-    const asyncApiObject = typeof asyncApiSchema === 'string' ? JSON.parse(asyncApiSchema) : asyncApiSchema;
-    const enhancedRules = await enhanceFeedrulesWithAI(
-      rules,
-      asyncApiObject,
-      options.aiMapperEndpoint
-    );
+    // Check if user has accepted AI disclaimer
+    if (!hasAcceptedAiDisclaimer()) {
+      const accepted = await showAiDisclaimer();
+      if (!accepted) {
+        Logger.logWarn('AI enhancement declined. Continuing with standard field generation.');
+        options.aiEnhance = false;
+      } else {
+        recordAiDisclaimerAcceptance();
+        Logger.logSuccess('AI disclaimer accepted. Proceeding with AI enhancement.');
+      }
+    }
 
-    if (enhancedRules && enhancedRules.length > 0) {
-      Logger.logSuccess('Successfully enhanced feedrules with AI mappings');
-      rules = enhancedRules;
-    } else {
-      Logger.logWarn('AI enhancement failed or returned no results, using original rules');
+    // Proceed with AI enhancement if still enabled
+    if (options.aiEnhance) {
+      Logger.info('AI enhancement enabled - enhancing field mappings...');
+      // Parse the AsyncAPI schema string to an object for the Lambda
+      const asyncApiObject = typeof asyncApiSchema === 'string' ? JSON.parse(asyncApiSchema) : asyncApiSchema;
+      const enhancedRules = await enhanceFeedrulesWithAI(
+        rules,
+        asyncApiObject,
+        options.aiMapperEndpoint
+      );
+
+      if (enhancedRules && enhancedRules.length > 0) {
+        Logger.logSuccess('Successfully enhanced feedrules with AI mappings');
+        rules = enhancedRules;
+      } else {
+        Logger.logWarn('AI enhancement failed or returned no results, using original rules');
+      }
     }
   }
 
