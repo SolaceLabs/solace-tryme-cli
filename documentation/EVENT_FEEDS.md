@@ -136,6 +136,24 @@ Generate a Feed| Validate the Feed
 --|--
 ![](./docrefs/feed-generate.gif)|![](./docrefs/feed-generate-verify.gif)|
 
+### AI-Enhanced Field Mapping (Optional)
+
+The `generate` command supports an optional `--ai-enhance` flag that uses AI to automatically create intelligent field mappings and data generation rules:
+
+```bash
+# Generate feed with AI enhancement
+stm feed generate --file-name asyncapi.yaml --feed-name "MyFeed" --ai-enhance
+```
+
+**Benefits:**
+- Automatically generates realistic Faker.js rules based on field names and types
+- Creates topic parameter mappings when topic variables match payload fields
+- Reduces manual configuration time
+
+> **⚠️ First-Time Use:** You will be prompted to accept an AI disclaimer before using this feature. Your AsyncAPI specification will be processed by external AI services (AWS Bedrock with Google Gemini and Anthropic Claude). Do not include sensitive or proprietary information.
+
+For more details, see the [AI-Powered Field Mapping section in CLAUDE.md](../claude.md#ai-powered-field-mapping).
+
 ## Configure Data Generation Rules for an Event Feed
 
 The `configure` sub-command enables setting up data generation rules for *topic* and *payload* parameters. It also allows optional mapping of attributes (e.g., `topic parameter → payload attribute, payload attribute → another attribute`).
@@ -152,6 +170,19 @@ Options:
   /* HELP OPTIONS */
   -h, --help                          display help for command
 ```
+
+### AI-Enhanced Configuration (Optional)
+
+You can also use AI to automatically enhance an existing feed's configuration:
+
+```bash
+# Auto-configure feed with AI
+stm feed configure --feed-name "MyFeed" --ai-enhance
+```
+
+This skips the web UI and automatically applies intelligent field mappings to your feed. To review or modify the AI-generated mappings afterwards, run the configure command without the `--ai-enhance` flag.
+
+> **⚠️ First-Time Use:** You will be prompted to accept an AI disclaimer before using this feature. Your AsyncAPI specification will be processed by external AI services (AWS Bedrock with Google Gemini and Anthropic Claude). Do not include sensitive or proprietary information.
 
 To learn about supported data generation rules, refer to the documentation: [Data Generation Rules](./DATAGENERATION_RULES.md)
 

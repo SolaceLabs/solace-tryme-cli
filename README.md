@@ -13,7 +13,11 @@ _**stm**_ provides a feature to generate event feeds directly from AsyncAPI docu
 ---
 ![](docrefs/eventfeeds.webp "stm - feeds")
 
-`stm` supports a set of operations to generate, configure and run an event feed from an AsyncAPI document corresponding to an asynchronous application or an API (from Event Portal). The goal is to help you quickly set up an event feed on your local machine, configure data generation rules, and run to stream events to a broker. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds shared on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)). 
+`stm` supports a set of operations to generate, configure and run an event feed from an AsyncAPI document corresponding to an asynchronous application or an API (from Event Portal). The goal is to help you quickly set up an event feed on your local machine, configure data generation rules, and run to stream events to a broker. Additionally, you can contribute your feed for community use by following the contribution process (referred to as community or contributed feeds shared on the [Community Event Feeds site](https://github.com/solacecommunity/solace-event-feeds)).
+
+**New in this release:** Event feeds now support AI-powered field mapping to automatically generate realistic data rules and topic parameter mappings. Use the `--ai-enhance` flag with `stm feed generate` or `stm feed configure` commands.
+
+**⚠️ Important:** When using AI enhancement for the first time, you will be prompted to accept a disclaimer regarding data processing by AI models. Your AsyncAPI specification content will be sent to AWS Bedrock services (including Google Gemini and Anthropic Claude) for analysis. Do not include sensitive or proprietary information in AsyncAPI documents used with AI enhancement features.
 
 > **For more details on working with event feeds, please review the [EVENT_FEEDS](./documentation/EVENT_FEEDS.md) documentation.**
 
