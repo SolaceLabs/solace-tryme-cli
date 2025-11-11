@@ -187,8 +187,7 @@ The Lambda function endpoint should:
 1. Accept POST requests with JSON body:
    ```json
    {
-     "feedrules": [...],
-     "asyncApiSpec": {...}
+     "feedrules": [...]
    }
    ```
 
@@ -202,11 +201,6 @@ The Lambda function endpoint should:
        "improved": 7,
        "unchanged": 3,
        "improvementPercentage": 70
-     },
-     "context": {
-       "eventName": "Order Created",
-       "topic": "acmeRental/orders/created/v1/{region}/{orderId}",
-       "domain": "Retail"
      }
    }
    ```
@@ -217,6 +211,8 @@ The Lambda function endpoint should:
    - Generate Faker.js rules for payload fields based on field names/types
    - Create Topic Parameter mappings for matched fields
    - Include all mappings in the `mappings` array of each feedrule
+
+**Note**: The AsyncAPI specification is no longer sent to the Lambda endpoint. All necessary information is contained within the feedrules structure itself.
 
 ### Implementation Reference
 

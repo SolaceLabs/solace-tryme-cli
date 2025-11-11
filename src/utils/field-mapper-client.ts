@@ -36,11 +36,6 @@ export interface FieldMapperResponse {
     unchanged: number;
     improvementPercentage: number;
   };
-  context: {
-    eventName: string;
-    topic: string;
-    domain: string;
-  };
 }
 
 export interface FieldMapperError {
@@ -52,7 +47,7 @@ export interface FieldMapperError {
 /**
  * Call the AI Field Mapper Lambda function to enhance feedrules with intelligent field mappings.
  *
- * This function sends feedrules and AsyncAPI specification to an AI-powered Lambda function that:
+ * This function sends feedrules to an AI-powered Lambda function that:
  * 1. Analyzes payload field types and names to generate realistic Faker.js rules
  * 2. Identifies topic variables (e.g., {amount}, {employeeId}) that match payload field names
  * 3. Creates mappings to use payload-generated values in topic addresses
@@ -61,14 +56,12 @@ export interface FieldMapperError {
  * the Lambda will generate a mapping to inject the payload's orderId value into the topic.
  *
  * @param feedrules - The vanilla/generic feedrules to enhance with mappings array
- * @param asyncApiSpec - The AsyncAPI specification containing topic and payload schemas
  * @param endpoint - Optional custom endpoint URL (defaults to hard-coded endpoint or STM_FIELD_MAPPER_ENDPOINT env var)
  * @returns Enhanced feedrules with mappings array populated, or null on failure
  *
  * @example
  * const enhanced = await enhanceFeedrulesWithAI(
  *   [{ topic: 'acme/{region}/{employeeId}', topicParameters: {...}, payload: {...} }],
- *   asyncApiSpec,
  *   'https://my-lambda-url.com'
  * );
  * // Returns feedrules with mappings like:
@@ -82,7 +75,6 @@ export interface FieldMapperError {
  */
 export async function enhanceFeedrulesWithAI(
   feedrules: any[],
-  asyncApiSpec: any,
   endpoint?: string
 ): Promise<any[] | null> {
   const apiEndpoint = endpoint || DEFAULT_FIELD_MAPPER_ENDPOINT;
@@ -98,8 +90,7 @@ export async function enhanceFeedrulesWithAI(
   Logger.logInfo(`Endpoint: ${chalk.cyanBright(apiEndpoint)}`);
 
   const requestBody = {
-    feedrules,
-    asyncApiSpec
+    feedrules
   };
 
   try {
@@ -130,8 +121,6 @@ export async function enhanceFeedrulesWithAI(
 
     // Log summary
     Logger.logSuccess('Field mapping completed successfully!');
-    Logger.logInfo(`Context: ${chalk.greenBright(result.context.eventName)} in ${chalk.cyanBright(result.context.domain)}`);
-    Logger.logInfo(`Topic: ${chalk.yellowBright(result.context.topic)}`);
     Logger.logInfo(`Fields analyzed: ${chalk.whiteBright(result.summary.totalFields)}`);
     Logger.logInfo(`Improved mappings: ${chalk.greenBright(result.summary.improved)} (${result.summary.improvementPercentage}%)`);
     Logger.logInfo(`Unchanged: ${chalk.gray(result.summary.unchanged)}`);

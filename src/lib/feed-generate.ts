@@ -176,11 +176,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
     // Proceed with AI enhancement if still enabled
     if (options.aiEnhance) {
       Logger.info('AI enhancement enabled - enhancing field mappings...');
-      // Parse the AsyncAPI schema string to an object for the Lambda
-      const asyncApiObject = typeof asyncApiSchema === 'string' ? JSON.parse(asyncApiSchema) : asyncApiSchema;
       const enhancedRules = await enhanceFeedrulesWithAI(
         rules,
-        asyncApiObject,
         options.aiMapperEndpoint
       );
 

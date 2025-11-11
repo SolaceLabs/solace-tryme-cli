@@ -1,5 +1,5 @@
-import { getAllFeeds, getFeed, loadLocalFeedFile, loadLocalFeedSessionSettingsFile, processPlainPath, updateRules, updateSession, loadRawLocalFeedFile, fileExists } from '../utils/config';
-import { defaultFakerRulesFile, defaultFeedInfoFile, defaultFeedSessionFile, defaultProjectName, defaultStmFeedsHome, defaultFeedRulesFile } from '../utils/defaults';
+import { getAllFeeds, getFeed, loadLocalFeedFile, loadLocalFeedSessionSettingsFile, processPlainPath, updateRules, updateSession } from '../utils/config';
+import { defaultFakerRulesFile, defaultFeedInfoFile, defaultFeedSessionFile, defaultProjectName, defaultFeedRulesFile } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator } from './feed-datahelper';
@@ -9,8 +9,6 @@ import { sessionPropertiesJson } from '../utils/sessionprops';
 import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
 import { hasAcceptedAiDisclaimer, showAiDisclaimer, recordAiDisclaimerAcceptance } from '../utils/ai-disclaimer';
 import chalk from 'chalk';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
@@ -95,39 +93,13 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     // 1. Load existing feedrules
     const feedrules = loadLocalFeedFile(feedName, defaultFeedRulesFile);
 
-    // 2. Find and load the AsyncAPI spec file from the feed directory
-    const feedPath = processPlainPath(`${defaultStmFeedsHome}/${feedName}`);
-    const files = fs.readdirSync(feedPath);
-
-    // Filter to find AsyncAPI spec file (exclude known feed files)
-    const excludedFiles = ['feedrules.json', 'analysis.json', 'fakerrules.json', 'feedinfo.json', 'feedschemas.json', 'feedsession.json'];
-    const asyncApiFile = files.find(file => {
-      const ext = path.extname(file).toLowerCase();
-      return (ext === '.json' || ext === '.yaml' || ext === '.yml') && !excludedFiles.includes(file);
-    });
-
-    if (!asyncApiFile) {
-      Logger.logError('Could not find AsyncAPI specification file in feed directory');
-      Logger.logError('exiting...');
-      process.exit(1);
-    }
-
-    Logger.logInfo(`Found AsyncAPI spec: ${chalk.cyanBright(asyncApiFile)}`);
-
-    // 3. Load the AsyncAPI spec
-    const asyncApiSpec = loadRawLocalFeedFile(feedName, asyncApiFile);
-
-    // 4. Parse AsyncAPI to object if it's a string
-    const asyncApiObject = typeof asyncApiSpec === 'string' ? JSON.parse(asyncApiSpec) : asyncApiSpec;
-
-    // 5. Call AI enhancement
+    // 2. Call AI enhancement
     const enhancedRules = await enhanceFeedrulesWithAI(
       feedrules,
-      asyncApiObject,
       options.aiMapperEndpoint
     );
 
-    // 6. Save enhanced rules back if successful
+    // 3. Save enhanced rules back if successful
     if (enhancedRules && enhancedRules.length > 0) {
       await updateRules(feedName, enhancedRules);
       Logger.logSuccess(`Feed configuration for '${chalk.greenBright(feedName)}' automatically enhanced with AI!`);
