@@ -219,7 +219,7 @@ export const checkSempQueueParamsExists = (options: ManageClientOptions, options
     optionsSource.queue = (typeof options.list === 'string') ? 'cli' : optionsSource.queue;
   }
   if (options.create) {
-    count++; 
+    count++;
     options.operation = 'CREATE'
     optionsSource.operation = 'cli'
     options.queue = (typeof options.create === 'string') ? options.create : options.queue;
