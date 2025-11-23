@@ -442,23 +442,41 @@ if (process.env.SHOW_VISUALIZATION) {
     const manageQueueCmd = manageCmd
       .command('queue')
       .description(chalk.whiteBright('Manage a queue'))
+      .argument('[operation]', 'queue operation: create, update, delete, or list')
+      .argument('[queueName]', 'queue name')
       .allowUnknownOption(false)
       .addHelpText('after', this.newVersionCheck())
     addManageQueueOptions(manageQueueCmd, this.advanced);
-    manageQueueCmd.action((options: ManageClientOptions) => {
+    manageQueueCmd.action((operation: string | undefined, queueName: string | undefined, options: ManageClientOptions) => {
       this.newVersionCheck();
       const cliOptions:any = {};
       const defaultKeys = Object.keys(new ManageClientOptionsEmpty('queue'));
       for (var i=0; i<defaultKeys.length; i++) {
         cliOptions[defaultKeys[i]] = manageQueueCmd.getOptionValueSource(defaultKeys[i]);
       }
+
+      // Handle positional arguments for operation and queue name BEFORE loading config
+      // so that positional arguments are not overridden by config values
+      if (operation) {
+        const validOperations = ['create', 'update', 'delete', 'list'];
+        if (validOperations.includes(operation.toLowerCase())) {
+          // Map positional operation to the appropriate option
+          options[operation.toLowerCase()] = queueName || true;
+          cliOptions[operation.toLowerCase()] = 'cli';
+          if (operation.toLowerCase() === 'create') {
+            options.owner = options.owner || 'default';
+            cliOptions.owner = cliOptions.owner || 'implied';
+          }
+        }
+      }
+
       const configOptions = loadCommandFromConfig('queue', options)
       if (configOptions) {
         for (var i=0; i<defaultKeys.length; i++) {
           options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
         }
       }
-  
+
       queue(options, cliOptions);
     })
 
