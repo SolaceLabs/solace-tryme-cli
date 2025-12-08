@@ -424,7 +424,7 @@ git clone --recurse-submodules git@github.com:SolaceLabs/solace-tryme-cli.git
 cd solace-tryme-cli
 
 # Install dependencies
-yarn install
+yarn install --frozen-lockfile
 
 # Compiles and hot-reloads for development
 yarn run dev
@@ -443,7 +443,7 @@ git submodule update --remote
 After a successful build, you will see the binary executable for each system in the `release` directory.
 
 ##### Run from build
-After running `yarn install` above you can now run from the build using `yarn run index [command]`
+After running `yarn install --frozen-lockfile` above you can now run from the build using `yarn run index [command]`
 
 ```
 $ yarn run index
@@ -464,8 +464,36 @@ Commands:
   reply [options]       Execute a reply command
   config [options]      Manage command configurations
   manage [options]      Manage broker connection and resources
-  
+
 ```
+
+## Security Best Practices
+
+When working with this repository, follow these security guidelines:
+
+### Dependency Management
+- This project uses Yarn with a lockfile (`yarn.lock`) for reproducible builds
+- Always use `yarn install --frozen-lockfile` to install dependencies
+- Never modify `yarn.lock` manually
+- Check for vulnerabilities regularly: `yarn audit`
+- Check for outdated packages: `yarn outdated`
+
+### Installation Safety
+- All dependencies use exact version pinning (no ^ or ~ ranges)
+- Lifecycle scripts are blocked by default via `.yarnrc`
+- If you encounter "Ignored scripts" warnings, this is expected and secure
+
+### Adding New Dependencies
+- Always specify exact versions: `yarn add package@1.2.3`
+- Never use version ranges: ~~`yarn add package@^1.2.3`~~ ❌
+- After adding packages, commit both `package.json` and `yarn.lock`
+- Team members run `yarn install --frozen-lockfile` to get exact versions
+
+### For Contributors
+- Run `yarn audit` before submitting pull requests
+- Do not commit secrets, API keys, or credentials to version control
+- Keep dependencies up to date and address security advisories promptly
+- Review the [OWASP NPM Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html)
 
 ## Technology Stack
 
