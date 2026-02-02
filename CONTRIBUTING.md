@@ -43,6 +43,37 @@ Make your changes on a new git branch in your fork of the repository.
 git checkout -b my-fix-branch master
 ```
 
+#### Step 2.5: Security Checks
+
+Before committing your changes, run these security checks:
+
+```sh
+# Check for known vulnerabilities
+yarn audit
+
+# Ensure dependencies are up to date
+yarn outdated
+
+# Verify lockfile integrity (install without modifying lockfile)
+yarn install --frozen-lockfile
+```
+
+**If adding new dependencies:**
+```sh
+# Always specify exact versions to prevent typosquatting
+yarn add package@1.2.3
+
+# Then commit both files
+git add package.json yarn.lock
+```
+
+If `yarn audit` reports vulnerabilities:
+- For high/critical vulnerabilities in direct dependencies: update the package
+- For vulnerabilities in transitive dependencies: check if updating the direct dependency resolves it
+- Document any accepted risks in your pull request
+
+**Important:** Never use version ranges (^, ~). Always use exact version pinning.
+
 #### Step 3: Commit
 
 Commit your changes using a descriptive commit message.
