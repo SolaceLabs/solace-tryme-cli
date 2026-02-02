@@ -449,6 +449,7 @@ export const homedir = currentHomeDir;
 export const defaultStmHome = currentStmHome;
 export const defaultStmFeedsHome = `${defaultStmHome}/feeds`
 export const defaultStmTempFeedsHome = `${defaultStmHome}/feeds/tmp`
+export const defaultAiDisclaimerFile = 'ai-disclaimer-accepted'
 export const defaultFeedAnalysisFile = 'analysis.json'
 export const defaultFakerRulesFile = 'fakerrules.json'
 export const defaultFeedMajorVersion = 1

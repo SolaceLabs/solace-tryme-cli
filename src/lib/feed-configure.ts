@@ -1,11 +1,14 @@
 import { getAllFeeds, getFeed, loadLocalFeedFile, loadLocalFeedSessionSettingsFile, processPlainPath, updateRules, updateSession } from '../utils/config';
-import { defaultFakerRulesFile, defaultFeedInfoFile, defaultFeedSessionFile, defaultProjectName, defaultStmFeedsHome } from '../utils/defaults';
+import { defaultFakerRulesFile, defaultFeedInfoFile, defaultFeedSessionFile, defaultProjectName, defaultFeedRulesFile } from '../utils/defaults';
 import { getLocalEventFeeds } from '../utils/listfeeds';
 import { Logger } from '../utils/logger'
 import { fakeDataObjectGenerator, fakeDataValueGenerator } from './feed-datahelper';
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils';
 import { messagePropertiesJson } from '../utils/msgprops';
 import { sessionPropertiesJson } from '../utils/sessionprops';
+import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
+import { hasAcceptedAiDisclaimer, showAiDisclaimer, recordAiDisclaimerAcceptance } from '../utils/ai-disclaimer';
+import chalk from 'chalk';
 
 // @ts-ignore
 import { generateEvent } from '@solace-labs/solace-data-generator';
@@ -61,7 +64,55 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     if (feedName === 'All Event Feeds') {
       feedName = undefined;
       Logger.success(`will explore all available feeds`)
-    }    
+    }
+  }
+
+  // AI Enhancement: If --ai-enhance flag is provided, automatically enhance feedrules with AI
+  if (options.aiEnhance) {
+    if (!feedName) {
+      Logger.logError('--feed-name is required when using --ai-enhance');
+      Logger.logError('exiting...');
+      process.exit(1);
+    }
+
+    // Check if user has accepted AI disclaimer
+    if (!hasAcceptedAiDisclaimer()) {
+      const accepted = await showAiDisclaimer();
+      if (!accepted) {
+        Logger.logWarn('AI enhancement declined. Feed configuration was not modified.');
+        Logger.success('exiting...');
+        process.exit(0);
+      } else {
+        recordAiDisclaimerAcceptance();
+        Logger.logSuccess('AI disclaimer accepted. Proceeding with AI enhancement.');
+      }
+    }
+
+    Logger.info('AI enhancement enabled - automatically configuring feed with intelligent field mappings...');
+
+    // 1. Load existing feedrules
+    const feedrules = loadLocalFeedFile(feedName, defaultFeedRulesFile);
+
+    // 2. Call AI enhancement
+    const enhancedRules = await enhanceFeedrulesWithAI(
+      feedrules,
+      options.aiMapperEndpoint
+    );
+
+    // 3. Save enhanced rules back if successful
+    if (enhancedRules && enhancedRules.length > 0) {
+      await updateRules(feedName, enhancedRules);
+      Logger.logSuccess(`Feed configuration for '${chalk.greenBright(feedName)}' automatically enhanced with AI!`);
+      Logger.hint(`\nWhat's next?\n` +
+        `    To explore or modify the AI-generated field mappings, run:\n` +
+        `    ${chalk.italic.cyanBright(`stm feed configure --feed-name ${feedName}`)}`);
+    } else {
+      Logger.logError('AI enhancement failed - no enhanced rules returned');
+      Logger.logWarn('Feed configuration was not modified');
+    }
+
+    Logger.success('exiting...');
+    process.exit(0);
   }
 
   const express = require('express');

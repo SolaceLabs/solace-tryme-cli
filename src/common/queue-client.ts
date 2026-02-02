@@ -33,7 +33,7 @@ export class SempClient {
       case 'DELETE': sempUrl += `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${encodeURIComponent(this.options.queue)}`; break;
     }
 
-    this.sempBody = {            
+    this.sempBody = {
       msgVpnName: this.options?.sempVpn,
       queueName: this.options?.queue,
       owner: this.options?.owner,

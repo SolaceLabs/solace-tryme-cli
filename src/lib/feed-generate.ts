@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
-import { createFeed, fileExists, updateAndLoadFeedInfo, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
+import { createFeed, fileExists, loadLocalFeedFile, processPlainPath, writeJsonFile, readAsyncAPIFile } from '../utils/config';
 import { prettyJSON } from '../utils/prettify';
 import { defaultFakerRulesFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedMajorVersion, defaultFeedMinorVersion, defaultFeedRulesFile, defaultFeedSessionFile, defaultStmFeedsHome } from '../utils/defaults';
 import { chalkBoldLabel, chalkBoldVariable, chalkBoldWhite } from '../utils/chalkUtils';
@@ -10,6 +10,8 @@ import { analyze, analyzeV2, analyzeEP, formulateRules, formulateSchemas, load }
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { checkFeedGenerateOptions, getPotentialFeedName, getPotentialTopicFromFeedName } from '../utils/checkparams';
 import { sessionPropertiesJson } from '../utils/sessionprops';
+import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
+import { hasAcceptedAiDisclaimer, showAiDisclaimer, recordAiDisclaimerAcceptance } from '../utils/ai-disclaimer';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
   var { fileName, feedName, feedType, feedView } = options;
@@ -84,7 +86,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
   if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
     feedName = options.feedName;
     fileName = options.fileName;
-  } 
+    feed.name = feedName;
+  }
   if (!feedName) {
     const pFeedName = new Input({
       message: `${chalkBoldWhite('Enter feed name')}\n` +
@@ -104,7 +107,27 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
         Logger.logDetailedError('interrupted...', error)
         process.exit(1);
       });
-  } 
+  }
+
+  // AI Enhancement prompt (only in interactive mode when not specified via CLI)
+  if (optionsSource.aiEnhance !== 'cli') {
+    const { Confirm } = require('enquirer');
+    const pAiEnhance = new Confirm({
+      message: `${chalkBoldWhite('Use AI to enhance field mappings?')}\n` +
+        `${chalkBoldLabel('Hint')}: AI can automatically generate realistic data rules and topic mappings\n`,
+      initial: false
+    });
+
+    await pAiEnhance.run()
+      .then((answer: boolean) => {
+        options.aiEnhance = answer;
+        optionsSource.aiEnhance = 'interactive';
+      })
+      .catch((error: any) => {
+        Logger.logDetailedError('interrupted...', error)
+        process.exit(1);
+      });
+  }
 
   if (options.lint) {
     Logger.logSuccess('linting successful...')
@@ -133,8 +156,39 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
                   await analyzeV2(documentCopy, reverseView) : await analyze(documentCopy, reverseView);
   data.fileName = fileName.lastIndexOf('/') >= 0 ? fileName.substring(fileName.lastIndexOf('/')+1) : fileName;
 
-  const rules = await formulateRules(document, reverseView); // Uses original unmodified document
+  let rules = await formulateRules(document, reverseView); // Uses original unmodified document
   const schemas = await formulateSchemas(document); // Uses original unmodified document
+
+  // AI Enhancement: Optionally enhance feedrules with intelligent field mappings
+  if (options.aiEnhance) {
+    // Check if user has accepted AI disclaimer
+    if (!hasAcceptedAiDisclaimer()) {
+      const accepted = await showAiDisclaimer();
+      if (!accepted) {
+        Logger.logWarn('AI enhancement declined. Continuing with standard field generation.');
+        options.aiEnhance = false;
+      } else {
+        recordAiDisclaimerAcceptance();
+        Logger.logSuccess('AI disclaimer accepted. Proceeding with AI enhancement.');
+      }
+    }
+
+    // Proceed with AI enhancement if still enabled
+    if (options.aiEnhance) {
+      Logger.info('AI enhancement enabled - enhancing field mappings...');
+      const enhancedRules = await enhanceFeedrulesWithAI(
+        rules,
+        options.aiMapperEndpoint
+      );
+
+      if (enhancedRules && enhancedRules.length > 0) {
+        Logger.logSuccess('Successfully enhanced feedrules with AI mappings');
+        rules = enhancedRules;
+      } else {
+        Logger.logWarn('AI enhancement failed or returned no results, using original rules');
+      }
+    }
+  }
 
   await checkEventValidity(data);
 
@@ -242,9 +296,8 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
       });
   }
 
-  createFeed(fileName, feedName, feed, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
   feed.lastUpdated = new Date().toISOString();
-  updateAndLoadFeedInfo(feed);
+  createFeed(fileName, feedName, feed, data, rules, schemas, sessionPropertiesJson, options.useDefaults ? true : false);
 
   Logger.success(`Successfully created event feed ${feedName}`);
 
