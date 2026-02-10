@@ -232,6 +232,10 @@ declare global {
 
     // manager port
     managePort: number | undefined
+
+    // AI enhancement options
+    aiEnhance: boolean
+    aiMapperEndpoint: string | undefined
   }
 
   interface ManageFeedClientOptions extends StmFeedConfigOptions {

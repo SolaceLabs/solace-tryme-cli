@@ -587,6 +587,9 @@ if (process.env.SHOW_VISUALIZATION) {
       for (var i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = generateCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
+      // Capture AI enhancement option source
+      optionsSource.aiEnhance = generateCmd.getOptionValueSource('aiEnhance');
+      optionsSource.aiMapperEndpoint = generateCmd.getOptionValueSource('aiMapperEndpoint');
 
       feedGenerate(options, optionsSource);
     })
