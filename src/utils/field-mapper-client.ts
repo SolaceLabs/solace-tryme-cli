@@ -3,7 +3,7 @@ import chalk from 'chalk';
 
 // Default endpoint - can be overridden via environment variable or command line flag
 const DEFAULT_FIELD_MAPPER_ENDPOINT = process.env.STM_FIELD_MAPPER_ENDPOINT ||
-  'https://b0hv9uf5m8.execute-api.us-east-2.amazonaws.com/Prod/fieldmap';
+  'https://hzgvajgdtxfoo5sl7ztzc7mli40kvepe.lambda-url.us-east-2.on.aws/';
 
 /**
  * Mapping between topic parameters and payload parameters
