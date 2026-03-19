@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils'
-import { fileExists, loadGitFeedFile, loadLocalFeedFile, writeJsonFile } from '../utils/config';
+import { fileExists, loadGitFeedFile, loadGitFeedSessionFile, loadLocalFeedFile, writeJsonFile } from '../utils/config';
 import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultFeedSessionFile } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 
@@ -154,8 +154,12 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
     writeJsonFile(`${zipPath}/${defaultFeedSchemasFile}`, data);
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
     writeJsonFile(`${zipPath}/${defaultFeedRulesFile}`, data);
-    data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
-    writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
+    try {
+      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
+      writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
+    } catch (error: any) {
+      Logger.logWarn(`feed session file not found, skipping...`);
+    }
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedSchemasFile) : loadLocalFeedFile(feedName, defaultFeedSchemasFile);
     writeJsonFile(`${zipPath}/${defaultFeedSchemasFile}`, data);
   } else if (info.type === 'restapi_feed') {
@@ -165,8 +169,12 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
     writeJsonFile(`${zipPath}/${defaultFeedApiEndpointFile}`, data);
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
     writeJsonFile(`${zipPath}/${defaultFeedRulesFile}`, data);
-    data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
-    writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
+    try {
+      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
+      writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
+    } catch (error: any) {
+      Logger.logWarn(`feed session file not found, skipping...`);
+    }
   }
 
   await zlib.archiveFolder(exportPath , options.archiveFile.endsWith('.zip') ? options.archiveFile : options.archiveFile + '.zip').then(function () {
