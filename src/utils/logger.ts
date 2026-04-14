@@ -242,7 +242,6 @@ const Logger = {
     } else if (messageType === 1) { // map
       payload = message.getSdtContainer().getValue();
     } else if (messageType === 2) { // stream
-      // console.log('Got a stream message');
     } else {  // text
       payload = message.getSdtContainer().getValue();
     }

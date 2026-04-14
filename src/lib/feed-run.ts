@@ -578,7 +578,6 @@ async function publishFeed(publisher:any, msg:any) {
 }
 
 function addEventFeedTimer(msg: any, publisher: any) {
-  // console.log('Timer', msg);
   sleep(msg.delay).then(() => { 
     if (!msg.count || msg.count >= 1) {
       eventFeedTimers.push({
