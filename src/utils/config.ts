@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import https from 'https'
 import http from 'http'
 import path from 'path'
 import { Logger } from './logger'
@@ -910,11 +911,12 @@ export const urlExists = async (url:any) => {
 	const valid_url = validURL(url)
 	if (!valid_url) return false
 
-	const { host, pathname } = valid_url
+	const { host, pathname, protocol } = valid_url
 	const opt = { method: 'HEAD', host, path: pathname }
+	const transport = protocol === 'https:' ? https : http
 
 	return new Promise((resolve) => {
-		const req = http.request(opt, (r) =>
+		const req = transport.request(opt, (r) =>
 			resolve(/4\d\d/.test(`${r.statusCode}`) === false),
 		)
 
