@@ -70,7 +70,6 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   app.use(express.static(publicDir + '/public'));
   app.use(express.json()); 
   app.use(function(req:any, res:any, next:any) {
-    // console.log('Request: ', req.method, ' on ', req.path);
     if (req.path.startsWith('/index.html')) {
       res.redirect(302, '/feeds.html');
       res.end();

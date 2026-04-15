@@ -193,7 +193,6 @@ async function publishFeed(publisher:any, feed:any) {
 }
 
 function addEventFeedTimer(feed: any, publisher: any) {
-  // console.log('Timer', msg);
   sleep(feed.delay).then(() => { 
     if (!feed.count || feed.count >= 1) {
       eventFeedTimers.push({
