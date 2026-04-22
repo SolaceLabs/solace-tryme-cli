@@ -39,20 +39,22 @@ jobs:
       - name: Prepare stm archives for different targets
         run: |
           cd release
-          zip -qq -r stm-macos-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-macos
-          zip -qq -r stm-linux-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-linux
-          zip -qq -r stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-alpine
-          zip -qq -r stm-win-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-win.exe
+          zip -qq -r stm-macos-arm64-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-macos-arm64
+          zip -qq -r stm-macos-x64-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-macos-x64
+          zip -qq -r stm-linux-x64-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-linux-x64
+          zip -qq -r stm-alpine-x64-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-alpine-x64
+          zip -qq -r stm-win-x64-v${{ steps.package-version.outputs.current-version}}.zip . -i stm-win-x64.exe
           cd ..
       
       - name: Publish artifacts to github
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release/stm-macos-v${{ steps.package-version.outputs.current-version}}.zip
-            release/stm-linux-v${{ steps.package-version.outputs.current-version}}.zip
-            release/stm-alpine-v${{ steps.package-version.outputs.current-version}}.zip
-            release/stm-win-v${{ steps.package-version.outputs.current-version}}.zip
+            release/stm-macos-arm64-v${{ steps.package-version.outputs.current-version}}.zip
+            release/stm-macos-x64-v${{ steps.package-version.outputs.current-version}}.zip
+            release/stm-linux-x64-v${{ steps.package-version.outputs.current-version}}.zip
+            release/stm-alpine-x64-v${{ steps.package-version.outputs.current-version}}.zip
+            release/stm-win-x64-v${{ steps.package-version.outputs.current-version}}.zip
 
       - name: Update Homebrew 
         run: ./scripts/update_homebrew.sh ${{ steps.package-version.outputs.current-version}}

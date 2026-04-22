@@ -12,7 +12,7 @@ pkg_version=$1
 git clone https://x-access-token:$GITHUB_TOKEN@github.com/$APT_SERVER
 
 # Prepare for APT update
-reprepro -b apt-stm/ --priority 0 includedeb stm stm-linux_$pkg_version\_amd64.deb
+reprepro -b apt-stm/ --priority 0 includedeb stm stm-linux-x64_$pkg_version\_amd64.deb
 
 # Commit and push changes
 cd apt-stm/
