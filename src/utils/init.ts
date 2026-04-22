@@ -141,7 +141,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
                 config.sempconnection.sempUrl, config.sempconnection.sempVpn, config.sempconnection.sempUsername, 
                 "******")
   table.setJustify(false);
-  console.log(table.toString());
+  Logger.info(table.toString());
 
   var table = new AsciiTable('Messaging Commands')
   table.setHeading('Command', 'Name', 'Topic(s)', 'Broker URL', 'Message VPN', 'Credentials' )
@@ -176,7 +176,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     });
   });
   table.setJustify(false);
-  console.log(table.toString());
+  Logger.info(table.toString());
 
   table = new AsciiTable('Management Commands')
   table.setHeading('Resource', 'Command', 'Name', 'Broker SEMP URL', 'Message VPN', 'Credentials' )
@@ -202,7 +202,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
     });
   });
   table.setJustify(false);
-  console.log(table.toString());
+  Logger.info(table.toString());
 
   Logger.success(`[${count}] commands found in configuration ${options.config}`);
 }

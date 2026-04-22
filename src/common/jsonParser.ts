@@ -28,25 +28,22 @@ export class JsonSchemaParser {
     if ((tokens.filter((t:string) => t === 'properties')).length > 1) return;
     var token = tokens.pop();
     if (token.startsWith('x-ep-')) {
-      console.log('Here in CB for x-ep - ', token);
-      console.log('Schema', schema);
-      console.log('Value', value);
-      console.log('Pointer', pointer);  
-      console.log('------------------------')
+      Logger.info(`Here in CB for x-ep - ${token}`);
+      Logger.info(`Schema: ${JSON.stringify(schema)}`);
+      Logger.info(`Value: ${JSON.stringify(value)}`);
+      Logger.info(`Pointer: ${pointer}`);
       this.output.ep[token] = value;
     } else if (token === 'properties') {
-      console.log('Here in CB for properties - ', token);
-      console.log('Schema', schema);
-      console.log('Value', value);
-      console.log('Pointer', pointer);  
-      console.log('------------------------')
+      Logger.info(`Here in CB for properties - ${token}`);
+      Logger.info(`Schema: ${JSON.stringify(schema)}`);
+      Logger.info(`Value: ${JSON.stringify(value)}`);
+      Logger.info(`Pointer: ${pointer}`);
       this.output[token] = value;
     } else if (token.startsWith('$')) {
-      console.log('Here in CB for $ - ', token);
-      console.log('Schema', schema);
-      console.log('Value', value);
-      console.log('Pointer', pointer);  
-      console.log('------------------------')
+      Logger.info(`Here in CB for $ - ${token}`);
+      Logger.info(`Schema: ${JSON.stringify(schema)}`);
+      Logger.info(`Value: ${JSON.stringify(value)}`);
+      Logger.info(`Pointer: ${pointer}`);
       this.output[token] = value;
     }
   };

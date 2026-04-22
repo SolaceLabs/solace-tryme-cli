@@ -211,7 +211,6 @@ export const updateLastVersionCheck = (ts:number|undefined = undefined) => {
 
 export const updateVisualizeConfig = (configFile: string, visualize:string) => {
   try {
-    console.log('In updateVisualizeConfig')
     const filePath = processPath(`${defaultStmHome}/${configFile}`)
     if (!filePath.endsWith('.json')) filePath.concat('.json')
     if (fileExists(filePath)) {

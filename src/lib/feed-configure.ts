@@ -184,20 +184,20 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/exit', (req:any, res:any) => {
-    console.log('exiting...')
+    Logger.info('exiting...')
     setTimeout(process.exit(0), 2000)
   })
 
   let http = require('http');
   let server = http.createServer(app);
   server.listen(managePort, () => {
-    console.info(`App listening on port ${server.address().port}`);
+    Logger.info(`App listening on port ${server.address().port}`);
     var opener = require("opener");
     if (feedName) {
-      console.log(`Accessible at http://localhost:${server.address().port}/feeds.html?feed=${feedName}`);
+      Logger.info(`Accessible at http://localhost:${server.address().port}/feeds.html?feed=${feedName}`);
       opener(`http://localhost:${server.address().port}/feeds.html?feed=${feedName}`)
     } else {
-      console.log(`Accessible at http://localhost:${server.address().port}/feeds.html`);
+      Logger.info(`Accessible at http://localhost:${server.address().port}/feeds.html`);
       opener(`http://localhost:${server.address().port}/feeds.html`)
     }
   });

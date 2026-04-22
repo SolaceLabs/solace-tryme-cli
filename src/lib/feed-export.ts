@@ -375,7 +375,7 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
     await exportFeed(cloudSettings.spec);
     if (showLogs) {
       Logger.info('Export logs...');
-      console.log(cloudSettings.logs);
+      Logger.info(cloudSettings.logs);
     }
   } catch (error:any) {
     Logger.logDetailedError('Export failed...', error);
