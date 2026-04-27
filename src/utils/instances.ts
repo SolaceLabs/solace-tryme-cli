@@ -286,6 +286,9 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
 
   managePort: number | undefined
 
+  aiEnhance: boolean
+  aiMapperEndpoint: string | undefined
+
   constructor() {
     this.fileName = "";
     this.outputPath = "";
@@ -303,5 +306,7 @@ export class ManageFeedClientOptionsEmpty implements ManageFeedClientOptions {
     this.verbose = false;
     this.uiPortal = false;
     this.managePort = 0;
+    this.aiEnhance = false;
+    this.aiMapperEndpoint = undefined;
   }
 }
