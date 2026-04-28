@@ -118,7 +118,7 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   let server = http.createServer(app);
   server.listen(managePort, () => {
     var opener = require("opener");
-    console.log(`Accessible at http://127.0.0.1:8081`);
+    Logger.info(`Accessible at http://127.0.0.1:8081`);
     opener(`http://127.0.0.1:8081`)
   });
 

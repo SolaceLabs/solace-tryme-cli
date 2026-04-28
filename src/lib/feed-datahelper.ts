@@ -145,7 +145,6 @@ const fakeDataValueGenerator = (data:any) => {
   var fakeData: any[] | any = [];
   var count = data.count ? data.count : 1;
   if (!data || !data.rule || !data.rule.group) {
-    console.log('here');
     return;
   }
   

@@ -45,7 +45,7 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
   // unzip the archive file
   const zlib = require("zip-lib");
   await zlib.extract(zipPath, importPath).then(function () {
-    console.log("done");
+    Logger.info("done");
   }, function (err:any) {
     fs.rmdirSync(importPath, { recursive: true });
     Logger.logDetailedError('feed import failed...', err)
