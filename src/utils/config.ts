@@ -911,8 +911,15 @@ export const urlExists = async (url:any) => {
 	const valid_url = validURL(url)
 	if (!valid_url) return false
 
-	const { host, pathname, protocol } = valid_url
-	const opt = { method: 'HEAD', host, path: pathname }
+	const { hostname, port, pathname, search, protocol } = valid_url
+	const opt: http.RequestOptions | https.RequestOptions = {
+    method: 'HEAD',
+    hostname,
+    path: `${pathname}${search ?? ''}`,
+  }
+  if (port) {
+    ;(opt as any).port = port
+  }
 	const transport = protocol === 'https:' ? https : http
 
 	return new Promise((resolve) => {
