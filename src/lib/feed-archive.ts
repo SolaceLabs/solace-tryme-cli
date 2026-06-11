@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { Logger } from '../utils/logger'
 import { chalkBoldLabel, chalkBoldVariable } from '../utils/chalkUtils'
-import { fileExists, loadGitFeedFile, loadGitFeedSessionFile, loadLocalFeedFile, writeJsonFile } from '../utils/config';
+import { fileExists, loadGitFeedFile, loadGitFeedSessionFile, loadLocalFeedFile, loadLocalFeedSessionFile, writeJsonFile } from '../utils/config';
 import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedApiEndpointFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultFeedSessionFile } from '../utils/defaults';
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 
@@ -155,7 +155,7 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
     writeJsonFile(`${zipPath}/${defaultFeedRulesFile}`, data);
     try {
-      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
+      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedSessionFile(feedName, defaultFeedSessionFile);
       writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
     } catch (error: any) {
       Logger.logWarn(`feed session file not found, skipping...`);
@@ -170,7 +170,7 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
     writeJsonFile(`${zipPath}/${defaultFeedRulesFile}`, data);
     try {
-      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedFile(feedName, defaultFeedSessionFile);
+      data = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : loadLocalFeedSessionFile(feedName, defaultFeedSessionFile);
       writeJsonFile(`${zipPath}/${defaultFeedSessionFile}`, data);
     } catch (error: any) {
       Logger.logWarn(`feed session file not found, skipping...`);
