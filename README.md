@@ -43,6 +43,7 @@ The Solace Try-Me CLI is a command line tool used to publish and receive message
   - [Run `stm` tool](#run-stm-tool)
     - [Working with Software Broker](#working-with-software-broker)
     - [Receive Messages](#receive-messages)
+    - [Browse a Queue](#browse-a-queue)
     - [Working with Cloud Broker](#working-with-cloud-broker)
   - [Using `stm` to create and modify Broker resources](#using-stm-to-create-and-modify-broker-resources)
     - [Create a Queue](#create-a-queue)
@@ -137,6 +138,7 @@ stm
 ├── -he, --help-examples            /* display examples                               */
 ├── send                            /* execute a send command                         */
 ├── receive                         /* execute a receive command                      */
+├── browse                          /* execute a queue browse command                 */
 ├── request                         /* execute a request command                      */
 ├── reply                           /* execute a reply command                        */
 ├── config                          /* manage command configurations                  */
@@ -343,6 +345,25 @@ Destination:                            [Topic solace/try/me]
 
 **NOTE:** `stm` supports a default output mode that prints the destination and the message payload length (not the payload itself). However, if you want more details around message & user properties and payload - explore the other options i.e., `PROPS` to print message properties + just payload length, and `FULL` to print message properties and a pretty-print of the payload.
 
+### Browse a Queue
+
+The `browse` command inspects the messages spooled on a queue without consuming them. Browsing is non-destructive - the messages are read from oldest to newest and remain on the queue, available for normal consumption.
+
+``` code
+stm browse --queue my-queue
+ℹ  info: loading 'browse' command from configuration 'stm-cli-config.json'
+…  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: ******]
+✔  success: === stm_browse_df6405d5 successfully connected and ready to browse the queue. ===
+✔  success: ready to browse messages (non-destructive, messages remain on the queue).
+…  waiting for messages...
+ℹ  info: press Ctrl-C to exit
+✔  success: browsed TEXT message on topic [Topic browse/test/1]
+ℹ  message: Payload
+hello-browse
+```
+
+**NOTE:** `browse` binds to an existing queue only, so unlike `receive` it does not accept topic subscriptions or the `--create-if-missing` option. Use `--output-mode FULL` to inspect message and user properties along with a pretty-printed payload.
+
 ### Working with Cloud Broker
 
 Since the connection parameters are distinct for Cloud Broker, you will have to create a new Try-Me CLI configuration with appropriate connection parameters. You can make the `stm` operations directed to a specific broker by specifying the configuration that holds that broker's connection details by specifying `--config <CONFIG_FILE>` parameter.
@@ -464,6 +485,7 @@ Options:
 Commands:
   send [options]        Execute a send command
   receive [options]     Execute a receive command
+  browse [options]      Execute a queue browse command
   request [options]     Execute a request command
   reply [options]       Execute a reply command
   config [options]      Manage command configurations

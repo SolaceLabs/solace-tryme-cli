@@ -2,7 +2,7 @@ import solace = require('solclientjs')
 
 declare global {
 
-  type CommandType = 'send' | 'receive' | 'request' | 'reply' | 
+  type CommandType = 'send' | 'receive' | 'browse' | 'request' | 'reply' |
                       'queue' | 'client-profile' | 'acl-profile' | 'client-username' |
                       'connection' | 'sempconnection' | 'all'
 

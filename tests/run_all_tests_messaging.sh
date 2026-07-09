@@ -37,13 +37,13 @@ echo "" >> "$LOG_FILE"
 
 log_and_display_colored "${CYAN}=== Solace Try-Me CLI Parameter Validation Test Suite ===${NC}"
 log_and_display ""
-log_and_display_colored "${WHITE}Total Test Scripts: 26${NC}"
-log_and_display_colored "${WHITE}Commands Covered: 13 (4 messaging + 9 feed)${NC}"
+log_and_display_colored "${WHITE}Total Test Scripts: 10${NC}"
+log_and_display_colored "${WHITE}Commands Covered: 5 (messaging)${NC}"
 log_and_display_colored "${WHITE}Test Types: 2 per command (basic, advanced)${NC}"
 log_and_display ""
 
 # Test categories
-MESSAGING_COMMANDS=("send" "receive" "request" "reply")
+MESSAGING_COMMANDS=("send" "receive" "browse" "request" "reply")
 FEED_COMMANDS=("preview" "generate" "configure" "run" "list" )
 TEST_TYPES=("basic_parameters" "advanced_parameters")
 

@@ -16,7 +16,7 @@ import {
 } from './parse';
 import { defaultMessageConnectionConfig, defaultConfigFile, getDefaultTopic, getDefaultClientName, 
         defaultMessagePublishConfig, defaultMessageConfig, defaultMessageHint, defaultManageConnectionConfig, 
-        commandSend, commandReceive, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, 
+        commandSend, commandReceive, commandBrowse, commandRequest, commandReply, defaultRequestMessageHint, defaultMessageReceiveConfig, defaultMessageBrowseConfig,
         defaultManageQueueConfig, commandQueue, defaultManageAclProfileConfig, defaultManageClientProfileConfig, 
         defaultManageClientUsernameConfig, commandAclProfile, commandClientProfile, commandClientUsername, defaultMessageRequestConfig, defaultMessageReplyConfig, 
         defaultFeedConfig} from './defaults';
@@ -242,6 +242,56 @@ export const addReceiveOptions = (cmd: Command, advanced: boolean) => {
     .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
     .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
     .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli receive examples')) )
+    // lint options - validate CLI arguments quitely (without executing the command)
+    .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
+    .allowUnknownOption(false)
+}
+
+export const addBrowseOptions = (cmd: Command, advanced: boolean) => {
+  cmd
+    // connect options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CONNECTION SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('--url <URL>', chalk.whiteBright('the broker url')) .argParser(parseMessageProtocol) .default(defaultMessageConnectionConfig.url) .hideHelp(advanced))
+    .addOption(new Option('--vpn <VPN>', chalk.whiteBright('the message VPN name')) .default(defaultMessageConnectionConfig.vpn) .hideHelp(advanced))
+    .addOption(new Option('-u, --username <USERNAME>', chalk.whiteBright('the username')) .default(defaultMessageConnectionConfig.username) .hideHelp(advanced))
+    .addOption(new Option('-p, --password <PASSWORD>', chalk.whiteBright('the password')) .default(defaultMessageConnectionConfig.password) .hideHelp(advanced))
+
+    // browse from queue
+    .addOption(new Option(`\n/* ${chalk.whiteBright('QUEUE ENDPOINT')} */`) .hideHelp(advanced))
+    .addOption(new Option('-q, --queue <QUEUE>', chalk.whiteBright('the message queue endpoint')) .hideHelp(advanced))
+
+    // advanced message options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('MESSAGE OUTPUT SETTINGS')} */`) .hideHelp(advanced))
+    .addOption(new Option('--output-mode <MODE>', chalk.whiteBright('[advanced] message print mode: DEFAULT, PROPS OR FULL')) .argParser(parseOutputMode) .default(defaultMessageConfig.outputMode) .hideHelp(advanced))
+
+    // session options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('BROWSE SESSION SETTINGS')} */`) .hideHelp(!advanced))
+    .addOption(new Option('-cn, --client-name <CLIENT_NAME>', chalk.whiteBright('[advanced] the client name')) .default(getDefaultClientName('browse'), 'an auto-generated client name') .hideHelp(!advanced))
+    .addOption(new Option('--description <DESCRIPTION>', chalk.whiteBright('[advanced] the application description')) .default(defaultMessageBrowseConfig.description) .hideHelp(!advanced))
+    .addOption(new Option('--window-size <NUMBER>', chalk.whiteBright('[advanced] the maximum number of messages the broker will send to the browser without acknowledgement')) .argParser(parseWindowSize) .default(defaultMessageBrowseConfig.windowSize) .hideHelp(!advanced))
+    .addOption(new Option('--read-timeout <MILLISECONDS>', chalk.whiteBright('[advanced] the read timeout period for a connect operation')) .argParser(parseReadTimeout) .default(defaultMessageConnectionConfig.readTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-timeout <NUMBER>', chalk.whiteBright('[advanced] the timeout period for a connect operation')) .argParser(parseConnectionTimeout) .default(defaultMessageConnectionConfig.connectionTimeout) .hideHelp(!advanced))
+    .addOption(new Option('--connection-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting during initial connection setup')) .argParser(parseConnectionRetries) .default(defaultMessageConnectionConfig.connectionRetries) .hideHelp(!advanced))
+.addOption(new Option('--reconnect-retries <NUMBER>', chalk.whiteBright('[advanced] the number of times to retry connecting after a connected session goes down')) .argParser(parseReconnectRetries) .default(defaultMessageConnectionConfig.reconnectRetries) .hideHelp(!advanced))
+    .addOption(new Option('--reconnect-retry-wait <MILLISECONDS>', chalk.whiteBright('[advanced] the amount of time between each attempt to connect to a host')) .argParser(parseReconnectRetryWait) .default(defaultMessageConnectionConfig.reconnectRetryWait) .hideHelp(!advanced))
+    .addOption(new Option('--receive-timestamps [BOOLEAN]', chalk.whiteBright('[advanced] include a receive timestamp on received messages')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.generateReceiveTimestamps) .hideHelp(!advanced))
+    .addOption(new Option('--reapply-subscriptions [BOOLEAN]', chalk.whiteBright('[advanced] reapply subscriptions upon calling on a disconnected session')) .argParser(parseBoolean) .default(defaultMessageConnectionConfig.reapplySubscriptions) .hideHelp(!advanced))
+    .addOption(new Option('--log-level <LEVEL>', chalk.whiteBright('[advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE')) .argParser(parseLogLevel) .default(defaultMessageConnectionConfig.logLevel) .hideHelp(!advanced))
+    .addOption(new Option('--trace-visualization [BOOLEAN]', chalk.whiteBright('[advanced] trace visualization events')) .argParser(parseBoolean) .default(defaultMessageConfig.traceVisualization) .hideHelp(true))
+
+    // consumer options
+    .addOption(new Option('--exit-after <NUMBER>', chalk.whiteBright('[advanced] exit the session after specified number of seconds')) .argParser(parseExitAfter) .hideHelp(true))
+
+    // config options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('CONFIGURATION SETTINGS')} */`))
+    .addOption(new Option('--config <CONFIG_FILE>', chalk.whiteBright('the configuration file')) .hideHelp(advanced) .default(defaultConfigFile))
+    .addOption(new Option('--name <COMMAND_NAME>', chalk.whiteBright('the command name')) .hideHelp(!advanced) .default(commandBrowse))
+    .addOption(new Option('--save [COMMAND_NAME]', chalk.whiteBright('update existing or create a new command settings')) .hideHelp(!advanced) .default(false))
+
+    // help options
+    .addOption(new Option(`\n/* ${chalk.whiteBright('HELP OPTIONS')} */`))
+    .addOption(new Option('-hm, --help-more', chalk.whiteBright('display more help with options not shown in basic help')))
+    .addOption(new Option('-he, --help-examples', chalk.whiteBright('show cli browse examples')) )
     // lint options - validate CLI arguments quitely (without executing the command)
     .addOption(new Option('--lint [BOOLEAN]', chalk.whiteBright('validate CLI arguments quietly (without executing the command)')) .argParser(parseBoolean) .default(false) .hideHelp(true))
     .allowUnknownOption(false)

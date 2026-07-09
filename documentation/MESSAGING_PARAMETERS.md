@@ -5,6 +5,7 @@
 - [Messaging Commands](#messaging-commands)
   - [Publish Events](#publish-events)
   - [Receive Events](#receive-events)
+  - [Browse Queue](#browse-queue)
   - [Send Request Events](#send-request-events)
   - [Receive Reply Events](#receive-reply-events)
 - [Manage Commands](#manage-commands)
@@ -35,6 +36,7 @@ Options:
 Commands:
   send [options]        Execute a send command
   receive [options]     Execute a receive command
+  browse [options]      Execute a queue browse command
   request [options]     Execute a request command
   reply [options]       Execute a reply command
   config [options]      Manage command configurations
@@ -43,7 +45,7 @@ Commands:
 
 # Messaging Commands
 
-__Issue messaging commands: publish, receive, request and reply__
+__Issue messaging commands: publish, receive, browse, request and reply__
 
 ## Publish Events
 
@@ -220,6 +222,80 @@ Options:
   /* HELP OPTIONS */
   -hm, --help-more                           display more help with options not shown in basic help
   -he, --help-examples                       show cli receive examples
+  -h, --help                                 display help for command
+
+```
+
+</details>
+
+## Browse Queue
+
+The `browse` command inspects the messages spooled on a queue without consuming them. Browsing is non-destructive - messages are read from oldest to newest and remain on the queue, available for normal consumption. Unlike `receive`, `browse` binds to an existing queue only, so it does not accept topic subscriptions or the `--create-if-missing` option.
+
+<details>
+<summary>Basic Parameters: <i><b>stm browse -h</b></i> </summary>
+
+```
+
+Usage: stm browse [options]
+
+Execute a queue browse command
+
+Options:
+
+  /* CONNECTION SETTINGS */
+  --url <URL>                               the broker url (default: "ws://localhost:8008")
+  --vpn <VPN>                               the message VPN name (default: "default")
+  -u, --username <USERNAME>                 the username (default: "default")
+  -p, --password <PASSWORD>                 the password (default: "default")
+
+  /* QUEUE ENDPOINT */
+  -q, --queue <QUEUE>                       the message queue endpoint
+
+  /* MESSAGE OUTPUT SETTINGS */
+  --output-mode <MODE>                      [advanced] message print mode: DEFAULT, PROPS OR FULL (default: "DEFAULT")
+
+  /* CONFIGURATION SETTINGS */
+  --config <CONFIG_FILE>                the configuration file (default: "stm-cli-config.json")
+
+  /* HELP OPTIONS */
+  -hm, --help-more                          display more help with options not shown in basic help
+  -he, --help-examples                      show cli browse examples
+  -h, --help                                display help for command
+
+```
+</details>
+
+<details>
+<summary>Advanced Parameters: <i><b>stm browse -hm</b></i> </summary>
+
+```
+Usage: stm browse [options]
+
+Execute a queue browse command
+
+Options:
+
+  /* BROWSE SESSION SETTINGS */
+  -cn, --client-name <CLIENT_NAME>           [advanced] the client name (default: an auto-generated client name)
+  --description <DESCRIPTION>                [advanced] the application description (default: "Browse application created via Solace Try-Me CLI")
+  --window-size <NUMBER>                     [advanced] the maximum number of messages the broker will send to the browser without acknowledgement (default: 50)
+  --read-timeout <MILLISECONDS>              [advanced] the read timeout period for a connect operation (default: 10000)
+  --connection-timeout <NUMBER>              [advanced] the timeout period for a connect operation (default: 3000)
+  --connection-retries <NUMBER>              [advanced] the number of times to retry connecting during initial connection setup (default: 3)
+  --reconnect-retries <NUMBER>               [advanced] the number of times to retry connecting after a connected session goes down (default: 3)
+  --reconnect-retry-wait <MILLISECONDS>      [advanced] the amount of time between each attempt to connect to a host (default: 3000)
+  --receive-timestamps [BOOLEAN]             [advanced] include a receive timestamp on received messages (default: false)
+  --reapply-subscriptions [BOOLEAN]          [advanced] reapply subscriptions upon calling on a disconnected session (default: true)
+  --log-level <LEVEL>                        [advanced] solace log level, one of values: FATAL, ERROR, WARN, INFO, DEBUG, TRACE (default: "ERROR")
+
+  /* CONFIGURATION SETTINGS */
+  --name <COMMAND_NAME>                      the command name (default: "browse")
+  --save [COMMAND_NAME]                      update existing or create a new command settings (default: false)
+
+  /* HELP OPTIONS */
+  -hm, --help-more                           display more help with options not shown in basic help
+  -he, --help-examples                       show cli browse examples
   -h, --help                                 display help for command
 
 ```

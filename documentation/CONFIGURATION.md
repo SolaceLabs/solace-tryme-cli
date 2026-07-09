@@ -8,7 +8,7 @@ Checkout the default configuration file - [stm-cli-config.json](sample-config/st
 
 ## Configuration File
 
-A configuration file contains __message__ and __manage__ sections at a high-level. The __message__ section captures the connection and command settings of basic messaging commands (publish, receive, request and reply), whereas the __manage__ section captures the SEMP connection and command settings of managing key broker resources (queue, client-profile, acl-profile and client-username).
+A configuration file contains __message__ and __manage__ sections at a high-level. The __message__ section captures the connection and command settings of basic messaging commands (publish, receive, browse, request and reply), whereas the __manage__ section captures the SEMP connection and command settings of managing key broker resources (queue, client-profile, acl-profile and client-username).
 
 ```
 {
@@ -37,6 +37,11 @@ A configuration file contains __message__ and __manage__ sections at a high-leve
         "solace/try/me"
       ],
       ...other receive parameters
+    },
+    "browse": {
+      "command": "browse",
+      "queue": "my-queue",
+      ...other browse parameters
     },
     "request": {
       "command": "request",
@@ -112,7 +117,7 @@ In here, each key name under the _message_ and _manage_ object represents the na
 ### Named Commands
 - A configuration file can contain a number of commands accessible by their names
 - A configuration file created by the `stm config init` command
-  - Contains connection and messaging command settings pointing to the local broker (connection, publish, receive, request, reply)
+  - Contains connection and messaging command settings pointing to the local broker (connection, publish, receive, browse, request, reply)
   - Contains semp connection and management command settings pointing to the local broker (sempconnection, queue, client-profile, acl-profile and client-username)
 - When executing a CLI command, if a command name is not specified - the basic command setting with the name same as the command will be picked and applied.
   - Example: `stm send` - will simply pick up the command by name `publish` in the default configuration file `stm-cli-configuration.json`
@@ -124,7 +129,7 @@ In here, each key name under the _message_ and _manage_ object represents the na
   - Example: `stm send --config cloud-broker.json --name publish2 --time-to-live 600000 --save` will update the named command `publish2` on the `cloud-broker.json` configuration file.
 - You can duplicate a command setting from an existing command setting
   - Example: `stm send --name publish --time-to-live 60000 --save publishWithTTL60Secs` will create a new command with the name `publishWithTTL60Secs` with settings defined on the command name `publish` and with `time-to-live` parameter updated with value specified in the command-line
-- You can delete a command settings by name (except for the basic command and connection settings created by the `stm config init` command - i.e, connection, publish, receive, request, reply, sempconnection, queue, client-profile, acl-profile and client-username)
+- You can delete a command settings by name (except for the basic command and connection settings created by the `stm config init` command - i.e, connection, publish, receive, browse, request, reply, sempconnection, queue, client-profile, acl-profile and client-username)
   - Example: `stm config delete --name publishWithTTL60Secs`
 
 

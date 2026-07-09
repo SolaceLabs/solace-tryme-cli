@@ -43,7 +43,7 @@ log_and_display_colored "${WHITE}Test Types: 2 per command (basic, advanced)${NC
 log_and_display ""
 
 # Test categories
-MESSAGING_COMMANDS=("send" "receive" "request" "reply")
+MESSAGING_COMMANDS=("send" "receive" "browse" "request" "reply")
 FEED_COMMANDS=("preview" "generate" "configure" "run" "list" )
 TEST_TYPES=("basic_parameters" "advanced_parameters")
 

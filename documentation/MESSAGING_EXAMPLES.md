@@ -169,6 +169,54 @@ HINT: You can verify the outcome by executing a config list command 'stm config 
 </details>
 
 <details>
+<summary>Browse Queue: <i><b>stm browse -he</b></i> </summary>
+
+```
+ℹ  info: loading 'browse' command from configuration 'stm-cli-config.json'
+
+Examples:
+// browse messages spooled on a queue (non-destructive, messages remain on the queue)
+// using the settings defined on the default configuration 'stm-cli-config.json'
+
+stm browse --queue my-queue
+
+HINT: You can view the default browse command settings 'stm config list --name browse'!
+
+// browse with detailed output mode (useful for debugging and message inspection)
+
+stm browse --queue my-queue --output-mode FULL
+
+NOTE: You can override any of the browse parameters
+that are applied only for this instance of execution!
+
+// If you want to run a browse entirely based on the command-line parameters
+// without any reference to recorded command settings, you can do so by specifying
+// requisite parameters in the command-line
+
+stm browse --url ws://localhost:8008 --vpn default --username default --password default --queue my-queue
+
+NOTE: The following examples demonstrate how to update an existing command settings
+in a configuration, as well as how to duplicate (copy) a command
+setting to a new name!
+
+// execute a named browse command from the named configuration
+
+stm browse --config cloud-broker --name browse
+
+// Update the default browse command setting with the specified command-line parameters (if specified)
+
+stm browse --queue my-queue --name browse --config cloud-broker --save
+
+// Duplicate the command setting
+
+stm browse --name browse --config cloud-broker --save browse2
+
+HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!
+```
+
+</details>
+
+<details>
 <summary>Send Request Events: <i><b>stm request -he</b></i> </summary>
 
 ```
@@ -612,7 +660,7 @@ stm config delete --name publish2
 
 stm config delete --config cloud-broker --name publish2
 
-NOTE: The default commands created by the initialize operation such as publish, receive, request, reply,
+NOTE: The default commands created by the initialize operation such as publish, receive, browse, request, reply,
 queue, client-profile, acl-profile, client-username, connection and semconnection cannot be deleted!!
 ```
 

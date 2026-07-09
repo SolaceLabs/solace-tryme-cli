@@ -313,6 +313,22 @@ export const createDefaultConfig = () => {
   saveConfig(buildMessageConfig(null, options, optionsSource, []))
 }
 
+// Auto-heal a configuration that predates a base command (e.g., a config created before
+// the 'browse' command was introduced will not carry its settings). Only a base command
+// referenced by its default name is seeded, from its default settings, and persisted back
+// so it shows up in subsequent 'config list' output. A custom (unknown) command name is
+// left to error as before.
+const healMissingBaseCommand = (config: any, filePath: string, group: string, cmd: string, commandName: string) => {
+  if (commandName !== cmd || !baseCommands.includes(cmd)) return false;
+  const defaultConfig = getDefaultConfig(cmd);
+  if (!defaultConfig) return false;
+
+  config[group][cmd] = { ...defaultConfig };
+  Logger.logInfo(`'${chalk.greenBright(cmd)}' command not found in configuration, adding it with default settings`)
+  writeFile(filePath, JSON.parse(JSON.stringify(config)))
+  return true;
+}
+
 export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions | ManageFeedPublishOptions) => {
   try {
     var group = getCommandGroup(cmd)
@@ -332,7 +348,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     if (fileExists(filePath)) {
       config = readFile(filePath)
       Logger.info(`loading '${commandName}' command from configuration '${chalk.cyanBright(filePath)}'`)
-      if (!config[group][commandName]) {
+      if (!config[group][commandName] && !healMissingBaseCommand(config, filePath, group, cmd, commandName)) {
         Logger.logError(`could not find '${commandName}' command`)
         // commandName = cmd
         Logger.logError('exiting...')
@@ -360,7 +376,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
     } else if (fileExists(localFilePath)) {
       config = readFile(localFilePath)
       Logger.info(`loading '${commandName}' command from configuration '${chalk.cyanBright(localFilePath)}'`)
-      if (!config[group][commandName]) {
+      if (!config[group][commandName] && !healMissingBaseCommand(config, localFilePath, group, cmd, commandName)) {
         Logger.logError(`could not find '${commandName}' command`)
         // commandName = cmd
         Logger.logError('exiting...')

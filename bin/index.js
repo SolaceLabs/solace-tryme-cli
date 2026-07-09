@@ -43,6 +43,8 @@ const getHelpConfiguration = (args) => {
   return { help: true, helpMore: true, helpExamples: true}
     if (args.indexOf('stm receive') >= 0)
     return { help: true, helpMore: true, helpExamples: true}
+  if (args.indexOf('stm browse') >= 0)
+    return { help: true, helpMore: true, helpExamples: true}
   if (args.indexOf('stm request') >= 0)
     return { help: true, helpMore: true, helpExamples: true}
   if (args.indexOf('stm reply') >= 0)

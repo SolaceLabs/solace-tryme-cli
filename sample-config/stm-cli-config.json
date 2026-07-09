@@ -74,6 +74,22 @@
       "enabled": false,
       "windowSize": 50
     },
+    "browse": {
+      "command": "browse",
+      "asReplyMessage": false,
+      "deliveryMode": "PERSISTENT",
+      "dmqEligible": true,
+      "partitionKeys": [],
+      "elidingEligible": false,
+      "timeout": 5000,
+      "payloadType": "text",
+      "outputMode": "DEFAULT",
+      "pretty": false,
+      "count": 1,
+      "interval": 3000,
+      "description": "Browse application created via Solace Try-Me CLI",
+      "windowSize": 50
+    },
     "request": {
       "command": "request",
       "count": 1,

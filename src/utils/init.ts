@@ -4,6 +4,7 @@ import {
   defaultMessageConnectionConfig,
   defaultMessagePublishConfig,
   defaultMessageReceiveConfig,
+  defaultMessageBrowseConfig,
   defaultMessageRequestConfig,
   defaultMessageReplyConfig,
   defaultManageAclProfileConfig,
@@ -272,6 +273,7 @@ export const buildMessageConfig = (current: any, options:any, optionsSource: any
       connection: (!commands.length || commands.includes('connection')) ? { command: 'connection'} : undefined,
       send: (!commands.length || commands.includes('send')) ? { command: 'send' } : undefined,
       receive: (!commands.length || commands.includes('receive')) ? { command: 'receive' } : undefined,
+      browse: (!commands.length || commands.includes('browse')) ? { command: 'browse' } : undefined,
       request: (!commands.length || commands.includes('request')) ? { command: 'request' } : undefined,
       reply: (!commands.length || commands.includes('reply')) ? { command: 'reply' } : undefined,
     },
@@ -316,6 +318,16 @@ export const buildMessageConfig = (current: any, options:any, optionsSource: any
       current ? 
         result.message.receive[key] = current.message.receive[key] :
         result.message.receive[key] = defaultMessageReceiveConfig[key];
+    }
+  })
+
+  result.message.browse && Object.keys(defaultMessageBrowseConfig).forEach((key:string) => {
+    if (optionsSource[key] === 'cli') {
+      result.message.browse[key] = options[key];
+    } else {
+      current ?
+        result.message.browse[key] = current.message.browse[key] :
+        result.message.browse[key] = defaultMessageBrowseConfig[key];
     }
   })
 
