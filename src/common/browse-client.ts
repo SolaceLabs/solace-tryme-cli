@@ -59,6 +59,7 @@ export class SolaceClient extends VisualizeClient {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
         Logger.logWarn("already connected and ready to browse");
+        resolve();
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
