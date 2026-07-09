@@ -96,7 +96,21 @@ export const checkReceiverIntegrity = (topic: any, queue: string, createIfMissin
   }
 }
 
-export const checkSempConnectionParamsExists = (url: string | undefined, vpn :string | undefined, 
+export const checkBrowseIntegrity = (queue: string) => {
+  if (!queue) {
+    Logger.logError("required option '--queue <QUEUE>' not specified")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+
+  if (typeof queue !== 'string') {
+    Logger.logError("invalid queue specified, a single queue name is expected")
+    Logger.logError('exiting...')
+    process.exit(1)
+  }
+}
+
+export const checkSempConnectionParamsExists = (url: string | undefined, vpn :string | undefined,
                                       username: string | undefined, password: string | undefined) => {
   if (!url) {
     Logger.logError("required option '--semp-url <URL>' not specified")

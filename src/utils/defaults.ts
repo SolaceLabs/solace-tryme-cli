@@ -59,6 +59,7 @@ export const defaultConfigFile = 'stm-cli-config.json'
 export const commandConnection = 'connection'
 export const commandSend = 'send'
 export const commandReceive = 'receive'
+export const commandBrowse = 'browse'
 export const commandRequest = 'request'
 export const commandReply = 'reply'
 export const commandSempConnection = 'sempconnection'
@@ -69,14 +70,14 @@ export const commandClientUsername = 'client-username'
 export const commandGroupMessage = 'message'
 export const commandGroupManage = 'manage'
 export const commandGroupUnknown = 'unknown'
-export const baseCommands = [ commandConnection, commandSend, commandReceive, commandRequest, commandReply,
+export const baseCommands = [ commandConnection, commandSend, commandReceive, commandBrowse, commandRequest, commandReply,
                               commandSempConnection, commandQueue, commandAclProfile, commandClientProfile, commandClientUsername,
                               commandGroupMessage, commandGroupManage ]
-export const messagingCommands = [ commandSend, commandReceive, commandRequest, commandReply ]
+export const messagingCommands = [ commandSend, commandReceive, commandBrowse, commandRequest, commandReply ]
 export const manageCommands = [ commandQueue, commandAclProfile, commandClientProfile, commandClientUsername ]
 
 export const getCommandGroup = (command:any) => {
-  if ([ commandConnection, commandSend, commandReceive, commandRequest, commandReply].includes(command))
+  if ([ commandConnection, commandSend, commandReceive, commandBrowse, commandRequest, commandReply].includes(command))
     return 'message'
   else if ([ commandSempConnection, commandQueue, commandClientProfile, commandAclProfile, commandClientUsername].includes(command))
     return 'manage'
@@ -198,6 +199,20 @@ export const defaultMessageReceiveConfig:any = {
   
   command: 'receive',
   name: 'receive',
+}
+
+export const defaultMessageBrowseConfig:any = {
+  ...defaultMessageConfig,
+  count: 1,
+  interval: 3000,
+  clientName: undefined,
+  description: 'Browse application created via Solace Try-Me CLI',
+
+  queue: undefined,
+  windowSize: 50,
+
+  command: 'browse',
+  name: 'browse',
 }
 
 export const defaultMessageRequestConfig:any = {
@@ -386,6 +401,7 @@ export const getDefaultConfig = (commandType:any) => {
   switch (commandType) {
     case 'send': return defaultMessagePublishConfig
     case 'receive': return defaultMessageReceiveConfig
+    case 'browse': return defaultMessageBrowseConfig
     case 'request': return defaultMessageRequestConfig
     case 'reply': return defaultMessageReplyConfig
     case 'queue': return defaultManageQueueConfig
@@ -403,6 +419,7 @@ export const getCommandDescription = (commandType:any) => {
     case 'connection': return "VPN connection settings"
     case 'send': return "Send Message"
     case 'receive': return "Receive Message"
+    case 'browse': return "Browse Queue"
     case 'request': return "Send Request Message"
     case 'reply': return "Send Reply Message"
     case 'sempconnection': return "Manage VPN SEMP connection settings"

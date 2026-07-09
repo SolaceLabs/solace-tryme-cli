@@ -2,15 +2,16 @@
 
 ## Overview
 
-This directory contains a comprehensive test suite for the Solace Try-Me CLI (`stm`) with **20 test scripts** covering CLI commands and sub-commands. The test suite provides complete parameter validation and comprehensive result tracking.
+This directory contains a comprehensive test suite for the Solace Try-Me CLI (`stm`) with **22 test scripts** covering CLI commands and sub-commands. The test suite provides complete parameter validation and comprehensive result tracking.
 
 ## Test Suite Structure
 
-### Commands Tested (9 total - Currently Implemented)
+### Commands Tested (10 total - Currently Implemented)
 
-#### Messaging Commands (4)
+#### Messaging Commands (5)
 - `send` - Send messages to topics
 - `receive` - Receive messages from topics/queues
+- `browse` - Browse messages spooled on a queue (non-destructive)
 - `request` - Send request messages
 - `reply` - Send reply messages
 
@@ -178,6 +179,8 @@ tests/
 ├── test_send_advanced_parameters.sh       # Send command advanced tests
 ├── test_receive_basic_parameters.sh       # Receive command basic tests
 ├── test_receive_advanced_parameters.sh    # Receive command advanced tests
+├── test_browse_basic_parameters.sh        # Browse command basic tests
+├── test_browse_advanced_parameters.sh     # Browse command advanced tests
 ├── test_request_basic_parameters.sh       # Request command basic tests
 ├── test_request_advanced_parameters.sh    # Request command advanced tests
 ├── test_reply_basic_parameters.sh         # Reply command basic tests
@@ -197,7 +200,7 @@ tests/
 
 **Note**: 
 - Feed commands `import`, `export`, `contribute`, and `download` tests are not implemented as it is more aligned towards manual execution (not automation)
-- The current test suite focuses on basic and advanced parameter validation for 9 implemented commands
+- The current test suite focuses on basic and advanced parameter validation for 10 implemented commands
 
 ## Quick Start
 
@@ -232,7 +235,7 @@ export STM_TEST_EXECUTION=0
 ## Summary
 
 This comprehensive test suite provides:
-- **Current Command Coverage**: 9 CLI commands implemented (4 messaging + 5 feed commands)
+- **Current Command Coverage**: 10 CLI commands implemented (5 messaging + 5 feed commands)
 - **Parameter Validation**: Complete CLI parameter parsing and validation for implemented tests
 - **Environment Flexibility**: Configurable execution modes (lint vs full execution)
 - **Detailed Reporting**: Comprehensive test results with execution time and analytics
@@ -240,4 +243,4 @@ This comprehensive test suite provides:
 - **Easy Execution**: Master test runner plus separate runners for feed and messaging commands
 - **Test Logging**: Comprehensive log files for test execution tracking
 
-The test suite provides reliable parameter validation for the Solace Try-Me CLI, with comprehensive coverage of 9 implemented commands and robust error handling.
+The test suite provides reliable parameter validation for the Solace Try-Me CLI, with comprehensive coverage of 10 implemented commands and robust error handling.

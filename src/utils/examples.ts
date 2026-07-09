@@ -33,6 +33,16 @@ ${chalk.greenBright('stm receive --queue my-queue --create-if-missing --topic "s
 
 --<>--<>--<>--<>--<>--<>--<>--<>--
 
+${chalk.bold.greenBright('/* Browse queue (non-destructive) */')}
+
+// Browse messages spooled on a queue without removing them
+${chalk.greenBright('stm browse --queue my-queue')}
+
+// Browse a queue on the specified broker
+${chalk.greenBright('stm browse --url ws://localhost:8008 --vpn default --username default --password default --queue my-queue')}
+
+--<>--<>--<>--<>--<>--<>--<>--<>--
+
 ${chalk.bold.greenBright('/* Send Request message */')}
 
 // Execute a default send request command
@@ -254,7 +264,7 @@ ${chalk.greenBright('stm config delete --name publish2')}
 
 ${chalk.greenBright('stm config delete --config cloud-broker --name publish2')}
 
-${chalk.yellowBright('NOTE: The default commands created by the initialize operation such as publish, receive, request, reply,\n' +
+${chalk.yellowBright('NOTE: The default commands created by the initialize operation such as publish, receive, browse, request, reply,\n' +
 'queue, client-profile, acl-profile, client-username, connection and semconnection cannot be deleted!!')}
   `)
 }
@@ -416,6 +426,49 @@ ${chalk.greenBright('stm receive  --name receive --config cloud-broker --save re
 // Duplicate the command setting with the specified command-line parameters
 
 ${chalk.greenBright('stm receive --topic "stm/logistics/*" --name receive2 --config cloud-broker --save receive4')}
+
+${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
+  `)
+}
+
+export const displayHelpExamplesForBrowse = () => {
+  console.log(`
+Examples:
+// browse messages spooled on a queue (non-destructive, messages remain on the queue)
+// using the settings defined on the default configuration 'stm-cli-config.json'
+
+${chalk.greenBright('stm browse --queue my-queue')}
+
+${chalk.magentaBright(`HINT: You can view the default browse command settings 'stm config list --name browse'!`)}
+
+// browse with detailed output mode (useful for debugging and message inspection)
+
+${chalk.greenBright('stm browse --queue my-queue --output-mode FULL')}
+
+${chalk.yellowBright('NOTE: You can override any of the browse parameters \n' +
+'that are applied only for this instance of execution!')}
+
+// If you want to run a browse entirely based on the command-line parameters
+// without any reference to recorded command settings, you can do so by specifying
+// requisite parameters in the command-line
+
+${chalk.greenBright('stm browse --url ws://localhost:8008 --vpn default --username default --password default --queue my-queue')}
+
+${chalk.yellowBright('NOTE: The following examples demonstrate how to update an existing command settings\n' +
+'in a configuration, as well as how to duplicate (copy) a command \n' +
+'setting to a new name!')}
+
+// execute a named browse command from the named configuration
+
+${chalk.greenBright('stm browse --config cloud-broker --name browse')}
+
+// Update the default browse command setting with the specified command-line parameters (if specified)
+
+${chalk.greenBright('stm browse --queue my-queue --name browse --config cloud-broker --save')}
+
+// Duplicate the command setting
+
+${chalk.greenBright('stm browse --name browse --config cloud-broker --save browse2')}
 
 ${chalk.magentaBright(`HINT: You can verify the outcome by executing a config list command 'stm config list --config cloud-broker.json'!`)}
   `)

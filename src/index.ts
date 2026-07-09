@@ -7,7 +7,7 @@ import { deleteConfig, initializeConfig, listConfig } from './utils/init'
 
 import { addManageConnectionOptions, addManageSempConnectionOptions, 
         addConfigInitOptions, addConfigListOptions, addConfigDeleteOptions,
-        addReceiveOptions, addRequestOptions,  addReplyOptions, 
+        addReceiveOptions, addBrowseOptions, addRequestOptions,  addReplyOptions,
         addManageQueueOptions, addManageAclProfileOptions, addManageClientProfileOptions, addManageClientUsernameOptions, 
         addVisualizeOptions, addVisualizeLaunchOptions, addSendOptions, addRootHelpOptions, addConfigHelpOptions, 
         addManageHelpOptions, addFeedPreviewOptions, addFeedGenerateOptions, addFeedConfigureOptions,
@@ -16,6 +16,7 @@ import { addManageConnectionOptions, addManageSempConnectionOptions,
 } from './utils/options';
 import publisher from './lib/publish';
 import receiver from './lib/receive';
+import browser from './lib/browse';
 import requestor from './lib/request';
 import replier from './lib/reply';
 import queue from './lib/queue';
@@ -176,6 +177,31 @@ export class Commander {
       }
 
       receiver(options, cliOptions);
+    })
+
+    // stm browse
+    const browseCmd = this.program
+      .command('browse')
+      .description(chalk.whiteBright('Execute a queue browse command'))
+      .allowUnknownOption(false)
+      .addHelpText('after', this.newVersionCheck())
+
+    addBrowseOptions(browseCmd, this.advanced);
+    browseCmd.action((options: MessageClientOptions) => {
+      this.newVersionCheck();
+      const cliOptions:any = {};
+      const defaultKeys = Object.keys(new MessageClientOptionsEmpty('browse'));
+      for (var i=0; i<defaultKeys.length; i++) {
+        cliOptions[defaultKeys[i]] = browseCmd.getOptionValueSource(defaultKeys[i]);
+      }
+      const configOptions = loadCommandFromConfig('browse', options)
+      if (configOptions) {
+        for (var i=0; i<defaultKeys.length; i++) {
+          options[defaultKeys[i]] = ['cli', 'implied'].includes(cliOptions[defaultKeys[i]]) ? options[defaultKeys[i]] : configOptions[defaultKeys[i]]
+        }
+      }
+
+      browser(options, cliOptions);
     })
 
     // stm request
