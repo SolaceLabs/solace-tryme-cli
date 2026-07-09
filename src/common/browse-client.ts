@@ -179,7 +179,7 @@ export class SolaceClient extends VisualizeClient {
           });
           // Define message browsed event listener
           this.browser.queueBrowser.on(solace.QueueBrowserEventName.MESSAGE, (message: any) => {
-            Logger.await(`${chalkEventCounterLabel(++this.count)} browsing message [${new Date().toLocaleString('en-US', dateFormatOptions)}`)
+            Logger.await(`${chalkEventCounterLabel(++this.count)} browsing message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`)
             Logger.logSuccess(`browsed ${getType(message)} message on topic ${message.getDestination()}`)
             Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_RECEIVED, {
