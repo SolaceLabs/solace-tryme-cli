@@ -177,6 +177,8 @@ generate_test_summary() {
 
 echo -e "${CYAN}=== Browse Command Advanced Parameters Test ===${NC}\n"
 
+# Generate timestamp for unique queue names
+TIMESTAMP=$(date +%s)
 # Check if we're in the right directory (either root or tests folder)
 if [ ! -f "bin/index.js" ] && [ ! -f "../bin/index.js" ]; then
     echo -e "${RED}Error: Please run this script from the solace-tryme-cli root directory or tests folder${NC}"
