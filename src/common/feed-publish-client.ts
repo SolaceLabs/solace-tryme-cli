@@ -66,7 +66,7 @@ export class SolaceClient extends VisualizeClient {
   async connect() {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
-        Logger.logWarn("already connected and ready to subscribe");
+        Logger.logWarn("already connected and ready to publish events");
         resolve();
         return;
       }
