@@ -68,6 +68,7 @@ export class SolaceClient extends VisualizeClient {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
         Logger.logWarn("already connected and ready to subscribe");
+        resolve();
         return;
       }
       // if there's no session, create one with the properties imported from the game-config file
@@ -114,8 +115,8 @@ export class SolaceClient extends VisualizeClient {
 
         //The CONNECT_FAILED_ERROR implies a connection failure
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} -`, `check the connection parameters!`),
-          reject();
+          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} -`, `check the connection parameters!`)
+          reject(sessionEvent);
         });
         
         //The RECONNECTING_NOTICE implies a reconnect action
@@ -152,6 +153,8 @@ export class SolaceClient extends VisualizeClient {
       } catch (error: any) {
         Logger.logDetailedError('session creation failed - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        reject(error);
+        return;
       }
 
       // connect the session
@@ -162,6 +165,7 @@ export class SolaceClient extends VisualizeClient {
       } catch (error:any) {
         Logger.logDetailedError('failed to connect to broker - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        reject(error);
       }
     });
   }

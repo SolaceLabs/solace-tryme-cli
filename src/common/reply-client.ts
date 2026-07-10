@@ -51,6 +51,7 @@ export class SolaceClient extends VisualizeClient {
     return new Promise<void>((resolve, reject) => {
       if (this.session !== null) {
         Logger.logWarn('already connected and ready to receive requests.');
+        resolve();
         return;
       }
 
@@ -86,8 +87,8 @@ export class SolaceClient extends VisualizeClient {
           resolve();
         });
         this.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, (sessionEvent: solace.SessionEvent) => {
-          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} - `, `check the connection parameters!`),
-          reject();
+          Logger.logDetailedError(`connection failed to the message router ${sessionEvent.infoStr} - `, `check the connection parameters!`)
+          reject(sessionEvent);
         });
         this.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent: solace.SessionEvent) => {
           Logger.logSuccess('disconnected.');
@@ -128,6 +129,8 @@ export class SolaceClient extends VisualizeClient {
       } catch (error:any) {
         Logger.logDetailedError('session creation failed - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        reject(error);
+        return;
       }
 
       // connect the session
@@ -138,6 +141,7 @@ export class SolaceClient extends VisualizeClient {
       } catch (error:any) {
         Logger.logDetailedError('failed to connect to broker - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        reject(error);
       }
     });
   }

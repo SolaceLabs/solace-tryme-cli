@@ -2,11 +2,11 @@
 
 # Solace Try-Me CLI 
 
-The Solace Try-Me CLI (_**stm**_) is a command-line tool designed for messaging and streaming operations. It simplifies tasks like publishing, receiving, and performing request-reply messaging with a Solace PubSub+ Broker — all directly from the command line and without requiring any coding.
+The Solace Try-Me CLI (_**stm**_) is a command-line tool designed for messaging and streaming operations. It simplifies tasks like publishing, receiving, and performing request-reply messaging with a Solace PubSub+ Broker, all directly from the command line and without requiring any coding.
 
 ![](docrefs/messaging.webp "stm - messaging")
 
-_**stm**_ provides a feature to generate event feeds directly from AsyncAPI documents representing asynchronous applications or APIs (command _**feed**_). These feeds enable seamless streaming of events as specified in the document—entirely code-free. The streamed events include mock payload data, generated using the Faker.js library, ensuring conformity to the data types and formats defined in the document. Additionally, STM's feed functionality allows users to define custom data-generation rules from an extensive library of rule sets, producing realistic values for payload fields across categories such as strings, numbers, personal data, locations, internet, finance, and more.
+_**stm**_ provides a feature to generate event feeds directly from AsyncAPI documents representing asynchronous applications or APIs (command _**feed**_). These feeds enable seamless streaming of events as specified in the document, entirely code-free. The streamed events include mock payload data, generated using the Faker.js library, ensuring conformity to the data types and formats defined in the document. Additionally, STM's feed functionality allows users to define custom data-generation rules from an extensive library of rule sets, producing realistic values for payload fields across categories such as strings, numbers, personal data, locations, internet, finance, and more.
 
 > **Continue reading this [document](./README.md) to know more about how to use `stm` CLI for messaging.**
 
@@ -42,8 +42,9 @@ The Solace Try-Me CLI is a command line tool used to publish and receive message
     - [Use with a Cloud Broker](#use-with-a-cloud-broker)
   - [Run `stm` tool](#run-stm-tool)
     - [Working with Software Broker](#working-with-software-broker)
-    - [Receive Messages](#receive-messages)
-    - [Browse a Queue](#browse-a-queue)
+      - [Send and Receive Messages](#send-and-receive-messages)
+      - [Request and Reply](#request-and-reply)
+      - [Browse a Queue](#browse-a-queue)
     - [Working with Cloud Broker](#working-with-cloud-broker)
   - [Using `stm` to create and modify Broker resources](#using-stm-to-create-and-modify-broker-resources)
     - [Create a Queue](#create-a-queue)
@@ -304,9 +305,12 @@ Changes detected in the settings, do you want to overwrite (y/n): y
 
 ### Working with Software Broker
 
-Once you complete the `stm` setup process and a configuration is successfully created, you can run the messaging commands.
+Once you complete the `stm` setup process and a configuration is successfully created, you can run the messaging commands. The default configuration already points at the local software broker, so the commands below work out of the box.
 
-### Receive Messages
+#### Send and Receive Messages
+
+This walks through the publish/subscribe pattern. Start the receiver first so it is subscribed before you publish.
+
 ``` code
 stm receive
 ℹ  info: loading configuration 'stm-cli-config.json'
@@ -336,7 +340,7 @@ Destination:                            [Topic solace/try/me]
 
 At this point, you should see the event received on the receiver.
 
-```code
+``` code
 ✔  success: message Received - [Topic solace/try/me], type - BINARY
 ℹ  info: Message Properties
 Destination:                            [Topic solace/try/me]
@@ -345,9 +349,53 @@ Destination:                            [Topic solace/try/me]
 
 **NOTE:** `stm` supports a default output mode that prints the destination and the message payload length (not the payload itself). However, if you want more details around message & user properties and payload - explore the other options i.e., `PROPS` to print message properties + just payload length, and `FULL` to print message properties and a pretty-print of the payload.
 
-### Browse a Queue
+#### Request and Reply
+
+This walks through the request/reply pattern. Start the replier first so it is subscribed to the request topic (default `solace/try/me/request`) before you send a request.
+
+``` code
+stm reply
+ℹ  info: loading 'reply' command from configuration 'stm-cli-config.json'
+…  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: ******]
+✔  success: === stm_rep_7c1a2b3d successfully connected and ready to subscribe to request topic. ===
+ℹ  info: subscribing to solace/try/me/request
+✔  success: successfully subscribed to request topic: solace/try/me/request
+…  === ready to receive requests. ===
+```
+
+On a second window/terminal, send a request. The replier responds automatically and the requestor prints the reply it receives.
+
+``` code
+stm request
+ℹ  info: loading 'request' command from configuration 'stm-cli-config.json'
+…  connecting to broker [ws://localhost:8008, vpn: default, username: default, password: ******]
+✔  success: === stm_req_9f3e1c07 successfully connected and ready to send requests. ===
+…  requesting...
+✔  success: request sent on topic solace/try/me/request, type - TEXT
+✔  success: reply received, type - TEXT
+```
+
+Back on the replier window, you will see the matching request handled:
+
+``` code
+✔  success: request received - [Topic solace/try/me/request], type - TEXT
+…  replying to request on topic 'solace/try/me/request', type - TEXT
+✔  success: reply sent
+✔  success: replied.
+```
+
+The replier keeps running and answers each request until you stop it with Ctrl-C.
+
+#### Browse a Queue
 
 The `browse` command inspects the messages spooled on a queue without consuming them. Browsing is non-destructive - the messages are read from oldest to newest and remain on the queue, available for normal consumption.
+
+**Prerequisite:** `browse` only shows messages already spooled on the queue, so the queue must exist and contain messages. You can create it and publish a few messages directly to it first (see [Create a Queue](#create-a-queue)):
+
+``` code
+stm manage queue --create my-queue
+stm send --queue my-queue --count 3
+```
 
 ``` code
 stm browse --queue my-queue
@@ -364,13 +412,31 @@ hello-browse
 
 **NOTE:** `browse` binds to an existing queue only, so unlike `receive` it does not accept topic subscriptions or the `--create-if-missing` option. Use `--output-mode FULL` to inspect message and user properties along with a pretty-printed payload.
 
+**What is and is not supported**
+
+`browse` is a thin wrapper over the Solace `QueueBrowser`, so it inherits that API's capabilities and limits:
+
+**Supported**
+- Non-destructive read of a durable **Queue** endpoint - messages stay spooled and remain available for normal consumption.
+- Browsing always starts from the **head of the queue** and proceeds oldest to newest. This is the default and only ordering.
+- `--window-size` to tune how many messages the broker prefetches to the browser (valid range 1-255, default 50). This only affects prefetch, not where browsing starts.
+- `--output-mode DEFAULT | PROPS | FULL` to control how much of each message is printed.
+
+**Not supported**
+- **No starting position, offset, or message selector.** You cannot browse from the tail, from a specific message id, or by a selector expression - browsing always begins at the head. (Position-based replay is a `receive`/consumer feature, not a browser one.)
+- **No message removal or acknowledgement.** Browsing never deletes or acks messages. To consume messages use `receive`; to remove them use `stm manage queue`.
+- **Queue endpoints only.** Topic endpoints are not supported for browsing.
+- **No topic subscriptions and no `--create-if-missing`.** `browse` binds to an existing queue only.
+
+Because browsing is stateless, each new `browse` session re-binds and starts again at the current head (the oldest message still spooled at that moment); there is no persisted cursor.
+
 ### Working with Cloud Broker
 
 Since the connection parameters are distinct for Cloud Broker, you will have to create a new Try-Me CLI configuration with appropriate connection parameters. You can make the `stm` operations directed to a specific broker by specifying the configuration that holds that broker's connection details by specifying `--config <CONFIG_FILE>` parameter.
 
 At this point, the functionality of messaging commands are same irrespective of local or cloud broker. Try `stm send` and `stm receive` commands with a configuration containing cloud broker.
 
-🎉 You are set, explore other commands like `request`, `reply` and the parameters that goes along with the messaging commands!
+🎉 You are set! Explore the `feed` command and the full set of parameters that go along with each messaging command.
 
 ## Using `stm` to create and modify Broker resources
 
