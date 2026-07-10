@@ -164,7 +164,7 @@ Options:
 The `receive` command consumes messages by subscribing to one or more topics and/or binding to a queue endpoint. Unlike `browse`, consumption from a queue is destructive: received messages are acknowledged and removed.
 
 - **Supported:** topic subscriptions (`-t`, including wildcards `>` and `*`) and/or a queue binding (`-q`); creating the queue on the fly with `--create-if-missing`; `AUTO` or `CLIENT` acknowledgement (`--acknowledge-mode`).
-- **Not supported:** it is not non-destructive - to inspect messages without removing them use `browse` instead.
+- **Not supported:** consumption from a queue is destructive; to inspect messages without removing them use `browse` instead.
 
 <details>
 <summary>Basic Parameters: <i><b>stm receive -h</b></i> </summary>
