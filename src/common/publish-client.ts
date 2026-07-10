@@ -165,7 +165,9 @@ export class SolaceClient extends VisualizeClient {
       } catch (error:any) {
         Logger.logDetailedError('failed to connect to broker - ', error.toString())
         if (error.cause?.message) Logger.logDetailedError(``, `${error.cause?.message}`)
+        if (this.session !== null) { this.session.dispose(); this.session = null; }
         reject(error);
+        return;
       }
     });
   }
