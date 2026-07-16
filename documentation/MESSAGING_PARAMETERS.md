@@ -49,6 +49,11 @@ __Issue messaging commands: publish, receive, browse, request and reply__
 
 ## Publish Events
 
+The `send` command publishes one or more messages to one or more topics and/or queues. The payload can be supplied inline (`-m`), from a file (`-f`), from stdin (`--stdin`), or as a default/empty body, and can be sent repeatedly with `--count` and `--interval`.
+
+- **Supported:** publishing to topics (`-t`) and/or queues (`-q`); `DIRECT` or `PERSISTENT` delivery (`--delivery-mode`); guaranteed publishing with confirmations (`--publish-confirmation`, `--window-size`, `--acknowledge-mode`); partition keys; per-message TTL and DMQ eligibility, application message id/type, user properties, and HTTP content-type/encoding; `TEXT` or `BYTES` payloads.
+- **Not supported:** it does not wait for a reply (use `request` for request-reply) and does not consume or browse messages.
+
 <details>
 <summary>Basic Parameters: <i><b>stm send -h</b></i> </summary>
 
@@ -155,6 +160,12 @@ Options:
 </details>
 
 ## Receive Events
+
+The `receive` command consumes messages by subscribing to one or more topics and/or binding to a queue endpoint. Unlike `browse`, consumption from a queue is destructive: received messages are acknowledged and removed.
+
+- **Supported:** topic subscriptions (`-t`, including wildcards `>` and `*`) and/or a queue binding (`-q`); creating the queue on the fly with `--create-if-missing`; `AUTO` or `CLIENT` acknowledgement (`--acknowledge-mode`).
+- **Not supported:** consumption from a queue is destructive; to inspect messages without removing them use `browse` instead.
+
 <details>
 <summary>Basic Parameters: <i><b>stm receive -h</b></i> </summary>
 
@@ -232,6 +243,13 @@ Options:
 
 The `browse` command inspects the messages spooled on a queue without consuming them. Browsing is non-destructive - messages are read from oldest to newest and remain on the queue, available for normal consumption. Unlike `receive`, `browse` binds to an existing queue only, so it does not accept topic subscriptions or the `--create-if-missing` option.
 
+`browse` wraps the Solace `QueueBrowser`, so it inherits that API's capabilities and limits:
+
+- **Supported:** non-destructive read of a durable **Queue** endpoint; browsing always starts from the **head** and proceeds oldest to newest (the default and only ordering); `--window-size` to tune broker prefetch (1-255, default 50, affects prefetch only, not starting point); `--output-mode DEFAULT | PROPS | FULL` for print detail.
+- **Not supported:** no starting position, offset, or message selector (you cannot browse from the tail, a specific message id, or by selector - it always begins at the head); no message removal or acknowledgement (use `receive` to consume, `stm manage queue` to remove); Queue endpoints only (no topic endpoints); no topic subscriptions and no `--create-if-missing`.
+
+Browsing is stateless: each new session re-binds and starts again at the current head (the oldest message still spooled), with no persisted cursor.
+
 <details>
 <summary>Basic Parameters: <i><b>stm browse -h</b></i> </summary>
 
@@ -303,6 +321,11 @@ Options:
 </details>
 
 ## Send Request Events
+
+The `request` command sends a request message to a topic and waits for a reply, implementing the request-reply pattern. Use `--timeout` to bound how long it waits for each response, and `--count`/`--interval` to send more than one.
+
+- **Supported:** `DIRECT` or `PERSISTENT` delivery, per-message TTL and DMQ eligibility, application message id/type, correlation id, reply-to topic, user properties, and HTTP content-type/encoding; `TEXT` or `BYTES` payloads.
+- **Not supported:** a matching responder must be running (for example `stm reply`); if no reply arrives within `--timeout` the request fails.
 
 <details>
 <summary>Basic Parameters: <i><b>stm request -h</b></i> </summary>
@@ -410,6 +433,11 @@ Options:
 
 ## Receive Reply Events
 
+The `reply` command is the responder side of request-reply: it subscribes to one or more request topics and automatically returns a reply message for each request it receives. It runs until interrupted with Ctrl-C.
+
+- **Supported:** topic subscriptions (`-t`, including wildcards); a configurable reply body (`-m`, `-f`, `--stdin`, default, or empty); `DIRECT` or `PERSISTENT` delivery, TTL and DMQ eligibility, application message id/type, reply-to topic, user properties, and HTTP content-type/encoding.
+- **Not supported:** it only responds to requests it is subscribed for; it does not originate requests (use `request`) or browse queues.
+
 <details>
 <summary>Basic Parameters: <i><b>stm reply -h</b></i> </summary>
 
@@ -511,6 +539,8 @@ Options:
 
 ## Manage Broker Connection
 
+The `manage connection` command manages the messaging (SMF over WebSocket) connection settings - broker URL, message VPN, and credentials - used by the messaging commands, and persists them in the configuration file.
+
 <details>
 <summary>Basic Parameters: <i><b>stm manage connection -h</b></i> </summary>
 
@@ -569,6 +599,8 @@ Options:
 
 ## Manage Broker SEMP Connection
 
+The `manage semp-connection` command manages the SEMP (broker management API) connection settings - SEMP URL, VPN, and admin credentials - used by the `manage` resource commands, and persists them in the configuration file.
+
 <details>
 <summary>Basic Parameters: <i><b>stm manage semp-connection -h</b></i> </summary>
 
@@ -626,6 +658,11 @@ Options:
 </details>
 
 ## Manage Queue
+
+The `manage queue` command administers queue endpoints over SEMP. Use `--list`, `--create`, `--update`, or `--delete` to operate on a queue, along with its topic subscriptions and settings (access type, partitions, DMQ, redelivery, quotas, permissions, and more).
+
+- **Requires** a SEMP connection (admin credentials), not just a messaging connection.
+- **Related:** use `browse` to inspect messages on a queue non-destructively, and `receive` to consume them.
 
 <details>
 <summary>Basic Parameters: <i><b>stm manage queue -h</b></i> </summary>
@@ -707,6 +744,8 @@ Options:
 
 ## Manage Client Profile
 
+The `manage client-profile` command administers client profiles over SEMP with `--list`, `--create`, `--update`, and `--delete`, including guaranteed-messaging, connection, and subscription limits. Requires a SEMP connection.
+
 <details>
 <summary>Basic Parameters: <i><b>stm manage client-profile -h</b></i> </summary>
 
@@ -777,6 +816,8 @@ Options:
 
 ## Manage ACL Profile
 
+The `manage acl-profile` command administers ACL profiles over SEMP with `--list`, `--create`, `--update`, and `--delete`, including the default publish, subscribe, and connect actions. Requires a SEMP connection.
+
 <details>
 <summary>Basic Parameters: <i><b>stm manage acl-profile -h</b></i> </summary>
 
@@ -838,6 +879,8 @@ Options:
 </details>
 
 ## Manage Client Username
+
+The `manage client-username` command administers client usernames over SEMP with `--list`, `--create`, `--update`, and `--delete`, associating each with a client profile and an ACL profile. Requires a SEMP connection.
 
 <details>
 <summary>Basic Parameters: <i><b>stm manage client-username -h</b></i> </summary>
@@ -901,6 +944,8 @@ Options:
 </details>
 
 # Manage CLI Configuration Commands
+
+These commands manage the CLI configuration file that stores reusable command settings. `config init` seeds a new configuration with default command samples, `config list` shows the stored command settings (optionally filtered by `--name`), and `config delete` removes a named command setting.
 
 <details>
 <summary>Initialize Configuration: <i><b>stm config init -h</b></i> </summary>
