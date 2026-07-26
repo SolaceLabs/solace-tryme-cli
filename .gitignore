@@ -30,6 +30,7 @@ dist
 
 # config json fils
 *.json
+!.github/*.json
 
 # test scripts
 config
