@@ -18,7 +18,8 @@ import {
   commandConnection,
   commandSempConnection,
   manageCommands,
-  defaultStmHome
+  defaultStmHome,
+  connectionConfigToOptionKey
 } from './defaults'
 import { saveConfig, loadConfig, decoratePath, processPath, fileExists, writeConfig } from './config'
 import chalk from 'chalk'
@@ -288,8 +289,10 @@ export const buildMessageConfig = (current: any, options:any, optionsSource: any
 
   // initialize messaging settings
   result.message.connection && Object.keys(defaultMessageConnectionConfig).forEach((key:string) => {
-    if (optionsSource[key] === 'cli') {
-      result.message.connection[key] = options[key];
+    // a few settings are carried on the options object under their CLI option name
+    const optionKey = connectionConfigToOptionKey[key] ? connectionConfigToOptionKey[key] : key;
+    if (optionsSource[optionKey] === 'cli') {
+      result.message.connection[key] = options[optionKey];
     } else {
       current ? 
         result.message.connection[key] = current.message.connection[key] :

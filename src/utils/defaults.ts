@@ -123,6 +123,17 @@ export const defaultMessageConnectionConfig:any = {
   save: false,
 }
 
+// A few connection settings are stored in the configuration file under the solclientjs
+// session property name, while the CLI exposes them under a shorter option name (for
+// example 'generateSendTimestamps' vs '--send-timestamps'). Without this mapping the
+// settings are silently dropped when a command is loaded from - or saved to - a
+// configuration, since both directions match on key name alone.
+// Keyed by configuration key, valued by the camelCased CLI option name.
+export const connectionConfigToOptionKey:any = {
+  generateSendTimestamps: 'sendTimestamps',
+  generateReceiveTimestamps: 'receiveTimestamps',
+}
+
 export const defaultMessageConfig:any = {
   // acknowledgeImmediately: false,
   appMessageId: undefined,
