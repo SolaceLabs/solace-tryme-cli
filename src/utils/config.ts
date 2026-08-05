@@ -4,7 +4,7 @@ import http from 'http'
 import path from 'path'
 import { Logger } from './logger'
 import chalk from 'chalk'
-import { baseCommands, commandConnection, commandSempConnection, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome, defaultFeedApiEndpointFile, defaultFeedSessionFile } from './defaults'
+import { baseCommands, commandConnection, commandSempConnection, connectionConfigToOptionKey, defaultConfigFile, defaultLastVersionCheck, defaultManageConnectionConfig, defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultFeedRulesFile, defaultFeedSchemasFile, defaultGitRepo, defaultMessageConnectionConfig, defaultMetaKeys, getCommandGroup, getDefaultConfig, defaultStmHome, defaultStmFeedsHome, defaultFeedApiEndpointFile, defaultFeedSessionFile } from './defaults'
 import { buildMessageConfig } from './init'
 import { parseNumber } from './parse'
 import { fakerRulesJson } from './fakerrules';
@@ -330,6 +330,22 @@ const healMissingBaseCommand = (config: any, filePath: string, group: string, cm
   return true;
 }
 
+// Copy the connection settings out of a loaded configuration onto the options object.
+// Settings that the CLI exposes under a different name are also copied across under the
+// option name, so that the config -> options merge in index.ts (which matches on option
+// name) picks them up instead of dropping them.
+const applyConnectionSettings = (configOptions: any, config: any, group: string) => {
+  const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
+  const connection = config[group][group === 'manage' ? 'sempconnection' : 'connection'];
+  for (var i=0; i<connectionKeys.length; i++) {
+    const key = connectionKeys[i];
+    configOptions[key] = connection[key];
+    const optionKey = connectionConfigToOptionKey[key];
+    if (optionKey) configOptions[optionKey] = connection[key];
+  }
+  return configOptions
+}
+
 export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions | ManageClientOptions | ManageFeedPublishOptions) => {
   try {
     var group = getCommandGroup(cmd)
@@ -362,11 +378,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
       }
       // TODO: validateConfig(config)
 
-      const configOptions:any = {}
-      const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
-      for (var i=0; i<connectionKeys.length; i++) {
-        configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
-      }
+      const configOptions:any = applyConnectionSettings({}, config, group)
       const defaultConfig = getDefaultConfig(cmd);
       const clientKeys = Object.keys(defaultConfig);
       for (var i=0; i<clientKeys.length; i++) {
@@ -390,11 +402,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
       }
       // TODO: validateConfig(config)
 
-      const configOptions:any = {}
-      const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
-      for (var i=0; i<connectionKeys.length; i++) {
-        configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
-      }
+      const configOptions:any = applyConnectionSettings({}, config, group)
       const defaultConfig = getDefaultConfig(cmd);
       const clientKeys = Object.keys(defaultConfig);
       for (var i=0; i<clientKeys.length; i++) {
@@ -413,11 +421,7 @@ export const loadCommandFromConfig = (cmd: string, options: MessageClientOptions
         if (!filePath.endsWith('.json')) filePath.concat('.json')
 
         const config = readFile(filePath)
-        const configOptions:any = {}
-        const connectionKeys = Object.keys(group === 'manage' ? defaultManageConnectionConfig : defaultMessageConnectionConfig);
-        for (var i=0; i<connectionKeys.length; i++) {
-          configOptions[connectionKeys[i]] = config[group][group === 'manage' ? 'sempconnection' : 'connection'][connectionKeys[i]];
-        }
+        const configOptions:any = applyConnectionSettings({}, config, group)
         const defaultConfig = getDefaultConfig(cmd);
         const clientKeys = Object.keys(defaultConfig);
         for (var i=0; i<clientKeys.length; i++) {
