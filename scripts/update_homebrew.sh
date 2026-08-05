@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 # Define variables
 REPO_NAME="SolaceLabs/solace-tryme-cli"
@@ -17,9 +17,18 @@ git clone https://x-access-token:$GITHUB_TOKEN@github.com/$TAP_NAME
 
 cd homebrew-$FORMULA_NAME
 
+X64_ZIP=../release/stm-macos-x64-v$pkg_version.zip
+ARM64_ZIP=../release/stm-macos-arm64-v$pkg_version.zip
+for f in "$X64_ZIP" "$ARM64_ZIP"; do
+  if [ ! -f "$f" ]; then
+    echo "Release artifact not found: $f" >&2
+    exit 1
+  fi
+done
+
 # Calculate SHA256 for both macOS archs
-SHA256_X64=$(shasum -a 256 ../release/stm-macos-x64-v$pkg_version.zip | awk '{ print $1 }')
-SHA256_ARM64=$(shasum -a 256 ../release/stm-macos-arm64-v$pkg_version.zip | awk '{ print $1 }')
+SHA256_X64=$(shasum -a 256 "$X64_ZIP" | awk '{ print $1 }')
+SHA256_ARM64=$(shasum -a 256 "$ARM64_ZIP" | awk '{ print $1 }')
 
 # Regenerate the formula from scratch (idempotent, no reliance on prior file structure)
 cat > Formula/$FORMULA_NAME.rb <<EOF
