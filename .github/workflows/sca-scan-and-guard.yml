@@ -1,5 +1,7 @@
-name: SCA Scan on merge to main
+name: SCA Scan
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
 
@@ -15,12 +17,19 @@ permissions:
 jobs:
   sca_scan:
     uses: SolaceDev/solace-public-workflows/.github/workflows/sca-scan-and-guard.yaml@main
+    with:
+      setup_actions: '["setup-node"]'
     secrets:
       FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
 
   update_manifest:
     needs: sca_scan
-    if: needs.sca_scan.result == 'success' && github.ref_name == github.event.repository.default_branch
+    # The manifest records what landed on the default branch, so it must never
+    # be written from a PR run -- the scan still runs, the write does not.
+    if: >-
+      needs.sca_scan.result == 'success'
+      && github.event_name == 'push'
+      && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -42,7 +51,7 @@ jobs:
           ddb_sort_key: repository
           ddb_item_to_be_added: |
             {
-              "squad": "temp",
+              "squad": "cto",
               "repository": "${{ github.event.repository.name }}",
               "dev": {
                 "sha": "${{ github.sha }}",
