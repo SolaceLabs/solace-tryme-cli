@@ -42,7 +42,7 @@
     "@types/long": "5.0.0",
     "@types/node": "20.17.16",
     "ascii-table": "0.0.9",
-    "axios": "0.27.0",
+    "axios": "0.33.0",
     "chalk": "4.1.2",
     "commander": "11.1.0",
     "core-js": "3.40.0",
