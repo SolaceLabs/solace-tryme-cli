@@ -451,8 +451,8 @@ export const getType = (message:solace.Message) => {
   }
 }
 
-var currentHomeDir = require('os').homedir();
-var currentStmHome = `${currentHomeDir}/.stm`;
+const currentHomeDir = require('os').homedir();
+let currentStmHome = `${currentHomeDir}/.stm`;
 
 if (process.env.STM_HOME) {
   currentStmHome = process.env.STM_HOME;

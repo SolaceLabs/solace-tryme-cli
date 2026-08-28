@@ -224,7 +224,7 @@ export const checkSempQueuePartitionSettings = (options: ManageClientOptions) =>
 }
 
 export const checkSempQueueParamsExists = (options: ManageClientOptions, optionsSource: any) => {
-  var count = 0;
+  let count = 0;
   if (options.list) {
     count++; 
     options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
@@ -274,7 +274,7 @@ export const checkSempQueueParamsExists = (options: ManageClientOptions, options
 }
 
 export const checkSempClientProfileParamsExists = (options: ManageClientOptions, optionsSource: any) => {
-  var count = 0;
+  let count = 0;
   if (options.list) {
     count++; 
     options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
@@ -324,7 +324,7 @@ export const checkSempClientProfileParamsExists = (options: ManageClientOptions,
 }
 
 export const checkSempAclProfileParamsExists = (options: ManageClientOptions, optionsSource: any) => {
-  var count = 0;
+  let count = 0;
   if (options.list) {
     count++; 
     options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
@@ -374,7 +374,7 @@ export const checkSempAclProfileParamsExists = (options: ManageClientOptions, op
 }
 
 export const checkSempClientUsernameParamsExists = (options: ManageClientOptions, optionsSource: any) => {
-  var count = 0;
+  let count = 0;
   if (options.list) {
     count++; 
     options.operation = (typeof options.list === 'string') ? 'LIST_ITEM' : 'LIST';
@@ -436,7 +436,7 @@ export const checkForFeedSettings = (eventNames:string[], feedName:string) => {
     process.exit(1)
   }
 
-  var data = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
+  const data = loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
   if (!data.messages || !Object.keys(data.messages).length) {
     Logger.logError(`No event publish events found in the feed '${feedName}'`)
     Logger.logError('exiting...')
@@ -485,13 +485,13 @@ export const checkFeedRunOptions = (options: ManageFeedPublishOptions, optionsSo
 }
 
 export const getPotentialFeedName = (fileName: string) => {
-  var feedName = fileName.split('/').pop();
+  let feedName = fileName.split('/').pop();
   feedName = feedName?.split('.').shift() ?? '';// Add nullish coalescing operator to provide a default value
   return feedName;
 }
 
 export const getPotentialTopicFromFeedName = (name: string) => {
-  var feedName = name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase();
+  const feedName = name.replaceAll(' ', '').replaceAll('-', '/').toLowerCase();
   return feedName;
 }
 

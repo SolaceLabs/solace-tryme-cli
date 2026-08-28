@@ -18,7 +18,7 @@ const publish = async (
 
   const { count, interval } = options;
   const publisher = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
   try {
     await publisher.connect()
   } catch (error:any) {
@@ -42,10 +42,10 @@ const publish = async (
     }, options.exitAfter * 1000);
   }
 
-  var payloadType:any = options.payloadType as string;
-  var message:any = options.message as string;
+  let payloadType:any = options.payloadType as string;
+  let message:any = options.message as string;
 
-  var file:any = options.file as string;
+  const file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
       Logger.logError(`missing file '${file}'`);
@@ -71,7 +71,7 @@ const publish = async (
 
   if (options.stdin) {
     Logger.ctrlDToPublish();
-    var readLines = new StdinRead();
+    const readLines = new StdinRead();
     await readLines.getData();
     message = readLines.data();
   }
@@ -103,7 +103,7 @@ const publish = async (
       }, 1500);
     }
   } else {
-    for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
+    for (let iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
       if (options.queue) {
         for (var i=0; i<options.queue.length; i++) {
           if (optionsSource.file !== 'cli' && optionsSource.stdin !== 'cli' && optionsSource.message !== 'cli')

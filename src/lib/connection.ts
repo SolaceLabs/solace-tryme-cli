@@ -10,7 +10,7 @@ const connection = (options: ManageClientOptions, optionsSource: any) => {
     process.exit(0);
   }
 
-  var count = 0;
+  let count = 0;
   Object.keys(optionsSource).forEach(key => count += optionsSource[key] === 'cli' ? 1 : 0)
   if (!count) {
     Logger.error('specify at least one or more parameters')

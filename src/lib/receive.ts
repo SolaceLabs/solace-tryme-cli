@@ -14,7 +14,7 @@ const receive = async (
   }
 
   const receiver = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
   try {
     await receiver.connect();
     receiver.subscribe(options);

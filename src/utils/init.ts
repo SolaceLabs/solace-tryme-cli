@@ -46,8 +46,8 @@ export const initializeConfig = (options:StmConfigOptions, optionsSource: any) =
   const filePath = processPath(`${defaultStmHome}/${configFile}`)
   if (!filePath.endsWith('.json')) filePath.concat('.json')
   if (fileExists(filePath)) {
-    var prompt = require('prompt-sync')();
-    var confirmation = prompt(`${chalk.whiteBright(`Config file '${decoratePath(configFile)}' exists , do you want to reinitialize (`) + 
+    const prompt = require('prompt-sync')();
+    const confirmation = prompt(`${chalk.whiteBright(`Config file '${decoratePath(configFile)}' exists , do you want to reinitialize (`) + 
                                 chalk.greenBright('y') + chalk.whiteBright('/') + 
                                 chalk.redBright('n') + chalk.whiteBright('): ')}`);
     if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
@@ -83,7 +83,7 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
   // load current configuration
-  var current:any = loadConfig(options.config)
+  const current:any = loadConfig(options.config)
   current.config = options.config
 
   if (options.name) {
@@ -99,8 +99,8 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
       process.exit(1)
     }
 
-    var prompt = require('prompt-sync')();
-    var confirmation = prompt(`${chalk.whiteBright(`Are you sure you want to delete the command '${options.name}' on configuration '${options.config}' (`) + 
+    const prompt = require('prompt-sync')();
+    const confirmation = prompt(`${chalk.whiteBright(`Are you sure you want to delete the command '${options.name}' on configuration '${options.config}' (`) + 
                                 chalk.greenBright('y') + chalk.whiteBright('/') + 
                                 chalk.redBright('n') + chalk.whiteBright('): ')}`);
     if (!['Y', 'YES'].includes(confirmation.toUpperCase())) {
@@ -118,7 +118,7 @@ export const deleteConfig = (options:StmConfigOptions, optionsSource: any) => {
 
 export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   const { helpExamples } = options
-  var AsciiTable = require('ascii-table')
+  const AsciiTable = require('ascii-table')
 
   if (helpExamples) {
     displayHelpExamplesForConfigList()
@@ -132,7 +132,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
   }
 
 
-  var count = 0;
+  let count = 0;
   var table = new AsciiTable('Connection Settings')
   table.setHeading('Command', 'Name', 'Broker URL', 'Message VPN', 'Username', 'Password' )
   count++
@@ -169,7 +169,7 @@ export const listConfig = (options:StmConfigOptions, optionsSource: any) => {
         table.addRow((selected.command.toUpperCase() !== lastOp ? selected.command.toUpperCase() : ''), 
                       selected.name, '[ ', config.connection.url,
                       config.connection.vpn, config.connection.username + '/' + "******")
-        for (var i=0; i<selected.topic.length; i++) {
+        for (let i=0; i<selected.topic.length; i++) {
           table.addRow('', '', '  "' + selected.topic[i] + (i === selected.topic.length-1 ? '"' : '",'), '', '', '');
         }
         table.addRow('', '', ']', '', '', '');
@@ -213,7 +213,7 @@ export const buildConfig = (options:any, optionsSource: any, commandType: Comman
   const configFile = optionsSource.config === 'cli' && typeof options.config === 'string' ? options.config : defaultConfigFile;
   Logger.logDetailedSuccess(`loading ${configFile === defaultConfigFile ? 'from default' : 'from'} configuration file`, `${decoratePath(configFile)}`)
   const config = loadConfig(configFile);
-  var commands:string[] = [];
+  let commands:string[] = [];
   commands = commands.concat(Object.keys(config.manage))
   commands = commands.concat(Object.keys(config.message))
 
@@ -411,7 +411,7 @@ export const buildMessageConfig = (current: any, options:any, optionsSource: any
 
   // fix up name
   if (optionsSource.name === 'cli') {
-    let group = getCommandGroup(options.command)
+    const group = getCommandGroup(options.command)
     if (!group) {
       Logger.logDetailedError('unknown command  - ', options.command)
       Logger.logError('exiting...')

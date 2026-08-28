@@ -3,9 +3,9 @@ import { fakeDataValueGenerator } from './feed-datahelper';
 import { parseBoolean } from '../utils/parse';
 
 export const processStringRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
-  var val:any = '';
+  const data: any[] = [];
+  let options:any = {};
+  let val:any = '';
   if (rule.rule === 'alpha') {
     options = {
       length: {
@@ -31,7 +31,7 @@ export const processStringRules = (rule:any, count:number) => {
       data.push(faker.string.alphanumeric(options));
     }
   } else if (rule.rule === 'enum') {
-    let enumObj:any = {};
+    const enumObj:any = {};
     let enumValue:any = {};
     rule.enum.forEach((t: string) => {
       enumObj[`'${t}'`] = t;
@@ -124,8 +124,8 @@ export const processStringRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processNullRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  const options:any = {};
 
   if (rule.rule === 'null') {
     for (var i=0; i<count; i++) {
@@ -139,8 +139,8 @@ export const processNullRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processNumberRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
   if (rule.rule === 'int') {
     options = {
       min: rule.minimum,
@@ -177,10 +177,10 @@ export const processNumberRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processBooleanRules = (rule:any, count:number) => {
-  var data: any[] = [];
+  const data: any[] = [];
 
   if (rule.rule === 'boolean') {
-    for (var i=0; i<count; i++) {
+    for (let i=0; i<count; i++) {
       data.push(faker.datatype.boolean());
     }
     
@@ -189,8 +189,8 @@ export const processBooleanRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processDateRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'timeStamp') {
     for (var i=0; i<count; i++) {
@@ -211,14 +211,14 @@ export const processDateRules = (rule:any, count:number) => {
         data.push(`${day}-${month}-${year}`);
     }
   } else if (rule.rule === 'currentDateWithTime') {
-    let formatter = new Intl.DateTimeFormat("en-US", {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       month: '2-digit',
       day: '2-digit',
       year: 'numeric',
     });
 
     for (var i=0; i<count; i++) {
-      let date = new Date();
+      const date = new Date();
       const [{ value: month }, , { value: day }, , { value: year }] = formatter.formatToParts(date);
 
       // Extract time components
@@ -238,7 +238,7 @@ export const processDateRules = (rule:any, count:number) => {
         data.push(`${day}-${month}-${year} ${hours12}:${minutes}:${seconds} ${amPm}`);
     }
   } else if (rule.rule === 'currentTime') {
-    let formatter = new Intl.DateTimeFormat("en-US", {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
@@ -246,7 +246,7 @@ export const processDateRules = (rule:any, count:number) => {
     });
 
     for (var i=0; i<count; i++) {
-      let date = new Date();
+      const date = new Date();
       data.push(formatter.format(date));
     }
   } else if (rule.rule === 'anytime') {
@@ -306,8 +306,8 @@ export const processDateRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processLoremRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'lines') {
     options = {
@@ -356,7 +356,7 @@ export const processLoremRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processPersonRules = (rule:any, count:number) => {
-  var data: any[] = [];
+  const data: any[] = [];
 
   if (rule.rule === 'prefix') {
     for (var i=0; i<count; i++) {
@@ -403,8 +403,8 @@ export const processPersonRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processLocationRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'buildingNumber') {
     for (var i=0; i<count; i++) {
@@ -467,8 +467,8 @@ export const processLocationRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processFinanceRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'accountNumber') {
     for (var i=0; i<count; i++) {
@@ -528,8 +528,8 @@ export const processFinanceRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processAirlineRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'airline') {
     for (var i=0; i<count; i++) {
@@ -538,28 +538,28 @@ export const processAirlineRules = (rule:any, count:number) => {
   } else if (rule.rule === 'airplane') {
     for (var i=0; i<count; i++) {
       data.push(() => {
-        let ap = faker.airline.airplane();
+        const ap = faker.airline.airplane();
         return `${ap.name} [${ap.iataTypeCode}]`
       });
     }
   } else if (rule.rule === 'airport') {
     for (var i=0; i<count; i++) {
       data.push(() => {
-        let ap = faker.airline.airport();
+        const ap = faker.airline.airport();
         return `${ap.name} [${ap.iataCode}]`
       });
     }
   } else if (rule.rule === 'airportName') {
     for (var i=0; i<count; i++) {
       data.push(() => {
-        let ap = faker.airline.airport();
+        const ap = faker.airline.airport();
         return ap.name;
       });
     }
   } else if (rule.rule === 'airportCode') {
     for (var i=0; i<count; i++) {
       data.push(() => {
-        let ap = faker.airline.airport();
+        const ap = faker.airline.airport();
         return ap.iataCode;
       });
     }
@@ -580,8 +580,8 @@ export const processAirlineRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processCommerceRules = (rule:any, count:number) => {
-  var data: any[] = [];
-  var options:any = {};
+  const data: any[] = [];
+  let options:any = {};
 
   if (rule.rule === 'companyName') {
     for (var i=0; i<count; i++) {
@@ -621,20 +621,20 @@ export const processCommerceRules = (rule:any, count:number) => {
   return count === 1 ? data[0] : data;
 }
 export const processInternetRules = (rule:any, count:number) => {
-  var data: any[] = [];
+  const data: any[] = [];
   if (rule.rule === 'domainName') {
     for (var i=0; i<count; i++) {
-      let value = faker.internet.domainName();
+      const value = faker.internet.domainName();
       data.push(rule.casing === 'mixed' ? value : rule.casing === 'upper' ? value.toUpperCase() : value.toLowerCase());
     }
   } else if (rule.rule === 'domainWord') {
     for (var i=0; i<count; i++) {
-      let value = faker.internet.domainWord();
+      const value = faker.internet.domainWord();
       data.push(rule.casing === 'mixed' ? value : rule.casing === 'upper' ? value.toUpperCase() : value.toLowerCase());
     }
   } else if (rule.rule === 'email') {
     for (var i=0; i<count; i++) {
-      let value = faker.internet.email();
+      const value = faker.internet.email();
       data.push(rule.casing === 'mixed' ? value : rule.casing === 'upper' ? value.toUpperCase() : value.toLowerCase());
     }
   } else if (rule.rule === 'emoji') {
@@ -655,12 +655,12 @@ export const processInternetRules = (rule:any, count:number) => {
     }
   } else if (rule.rule === 'url') {
     for (var i=0; i<count; i++) {
-      let value = faker.internet.url();
+      const value = faker.internet.url();
       data.push(rule.casing === 'mixed' ? value : rule.casing === 'upper' ? value.toUpperCase() : value.toLowerCase());
     }
   } else if (rule.rule === 'username') {
     for (var i=0; i<count; i++) {
-      let value = faker.internet.userName();
+      const value = faker.internet.userName();
       data.push(rule.casing === 'mixed' ? value : rule.casing === 'upper' ? value.toUpperCase() : value.toLowerCase());
     }
   }
@@ -669,8 +669,8 @@ export const processInternetRules = (rule:any, count:number) => {
 }
 
 const generateObject = (obj:any) => {
-  var data:any = {};
-  var keys = Object.keys(obj ? obj : {});
+  const data:any = {};
+  const keys = Object.keys(obj ? obj : {});
   keys.forEach(key => {
     if (obj[key].type === 'object')
       data[key] = generateObject(obj[key].properties);
@@ -679,7 +679,7 @@ const generateObject = (obj:any) => {
     else if (typeof obj[key] === 'object' && !Object.keys(obj[key]).length)
       data[key] = {}; // empty object (should we consider undefined!!)
     else {
-      let value = fakeDataValueGenerator(obj[key]);
+      const value = fakeDataValueGenerator(obj[key]);
       // if (!value && obj[key].rule.rule === 'null') {
       data[key] = value;
     }
@@ -689,9 +689,9 @@ const generateObject = (obj:any) => {
 }
 
 export const processObjectRules = (payload:any, count:number) => {
-  var data: any[] = [];
+  const data: any[] = [];
 
-  for (var i=0; i<count; i++) {
+  for (let i=0; i<count; i++) {
     data.push(generateObject(payload));
   }
 
@@ -699,9 +699,9 @@ export const processObjectRules = (payload:any, count:number) => {
 }
 
 export const processBaseObjectRules = (payload:any, count:number) => {
-  var data: any[] = [];
+  const data: any[] = [];
 
-  for (var i=0; i<count; i++) {
+  for (let i=0; i<count; i++) {
     data.push(fakeDataValueGenerator(payload));
   }
 
@@ -709,11 +709,11 @@ export const processBaseObjectRules = (payload:any, count:number) => {
 }
 
 const generateArray = (obj:any) => {
-  var data:any = [];
+  const data:any = [];
   if (obj.items && Object.keys(obj.items).length === 0)
     return data;
-  var count = obj.rule.count ? obj.rule.count : 1;
-  for (var i=0; i<count; i++) {
+  const count = obj.rule.count ? obj.rule.count : 1;
+  for (let i=0; i<count; i++) {
     if (obj.subType === 'object')
       data.push(generateObject(obj?.items?.properties ? obj.items.properties : obj.properties));
     else if (obj.subType === 'array')

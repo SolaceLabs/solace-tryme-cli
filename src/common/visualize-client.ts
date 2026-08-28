@@ -13,7 +13,7 @@ export class VisualizeClient {
       return;
     }
     try {
-      let message = solace.SolclientFactory.createMessage();
+      const message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       message.setBinaryAttachment(JSON.stringify(payload));
       message.setDeliveryMode(MessageDeliveryModeType.DIRECT);

@@ -25,9 +25,9 @@ const deliveryModeMap:Map<string, MessageDeliveryModeType> = new Map<string, Mes
 
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
   hour12: false,
-  hour: '2-digit' as '2-digit',
-  minute: '2-digit' as '2-digit',
-  second: '2-digit' as '2-digit',
+  hour: '2-digit' as const,
+  minute: '2-digit' as const,
+  second: '2-digit' as const,
   fractionalSecondDigits: 3 // Include milliseconds with 3 digits
 };
 
@@ -50,7 +50,7 @@ export class SolaceClient extends VisualizeClient {
     this.options = options;
 
     //Initializing the solace client library
-    let factoryProps = new solace.SolclientFactoryProperties();
+    const factoryProps = new solace.SolclientFactoryProperties();
     factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
@@ -180,9 +180,9 @@ export class SolaceClient extends VisualizeClient {
       else
         return obj[path];
   
-    let field = path.substring(0, path.indexOf('.'));
-    let fieldName = field.replaceAll('[0]', '');
-    var remaining = path.substring(path.indexOf('.')+1);
+    const field = path.substring(0, path.indexOf('.'));
+    const fieldName = field.replaceAll('[0]', '');
+    const remaining = path.substring(path.indexOf('.')+1);
     return this.getSourceFieldValue(field.includes('[0]') ? obj[fieldName][0] : obj[field], remaining);
   }
   
@@ -200,7 +200,7 @@ export class SolaceClient extends VisualizeClient {
           Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
           Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
       }
-      let message = solace.SolclientFactory.createMessage();
+      const message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
       this.options.httpContentEncoding !== undefined && message.setHttpContentEncoding(this.options.httpContentEncoding);
       this.options.httpContentType !== undefined && message.setHttpContentType(this.options.httpContentType);
@@ -267,8 +267,8 @@ export class SolaceClient extends VisualizeClient {
       this.options.appMessageType !== undefined && message.setApplicationMessageType(this.options.appMessageType);
       this.options.replyToTopic !== undefined && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
       if (this.options.userProperties) {
-        let propertyMap = new solace.SDTMapContainer();
-        let props:Record<string, string | string[]> = this.options.userProperties;
+        const propertyMap = new solace.SDTMapContainer();
+        const props:Record<string, string | string[]> = this.options.userProperties;
         Object.entries(props).forEach((entry) => {
           propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
         });
@@ -279,7 +279,7 @@ export class SolaceClient extends VisualizeClient {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
         
-        var pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
+        const pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);    
       } else if (this.options.partitionKeysList && this.options.partitionKeysList.length) {
@@ -294,15 +294,15 @@ export class SolaceClient extends VisualizeClient {
           this.options.partitionKeys = '';
         }
         
-        var fields = this.options.partitionKeys.split('|').map((field:string) => field.trim());
+        const fields = this.options.partitionKeys.split('|').map((field:string) => field.trim());
         if (fields.length) {
           let propertyMap = message.getUserPropertyMap();
           if (!propertyMap) propertyMap = new solace.SDTMapContainer();
           
-          var values:string[] = [];
+          const values:string[] = [];
           fields.forEach((field:string) => {
             try {
-              let val:string = this.getSourceFieldValue(payload, field);
+              const val:string = this.getSourceFieldValue(payload, field);
               values.push(val);
             } catch (error:any) {
               Logger.logWarn(`failed to get field value for ${field} - ${error.toString()}`)
@@ -338,7 +338,7 @@ export class SolaceClient extends VisualizeClient {
       this.options.publishConfirmation ?
         Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message with correlation key ${this.pubConfirmationId} [${new Date().toLocaleString('en-US', dateFormatOptions)}]`) :
         Logger.await(`${chalkEventCounterValue(iter+1)} publishing ${this.options.deliveryMode} message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`);
-      let message = solace.SolclientFactory.createMessage();
+      const message = solace.SolclientFactory.createMessage();
       message.setDestination(solace.SolclientFactory.createDurableQueueDestination(queueName));
       this.options.httpContentEncoding !== undefined && message.setHttpContentEncoding(this.options.httpContentEncoding);
       this.options.httpContentType !== undefined && message.setHttpContentType(this.options.httpContentType);
@@ -394,8 +394,8 @@ export class SolaceClient extends VisualizeClient {
       this.options.appMessageType !== undefined && message.setApplicationMessageType(this.options.appMessageType);
       this.options.replyToTopic !== undefined && message.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
       if (this.options.userProperties) {
-        let propertyMap = new solace.SDTMapContainer();
-        let props:Record<string, string | string[]> = this.options.userProperties;
+        const propertyMap = new solace.SDTMapContainer();
+        const props:Record<string, string | string[]> = this.options.userProperties;
         Object.entries(props).forEach((entry) => {
           propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
         });
@@ -406,7 +406,7 @@ export class SolaceClient extends VisualizeClient {
         let propertyMap = message.getUserPropertyMap();
         if (!propertyMap) propertyMap = new solace.SDTMapContainer();
 
-        var pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
+        const pKey2 = 'pkey-' + Date.now() % this.options.partitionKeysCount;
         propertyMap.addField("JMSXGroupID", solace.SDTField.create(solace.SDTFieldType.STRING, pKey2));
         message.setUserPropertyMap(propertyMap);
       } else if (this.options.partitionKeysList && this.options.partitionKeysList.length) {
@@ -421,15 +421,15 @@ export class SolaceClient extends VisualizeClient {
           this.options.partitionKeys = '';
         }
 
-        var fields = this.options.partitionKeys.split('|').map((field:string) => field.trim());
+        const fields = this.options.partitionKeys.split('|').map((field:string) => field.trim());
         if (fields.length) {
           let propertyMap = message.getUserPropertyMap();
           if (!propertyMap) propertyMap = new solace.SDTMapContainer();
 
-          var values:string[] = [];
+          const values:string[] = [];
           fields.forEach((field:string) => {
             try {
-              let val:string = this.getSourceFieldValue(payload, field);
+              const val:string = this.getSourceFieldValue(payload, field);
               values.push(val);
             } catch (error:any) {
               Logger.logWarn(`failed to get field value for ${field} - ${error.toString()}`);

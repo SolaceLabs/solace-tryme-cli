@@ -1,6 +1,4 @@
-/* eslint-disable no-plusplus */
 /* eslint-disable no-useless-escape */
-/* eslint-disable arrow-body-style */
 /* eslint-disable no-undef */
 class SolaceClient {
   constructor(onConnectionSuccess, onConnectionError, onConnectionLost) {
@@ -13,7 +11,7 @@ class SolaceClient {
     this.onConnectionLost = onConnectionLost;
     this.client = new Paho.MQTT.Client(
       connection.MQTT_HOST,
-      // eslint-disable-next-line radix
+       
       parseInt(connection.MQTT_PORT),
       '/',
       'visualizer');

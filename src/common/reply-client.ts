@@ -39,7 +39,7 @@ export class SolaceClient extends VisualizeClient {
     this.replier.subscribed = [];
 
     //Initializing the solace client library
-    let factoryProps = new solace.SolclientFactoryProperties();
+    const factoryProps = new solace.SolclientFactoryProperties();
     factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
@@ -115,7 +115,7 @@ export class SolaceClient extends VisualizeClient {
         // define message event listener
         this.session.on(solace.SessionEventCode.MESSAGE, (message: any) => {
           try {
-            var request:any = message as string;
+            const request:any = message as string;
             this.publishVisualizationEvent(this.session, this.options, STM_EVENT_REQUEST_RECEIVED, { 
               type: 'replier', topicName: request.getDestination().getName(), clientName: this.clientName, uuid: uuid(), msgId: message.getApplicationMessageId() 
             })    
@@ -203,7 +203,7 @@ export class SolaceClient extends VisualizeClient {
     Logger.logSuccess(`request received - ${message.getDestination()}, type - ${getType(message)}`)
     Logger.dumpMessage(message, this.options.outputMode, this.options.pretty);
     if (this.session !== null) {
-      var reply = solace.SolclientFactory.createMessage();
+      const reply = solace.SolclientFactory.createMessage();
       this.options.httpContentEncoding && reply.setHttpContentEncoding(this.options.httpContentEncoding);
       this.options.httpContentType && reply.setHttpContentType(this.options.httpContentType);
       if (payload) {
@@ -212,7 +212,7 @@ export class SolaceClient extends VisualizeClient {
             if (typeof payload === 'object') {
               reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
             } else {
-              var jsonPayload = JSON.parse(payload.toString());
+              const jsonPayload = JSON.parse(payload.toString());
               reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
             }
           } catch (error) {

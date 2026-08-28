@@ -6,7 +6,7 @@ import { fileExists, processPlainPath } from '../utils/config';
 import { defaultStmFeedsHome } from '../utils/defaults';
 
 const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var archiveFile = optionsSource.archiveFile === 'cli' ? options.archiveFile : '';
+  let archiveFile = optionsSource.archiveFile === 'cli' ? options.archiveFile : '';
 
   if (!archiveFile) {
     const { Input } = require('enquirer');
@@ -25,7 +25,7 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
   }
 
   archiveFile = archiveFile.trim().replace(/['"]+/g, '');
-  let zipPath = !fileExists(archiveFile) ? `${process.cwd()}/${archiveFile}` : archiveFile;
+  const zipPath = !fileExists(archiveFile) ? `${process.cwd()}/${archiveFile}` : archiveFile;
   if (!fileExists(zipPath)) {
     Logger.logError(`File ${archiveFile} does not exist!`);
     Logger.error('exiting...');
@@ -38,7 +38,7 @@ const feedImport = async (options: ManageFeedClientOptions, optionsSource: any) 
     process.exit(1)
   }
 
-  var importPath = `${process.cwd()}/import`;
+  const importPath = `${process.cwd()}/import`;
   if (fileExists(importPath)) fs.rmdirSync(importPath, { recursive: true });
   fs.mkdirSync(importPath, { recursive: true });
 

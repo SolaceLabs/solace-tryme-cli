@@ -18,9 +18,9 @@ const publishStats:any = {};
 
 const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) => {
   const { helpExamples, quiet } = options
-  var feedName: string = '';
-  var eventNames: string[] = [];
-  var gitFeed = false;
+  let feedName: string = '';
+  let eventNames: string[] = [];
+  let gitFeed = false;
 
   if (helpExamples) {
     // TODO
@@ -29,7 +29,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
 
   checkFeedRunOptions(options, optionsSource);
 
-  var cmdLine = false;
+  let cmdLine = false;
   if (options.useDefaults) {
     cmdLine = true;
     var feedInfo = await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
@@ -176,7 +176,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       ]
     });
 
-    var choice = undefined;
+    let choice = undefined;
     await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
@@ -312,7 +312,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     }
     
     if (optionsSource.eventNames === 'cli') {
-      var foundEvents = events.filter((el:any) => options.eventNames.find((e:any) => el.name === e));
+      const foundEvents = events.filter((el:any) => options.eventNames.find((e:any) => el.name === e));
 
       options.eventNames = [];
       foundEvents.map((event:any) => {
@@ -334,11 +334,11 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   // load feed rules
-  var feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
+  const feed = gitFeed ? await loadGitFeedFile(feedName, defaultFeedRulesFile) : loadLocalFeedFile(feedName, defaultFeedRulesFile);
 
   function fixSessionSettings(sessionSettings: any, property: string, options: any, optionName: any = null) {
     if (sessionSettings[property] !== undefined && sessionSettings[property].exposed && sessionSettings[property].value !== undefined) {
-      let optionProperty = optionName ? optionName : property;
+      const optionProperty = optionName ? optionName : property;
       options[optionProperty] = sessionSettings[property].value !== undefined ? 
                                   sessionSettings[property].value : sessionSettings[property].default;
       if (sessionSettings[property].datatype === 'number') {
@@ -350,7 +350,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   }
 
   // populate feed settings (session and message)
-  var sessionSettings:any = null;
+  let sessionSettings:any = null;
   try {
     sessionSettings = gitFeed ? await loadGitFeedSessionFile(feedName, defaultFeedSessionFile) : 
                               loadLocalFeedSessionFile(feedName, defaultFeedSessionFile);
@@ -378,9 +378,9 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
 
   options.readyForExit = options.eventNames.length;
   options.eventNames.forEach((eventName:any) => {
-    var feedRule:any = undefined;
-    var name = eventName.split('      ')[0];
-    var topic = eventName.split('      ')[1];
+    let feedRule:any = undefined;
+    const name = eventName.split('      ')[0];
+    const topic = eventName.split('      ')[1];
     feed.forEach((rule:any) => {
       if (rule.messageName === name && rule.topic === topic) {
         feedRule = rule;
@@ -392,7 +392,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
       return;
     }
 
-    let publishInterval = optionsSource.interval === 'cli' ? options.interval :
+    const publishInterval = optionsSource.interval === 'cli' ? options.interval :
                             feedRule.publishSettings?.hasOwnProperty('interval') ? 
                               parseInt(feedRule.publishSettings?.interval) : defaultMessagePublishConfig.interval;
 
@@ -430,7 +430,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
   });
 
   const publisher = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
   try {
     await publisher.connect()
   } catch (error:any) {
@@ -454,13 +454,13 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
     }, options.exitAfter * 1000);
   }
 
-  for (var i=0; i<selectedMessages.length; i++) {
-    var msg = selectedMessages[i];
+  for (let i=0; i<selectedMessages.length; i++) {
+    const msg = selectedMessages[i];
     addEventFeedTimer({...msg}, publisher);
   }
 
   setInterval(() => {
-    var completed = selectedMessages.length;
+    let completed = selectedMessages.length;
     eventFeedTimers.forEach((t) => {
       if (t.completed && t.message.count >= publishStats[`${t.message.message}-${t.message.topic}`]) {
         completed--;
@@ -490,7 +490,7 @@ const feedRun = async (options: ManageFeedPublishOptions, optionsSource: any) =>
 
 function fixDefaultMessageSettings(defaultSettings: any, property: string, options: any, optionName: any = null) {
   if (defaultSettings[property] !== undefined && defaultSettings[property].exposed) {
-    let optionProperty = optionName ? optionName : property;
+    const optionProperty = optionName ? optionName : property;
     options[optionProperty] = defaultSettings[optionProperty].default;
     if (defaultSettings[property].datatype === 'number') {
       options[optionProperty] = parseInt(options[optionProperty]);
@@ -504,7 +504,7 @@ function fixDefaultMessageSettings(defaultSettings: any, property: string, optio
 
 function fixMessageSettings(defaultSettings: any, messageSettings: any, property: string, options: any, optionName: any = null) {
   if (defaultSettings[property] !== undefined && defaultSettings[property].exposed && messageSettings[property] !== undefined) {
-    let optionProperty = optionName ? optionName : property;
+    const optionProperty = optionName ? optionName : property;
     options[optionProperty] = messageSettings[optionProperty];
     if (defaultSettings[property].datatype === 'number') {
       options[optionProperty] = parseInt(options[optionProperty]);
@@ -560,14 +560,14 @@ async function publishFeed(publisher:any, msg:any) {
   if (publisher.exited) {
     return;
   }
-  var {topic, payload} = generateEvent(msg.rule);
+  const {topic, payload} = generateEvent(msg.rule);
   publisher.publish(topic, payload, msg.options, msg.published++);
   publishStats[`${msg.message}-${msg.topic}`]++;
   Logger.success(`published ` +  
                 chalkEventCounterLabel(msg.message ? msg.message : 
                   msg.rule.eventName ? msg.rule.eventName : msg.ruleMessageName));
   if (msg.count > 0 && publishStats[`${msg.message}-${msg.topic}`] >= msg.count) {
-    var index = eventFeedTimers.findIndex((t) => t.name === msg.message && t.topic === msg.topic);
+    const index = eventFeedTimers.findIndex((t) => t.name === msg.message && t.topic === msg.topic);
     if (index < 0) {
       console.error('Hmm... could not find the timer');
       return;

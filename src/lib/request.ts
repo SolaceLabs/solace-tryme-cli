@@ -18,7 +18,7 @@ const request = async (
 
   const { count, interval } = options;
   const requestor = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
 
   try {
     await requestor.connect()
@@ -42,11 +42,11 @@ const request = async (
     requestor.exit();
   });
 
-  var payloadType:any = options.payloadType as string;
-  var message:any = options.message as string;
+  const payloadType:any = options.payloadType as string;
+  let message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
   
-  var file:any = options.file as string;
+  const file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
       Logger.logError(`missing file '${file}'`);
@@ -66,7 +66,7 @@ const request = async (
 
   if (options.stdin) {
     Logger.ctrlDToPublish();
-    var readLines = new StdinRead();
+    const readLines = new StdinRead();
     await readLines.getData();
     message = readLines.data();
   }
@@ -74,11 +74,11 @@ const request = async (
   try {
     // if (options.replyToTopic)
     //   requestor.subscribe(options.replyToTopic)
-    var topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
+    const topicName = (typeof options.topic === 'object') ? options.topic[0] : options.topic;
     if (count === 1) {
       requestor.request(topicName, message, payloadType, 1);
     } else {
-      for (var iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
+      for (let iter=count ? count : 1, n=1;iter > 0;iter--, n++) {
         requestor.request(topicName, message, payloadType, n);
         if (interval) await delay(interval)        
       }

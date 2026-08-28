@@ -68,8 +68,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get client-profile successful`)
-          let result = data.data;
-          var clientProfiles = "";
+          const result = data.data;
+          let clientProfiles = "";
           clientProfiles += `\n${prettyJSON(JSON.stringify(result))}`
           Logger.logDetailedSuccess(`Details of client-profile ${this.options.clientProfile} on vpn ${this.options.sempVpn}`, clientProfiles)
         }
@@ -101,8 +101,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get client-profiles list successful`)
-          let result = data.data;
-          var clientProfiles = "";
+          const result = data.data;
+          let clientProfiles = "";
           result.forEach((profile:any) => clientProfiles += `\n${profile.clientProfileName}`)
           Logger.logDetailedSuccess(`${result.length} client profile(s) found on vpn ${this.options.sempVpn}`, clientProfiles)
         }

@@ -17,7 +17,7 @@ const reply = async (
   }
 
   const replier = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
 
   try {
     await replier.connect();
@@ -41,11 +41,11 @@ const reply = async (
     replier.exit();
   });
 
-  var payloadType:any = options.payloadType as string;
-  var message:any = options.message as string;
+  const payloadType:any = options.payloadType as string;
+  let message:any = options.message as string;
   message = (optionsSource.message !== 'cli' && (optionsSource.defaultMessage === 'default' || optionsSource.defaultMessage === 'cli')) ? getDefaultMessage() : message;
 
-  var file:any = options.file as string;
+  const file:any = options.file as string;
   if (file) {
     if (!fileExists(file)) {
       Logger.logError(`missing file '${file}'`);
@@ -65,7 +65,7 @@ const reply = async (
 
   if (options.stdin) {
     Logger.ctrlDToPublish();
-    var readLines = new StdinRead();
+    const readLines = new StdinRead();
     await readLines.getData();
     message = readLines.data();
   }

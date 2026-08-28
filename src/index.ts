@@ -72,13 +72,13 @@ export class Commander {
     if (!this.online) 
       return '';
 
-    var now = Date.now();
+    const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000; // 1 day
     // const oneDay = 10 * 1000; // 10 secs
 
     if (!this.newVersionFound && this.lastChecked && (now - this.lastChecked) > oneDay) {
       const fetch = require('sync-fetch')
-      var latestVersion = undefined;
+      let latestVersion = undefined;
 
       try {
         latestVersion = fetch('https://api.github.com/repos/SolaceLabs/solace-tryme-cli/releases/latest', {
@@ -376,7 +376,7 @@ if (process.env.SHOW_VISUALIZATION) {
       this.newVersionCheck();
       const optionsSource:any = {};
       const defaultKeys = Object.keys(defaultMessageConnectionConfig);
-      for (var i=0; i<defaultKeys.length; i++) {
+      for (let i=0; i<defaultKeys.length; i++) {
         optionsSource[defaultKeys[i]] = configListCmd.getOptionValueSource(defaultKeys[i]);
       }
 
@@ -394,7 +394,7 @@ if (process.env.SHOW_VISUALIZATION) {
       this.newVersionCheck();
       const optionsSource:any = {};
       const defaultKeys = Object.keys(defaultMessageConnectionConfig);
-      for (var i=0; i<defaultKeys.length; i++) {
+      for (let i=0; i<defaultKeys.length; i++) {
         optionsSource[defaultKeys[i]] = configDeleteCmd.getOptionValueSource(defaultKeys[i]);
       }
 
@@ -594,7 +594,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedValidateCmd.action((options: ManageFeedClientOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedValidateCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -612,7 +612,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedPreviewCmd.action((options: ManageFeedClientOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedPreviewCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -628,7 +628,7 @@ if (process.env.SHOW_VISUALIZATION) {
     generateCmd.action((options: ManageFeedClientOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = generateCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
       // Capture AI enhancement option source
@@ -647,7 +647,7 @@ if (process.env.SHOW_VISUALIZATION) {
     configureCmd.action((options: ManageFeedClientOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = configureCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -699,7 +699,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedListCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedListCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -715,7 +715,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedImportCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedImportCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -731,7 +731,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedExportCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedExportCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -747,7 +747,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedDownloadCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedDownloadCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 
@@ -763,7 +763,7 @@ if (process.env.SHOW_VISUALIZATION) {
     feedContributeCmd.action((options: ManageFeedPublishOptions) => {
       const optionsSource:any = {};
       const defaultFeedKeys = Object.keys(defaultFeedConfig);
-      for (var i=0; i<defaultFeedKeys.length; i++) {
+      for (let i=0; i<defaultFeedKeys.length; i++) {
         optionsSource[defaultFeedKeys[i]] = feedContributeCmd.getOptionValueSource(defaultFeedKeys[i]);
       }
 

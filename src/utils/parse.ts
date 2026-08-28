@@ -193,7 +193,7 @@ export const parsePartitionKeysCount = (value: string) => {
 }
 
 export const parseMessageProtocol = (value: string) => {
-  var protocol = value.substring(0, value.indexOf( ":" )); 
+  const protocol = value.substring(0, value.indexOf( ":" )); 
   if (!['ws', 'wss', 'http', 'https', 'tcp', 'tcps'].includes(protocol.toLowerCase())) {
     Logger.logError('only ws, wss, http, https, tcp, and tcps are supported.')
     Logger.logError('exiting...')
@@ -203,7 +203,7 @@ export const parseMessageProtocol = (value: string) => {
 }
 
 export const parseManageProtocol = (value: string) => {
-  var protocol = value.substring(0, value.indexOf( ":" )); 
+  const protocol = value.substring(0, value.indexOf( ":" )); 
   if (!['http', 'https'].includes(protocol.toLowerCase())) {
     Logger.logError('only http and https are supported.')
     Logger.logError('exiting...')
@@ -312,8 +312,8 @@ export const parsePartitionKeysList = (value: string, previous: string[] | undef
 export const parseUserProperties = (value: string, previous?: Record<string, string | string[]>) => {
   const [key, val] = value.split(':')
   if (key && val) {
-    var _key = key.trim();
-    var _val = val.trim();
+    const _key = key.trim();
+    const _val = val.trim();
     if (!previous) {
       return { [_key]: _val }
     } else {

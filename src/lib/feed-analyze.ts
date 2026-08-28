@@ -7,7 +7,7 @@ import { validateAsyncAPI } from './feed-validate';
 import { chalkBoldError, chalkBoldWarning } from '../utils/chalkUtils';
 
 const validateSchema = (schema: any) => {
-  var jsonParser = new JsonSchemaParser(schema);
+  const jsonParser = new JsonSchemaParser(schema);
   if (!jsonParser.validate()) {
     Logger.error('Invalid schema');
     process.exit(1);
@@ -17,9 +17,9 @@ const validateSchema = (schema: any) => {
 }
 
 const getChannelMessages = (channel:any) => {
-  let messages:any = {};
+  const messages:any = {};
   Array.from(channel.messages()).map((arr:any) => {
-    let key = arr.id() ? arr.id() : arr.name();
+    const key = arr.id() ? arr.id() : arr.name();
     messages[key] = arr.json()
     if (arr.hasPayload())
       validateSchema(arr.payload().json())
@@ -28,34 +28,34 @@ const getChannelMessages = (channel:any) => {
 }
 
 const getOpMessages = (op:any) => {
-  let messages:any = {};
+  const messages:any = {};
   Array.from(op.messages()).map((arr:any) => {
-    let key = arr.id() ? arr.id() : arr.name();
+    const key = arr.id() ? arr.id() : arr.name();
     messages[key] = arr.json()
   })
   return messages;
 }
 
 const getChannelParameters = (channel:any) => {
-  let parameters:any = {};
+  const parameters:any = {};
   Array.from(channel.parameters()).map((arr:any) => {
-    let key = arr.id() ? arr.id() : arr.name();
+    const key = arr.id() ? arr.id() : arr.name();
     parameters[key] = arr.json()
   })
   return parameters;
 }
 
 const getChannelServers = (channel:any) => {
-  let servers:any = {};
+  const servers:any = {};
   Array.from(channel.servers()).map((arr:any) => {
-    let key = arr.id() ? arr.id() : arr.name();
+    const key = arr.id() ? arr.id() : arr.name();
     servers[key] = arr.json()
   })
   return servers;
 }
 
 const getChannelBindings = (channel:any) => {
-  let bindings:any = {};
+  const bindings:any = {};
   Array.from(channel.bindings()).map((arr:any) => {
     bindings[arr.protocol()] = arr.json()
   })
@@ -179,7 +179,7 @@ const enhanceRuleWithValidatorsAndFormats = (schema: any, rule: any) => {
 
 const setDefaultTopicVariableRules = (obj: any) => {
   for(const prop in obj) {
-    var schema = obj[prop].schema;
+    let schema = obj[prop].schema;
     schema = !schema || !schema.type ? { ...obj[prop], type: 'string' } : schema;
     if (schema.type.toLowerCase() === 'string') {
       obj[prop].rule = schema.enum ? 
@@ -232,7 +232,7 @@ const processObjectPayload = async (payload: any) => {
       if (payload[prop].properties) 
         processObjectPayload(payload[prop].properties);
       else {
-        let keys = Object.keys(payload[prop]);
+        const keys = Object.keys(payload[prop]);
         if (keys.includes('allOf') && payload[prop]['allOf'].length) {
           payload[prop].properties = payload[prop]['allOf'][0].properties;
           processObjectPayload(payload[prop].properties);
@@ -306,7 +306,7 @@ const processObjectPayload = async (payload: any) => {
     }
 
     var schema = payload[prop];
-    var schemaType = schema.type;
+    const schemaType = schema.type;
     if (!schemaType) {
       console.warn(chalkBoldWarning(`Missing type for property ${prop}, setting default type to 'string'`));
     }
@@ -373,12 +373,12 @@ const processPayloadField = (payload: any) => {
 }
 
 const processArrayPayload = (payload: any) => {
-  var prop = 'items';
+  const prop = 'items';
   payload[prop].rule = { name: prop, type: 'array', subType: 'object'};
   if (payload[prop].properties) 
     processPayload(payload[prop].properties)
   else {
-    let keys = Object.keys(payload[prop]);
+    const keys = Object.keys(payload[prop]);
     if (keys.includes('allOf') && payload[prop]['allOf'].length) {
       payload[prop].properties = payload[prop]['allOf'][0].properties;
       payload[prop].type = payload[prop]['allOf'][0].type;
@@ -416,7 +416,7 @@ const processArrayPayload = (payload: any) => {
 const processPayload = (msg: any) => {
   // Logger.info('processing message: ' + JSON.stringify(msg));
   // Logger.info('message type: ' + msg.type);
-  var payload = msg.payload;
+  let payload = msg.payload;
   // Logger.info('payload type: ' + payload.type);
 
   if (!payload && msg.properties) {
@@ -434,7 +434,7 @@ const processPayload = (msg: any) => {
 
 const setDefaultPayloadRules = (msgs: any) => {
   msgs.forEach(async (msg:any) => {
-    var payload = msg.payload;
+    let payload = msg.payload;
     if (payload && payload.type === 'object' && payload.properties) {
       msg.payload = { ...payload.properties }
       payload = msg.payload;
@@ -466,7 +466,7 @@ const setDefaultPayloadRules = (msgs: any) => {
 
 const checkIfPlainJson = (schemaFormant: string) => {
   const jsonFormats = ['vnd.aai.asyncapi+json;', 'application/json;'];
-  let plainJson = jsonFormats.some((format: string) =>
+  const plainJson = jsonFormats.some((format: string) =>
     schemaFormant.toLowerCase().includes(format.toLowerCase())
   );
   return plainJson;
@@ -474,7 +474,7 @@ const checkIfPlainJson = (schemaFormant: string) => {
 
 const checkSchemaFormat = (schemaFormat: string) => {
   const supportedSchemaFormats = ['vnd.aai.asyncapi+json', 'application/schema+yaml', 'vnd.aai.asyncapi', 'json', 'avro'];
-  let supported = supportedSchemaFormats.some((format: string) => 
+  const supported = supportedSchemaFormats.some((format: string) => 
     schemaFormat.toLowerCase().includes(format.toLowerCase())
   );
   return supported;
@@ -572,7 +572,7 @@ const fixUpPayloadApplicators = (payload:any):any => {
     if (payload.properties) {
       return fixUpPayloadApplicators(payload.properties);
     } else {
-      let keys = Object.keys(payload);
+      const keys = Object.keys(payload);
       if (keys.includes('allOf')) {
         return fixUpPayloadApplicators(payload['allOf'][0]);
       } else if (keys.includes('anyOf')) {
@@ -584,7 +584,7 @@ const fixUpPayloadApplicators = (payload:any):any => {
       }
     }
   } else {
-    let keys = Object.keys(payload);
+    const keys = Object.keys(payload);
     if (keys.includes('allOf')) {
       return fixUpPayloadApplicators(payload['allOf'][0]);
     } else if (keys.includes('anyOf')) {
@@ -674,7 +674,7 @@ const load = async (asyncApiSchema: Input, validate: boolean = true) => {
 }
 
 const validateTopic = (topic: string) => {
-  let tokens = topic.split('/');
+  const tokens = topic.split('/');
   let valid = true;
   valid = tokens.length > 0;
   if (!valid) return false;
@@ -718,8 +718,8 @@ const analyze = async (document: AsyncAPIDocumentInterface, reverse:boolean = fa
 
   // extract topics
   _channels.forEach((channel:Channel) => {
-    let operations:any = channel.operations();
-    let sendOps:any = reverse ?
+    const operations:any = channel.operations();
+    const sendOps:any = reverse ?
                         Array.from(operations).filter((o:any) => !o.isSend()) :
                         Array.from(operations).filter((o:any) => o.isSend());
     if (sendOps.length) {
@@ -741,7 +741,7 @@ const analyze = async (document: AsyncAPIDocumentInterface, reverse:boolean = fa
       })
     }
 
-    let receiveOps = reverse ?
+    const receiveOps = reverse ?
                         Array.from(operations).filter((o:any) => !o.isReceive()) :
                         Array.from(operations).filter((o:any) => o.isReceive());
     if (receiveOps.length) {
@@ -761,7 +761,7 @@ const analyze = async (document: AsyncAPIDocumentInterface, reverse:boolean = fa
   // extract schemas 
   _schemas.forEach((schema:any) => {
     validateSchema(schema.json())
-    let id = schema.id();
+    const id = schema.id();
     api.schemas[id] = schema.json();
   });
 
@@ -790,7 +790,7 @@ const analyze = async (document: AsyncAPIDocumentInterface, reverse:boolean = fa
 
   // classify message-based send/receive contexts
   Object.keys(sendChannels).forEach((topic:any) => {
-    let channel = sendChannels[topic];
+    const channel = sendChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].send.push({
         topicName: channel.address,
@@ -804,7 +804,7 @@ const analyze = async (document: AsyncAPIDocumentInterface, reverse:boolean = fa
   })
   
   Object.keys(receiveChannels).forEach((topic:any) => {
-    let channel = receiveChannels[topic];
+    const channel = receiveChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].receive.push({
         topicName: channel.address,
@@ -847,8 +847,8 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
 
   // extract topics
   _channels.forEach((channel:Channel) => {
-    let operations:any = channel.operations();
-    let sendOps:any = reverse ?
+    const operations:any = channel.operations();
+    const sendOps:any = reverse ?
                           Array.from(operations).filter((o:any) => !o.isSend()) :
                           Array.from(operations).filter((o:any) => o.isSend());
     if (sendOps.length) {
@@ -868,7 +868,7 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
       }
     }
 
-    let receiveOps = reverse ?
+    const receiveOps = reverse ?
                         Array.from(operations).filter((o:any) => !o.isReceive()) :
                         Array.from(operations).filter((o:any) => o.isReceive());
     if (receiveOps.length) {
@@ -886,7 +886,7 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
   // extract schemas 
   _schemas.forEach((schema:any) => {
     validateSchema(schema.json())
-    let id = schema.id();
+    const id = schema.id();
     api.schemas[id] = schema.json();
   });
 
@@ -897,7 +897,7 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
   
   // extract messages
   _messages.forEach((message:any) => {
-    let key = message.id() ? message.id() : message.name();
+    const key = message.id() ? message.id() : message.name();
     api.messages[key] = {
       send: [],
       receive: [],
@@ -908,7 +908,7 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
 
   // classify message-based send/receive contexts
   Object.keys(sendChannels).forEach((topic:any) => {
-    let channel = sendChannels[topic];
+    const channel = sendChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].send.push({
         topicName: topic,
@@ -922,7 +922,7 @@ const analyzeV2 = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
   })
   
   Object.keys(receiveChannels).forEach((topic:any) => {
-    let channel = receiveChannels[topic];
+    const channel = receiveChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].receive.push({
         topicName: topic,
@@ -965,8 +965,8 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
 
   // extract topics
   _channels.forEach((channel:Channel) => {
-    let operations:any = channel.operations();
-    let sendOps:any = reverse ? 
+    const operations:any = channel.operations();
+    const sendOps:any = reverse ? 
                         Array.from(operations).filter((o:any) => !o.isSend()) :
                         Array.from(operations).filter((o:any) => o.isSend());
     if (sendOps.length) {
@@ -986,7 +986,7 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
       }
     }
 
-    let receiveOps = reverse ?
+    const receiveOps = reverse ?
                         Array.from(operations).filter((o:any) => !o.isReceive()) :
                         Array.from(operations).filter((o:any) => o.isReceive());
     if (receiveOps.length) {
@@ -1004,7 +1004,7 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
   // extract schemas 
   _schemas.forEach((schema:any) => {
     validateSchema(schema.json())
-    let id = schema.id();
+    const id = schema.id();
     api.schemas[id] = schema.json();
   });
 
@@ -1025,7 +1025,7 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
 
   // classify message-based send/receive contexts
   Object.keys(sendChannels).forEach((topic:any) => {
-    let channel = sendChannels[topic];
+    const channel = sendChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].send.push({
         topicName: topic,
@@ -1039,7 +1039,7 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
   })
   
   Object.keys(receiveChannels).forEach((topic:any) => {
-    let channel = receiveChannels[topic];
+    const channel = receiveChannels[topic];
     Object.keys(channel.messages).forEach((messageName:any) => {
       api.messages[messageName].receive.push({
         topicName: topic,
@@ -1060,24 +1060,24 @@ const analyzeEP = async (document: AsyncAPIDocumentInterface, reverse:boolean = 
 }
 
 const formulateRules = (document:AsyncAPIDocumentInterface|undefined, reverse:boolean = false) => {
-  var ruleSet:any = [];
+  const ruleSet:any = [];
 
   const checkHasPayload = (message:any) => {
     if (!message?.hasPayload())
       return false;
 
-    let obj = message?.payload()?.json();
-    let keys = Object.keys(obj).filter((k:any) => !k.startsWith('x-'));
+    const obj = message?.payload()?.json();
+    const keys = Object.keys(obj).filter((k:any) => !k.startsWith('x-'));
     return keys.length > 0;
   };
 
-  let _info = document?.info();
+  const _info = document?.info();
 
   document?.operations().forEach((_operation) => {
-    let consideration = reverse ? _operation.isReceive() : _operation.isSend();
+    const consideration = reverse ? _operation.isReceive() : _operation.isSend();
     if (consideration) {
-      let _channels = _operation.channels();
-      let _messages = _operation.messages();
+      const _channels = _operation.channels();
+      const _messages = _operation.messages();
 
       _channels.forEach((channel:any) => {
         Array.from(_messages).map((message:any) => {
@@ -1089,16 +1089,16 @@ const formulateRules = (document:AsyncAPIDocumentInterface|undefined, reverse:bo
             process.exit(1);
           }
             
-          let hasPayload = checkHasPayload(message);
+          const hasPayload = checkHasPayload(message);
           let fixedUpPayload = hasPayload ? 
                                     fixUpMessageApplicators(message?.payload()?.json()) : 
                                     undefined;
-          let plainJson = hasPayload ? checkIfPlainJson(message.schemaFormat()) : false;
+          const plainJson = hasPayload ? checkIfPlainJson(message.schemaFormat()) : false;
           if (plainJson) {
             fixedUpPayload = fixUpJsonPayload(fixedUpPayload, fixedUpPayload);
           }
 
-          let rule = {
+          const rule = {
             topic: channel.address(),
             topicParameters: getChannelParameters(channel),
             eventName: message.extensions().get('x-ep-event-name') ? 
@@ -1132,7 +1132,7 @@ const formulateRules = (document:AsyncAPIDocumentInterface|undefined, reverse:bo
 }
 
 const formulateSchemas = (document:AsyncAPIDocumentInterface|undefined) => {
-  var schemaSet:any = [];
+  const schemaSet:any = [];
 
   document?.schemas().forEach((_schema) => {
     schemaSet[_schema.id()] = _schema.json();

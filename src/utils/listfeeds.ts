@@ -3,15 +3,15 @@ import { loadLocalFeedFile, loadGitFeedFile, processPlainPath } from './config';
 import { defaultEventFeedsFile, defaultFeedAnalysisFile, defaultFeedInfoFile, defaultGitFeedRepo, defaultGitRepo, defaultStmFeedsHome } from './defaults';
 
 export const getLocalEventFeeds = () => {
-  var localFeeds: any[] = [];
+  const localFeeds: any[] = [];
   const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
   if (!fs.existsSync(`${feedPath}`)) 
     return localFeeds;
   
   const files:any = fs.readdirSync(`${feedPath}`);
   files.forEach((fileName: string) => {
-    var filePath = `${feedPath}/${fileName}`
-    var stat = fs.lstatSync(filePath);
+    const filePath = `${feedPath}/${fileName}`
+    const stat = fs.lstatSync(filePath);
     if (stat.isDirectory() && fs.existsSync(`${filePath}/${defaultFeedInfoFile}`)) {
       localFeeds.push(fileName)
     }
@@ -21,10 +21,10 @@ export const getLocalEventFeeds = () => {
 }
 
 export const getFeedEvents = (feedName:any) => {
-  var events: any[] = [];
-  var data = loadLocalFeedFile(feedName, defaultFeedAnalysisFile)
+  const events: any[] = [];
+  const data = loadLocalFeedFile(feedName, defaultFeedAnalysisFile)
   Object.keys(data.messages).forEach((messageName) => {
-    var sendEvents = data.messages[messageName].send;
+    const sendEvents = data.messages[messageName].send;
     if (sendEvents.length) {
       sendEvents.forEach((_event:any) => {
         events.push({
@@ -39,7 +39,7 @@ export const getFeedEvents = (feedName:any) => {
 }
 
 export const getGitEventFeeds = async () => {
-  var gitFeeds: any[] = [];
+  const gitFeeds: any[] = [];
   try {
     await fetch(`${defaultGitRepo}/${defaultEventFeedsFile}`)
       .then(async (response) => {
@@ -54,10 +54,10 @@ export const getGitEventFeeds = async () => {
 }
 
 export const getGitFeedEvents = async (feedName:any) => {
-  var events: any[] = [];
-  var data = await loadGitFeedFile(feedName, defaultFeedAnalysisFile)
+  const events: any[] = [];
+  const data = await loadGitFeedFile(feedName, defaultFeedAnalysisFile)
   Object.keys(data.messages).forEach((messageName) => {
-    var sendEvents = data.messages[messageName].send;
+    const sendEvents = data.messages[messageName].send;
     if (sendEvents.length) {
       sendEvents.forEach((_event:any) => {
         events.push({

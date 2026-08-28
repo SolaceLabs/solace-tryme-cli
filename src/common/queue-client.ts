@@ -74,8 +74,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get queues successful`)
-          let result = data.data;
-          var queues = "";
+          const result = data.data;
+          let queues = "";
           queues += `\n${prettyJSON(JSON.stringify(result))}`
           Logger.logDetailedSuccess(`Details of queue ${this.options.queue} on vpn ${this.options.sempVpn}`, queues)
           await this.listSubscription(this.options.queue)
@@ -107,8 +107,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get queues list successful`)
-          let result = data.data;
-          var queues = "";
+          const result = data.data;
+          let queues = "";
           result.forEach((q:any) => queues += `\n${q.queueName}`)
           Logger.logDetailedSuccess(`${result.length} queue(s) found on vpn ${this.options.sempVpn}`, queues)
         }
@@ -214,7 +214,7 @@ export class SempClient {
   }
 
   async listSubscription(queueName: string) {
-    var sempUrl = this.options.sempUrl + `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${encodeURIComponent(queueName)}/subscriptions`;
+    const sempUrl = this.options.sempUrl + `${this.urlFixture}/msgVpns/${this.options.sempVpn}/queues/${encodeURIComponent(queueName)}/subscriptions`;
     await fetch(sempUrl, {
       method: "GET",
       credentials: 'same-origin',
@@ -231,8 +231,8 @@ export class SempClient {
       if (data.meta.error) {
         Logger.logDetailedWarn(`list subscription on queue '${this.options?.queue}' encountered error`, `${decodeURIComponent(data.meta.error.description)}`)
       } else {
-        let result = data.data;
-        var subs = "";
+        const result = data.data;
+        let subs = "";
         result.forEach((sub:any) => subs += `\n${sub.subscriptionTopic}`)
         result.length && Logger.logDetailedSuccess(`${result.length} subscription(s) found on queue ${this.options.queue}`, subs)
       }
@@ -328,8 +328,8 @@ export class SempClient {
         if (data.meta.error) {
           Logger.logDetailedWarn(`list subscription on queue '${this.options?.queue}' encountered error`, `${decodeURIComponent(data.meta.error.description)}`)
         } else {
-          let result = data.data;
-          var subs = "";
+          const result = data.data;
+          let subs = "";
           result.forEach((sub:any) => subs += `\n${sub.subscriptionTopic}`)
           Logger.logDetailedSuccess(`${result.length} subscription(s) found on queue ${this.options.queue}`, subs)
         }

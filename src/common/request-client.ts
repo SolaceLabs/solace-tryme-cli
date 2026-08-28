@@ -38,7 +38,7 @@ export class SolaceClient extends VisualizeClient {
     this.requestor.topicName = this.options.topic ? this.options.topic : getDefaultTopic('request');
 
     //Initializing the solace client library
-    let factoryProps = new solace.SolclientFactoryProperties();
+    const factoryProps = new solace.SolclientFactoryProperties();
     factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
@@ -128,7 +128,7 @@ export class SolaceClient extends VisualizeClient {
     }
     
     Logger.await(`${chalkEventCounterLabel(iter)} requesting...`);
-    var request = solace.SolclientFactory.createMessage();
+    const request = solace.SolclientFactory.createMessage();
     request.setDestination(solace.SolclientFactory.createTopicDestination(topicName));
     this.options.httpContentEncoding && request.setHttpContentEncoding(this.options.httpContentEncoding);
     this.options.httpContentType && request.setHttpContentType(this.options.httpContentType);
@@ -139,7 +139,7 @@ export class SolaceClient extends VisualizeClient {
           if (typeof payload === 'object') {
             request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(payload)));
           } else {
-            var jsonPayload = JSON.parse(payload.toString());
+            const jsonPayload = JSON.parse(payload.toString());
             request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, JSON.stringify(jsonPayload)));
           }
         } catch (error) {
@@ -171,8 +171,8 @@ export class SolaceClient extends VisualizeClient {
     this.options.appMessageType && request.setApplicationMessageType(this.options.appMessageType);
     this.options.replyToTopic && request.setReplyTo(solace.SolclientFactory.createTopicDestination(this.options.replyToTopic))
     if (this.options.userProperties) {
-      let propertyMap = new solace.SDTMapContainer();
-      let props:Record<string, string | string[]> = this.options.userProperties;
+      const propertyMap = new solace.SDTMapContainer();
+      const props:Record<string, string | string[]> = this.options.userProperties;
       Object.entries(props).forEach((entry) => {
         propertyMap.addField(entry[0], solace.SDTField.create(solace.SDTFieldType.STRING, entry[1]));
       });
