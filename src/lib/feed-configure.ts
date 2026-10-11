@@ -15,9 +15,9 @@ import { generateEvent } from '@solace-labs/solace-data-generator';
 
 const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
-  var feedName: string | undefined = options.feedName;
-  var publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
-  var feedInfo: any = undefined;
+  let feedName: string | undefined = options.feedName;
+  const publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
+  let feedInfo: any = undefined;
   
   if (options.lint) {
     Logger.logSuccess('linting successful...')
@@ -29,7 +29,7 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     feedInfo = loadLocalFeedFile(feedName, defaultFeedInfoFile);
   } 
   else {
-    var feeds = getLocalEventFeeds();
+    const feeds = getLocalEventFeeds();
     if (!feeds || !feeds.length) {
       Logger.logError('no local feeds found...')
       process.exit(1);
@@ -131,10 +131,10 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   
   app.get('/feeds', (req:any, res:any) => {
     if (req.query.feed) {
-      var feed = getFeed(req.query.feed);
+      const feed = getFeed(req.query.feed);
       res.json(feed);
     } else {
-      var feeds = getAllFeeds();
+      const feeds = getAllFeeds();
       res.json(feeds);    
     }
 
@@ -145,13 +145,13 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
       res.status(201).json({error: 'missing feed name'})
     }
 
-    var rules = loadLocalFeedFile(req.query.feed, defaultFakerRulesFile);
+    const rules = loadLocalFeedFile(req.query.feed, defaultFakerRulesFile);
     res.json(rules);    
   })
 
   app.post('/feedrules', async (req:any, res:any) => {
-    var feed = req.body;
-    var result = await updateRules(feed.name, feed.rules);
+    const feed = req.body;
+    const result = await updateRules(feed.name, feed.rules);
     if (result) 
       res.status(200).json({success: 'updated feed rules successfully'});
     else
@@ -159,8 +159,8 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/feedsession', async (req:any, res:any) => {
-    var feed = req.body;
-    var result = await updateSession(feed.name, feed.session);
+    const feed = req.body;
+    const result = await updateSession(feed.name, feed.session);
     if (result) 
       res.status(200).json({success: 'updated feed session successfully'});
     else
@@ -181,9 +181,9 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/fakedata', (req:any, res:any) => {
-    var data = req.body;
+    const data = req.body;
     try {
-      var fakedData = fakeDataValueGenerator(data);
+      const fakedData = fakeDataValueGenerator(data);
       res.status(200).json(fakedData)
     } catch (error: any) {
       res.status(201).json({error: error.toString() });
@@ -191,9 +191,9 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/fakepayload', (req:any, res:any) => {
-    var data = req.body;
+    const data = req.body;
     try {
-      var fakedData = fakeDataObjectGenerator(data);
+      const fakedData = fakeDataObjectGenerator(data);
       res.status(200).json(fakedData)
     } catch (error: any) {
       res.status(201).json({error: error.toString() });
@@ -201,9 +201,9 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/fakedata', (req:any, res:any) => {
-    var data = req.body;
+    const data = req.body;
     try {
-      var fakedData = fakeDataValueGenerator(data);
+      const fakedData = fakeDataValueGenerator(data);
       res.status(200).json(fakedData)
     } catch (error: any) {
       res.status(201).json({error: error.toString() });
@@ -211,11 +211,11 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
   })
 
   app.post('/fakeevent', async (req:any, res:any) => {
-    var data = req.body;
-    var result = [];
+    const data = req.body;
+    const result = [];
     try {
-      for (var i=0; i<data.count; i++) {
-        var {topic, payload} = generateEvent(data.rule);
+      for (let i=0; i<data.count; i++) {
+        const {topic, payload} = generateEvent(data.rule);
         result.push({ topic, payload });
       }
       res.status(200).json(result)
@@ -239,11 +239,11 @@ const manage = async (options: ManageFeedClientOptions, optionsSource: any) => {
     setTimeout(process.exit(0), 2000)
   })
 
-  let http = require('http');
-  let server = http.createServer(app);
+  const http = require('http');
+  const server = http.createServer(app);
   server.listen(managePort, () => {
     Logger.info(`App listening on port ${server.address().port}`);
-    var opener = require("opener");
+    const opener = require("opener");
     if (feedName) {
       Logger.info(`Accessible at http://localhost:${server.address().port}/feeds.html?feed=${feedName}`);
       opener(`http://localhost:${server.address().port}/feeds.html?feed=${feedName}`)

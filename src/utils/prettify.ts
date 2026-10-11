@@ -3,30 +3,30 @@
 import { prettyPrint } from '@base2/pretty-print-object';
 import { Logger } from './logger';
 import chalk from 'chalk';
-var _os = require('os');
+const _os = require('os');
 
-var stringTimesN = function stringTimesN(n:number, char:string) {
+const stringTimesN = function stringTimesN(n:number, char:string) {
   return Array(n + 1).join(char);
 };
 
 // Adapted from https://gist.github.com/sente/1083506
 function prettifyXml(xmlInput:string, options: any) {
-  var _options$indent = options.indent,
+  const _options$indent = options.indent,
       indentOption = _options$indent === undefined ? 2 : _options$indent,
       _options$newline = options.newline,
       newlineOption = _options$newline === undefined ? _os.EOL : _options$newline;
 
-  var indentString = stringTimesN(indentOption, ' ');
+  const indentString = stringTimesN(indentOption, ' ');
 
-  var formatted = '';
-  var regex = /(>)\s*(<)(\/*)/g;
-  var xml = xmlInput.replace(regex, '$1' + newlineOption + '$2$3');
+  let formatted = '';
+  const regex = /(>)\s*(<)(\/*)/g;
+  const xml = xmlInput.replace(regex, '$1' + newlineOption + '$2$3');
 
-  var pad = 0;
+  let pad = 0;
   xml.split(/\r?\n/).forEach(function (l:any) {
-    var line = l.trim();
+    const line = l.trim();
 
-    var indent = 0;
+    let indent = 0;
     if (line.match(/.+<\/\w[^>]*>$/)) {
       indent = 0;
     } else if (line.match(/^<\/\w/)) {
@@ -41,8 +41,8 @@ function prettifyXml(xmlInput:string, options: any) {
       indent = 0;
     }
 
-    var padding = stringTimesN(pad, indentString);
-    formatted += padding + line + newlineOption; // eslint-disable-line prefer-template
+    const padding = stringTimesN(pad, indentString);
+    formatted += padding + line + newlineOption;  
     pad += indent;
   });
 
@@ -52,7 +52,7 @@ function prettifyXml(xmlInput:string, options: any) {
 function prettyXML(str: string, indent: number) {
   if (!str) return str;
   if (str.trim().startsWith('<')) {
-    var result = prettifyXml(str, {indent: indent, newline: '\n'});
+    const result = prettifyXml(str, {indent: indent, newline: '\n'});
     return result;
   } else {
     // Logger.warn(`not a valid xml payload`)
@@ -63,15 +63,15 @@ function prettyXML(str: string, indent: number) {
 function prettyJSON(str: string) {
   if (!str) return str;
   try {
-    let isNum = /^\d+$/.test(str);
+    const isNum = /^\d+$/.test(str);
 
-      var obj = isNum ? str : JSON.parse(str);
+      const obj = isNum ? str : JSON.parse(str);
       // var output = chalk.green(JSON.stringify(obj, null, 2));
       // return prettyPrint(obj, {
       //   indent: '  ',
       //   singleQuotes: false
       // });
-      var output = colorizeJSON(obj, 2);
+      const output = colorizeJSON(obj, 2);
       return output
   } catch (error: any) {
     // Logger.warn(`not a valid json payload`)

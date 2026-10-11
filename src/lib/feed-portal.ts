@@ -7,7 +7,7 @@ import { getGitEventFeeds } from '../utils/listfeeds';
 
 const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const managePort = options.managePort ? options.managePort : 0;
-  var publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
+  const publicDir = __dirname.substring(0, __dirname.lastIndexOf(defaultProjectName) + defaultProjectName.length);
 
   const express = require('express');
   const app = express();
@@ -25,35 +25,35 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
   
   app.post('/feeds', async (req:any, res:any) => {
     const isLocal = req.query?.isLocal === true || req.query?.isLocal === 'true';
-    var localFeeds: any[] = [];
+    const localFeeds: any[] = [];
     if (isLocal) {
       const files:any = fs.readdirSync(`${defaultStmFeedsHome}`);
       const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
       files.forEach((fileName: string) => {
-        var filePath = `${feedPath}/${fileName}`
-        var stat = fs.lstatSync(filePath);
+        const filePath = `${feedPath}/${fileName}`
+        const stat = fs.lstatSync(filePath);
         if (stat.isDirectory() && fs.existsSync(`${filePath}/${defaultFeedInfoFile}`)) {
-          var info = readFile(`${filePath}/${defaultFeedInfoFile}`);
+          const info = readFile(`${filePath}/${defaultFeedInfoFile}`);
           localFeeds.push(info);
         }
       })
     }
 
-    var communityFeeds = await getGitEventFeeds();
+    const communityFeeds = await getGitEventFeeds();
 
     res.send({localFeeds, communityFeeds});
   });
 
   app.post('/localfeed', async (req:any, res:any) => {
-    var feed = req.body;
+    const feed = req.body;
     const files:any = fs.readdirSync(`${defaultStmFeedsHome}`);
     const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
-    var found = false;
+    let found = false;
     files.forEach((fileName: string) => {
       if (fileName === feed.feedName) {
-        var filePath = `${feedPath}/${fileName}/${feed.fileName}`
+        const filePath = `${feedPath}/${fileName}/${feed.fileName}`
         if (fs.existsSync(`${filePath}`)) {
-          var content = readFile(`${filePath}`);
+          const content = readFile(`${filePath}`);
           res.send({content});
           found = true;
           return;
@@ -114,10 +114,10 @@ const feedPortal = async (options: ManageFeedClientOptions, optionsSource: any) 
     // console.log(`Server is running on http://127.0.0.1:8081`);
   });
 
-  let http = require('http');
-  let server = http.createServer(app);
+  const http = require('http');
+  const server = http.createServer(app);
   server.listen(managePort, () => {
-    var opener = require("opener");
+    const opener = require("opener");
     Logger.info(`Accessible at http://127.0.0.1:8081`);
     opener(`http://127.0.0.1:8081`)
   });

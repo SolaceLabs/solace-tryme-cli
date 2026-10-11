@@ -62,8 +62,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get client-username successful`)
-          let result = data.data;
-          var clientUsernames = "";
+          const result = data.data;
+          let clientUsernames = "";
           clientUsernames += `\n${prettyJSON(JSON.stringify(result))}`
           Logger.logDetailedSuccess(`Details of client-username ${this.options.clientUsername} on vpn ${this.options.sempVpn}`, clientUsernames)
         }
@@ -95,8 +95,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get client-usernames list successful`)
-          let result = data.data;
-          var clientUsernames = "";
+          const result = data.data;
+          let clientUsernames = "";
           result.forEach((username:any) => clientUsernames += `\n${username.clientUsername}`)
           Logger.logDetailedSuccess(`${result.length} client username(s) found on vpn ${this.options.sempVpn}`, clientUsernames)
         }

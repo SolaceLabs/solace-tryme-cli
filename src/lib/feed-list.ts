@@ -13,12 +13,12 @@ const wordwrap = (str:any, width:any, brk:any, cut:any ) => {
 
   if (!str) { return str; }
 
-  var regex = '.{1,' +width+ '}(\s|$)' + (cut ? '|.{' +width+ '}|.+$' : '|\S+?(\s|$)');
+  const regex = '.{1,' +width+ '}(\s|$)' + (cut ? '|.{' +width+ '}|.+$' : '|\S+?(\s|$)');
   return str.match( RegExp(regex, 'g') ).join( brk );
 }
 
 const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var communityOnly, localOnly = false;
+  let communityOnly, localOnly = false;
 
   if (options.lint) {
     Logger.logSuccess('linting successful...')
@@ -58,14 +58,14 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
 
   const feedPath = processPlainPath(`${defaultStmFeedsHome}`);
 
-  var localFeeds: any[] = [];
+  const localFeeds: any[] = [];
   if (localOnly) {
     const files:any = fs.readdirSync(`${feedPath}`);
     files.forEach((fileName: string) => {
-      var filePath = `${feedPath}/${fileName}`
-      var stat = fs.lstatSync(filePath);
+      const filePath = `${feedPath}/${fileName}`
+      const stat = fs.lstatSync(filePath);
       if (stat.isDirectory() && fs.existsSync(`${filePath}/${defaultFeedInfoFile}`)) {
-        var info = readFile(`${filePath}/${defaultFeedInfoFile}`);
+        const info = readFile(`${filePath}/${defaultFeedInfoFile}`);
         localFeeds.push(info);
       }
     })
@@ -80,7 +80,7 @@ const list = async (options: ManageFeedClientOptions, optionsSource: any) => {
     }
   }
   
-  var result:any = [];
+  let result:any = [];
   if (localFeeds.length) {
     Logger.await('Fetching Local Event Feeds...');
     Logger.logSuccess(`Local Event Feeds: ${localFeeds.length}`);

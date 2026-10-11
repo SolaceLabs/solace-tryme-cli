@@ -14,11 +14,11 @@ import yaml from 'js-yaml';
 
 const contribute = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const { Confirm, Input, List, AutoComplete } = require('enquirer');
-  var { feedName } = options;
-  var userEmail, contributionChanges = ''
+  let { feedName } = options;
+  let userEmail, contributionChanges = ''
 
   if (!feedName) {
-    var feeds = getLocalEventFeeds();
+    const feeds = getLocalEventFeeds();
     if (!feeds || !feeds.length) {
       Logger.logError('no local feeds found...')
       process.exit(1);
@@ -56,7 +56,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 
   Logger.info('Let us first update the feed information\n')
 
-  var info:any = loadLoadFeedInfo(feedName);
+  const info:any = loadLoadFeedInfo(feedName);
   Logger.logMessage(`${chalkBoldWhite('Current Feed Information:')}\n` + prettyJSON(JSON.stringify(info)));
 
   if (info.contributed) {
@@ -77,7 +77,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
       });
   }
 
-  var infoUpdated = false;
+  let infoUpdated = false;
 
   // Take user input
 
@@ -261,7 +261,7 @@ const contribute = async (options: ManageFeedClientOptions, optionsSource: any) 
 }
 
 async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedLocalPath:string, ) {
-  let PRLink = null
+  const PRLink = null
   // const azureFunctionURL = 'http://127.0.0.1:7071/api/triggerContribute'
   const azureFunctionURL = 'https://stm-contribute.azurewebsites.net/api/triggerContribute'
   // Query EVENT-FEEDS.json
@@ -288,7 +288,7 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
     if (info.type === 'asyncapi_feed') {
       const analysis:any = readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`);
       //  Create a new FormData object
-      let formData = new FormData();
+      const formData = new FormData();
 
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedAnalysisFile}`)), defaultFeedAnalysisFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSchemasFile}`)), defaultFeedSchemasFile);
@@ -310,7 +310,7 @@ async function createPR (feedName:string, info:any, azureFunctionInfo:any, feedL
     } else if (info.type === 'restapi_feed') {
 
       //  Create a new FormData object
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedApiEndpointFile}`)), defaultFeedApiEndpointFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedRulesFile}`)), defaultFeedRulesFile);
       formData.append('files', JSON.stringify(await readFile(`${feedLocalPath}/${defaultFeedSessionFile}`)), defaultFeedSessionFile);
@@ -347,7 +347,7 @@ async function executeFunction (azureFunctionURL:string, formData:FormData) {
       maxBodyLength: Infinity      
     });
 
-    let body  = response.data
+    const body  = response.data
     if(response.status === 200) {
       return body
     } else {

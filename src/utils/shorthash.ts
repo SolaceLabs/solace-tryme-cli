@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-bitwise */
-/* eslint-disable no-plusplus */
+ 
+ 
+ 
 /**
  * shorthash2 Jecsham (c) 2020
  * Based in shorthash (c) 2013 Bibig https://github.com/bibig/node-shorthash (MIT)

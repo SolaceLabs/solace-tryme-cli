@@ -1460,7 +1460,7 @@
       this._fixHeight(true);
 
       if (usingDefTab) {
-        var $el = $__default["default"]("" + SELECTOR_TAB_PANE).first(); // eslint-disable-next-line no-console
+        var $el = $__default["default"]("" + SELECTOR_TAB_PANE).first();  
 
         console.log($el);
         var uniqueName = $el.attr('id').replace('panel-', '');

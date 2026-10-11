@@ -21,7 +21,7 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
   }
 
   const publisher = new SolaceClient(options);
-  var interrupted = false;
+  let interrupted = false;
   try {
     await publisher.connect()
   } catch (error:any) {
@@ -45,10 +45,10 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
     }, options.exitAfter * 1000);
   }
 
-  var apiFeed = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedApiEndpointFile) : await loadLocalFeedFile(options.feedName, defaultFeedApiEndpointFile);
-  var apiFeedInfo = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedInfoFile) : await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
-  var apiFeedRule = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedRulesFile) : await loadLocalFeedFile(options.feedName, defaultFeedRulesFile);
-  var apiFeedSession = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedSessionFile) : await loadLocalFeedFile(options.feedName, defaultFeedSessionFile);
+  const apiFeed = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedApiEndpointFile) : await loadLocalFeedFile(options.feedName, defaultFeedApiEndpointFile);
+  const apiFeedInfo = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedInfoFile) : await loadLocalFeedFile(options.feedName, defaultFeedInfoFile);
+  const apiFeedRule = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedRulesFile) : await loadLocalFeedFile(options.feedName, defaultFeedRulesFile);
+  const apiFeedSession = options.communityFeed ? await loadGitFeedFile(options.feedName, defaultFeedSessionFile) : await loadLocalFeedFile(options.feedName, defaultFeedSessionFile);
   
   if (apiFeed.apiUrl.includes('$') && !apiFeedRule) {
     Logger.logError('api endpoint contains placeholders, please configure parameter rules...')
@@ -74,13 +74,13 @@ const feedRunApi = async (options: ManageFeedPublishOptions, optionsSource: any)
     published: 0
   });
 
-  for (var i=0; i<selectedEndpoints.length; i++) {
-    var endpoint = selectedEndpoints[i];
+  for (let i=0; i<selectedEndpoints.length; i++) {
+    const endpoint = selectedEndpoints[i];
     addEventFeedTimer(endpoint, publisher);
   }
 
   setInterval(() => {
-    var completed = selectedEndpoints.length;
+    let completed = selectedEndpoints.length;
     eventFeedTimers.forEach((t) => {
       if (t.completed && t.published >= publishStats[`${t.api.topic}`]) {
         completed--;
@@ -116,13 +116,13 @@ async function publishFeed(publisher:any, feed:any) {
   }
   
   try {
-    var headers:any = { Accept: 'application/json' };
+    const headers:any = { Accept: 'application/json' };
 
-    var apiUrl = feed.api.apiUrl;
-    var apiKey = feed.api.apiKey;
-    var apiToken = feed.api.apiToken;
-    var xapiPairs = feed.api.xapiPairs;
-    var apiRules = feed.rule.rules;
+    let apiUrl = feed.api.apiUrl;
+    const apiKey = feed.api.apiKey;
+    const apiToken = feed.api.apiToken;
+    const xapiPairs = feed.api.xapiPairs;
+    const apiRules = feed.rule.rules;
 
     if (feed.api.apiAuthType === 'Basic Authentication') {
       headers['Authorization'] = `Basic ${apiToken}`;
@@ -130,7 +130,7 @@ async function publishFeed(publisher:any, feed:any) {
       headers['Authorization'] = `Bearer ${apiToken}`;
     } else if (feed.api.apiAuthType === 'X-API Authentication') {
       for (var i=0; i<xapiPairs.length; i++) {
-        var xPair = xapiPairs[i];
+        const xPair = xapiPairs[i];
         headers[xPair.key] = xPair.value;
       }
     } else if (feed.api.apiAuthType === 'API Key' && !feed.api.apiKeyUrlEmbedded) {
@@ -139,23 +139,23 @@ async function publishFeed(publisher:any, feed:any) {
       apiUrl = apiUrl.replaceAll(`$${feed.api.apiKeyUrlParam}`, apiKey);
     }
 
-    var params = Object.keys(apiRules);
-    var ruleData:any = {};
+    const params = Object.keys(apiRules);
+    const ruleData:any = {};
     if (params.length > 0) {
       for (var i=0; i<params.length; i++) {
         ruleData[params[i]] = await fakeDataValueGenerator({rule: apiRules[params[i]].rule, count: 1});
       }
     }
   
-    var topic = feed.api.topic;
-    var url = apiUrl;
-    for (var j=0; j<params.length; j++) {
+    let topic = feed.api.topic;
+    let url = apiUrl;
+    for (let j=0; j<params.length; j++) {
       url = url.replaceAll(`$${params[j]}`, ruleData[params[j]]);
       topic = topic.replaceAll(`$${params[j]}`, ruleData[params[j]]);
     }
 
     (async () => {
-      var payload = await (await fetch(`${url}`, {
+      const payload = await (await fetch(`${url}`, {
         headers: headers
       })).json();
 
@@ -169,7 +169,7 @@ async function publishFeed(publisher:any, feed:any) {
       publishStats[`${feed.api.topic}`]++;
       Logger.info(chalkEventCounterValue(publishStats[`${feed.api.topic}`]) + ' ' +  chalkEventCounterLabel(feed.name));
       if (feed.count > 0 && publishStats[`${feed.api.topic}`] >= feed.count) {
-        var index = eventFeedTimers.findIndex((t) => t.name === feed.name);
+        const index = eventFeedTimers.findIndex((t) => t.name === feed.name);
         if (index < 0) {
           console.error('Hmm... could not find the timer');
           return;

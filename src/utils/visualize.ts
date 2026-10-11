@@ -11,7 +11,7 @@ const visualize = async (options: MessageClientOptions) => {
   const url = new URL(config.url);
   console.log(config.url, '\n', url);
   console.log(url.hostname, config.url.substring(config.url.lastIndexOf(':')+1), config.username, "******");
-  var publicDir = __dirname.substring(0, __dirname.lastIndexOf('solace-tryme-cli') + 16);
+  const publicDir = __dirname.substring(0, __dirname.lastIndexOf('solace-tryme-cli') + 16);
 
   const express = require('express');
   const app = express();
@@ -21,7 +21,7 @@ const visualize = async (options: MessageClientOptions) => {
   });
   
   app.get('/config', (req:any, res:any) => {
-    var configuration = {
+    const configuration = {
       "MQTT_HOST": `${url.hostname}`,
       "MQTT_PORT": (url.hostname === 'localhost' ? 8000: 8443),
       "MQTT_USER_NAME":   `${config.username}`,
@@ -36,11 +36,11 @@ const visualize = async (options: MessageClientOptions) => {
     res.send("Success");
   })
 
-  let http = require('http');
-  let server = http.createServer(app);
+  const http = require('http');
+  const server = http.createServer(app);
   server.listen(visualizationPort, () => {
     console.info(`App listening on port ${server.address().port}`);
-    var opener = require("opener");
+    const opener = require("opener");
     opener(`http://localhost:${server.address().port}`)
   });
 

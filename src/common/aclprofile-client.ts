@@ -61,8 +61,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get acl-profile successful`)
-          let result = data.data;
-          var aclProfiles = "";
+          const result = data.data;
+          let aclProfiles = "";
           aclProfiles += `\n${prettyJSON(JSON.stringify(result))}`
           Logger.logDetailedSuccess(`Details of acl-profile ${this.options.aclProfile} on vpn ${this.options.sempVpn}`, aclProfiles)
         }
@@ -93,8 +93,8 @@ export class SempClient {
           process.exit(1)
         } else {
           Logger.logSuccess(`get acl-profiles list successful`)
-          let result = data.data;
-          var aclProfiles = "";
+          const result = data.data;
+          let aclProfiles = "";
           result.forEach((acl:any) => aclProfiles += `\n${acl.aclProfileName}`)
           Logger.logDetailedSuccess(`${result.length} acl-profile(s) found on vpn ${this.options.sempVpn}`, aclProfiles)
         }

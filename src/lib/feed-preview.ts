@@ -7,7 +7,7 @@ import { analyze, analyzeEP, analyzeV2, load } from './feed-analyze';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 
 const preview = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var feedName, fileName, feedView, gitFeed = undefined;
+  let feedName, fileName, feedView, gitFeed = undefined;
 
   if (optionsSource.feedName === 'cli' || optionsSource.fileName === 'cli') {
     feedName = options.feedName;
@@ -28,7 +28,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
       ]
     });
 
-    var choice = undefined;
+    let choice = undefined;
     await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
@@ -134,9 +134,9 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
   }
 
   const reverseView = feedView === 'provider';
-  var data:any = undefined;
-  var info:any = undefined;
-  var type:any = undefined;
+  let data:any = undefined;
+  let info:any = undefined;
+  let type:any = undefined;
   if (fileName) {
     const asyncApiSchema = readAsyncAPIFile(fileName);  
     const loaded:any = await load(asyncApiSchema);
@@ -169,7 +169,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     process.exit(1);
   }
 
-  var result:any = [];
+  const result:any = [];
   let noOfSendEvents = 0;
   let noOfReceiveEvents = 0;
   if (type === 'file' || type === 'asyncapi_feed') {
@@ -182,7 +182,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
 
     let sendAdded = false;
     Object.keys(data.messages).forEach((messageName) => {
-      var sendEvents = data.messages[messageName].send;
+      const sendEvents = data.messages[messageName].send;
       noOfSendEvents += sendEvents.length;
       if (sendEvents.length) {
         if (!sendAdded) {
@@ -219,7 +219,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
     
     let receiveAdded = false;
     Object.keys(data.messages).forEach((messageName) => {
-      var receiveEvents = data.messages[messageName].receive;
+      const receiveEvents = data.messages[messageName].receive;
       noOfReceiveEvents += receiveEvents.length;
       if (receiveEvents.length) {
         if (!receiveAdded) {
@@ -277,7 +277,7 @@ const preview = async (options: ManageFeedClientOptions, optionsSource: any) => 
         schemaAdded = true;
       }
 
-      let _schema = data.schemas[schemaName]
+      const _schema = data.schemas[schemaName]
       result.push(chalkBoldLabel('│   ├──Schema: ') + chalkBoldWhite(schemaName))
       _schema.description &&
         result.push(chalkBoldLabel('│   │   │      ') + 

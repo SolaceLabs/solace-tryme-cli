@@ -14,8 +14,8 @@ import { enhanceFeedrulesWithAI } from '../utils/field-mapper-client';
 import { hasAcceptedAiDisclaimer, showAiDisclaimer, recordAiDisclaimerAcceptance } from '../utils/ai-disclaimer';
 
 const generate = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var { fileName, feedName, feedType, feedView } = options;
-  var feed:any = {
+  let { fileName, feedName, feedType, feedView } = options;
+  const feed:any = {
     version: `${defaultFeedMajorVersion}.${defaultFeedMinorVersion}`,
   };
   const { Input } = require('enquirer');
@@ -309,9 +309,9 @@ const generate = async (options: ManageFeedClientOptions, optionsSource: any) =>
 }
 
 const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var { feedName } = options;
-  var feed:any = { type: 'restapi_feed', name: feedName };
-  var apiRules:any = {
+  const { feedName } = options;
+  let feed:any = { type: 'restapi_feed', name: feedName };
+  let apiRules:any = {
     publishSettings: {
       "count": 0,
       "interval": 1000,
@@ -319,10 +319,10 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     }
   }
 
-  var apiSession:any = sessionPropertiesJson;
+  let apiSession:any = sessionPropertiesJson;
 
-  var apiEndpoint:any = {};
-  var localFeedPath = '';
+  let apiEndpoint:any = {};
+  let localFeedPath = '';
   
   const { Input, Select, Confirm } = require('enquirer');
 
@@ -491,11 +491,11 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
         process.exit(1);
       });
   } else if (apiEndpoint.apiAuthType === 'X-API Authentication') {
-    var newPairs = [];
-    var xapiPairs = apiEndpoint?.xapiPairs ? apiEndpoint?.xapiPairs : [];
-    var pair = 0;
-    var done = false;
-    var restart = false;
+    const newPairs = [];
+    const xapiPairs = apiEndpoint?.xapiPairs ? apiEndpoint?.xapiPairs : [];
+    let pair = 0;
+    let done = false;
+    let restart = false;
     do {
       restart = false;
       var xApiPair = { 
@@ -556,19 +556,19 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
   } else {
     // check if the API endpoint is valid
     try {
-      var headers:any = { Accept: 'application/json' };
+      const headers:any = { Accept: 'application/json' };
       if (apiEndpoint.apiAuthType === 'Basic Authentication') {
         headers['Authorization'] = `Basic ${apiEndpoint.apiToken}`;
       } else if (apiEndpoint.apiAuthType === 'Token Authentication') {
         headers['Authorization'] = `Bearer ${apiEndpoint.apiToken}`;
       } else if (apiEndpoint.apiAuthType === 'X-API Authentication') {
         for (var i=0; i<apiEndpoint.xapiPairs.length; i++) {
-          var xPair = apiEndpoint.xapiPairs[i];
+          const xPair = apiEndpoint.xapiPairs[i];
           headers[xPair.key] = xPair.value;
         }
       }
 
-      var result = await (await fetch(`${apiEndpoint.apiUrl}`, {
+      const result = await (await fetch(`${apiEndpoint.apiUrl}`, {
         headers: headers
       })).json();
       Logger.logInfo('Testing API endpoint');
@@ -592,17 +592,17 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   await pTopic.run()
     .then((answer: string) => {
-      var topic = answer.trim();      
+      const topic = answer.trim();      
       apiEndpoint.topic = topic.split('/').join('/');
       if (apiEndpoint.topic.includes('$')) {
-        var topicParams = apiEndpoint.topic.split('/').filter((t:any) => t.startsWith('$'));
-        var apiUrl = new URL(apiEndpoint.apiUrl);
-        var apiParams = apiUrl.pathname.split('/').filter((t:any) => t.startsWith('$'));
+        const topicParams = apiEndpoint.topic.split('/').filter((t:any) => t.startsWith('$'));
+        const apiUrl = new URL(apiEndpoint.apiUrl);
+        const apiParams = apiUrl.pathname.split('/').filter((t:any) => t.startsWith('$'));
         for (const [key, value] of apiUrl.searchParams)
           apiParams.push(value);
 
-        for (var i=0; i<topicParams.length; i++) {
-          var p:string = topicParams[i];
+        for (let i=0; i<topicParams.length; i++) {
+          const p:string = topicParams[i];
           if (!apiParams.includes(p)) {
             Logger.logDetailedError('Specified topic parameter not found in the URL parameters', chalkBoldVariable(p));
             Logger.success('exiting...');
@@ -766,8 +766,8 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
 
   const rules:any = {};
   if (apiEndpoint.apiUrl.includes('$') || apiEndpoint.apiUrl.includes('{')) {
-    var apiUrl = new URL(apiEndpoint.apiUrl);
-    var params = apiUrl.pathname.split('/').filter((t:any) => t.startsWith('$')).map((t:any) => t.substring(1, t.length));
+    const apiUrl = new URL(apiEndpoint.apiUrl);
+    const params = apiUrl.pathname.split('/').filter((t:any) => t.startsWith('$')).map((t:any) => t.substring(1, t.length));
     for (var i=0; i<params.length; i++) {
       var p:string = params[i];
       if (apiEndpoint.apiKeyUrlEmbedded && p === apiEndpoint.apiKeyUrlParam)
@@ -815,7 +815,7 @@ const generateAPIFeed = async (options: ManageFeedClientOptions, optionsSource: 
     }    
   }
 
-  var feedRule = {
+  const feedRule = {
     rules: rules,
     publishSettings: apiRules.publishSettings
   }
@@ -835,9 +835,9 @@ const checkEventValidity = async (data:any) => {
   let noOfReceiveEvents = 0;
 
   Object.keys(data.messages).forEach((messageName) => {
-    var sendEvents = data.messages[messageName].send;
+    const sendEvents = data.messages[messageName].send;
     noOfSendEvents += sendEvents.length;
-    var receiveEvents = data.messages[messageName].receive;
+    const receiveEvents = data.messages[messageName].receive;
     noOfReceiveEvents += receiveEvents.length;
   });
 

@@ -8,8 +8,8 @@ const IMPORTER_URL = 'https://ep-asyncapi-importer.cfapps.ca10.hana.ondemand.com
 const epExport = async (options: ManageFeedClientOptions, optionsSource: any) => {
   const cloudSettings:any = {};
 
-  var feedName = '';
-  var gitFeed = undefined;
+  let feedName = '';
+  let gitFeed = undefined;
 
   const startLoadingSimulator = (message:string, interval: number) => {
     let dots = 0;
@@ -137,7 +137,7 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
       ]
     });
 
-    var choice = undefined;
+    let choice = undefined;
     await pFeedSource.run()
       .then((answer: any) => { choice = answer; })
       .catch((error:any) => {
@@ -218,7 +218,7 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
   }
 
   // load feed details
-  let analysis = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : 
+  const analysis = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : 
                             await loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
   if (!analysis) {
     Logger.logError('error loading feed details...')
@@ -226,7 +226,7 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
   }
 
   cloudSettings.specFile = analysis.fileName;
-  let spec = gitFeed ? await loadGitFeedFile(feedName, analysis.fileName) :
+  const spec = gitFeed ? await loadGitFeedFile(feedName, analysis.fileName) :
                       await loadLocalFeedFile(feedName, analysis.fileName);
   if (!spec) {
     Logger.logError('error loading AsyncAPI document...')
@@ -298,7 +298,7 @@ const epExport = async (options: ManageFeedClientOptions, optionsSource: any) =>
     
     await pDomainSelection.run()
       .then((answer:any) => {
-        var domain = domains.find((d:any) => d.name === answer);
+        const domain = domains.find((d:any) => d.name === answer);
         cloudSettings.domainName = domain.name;
         cloudSettings.domainId = domain.id;
       })

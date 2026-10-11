@@ -88,8 +88,8 @@ const Logger = {
   await: (message: string) => Signal.await(chalk.cyanBright(message)),
   alert: (message: string) => Signal.alert(chalk.bgMagenta(message)),
   dumpMap: (map: any) => {
-    var keys = map.getKeys();
-    var str = '';
+    const keys = map.getKeys();
+    let str = '';
     keys.forEach((key: any, idx: number) => {
       str += `${key.padEnd(24, ' ')} ${map.getField(key).getValue()}`;
       if (idx < keys.length-1) str += `\r\n`;
@@ -121,13 +121,13 @@ const Logger = {
   },
   
   prettyPrintMessage: (message: any, payload:any, messageType: number, outputMode:string, pretty: boolean) => {
-    var properties = message.dump(0);
+    let properties = message.dump(0);
     if (messageType === 1) { // MAP MESSAGE
-      var map = message.getSdtContainer();
-      var keys = map.getKeys();
+      const map = message.getSdtContainer();
+      const keys = map.getKeys();
       properties = '';
       keys.forEach((key: any, idx: number) => {
-        var field = map.getField(key);
+        const field = map.getField(key);
         if (field.getType() === 15)
           properties += `${key.padEnd(24, ' ')} ${Logger.printStream(field.getValue(), '')}`;
         else
@@ -136,13 +136,13 @@ const Logger = {
       });
     }
 
-    var userProperties = message.getUserPropertyMap();
+    const userProperties = message.getUserPropertyMap();
 
     if (outputMode?.toUpperCase() === 'FULL') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
       let userProps = '';
       if  (userProperties) {
-        let keys = userProperties.getKeys();
+        const keys = userProperties.getKeys();
         keys.forEach((key: any, idx: number) => {
           userProps += padString(4, `${key}:`, 40) + userProperties.getField(key).getValue();          
           if (idx < keys.length-1) userProps += `\r\n`;
@@ -186,7 +186,7 @@ const Logger = {
     } else if (outputMode?.toUpperCase() === 'PROPS') {
       properties = properties.replace(/User Property Map:.*entries\n/, '')
       let userProps = '';
-      let keys = userProperties.getKeys();
+      const keys = userProperties.getKeys();
       keys.forEach((key: any, idx: number) => {
         userProps += padString(4, `${key}:`, 40) + userProperties.getField(key).getValue();          
         if (idx < keys.length-1) userProps += `\r\n`;
@@ -233,8 +233,8 @@ const Logger = {
   },
 
   dumpMessage: (message: any, outputMode: string, pretty: boolean) => {
-    var payload = undefined;
-    var messageType = message.getType();
+    let payload = undefined;
+    const messageType = message.getType();
     if (messageType === 0) { // binary
       payload = message.getBinaryAttachment();
       if (!payload)

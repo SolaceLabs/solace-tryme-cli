@@ -24,9 +24,9 @@ export class JsonSchemaParser {
 
   parseElement = (schema:any, value:any, pointer:any) => {
     if (!pointer.startsWith('#/__rootSchema/')) return;
-    var tokens = pointer.split('/');
+    const tokens = pointer.split('/');
     if ((tokens.filter((t:string) => t === 'properties')).length > 1) return;
-    var token = tokens.pop();
+    const token = tokens.pop();
     if (token.startsWith('x-ep-')) {
       Logger.info(`Here in CB for x-ep - ${token}`);
       Logger.info(`Schema: ${JSON.stringify(schema)}`);

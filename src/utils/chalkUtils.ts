@@ -57,7 +57,7 @@ export const chalkFeedAsyncAPIValue = (value: any) => {
 }
 
 export const colorizeTopic = (value: string, marker: string = '{') => {
-  let tokens = value.split('/');
+  const tokens = value.split('/');
   tokens.forEach((v, index) => {
     if (v.startsWith(marker)) 
       tokens[index] = chalkBoldVariable(v.toString())
@@ -78,7 +78,7 @@ export const wrapContent = (emptyPrefix: string, content:string, chunkSize:numbe
     return content;
 
   let result = chunks[0];
-  for (var i=1; i<chunks.length; i++) {
+  for (let i=1; i<chunks.length; i++) {
     result += '\n' + emptyPrefix + chunks[i];
   }
   

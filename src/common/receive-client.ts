@@ -18,12 +18,12 @@ const logLevelMap:Map<string, LogLevel> = new Map<string, LogLevel>([
 
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
   hour12: false,
-  year: 'numeric' as 'numeric',
-  month: '2-digit' as '2-digit',
-  day: '2-digit' as '2-digit',
-  hour: '2-digit' as '2-digit',
-  minute: '2-digit' as '2-digit',
-  second: '2-digit' as '2-digit',
+  year: 'numeric' as const,
+  month: '2-digit' as const,
+  day: '2-digit' as const,
+  hour: '2-digit' as const,
+  minute: '2-digit' as const,
+  second: '2-digit' as const,
   fractionalSecondDigits: 3 // Include milliseconds with 3 digits
 };
 
@@ -43,7 +43,7 @@ export class SolaceClient extends VisualizeClient {
     this.options = options;
 
     //Initializing the solace client library
-    let factoryProps = new solace.SolclientFactoryProperties();
+    const factoryProps = new solace.SolclientFactoryProperties();
     factoryProps.profile = solace.SolclientFactoryProfiles.version10_5;
     solace.SolclientFactory.init(factoryProps);
     this.options.logLevel && solace.SolclientFactory.setLogLevel(logLevelMap.get(this.options.logLevel.toUpperCase()) as LogLevel);
@@ -142,13 +142,13 @@ export class SolaceClient extends VisualizeClient {
         //SUBSCRIPTION_OK implies that a subscription was successfully applied/removed from the broker
         this.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, (sessionEvent: solace.SessionEvent) => {
           //Check if the topic exists in the map
-          let key:string = sessionEvent.correlationKey ? sessionEvent.correlationKey.toString() : '';
+          const key:string = sessionEvent.correlationKey ? sessionEvent.correlationKey.toString() : '';
           if (!key) {
             Logger.logError(`session subscription activity missing correlation-key`);
             return;
           }
 
-          let subscription = !this.receiver.topics.has(key);
+          const subscription = !this.receiver.topics.has(key);
           if (subscription) {
             // subscription exists, remove the topic from the map
             this.receiver.topics.delete(key);
@@ -165,10 +165,10 @@ export class SolaceClient extends VisualizeClient {
           Logger.await(`${chalkEventCounterLabel(++this.count)} receiving message [${new Date().toLocaleString('en-US', dateFormatOptions)}]`)
           Logger.logSuccess(`received ${getType(message)} message on topic ${message.getDestination()}`)
           //Get the topic name from the message's destination
-          let topicName: string = message.getDestination().getName();
+          const topicName: string = message.getDestination().getName();
           if (!this.receiver.topics.has(topicName)) {
             let matched:boolean = false;
-            for (let topic of Array.from(this.receiver.topics.keys())) {
+            for (const topic of Array.from(this.receiver.topics.keys())) {
               let sub = topic as string
               if (sub.startsWith('#share'))
                 sub = sub.split('/').slice(2).join('/');;
@@ -291,7 +291,7 @@ export class SolaceClient extends VisualizeClient {
       return;
     }
 
-    let topicList:string[] = [];
+    const topicList:string[] = [];
     if (typeof topicNames === 'string')
       topicList.push(topicNames);
     else if (typeof topicNames === 'object')

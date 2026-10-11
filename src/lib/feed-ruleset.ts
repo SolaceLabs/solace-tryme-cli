@@ -9,7 +9,7 @@ const removeMetaParams = (obj: any) => {
 
 const setDefaultTopicVariableRules = (obj: any) => {
   for(const prop in obj) {
-    var schema = obj[prop].schema;
+    let schema = obj[prop].schema;
     schema = !schema || !schema.type ? { type: 'string' } : schema;
     if (schema.type.toLowerCase() === 'string') {
       obj[prop].rule = { name: prop, type: 'string', group: 'StringRules', rule: 'alpha', casing: 'mixed', minLength: 10, maxLength: 10 }
@@ -29,7 +29,7 @@ const setDefaultTopicVariableRules = (obj: any) => {
 
 const setDefaultSchemaRules = (msgs: any) => {
   msgs.forEach((msg:any) => {
-    var payload = msg.payload;
+    const payload = msg.payload;
     if (!payload) return;
 
     processPayload(msg);
@@ -37,7 +37,7 @@ const setDefaultSchemaRules = (msgs: any) => {
 }
 
 const processPayload = (msg: any) => {
-  var payload = msg.payload;
+  let payload = msg.payload;
   payload = payload ? payload : msg.properties;
   if (!payload) return;
 
@@ -65,7 +65,7 @@ const processPayload = (msg: any) => {
       continue;
     }
 
-    var schema = payload[prop];
+    const schema = payload[prop];
     if (schema.type.toLowerCase() === 'string') {
       if (schema.enum) {
         payload[prop].rule = { ...payload[prop], name: prop, type: 'string', group: 'StringRules', rule: 'enum', enum: schema.enum }
@@ -87,13 +87,13 @@ const processPayload = (msg: any) => {
 }
 
 const formulateRules = async (data: any) => {
-  var ruleSet:any = [];
-  var msgNames = Object.keys(data.messages);
+  const ruleSet:any = [];
+  const msgNames = Object.keys(data.messages);
   msgNames.forEach((msgName) => {    
-    var message = data.messages[msgName];
+    const message = data.messages[msgName];
     if (message.send.length) {
       message.send.forEach((send: any) => {
-        var topic:any = {};
+        const topic:any = {};
         topic.topic = send.topicName;
         topic.eventName = send.message['x-ep-event-name'];
         topic.eventVersion = send.message['x-ep-event-version'];
@@ -119,13 +119,13 @@ const formulateRules = async (data: any) => {
 }
 
 const formulateSchemas = async (data: any) => {
-  var schemaSet:any = [];
-  var msgNames = Object.keys(data.messages);
+  const schemaSet:any = [];
+  const msgNames = Object.keys(data.messages);
   msgNames.forEach((msgName) => {    
-    var message = data.messages[msgName];
+    const message = data.messages[msgName];
     if (message.receive.length) {
       message.receive.forEach((receive: any) => {
-        var schema:any = {};
+        const schema:any = {};
         schema.topic = receive.topicName;
         schema.eventName = receive.message['x-ep-event-name'];
         schema.eventVersion = receive.message['x-ep-event-version'];

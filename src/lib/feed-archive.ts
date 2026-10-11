@@ -6,9 +6,9 @@ import { defaultFakerRulesFile, defaultFeedAnalysisFile, defaultFeedApiEndpointF
 import { getGitEventFeeds, getLocalEventFeeds } from '../utils/listfeeds';
 
 const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var feedName = '';
-  var gitFeed = false;
-  var info = null;
+  let feedName = '';
+  let gitFeed = false;
+  let info = null;
 
   const { Select, Input, AutoComplete } = require('enquirer');
   if (optionsSource.communityOnly === 'cli') {
@@ -135,17 +135,17 @@ const feedDownload = async (options: ManageFeedClientOptions, optionsSource: any
 
   const zlib = require("zip-lib");
 
-  var exportPath = `${process.cwd()}/export`;
-  var zipPath = `${exportPath}/${feedName}`;
+  const exportPath = `${process.cwd()}/export`;
+  const zipPath = `${exportPath}/${feedName}`;
   if (fileExists(exportPath)) fs.rmdirSync(exportPath, { recursive: true });
   fs.mkdirSync(exportPath, { recursive: true });
 
-  var data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
+  let data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedInfoFile) : loadLocalFeedFile(feedName, defaultFeedInfoFile);
   writeJsonFile(`${zipPath}/${defaultFeedInfoFile}`, data);
   if (info.type === 'asyncapi_feed') {
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFeedAnalysisFile) : loadLocalFeedFile(feedName, defaultFeedAnalysisFile);
     writeJsonFile(`${zipPath}/${defaultFeedAnalysisFile}`, data);
-    var asyncApiFile = data.fileName;
+    const asyncApiFile = data.fileName;
     data = gitFeed ? await loadGitFeedFile(feedName, asyncApiFile) : loadLocalFeedFile(feedName, asyncApiFile);
     writeJsonFile(`${zipPath}/${asyncApiFile}`, data);
     data = gitFeed ? await loadGitFeedFile(feedName, defaultFakerRulesFile) : loadLocalFeedFile(feedName, defaultFakerRulesFile);

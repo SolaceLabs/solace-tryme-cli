@@ -4,7 +4,7 @@ import { readAsyncAPIFile } from '../utils/config';
 import { chalkBoldError, chalkBoldWarning } from '../utils/chalkUtils';
 
 const validate = async (options: ManageFeedClientOptions, optionsSource: any) => {
-  var fileName = undefined;
+  let fileName = undefined;
 
   if (optionsSource.fileName === 'cli') fileName = options.fileName;
 
