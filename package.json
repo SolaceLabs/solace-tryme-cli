@@ -35,7 +35,7 @@
     "@apidevtools/json-schema-ref-parser": "11.9.0",
     "@asyncapi/parser": "3.4.0",
     "@base2/pretty-print-object": "1.0.2",
-    "@faker-js/faker": "8.4.1",
+    "@faker-js/faker": "10.5.0",
     "@solace-labs/solace-data-generator": "1.0.15",
     "@stoplight/spectral-core": "1.19.4",
     "@stoplight/spectral-functions": "1.9.3",
